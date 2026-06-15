@@ -1,0 +1,32 @@
+[
+  {
+    "name": "nominal_proposed_rmse_le_0p03mm",
+    "value": 0.006741100335908755,
+    "threshold": 0.03,
+    "passed": true
+  },
+  {
+    "name": "strong_wrapping_rmse_le_0p08mm",
+    "value": 0.035220282472705464,
+    "threshold": 0.08,
+    "passed": true
+  },
+  {
+    "name": "strong_wrapping_unwrap_errors_le_10pct_itoh",
+    "value": 0,
+    "threshold": 1,
+    "passed": true
+  },
+  {
+    "name": "target_snr_drop_proposed_beats_fixed_r",
+    "value": 0.00784944344030745,
+    "threshold": 0.012713339447949194,
+    "passed": true
+  },
+  {
+    "name": "proposed_beats_single_target_in_at_least_4_scenarios",
+    "value": 5,
+    "threshold": 4,
+    "passed": true
+  }
+]
