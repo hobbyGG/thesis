@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 import numpy as np
 
@@ -17,6 +18,24 @@ class RadarObservation:
     iq: np.ndarray
     wrapped_phase_rad: np.ndarray
     available_mask: np.ndarray
+
+
+@dataclass(frozen=True)
+class RadarAlgorithmInput:
+    measured_kappa: np.ndarray
+    wrapped_phase_rad: np.ndarray
+    available_mask: np.ndarray
+    selected_indices: Optional[np.ndarray] = None
+    initial_r: Optional[np.ndarray] = None
+    selection_scores: Optional[np.ndarray] = None
+
+
+def to_algorithm_radar_input(radar: RadarObservation) -> RadarAlgorithmInput:
+    return RadarAlgorithmInput(
+        measured_kappa=radar.measured_kappa.copy(),
+        wrapped_phase_rad=radar.wrapped_phase_rad.copy(),
+        available_mask=radar.available_mask.copy(),
+    )
 
 
 def _fit_sequence(values, count: int, name: str) -> np.ndarray:

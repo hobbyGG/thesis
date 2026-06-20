@@ -1,25 +1,35 @@
 import math
+import tempfile
 import unittest
+from pathlib import Path
 
 import numpy as np
 
 from simulation.phase1.accelerometer import simulate_accelerometer
 from simulation.phase1.config import Phase1Config
+from simulation.phase1.methods import cold_start_reference_mean
+from simulation.phase1.phase_utils import wrap_to_pi
 from simulation.phase1.radar import simulate_radar_targets
+from simulation.phase1.run_phase1 import run
+from simulation.phase1.scenarios import build_phase1_scenarios
 from simulation.phase1.truth import generate_component_frequencies, generate_multifrequency_truth
+
+
+def _synthetic_phase1_scenarios():
+    return [scenario for scenario in build_phase1_scenarios() if scenario.motion_profile != "measured_bridge"]
 
 
 class Phase1SimulationTest(unittest.TestCase):
     def test_component_frequencies_are_seeded_near_nominal_values(self):
-        freqs_a = generate_component_frequencies([20.0, 40.0, 60.0], jitter_hz=10.0, seed=7)
-        freqs_b = generate_component_frequencies([20.0, 40.0, 60.0], jitter_hz=10.0, seed=7)
+        freqs_a = generate_component_frequencies([2.0, 5.0, 12.0], jitter_hz=1.0, seed=7)
+        freqs_b = generate_component_frequencies([2.0, 5.0, 12.0], jitter_hz=1.0, seed=7)
 
         self.assertEqual(freqs_a, freqs_b)
         self.assertEqual(len(freqs_a), 3)
 
-        for freq, nominal in zip(freqs_a, [20.0, 40.0, 60.0]):
-            self.assertGreaterEqual(freq, nominal - 10.0)
-            self.assertLessEqual(freq, nominal + 10.0)
+        for freq, nominal in zip(freqs_a, [2.0, 5.0, 12.0]):
+            self.assertGreaterEqual(freq, nominal - 1.0)
+            self.assertLessEqual(freq, nominal + 1.0)
             self.assertAlmostEqual(freq, round(freq, 2))
 
     def test_multifrequency_truth_has_consistent_analytic_derivatives(self):
@@ -40,6 +50,103 @@ class Phase1SimulationTest(unittest.TestCase):
 
         np.testing.assert_allclose(truth.a_mps2, reconstructed_acc, rtol=0.0, atol=1e-12)
 
+    def test_truth_generator_supports_quiet_cold_start_window(self):
+        config = Phase1Config(
+            duration_s=1.0,
+            sample_rate_hz=1000.0,
+            seed=12,
+            quiet_start_duration_s=0.08,
+        )
+
+        truth = generate_multifrequency_truth(config)
+        quiet = truth.t < config.quiet_start_duration_s
+        active = truth.t > config.quiet_start_duration_s + 0.1
+
+        self.assertLess(np.max(np.abs(truth.q_m[quiet])), 1e-15)
+        self.assertLess(np.max(np.abs(truth.v_mps[quiet])), 1e-12)
+        self.assertLess(np.max(np.abs(truth.a_mps2[quiet])), 1e-9)
+        self.assertGreater(np.max(np.abs(truth.q_m[active])), 1e-6)
+
+    def test_vehicle_event_truth_is_nonstationary_after_quiet_start(self):
+        config = Phase1Config(
+            duration_s=3.0,
+            sample_rate_hz=1000.0,
+            seed=13,
+            motion_profile="vehicle_event",
+            quiet_start_duration_s=0.10,
+            vehicle_event_center_s=1.5,
+            vehicle_event_width_s=0.35,
+        )
+
+        truth = generate_multifrequency_truth(config)
+        quiet = truth.t < config.quiet_start_duration_s
+        event = np.abs(truth.t - config.vehicle_event_center_s) < config.vehicle_event_width_s
+        tail = truth.t > config.vehicle_event_center_s + 3.0 * config.vehicle_event_width_s
+
+        self.assertLess(np.max(np.abs(truth.q_m[quiet])), 1e-15)
+        self.assertGreater(np.max(np.abs(truth.q_m[event])), 5.0 * np.max(np.abs(truth.q_m[tail])))
+
+    def test_default_synthetic_scenario_peak_displacements_match_report_design(self):
+        for scenario in _synthetic_phase1_scenarios():
+            with self.subTest(scenario=scenario.scenario_name):
+                truth = generate_multifrequency_truth(scenario)
+                peak_mm = float(np.max(np.abs(truth.q_m)) * 1e3)
+                if scenario.scenario_name == "strong_wrapping":
+                    self.assertGreaterEqual(peak_mm, 4.0)
+                    self.assertLessEqual(peak_mm, 6.0)
+                else:
+                    self.assertGreaterEqual(peak_mm, 1.0)
+                    self.assertLessEqual(peak_mm, 2.0)
+
+    def test_default_synthetic_frequencies_are_below_slow_time_nyquist(self):
+        for scenario in _synthetic_phase1_scenarios():
+            with self.subTest(scenario=scenario.scenario_name):
+                truth = generate_multifrequency_truth(scenario)
+                self.assertLess(max(truth.frequencies_hz), 0.45 * scenario.sample_rate_hz)
+
+    def test_strong_wrapping_has_quiet_micro_ramp_and_strong_intervals(self):
+        scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "strong_wrapping"][0]
+        truth = generate_multifrequency_truth(scenario)
+
+        quiet = truth.t < 0.20
+        micro = (truth.t >= 0.20) & (truth.t < 0.80)
+        ramp = (truth.t >= 0.80) & (truth.t < 1.40)
+        strong = (truth.t >= 1.40) & (truth.t < 3.20)
+        decay = truth.t >= 3.20
+
+        quiet_peak_mm = float(np.max(np.abs(truth.q_m[quiet])) * 1e3)
+        micro_peak_mm = float(np.max(np.abs(truth.q_m[micro])) * 1e3)
+        ramp_peak_mm = float(np.max(np.abs(truth.q_m[ramp])) * 1e3)
+        strong_peak_mm = float(np.max(np.abs(truth.q_m[strong])) * 1e3)
+        decay_peak_mm = float(np.max(np.abs(truth.q_m[decay])) * 1e3)
+
+        self.assertLess(quiet_peak_mm, 0.02)
+        self.assertGreaterEqual(micro_peak_mm, 0.05)
+        self.assertLessEqual(micro_peak_mm, 0.25)
+        self.assertGreater(ramp_peak_mm, micro_peak_mm)
+        self.assertGreaterEqual(strong_peak_mm, 4.0)
+        self.assertLessEqual(strong_peak_mm, 6.0)
+        self.assertLess(decay_peak_mm, strong_peak_mm)
+
+    def test_default_synthetic_scenarios_start_weak_before_full_response(self):
+        for scenario in _synthetic_phase1_scenarios():
+            with self.subTest(scenario=scenario.scenario_name):
+                truth = generate_multifrequency_truth(scenario)
+                q_mm = np.abs(truth.q_m) * 1e3
+                peak_mm = float(np.max(q_mm))
+                quiet = truth.t < 0.20
+                micro = (truth.t >= 0.20) & (truth.t < 0.80)
+                strong = truth.t >= 1.40
+
+                quiet_peak_mm = float(np.max(q_mm[quiet]))
+                micro_peak_mm = float(np.max(q_mm[micro]))
+                strong_peak_mm = float(np.max(q_mm[strong]))
+
+                self.assertLess(quiet_peak_mm, 0.05 * peak_mm)
+                self.assertGreater(micro_peak_mm, 0.01 * peak_mm)
+                self.assertLess(micro_peak_mm, 0.30 * peak_mm)
+                self.assertGreater(strong_peak_mm, 0.80 * peak_mm)
+
     def test_radar_targets_return_wrapped_phase_and_are_reproducible(self):
         config = Phase1Config(duration_s=1.0, sample_rate_hz=1000.0, seed=21)
         truth = generate_multifrequency_truth(config)
@@ -53,6 +160,24 @@ class Phase1SimulationTest(unittest.TestCase):
         self.assertTrue(np.all(radar_a.wrapped_phase_rad > -math.pi))
         self.assertTrue(np.all(radar_a.wrapped_phase_rad <= math.pi))
         np.testing.assert_allclose(radar_a.wrapped_phase_rad, radar_b.wrapped_phase_rad)
+
+    def test_radar_wrapped_phase_matches_independent_los_phase_model(self):
+        config = Phase1Config(
+            duration_s=0.5,
+            sample_rate_hz=1000.0,
+            seed=22,
+            target_snr_db=(240.0, 240.0, 240.0, 240.0, 240.0),
+        )
+        truth = generate_multifrequency_truth(config)
+        radar = simulate_radar_targets(truth, config)
+        theta = 4.0 * math.pi * truth.q_m / config.wavelength_m()
+
+        for target_idx, kappa in enumerate(radar.kappa):
+            physical_phase_without_bias = kappa * theta
+            bias = wrap_to_pi(radar.wrapped_phase_rad[target_idx, 0] - physical_phase_without_bias[0])
+            expected_wrapped = wrap_to_pi(physical_phase_without_bias + bias)
+            phase_error = wrap_to_pi(radar.wrapped_phase_rad[target_idx] - expected_wrapped)
+            self.assertLess(np.max(np.abs(phase_error)), 1e-8)
 
     def test_accelerometer_noise_is_seeded_and_bias_is_applied(self):
         config = Phase1Config(
@@ -71,6 +196,29 @@ class Phase1SimulationTest(unittest.TestCase):
         self.assertEqual(accel_a.measured_mps2.shape, truth.a_mps2.shape)
         np.testing.assert_allclose(accel_a.measured_mps2, accel_b.measured_mps2)
         self.assertGreater(abs(np.mean(accel_a.measured_mps2 - truth.a_mps2)), 0.01)
+
+    def test_accelerometer_sync_error_is_independent_time_shift(self):
+        config = Phase1Config(
+            duration_s=1.0,
+            sample_rate_hz=1000.0,
+            seed=32,
+            accel_noise_std_mps2=0.0,
+            accel_bias_mps2=0.0,
+            accel_drift_mps2=0.0,
+            accel_sync_error_s=0.01,
+        )
+        truth = generate_multifrequency_truth(config)
+
+        accel = simulate_accelerometer(truth, config)
+        expected = np.interp(
+            truth.t - config.accel_sync_error_s,
+            truth.t,
+            truth.a_mps2,
+            left=truth.a_mps2[0],
+            right=truth.a_mps2[-1],
+        )
+
+        np.testing.assert_allclose(accel.measured_mps2, expected)
 
     def test_radar_target_degradation_reduces_iq_quality_inside_window(self):
         config = Phase1Config(
@@ -120,8 +268,31 @@ class Phase1SimulationTest(unittest.TestCase):
         np.testing.assert_allclose(radar.measured_kappa, expected_measured)
         self.assertGreater(np.max(np.abs(radar.measured_kappa - radar.kappa)), 1e-3)
 
+    def test_run_phase1_writes_cold_start_relative_reference_fields(self):
+        config = Phase1Config(duration_s=0.2, sample_rate_hz=1000.0, seed=44)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            output = Path(tmpdir) / "phase1.npz"
+            run(output, config)
+            data = np.load(output)
+
+            q_ref = cold_start_reference_mean(data["q_m"], config)
+            self.assertIn("q_ref_m", data)
+            self.assertIn("delta_q_m", data)
+            self.assertIn("delta_main_phase_rad", data)
+            self.assertAlmostEqual(float(data["q_ref_m"]), q_ref)
+            np.testing.assert_allclose(data["delta_q_m"], data["q_m"] - q_ref)
+
 
 class Phase1ConfigExtensionTest(unittest.TestCase):
+    def test_default_phase_sample_rate_is_iwr_like_slow_time_not_adc_rate(self):
+        config = Phase1Config()
+
+        self.assertEqual(config.sample_rate_hz, 100.0)
+        self.assertEqual(config.adc_sample_rate_hz, 6.0e6)
+        self.assertEqual(config.chirps_per_frame, 4)
+        self.assertEqual(config.adc_samples_per_chirp, 256)
+
     def test_default_kalman_and_bootstrap_config_values_are_available(self):
         config = Phase1Config()
 
@@ -130,8 +301,10 @@ class Phase1ConfigExtensionTest(unittest.TestCase):
         self.assertGreater(config.initial_rate_variance, 0.0)
         self.assertGreater(config.initial_measurement_variance, config.min_measurement_variance)
         self.assertGreater(config.max_measurement_variance, config.min_measurement_variance)
+        self.assertGreater(config.cold_start_duration_s, 0.0)
         self.assertGreater(config.kappa_window_samples, 2)
         self.assertGreater(config.kappa_update_start_s, 0.0)
+        self.assertGreater(config.kappa_bootstrap_prior_weight, 0.0)
         self.assertGreater(config.adaptive_r_forgetting, 0.0)
         self.assertLess(config.adaptive_r_forgetting, 1.0)
 

@@ -42,6 +42,12 @@ class PhaseUtilsTest(unittest.TestCase):
 
         self.assertEqual(count_branch_errors(estimate, truth), 1)
 
+    def test_count_branch_errors_ignores_constant_two_pi_reference_offset(self):
+        truth = np.array([0.0, 0.1, 0.2, 0.3])
+        estimate = truth - 2.0 * math.pi
+
+        self.assertEqual(count_branch_errors(estimate, truth), 0)
+
 
 if __name__ == "__main__":
     unittest.main()

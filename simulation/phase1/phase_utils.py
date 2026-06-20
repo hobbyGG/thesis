@@ -23,5 +23,7 @@ def count_branch_errors(estimated_phase, true_phase, tolerance=np.pi):
     valid = np.isfinite(estimated) & np.isfinite(truth)
     if not np.any(valid):
         return 0
-    branch_error = np.abs(estimated[valid] - truth[valid]) > float(tolerance)
+    difference = estimated[valid] - truth[valid]
+    constant_branch_offset = 2.0 * np.pi * np.round(np.median(difference) / (2.0 * np.pi))
+    branch_error = np.abs(difference - constant_branch_offset) > float(tolerance)
     return int(np.count_nonzero(branch_error))

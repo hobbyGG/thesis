@@ -37,3 +37,11 @@ def simulate_accelerometer(truth: TruthSignal, config: Phase1Config) -> Accelero
         bias_mps2=bias,
         noise_mps2=noise,
     )
+
+
+def build_accelerometer_observation(truth: TruthSignal, config: Phase1Config) -> AccelerometerObservation:
+    if config.motion_profile == "measured_bridge":
+        from .measured_bridge import load_measured_bridge_record
+
+        return load_measured_bridge_record(config).accelerometer
+    return simulate_accelerometer(truth, config)
