@@ -430,7 +430,7 @@ class Phase1AlgorithmChainReviewTest(unittest.TestCase):
             "range-bin-only mixed phase baseline",
             "Ma 2026 reproduction baseline",
             "Ma-style iterative beta baseline",
-            "target-wise adaptive R",
+            "confidence-aware target-wise R",
             "online kappa bootstrap",
             "真实 IWR1843 ADC 文件解析",
         ]

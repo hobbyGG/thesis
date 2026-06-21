@@ -11,7 +11,7 @@
 | 生成基础 SVG 折线图 | `simulation/phase1/reporting.py` 的 `write_basic_svg(...)` | 纯 Python/NumPy/标准库写 SVG，不依赖 matplotlib。验证报告和诊断图都用它。 |
 | 生成验证报告和关键诊断图 | `simulation/phase1/reporting.py` 的 `write_validation_report(...)` | 写 `metrics.csv`、`feasibility_gates.json`、`summary.md` 和 `plots/*.svg`。 |
 | 生成场景真值时域/频域图 | `simulation/phase1/scenario_diagnostics.py` | 写 `scenario_parameters.csv`、`summary.md` 和每个场景的位移/加速度 SVG 图。 |
-| 论文汇报可直接引用的图 | `reports/numerical_simulation_assets/` 和 `reports/numerical_simulation_assets_png/` | SVG 源图和 PNG 版本，已包含 range-angle、target selection、phase correction、adaptive R、kappa bootstrap、激光实测分析图。 |
+| 论文汇报可直接引用的图 | `reports/numerical_simulation_assets/` 和 `reports/numerical_simulation_assets_png/` | SVG 源图和 PNG 版本，已包含 range-angle、target selection、phase correction、confidence-aware R、kappa bootstrap、激光实测分析图。 |
 | 仿真验证输出图 | `simulation/outputs/phase1_validation/plots/`、`simulation/outputs/phase1_report_validation/plots/` | 由验证脚本生成的 SVG 图。 |
 | 场景诊断输出图 | `simulation/outputs/phase1_scenario_diagnostics/plots/` | 每个场景的 time/frequency displacement/acceleration SVG。 |
 | 实测激光数据分析图 | `datafile/analysis/*.svg` | 激光通道时域、频谱、动态相关性、配对分数等图表。 |
@@ -91,7 +91,7 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 | `selection.py` | 2D peak detection、同 range 近角度合并、presence/SNR/结构频带一致性评分、selected target 输出。 |
 | `inputs.py` | 统一场景输入构建层：一个 `Phase1Config` 生成 truth、accelerometer、target-level radar、frontend/range-angle、selected frontend、range-bin-only、Ma2026 等命名视图。 |
 | `method_registry.py` | 方法/基线注册表：集中声明要跑哪些方法、每个方法吃哪个输入视图、评估时如何映射 target reference。 |
-| `algorithm.py` | proposed 方法：结构主相位 Kalman、prediction-aided phase correction、online kappa bootstrap、target-wise adaptive R。 |
+| `algorithm.py` | proposed 方法：结构主相位 Kalman、prediction-aided phase correction、online kappa bootstrap、confidence-aware target-wise R。 |
 | `baselines.py` | oracle、Itoh-LS、single-target Ma-style、range-bin-only mixed phase、Ma-style iterative beta、固定 kappa 等 baseline。 |
 | `ma2026/` | 正式 Ma-family baseline 复现：Ma 2023 range-bin beta 标定 + Ma 2026 acceleration-aided LoS phase Kalman。 |
 | `pipeline.py` | 薄编排层：构建统一输入、运行 `method_registry`、生成指标和 artifacts；不再直接拼雷达输入。 |
@@ -118,7 +118,7 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 | `ma2023_balanced_good_targets` | 模拟 Ma 2023 多个优质目标条件。 |
 | `strong_wrapping` | 强相位缠绕，检验 prediction-aided phase correction。 |
 | `aoa_error_bootstrap` | AoA 初值误差下的 online kappa bootstrap。 |
-| `target_snr_drop` | 目标 SNR 退化下的 target-wise adaptive R。 |
+| `target_snr_drop` | 目标 SNR 退化下的 confidence-aware target-wise R。 |
 | `target_dropout` | 单 target 缺失/遮挡。 |
 | `mixed_scatterer_rangebin` | 同 rangeBin 复合散射相位混合。 |
 | `same_range_far_angles` | 同 rangeBin 但远角度目标分离，是 range-angle 前端的关键动机场景。 |
@@ -212,7 +212,7 @@ python3 -m unittest discover tests -v
 - `test_phase1_simulation.py`：真值、雷达、加速度合成。
 - `test_phase1_frontend.py`：ADC cube、range/angle FFT、frontend target 提取。
 - `test_phase1_target_selection.py`：峰值检测、角度合并、presence/SNR/频带筛选。
-- `test_phase1_methods.py`：proposed Kalman、kappa bootstrap、adaptive R、算法可见输入边界。
+- `test_phase1_methods.py`：proposed Kalman、kappa bootstrap、confidence-aware R、算法可见输入边界。
 - `test_phase1_ma2026_reproduction.py`：Ma-family baseline 复现。
 - `test_phase1_validation.py`：场景、指标、gates、报告和 SVG 输出。
 - `test_phase1_extended_experiments.py`：Monte Carlo / ablation / sensitivity 表格。
@@ -247,7 +247,7 @@ python3 -m unittest discover tests -v
 - 2D peak detection、同 rangeBin 近角度合并、同 rangeBin 远角度分离。
 - target presence、SNR、结构频带一致性筛选。
 - AoA cold start、prediction-aided phase correction、online kappa bootstrap。
-- 多目标结构主相位 Kalman、target-wise adaptive R。
+- 多目标结构主相位 Kalman、confidence-aware target-wise R。
 - Ma 2023 + Ma 2026 family baseline 复现。
 - 标准合成验证、extended validation、场景诊断、SVG/CSV/Markdown 报告输出。
 - TDMS 激光位移驱动的半实测桥梁场景。

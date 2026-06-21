@@ -376,7 +376,7 @@ $$
 
 其中 $R_{i,k}$ 表示第 $i$ 个 target 当前相位观测的不确定度。
 
-本文主方法采用固定/标定 $\mathbf{Q}$ 与 target-wise 自适应 $\mathbf{R}_k$。其中，$\mathbf{Q}$ 表示结构主相位动力学预测误差，主要由加速度传感器噪声、同步误差和状态模型未建模项决定，属于全局标定参数；$\mathbf{R}_k$ 表示 radar target 相位观测误差，受目标 SNR、遮挡、复合散射、AoA/转换系数误差和短时观测条件影响，更适合作为在线估计对象。桥梁 acceleration+strain displacement estimation 的相关工作也采用类似分工：过程噪声可依据传感器或模型误差预先给定，而测量噪声随观测条件变化进行自适应估计。
+本文主方法采用固定/标定 $\mathbf{Q}$ 与 confidence-aware target-wise effective $\mathbf{R}_k$ 的分工。也就是说，$\mathbf{Q}$ 表示结构主相位动力学预测误差，主要由加速度传感器噪声、同步误差和状态模型未建模项决定，属于全局标定参数；$\mathbf{R}_k$ 表示 radar target 相位观测误差与转换系数不确定性共同形成的等效观测噪声，受目标 SNR、遮挡、复合散射、AoA/转换系数误差和短时观测条件影响，更适合作为在线估计对象。桥梁 acceleration+strain displacement estimation 的相关工作也采用类似分工：过程噪声可依据传感器或模型误差预先给定，而测量噪声随观测条件变化进行自适应估计。
 
 在当前仿真实现中，$\mathbf{Q}$ 的标定采用候选网格而不是单个硬编码常数。具体地，对候选 $q \in \mathcal{Q}$ 分别运行相同的结构主相位 Kalman 滤波器，并以目标级 prediction innovation energy 作为无真值标定准则：
 
@@ -455,7 +455,7 @@ R_{i,k+1}
 0<\alpha<1.
 $$
 
-该基础自适应机制使滤波器在 target SNR 下降或相位残差异常时自动降低对应 target 的观测权重；随着预测辅助相位校正稳定，prediction innovation 减小，$R_{i,k}$ 随之下降，radar 相位观测以正常权重参与多目标融合。上下限 clipping 的作用不是人为修饰结果，而是防止单帧异常残差导致测量噪声估计发散或退化为零，从而维持 Kalman 增益的数值稳定性和鲁棒性。
+该基础更新机制使滤波器在 target SNR 下降或相位残差异常时自动降低对应 target 的观测权重；随着预测辅助相位校正稳定，prediction innovation 减小，$R_{i,k}$ 随之下降，radar 相位观测以正常权重参与多目标融合。上下限 clipping 的作用不是人为修饰结果，而是防止单帧异常残差导致测量噪声估计发散或退化为零，从而维持 Kalman 增益的数值稳定性和鲁棒性。
 
 需要说明的是，posterior residual
 

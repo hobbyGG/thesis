@@ -18,7 +18,7 @@ delta_Theta(t) = 4*pi*delta_q(t)/lambda
 
 ## Package Structure
 
-- `algorithm.py`: proposed structural-main-phase Kalman estimator, prediction-aided phase correction, target-wise adaptive `R`, and online `kappa` bootstrap.
+- `algorithm.py`: proposed structural-main-phase Kalman estimator, prediction-aided phase correction, calibrated `Q`, SNR-informed initial `R`, confidence-aware target-wise effective `R`, and online `kappa` bootstrap.
 - `baselines.py`: oracle, Itoh-LS, single-target Ma-style, fixed-kappa, range-bin-only, and Ma-style iterative-beta baselines.
 - `ma2026/`: dedicated reproduction package for the formal Ma 2026 baseline. It separates the paper target-specific LoS-phase Kalman method from the simulation-only range-bin candidate adapter.
 - `scenario_inputs.py`: the unified scenario input builder. It turns one `Phase1Config` into named data views: truth, accelerometer, target-level radar, frontend/range-angle outputs, selected frontend radar input, range-bin-only input, and Ma2026 range-bin input.
@@ -85,9 +85,9 @@ The core validation methods are:
 - `multitarget_true_kappa_fixed_r`: multi-target structural-main-phase Kalman with true fixed `kappa` and fixed `R`, used as a known-geometry ablation baseline.
 - `multitarget_aoa_fixed_kappa`: multi-target structural-main-phase Kalman with AoA initial `kappa` fixed, used as a realistic baseline without online bootstrap.
 - `selected_aoa_fixed_kappa`: frontend-selected targets with AoA initial `kappa` fixed, used as the selected-target fixed-geometry baseline.
-- `proposed`: all target-wise observations + AoA cold start + online `kappa` bootstrap + target-wise adaptive `R_i,k`; this remains an all-target ablation and uses the scenario's base `Q`.
-- `proposed_full_pipeline`: ADC/range-angle frontend + 2D peak detection + same-range close-angle merge + target selection + AoA cold start + online `kappa` bootstrap + SNR-informed initial `R_i,0` + target-wise adaptive `R_i,k`; this remains the uncalibrated-`Q` full-pipeline ablation.
-- `proposed_full_pipeline_calibrated`: the full pipeline with innovation-energy-selected global `Q`, SNR-informed initial `R_i,0`, confidence-aware target-wise online `R_i,k`, and online `kappa` bootstrap. This is the Phase 1 main synthetic method after the Kalman parameter optimization.
+- `proposed`: all target-wise observations + AoA cold start + online `kappa` bootstrap + innovation-updated target-wise `R_i,k`; this remains an all-target ablation and uses the scenario's base `Q`.
+- `proposed_full_pipeline`: ADC/range-angle frontend + 2D peak detection + same-range close-angle merge + target selection + AoA cold start + online `kappa` bootstrap + SNR-informed initial `R_i,0` + innovation-updated target-wise `R_i,k`; this remains the uncalibrated-`Q` full-pipeline ablation.
+- `proposed_full_pipeline_calibrated`: the full pipeline with innovation-energy-selected global `Q`, SNR-informed initial `R_i,0`, confidence-aware target-wise effective `R_i,k`, and online `kappa` bootstrap. This is the Phase 1 main synthetic method after the Kalman parameter optimization.
 - `proposed_full_pipeline_posterior_r`: calibrated full pipeline with posterior-residual adaptive `R`; retained as an adaptive-R residual-definition ablation.
 - `proposed_full_pipeline_doc_strict`: documented strict comparison variant using the older plain-window LS and conservative initial-R rule.
 

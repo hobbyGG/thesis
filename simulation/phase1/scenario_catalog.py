@@ -42,8 +42,8 @@ _SCENARIO_DESCRIPTIONS = {
     ),
     "target_snr_drop": ScenarioDescription(
         label_zh="目标 SNR 退化",
-        validation_purpose_zh="验证 target-wise 自适应 R 能否降低退化目标对融合状态的污染",
-        validation_focus_zh="SNR 下降、目标级 R 自适应、坏目标降权",
+        validation_purpose_zh="验证 confidence-aware target-wise R 能否降低退化目标对融合状态的污染",
+        validation_focus_zh="SNR 下降、目标级有效 R、坏目标降权",
         paper_section_zh="主实验",
     ),
     "target_dropout": ScenarioDescription(
@@ -54,7 +54,7 @@ _SCENARIO_DESCRIPTIONS = {
     ),
     "mixed_scatterer_rangebin": ScenarioDescription(
         label_zh="同 rangeBin 复合散射",
-        validation_purpose_zh="验证同一距离单元内复合散射造成相位畸变时，前端筛选与自适应 R 的鲁棒性",
+        validation_purpose_zh="验证同一距离单元内复合散射造成相位畸变时，前端筛选与 confidence-aware R 的鲁棒性",
         validation_focus_zh="复合散射、混合相位、目标质量退化",
         paper_section_zh="鲁棒性附录",
     ),
