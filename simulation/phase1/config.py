@@ -86,15 +86,27 @@ class Phase1Config:
     max_measurement_variance: float = 25.0
     adaptive_r_forgetting: float = 0.95
 
-    kappa_window_samples: int = 80
-    kappa_update_start_s: float = 0.25
-    kappa_bootstrap_prior_weight: float = 500.0
-    kappa_confidence_initial_variance: float = 0.04
-    kappa_confidence_min_variance: float = 1.0e-6
-    kappa_confidence_max_variance: float = 0.25
-    kappa_confidence_forgetting: float = 0.90
-    kappa_min_abs: float = 0.05
-    kappa_max_abs: float = 1.2
+    beta_window_samples: int = 80
+    beta_update_start_s: float = 0.25
+    beta_bootstrap_prior_weight: float = 500.0
+    # beta variance is expressed in beta-coordinate units. It is propagated into
+    # structural phase observation noise as (phi_los_corr - bias)^2 * var(beta).
+    beta_confidence_initial_variance: float = 0.04
+    beta_confidence_min_variance: float = 1.0e-6
+    beta_confidence_max_variance: float = 0.25
+    beta_confidence_forgetting: float = 0.90
+    beta_identifiability_min_samples: int = 8
+    beta_identifiability_min_los_energy: float = 1.0e-3
+    beta_identifiability_min_theta_energy: float = 1.0e-3
+    beta_identifiability_min_abs_corr: float = 0.35
+    beta_identifiability_max_residual_ratio: float = 0.75
+    beta_update_gain: float = 0.25
+    beta_update_max_relative_step: float = 0.20
+    beta_update_reference_mode: str = "accel_fft_reference"
+    beta_accel_reference_low_hz: float = 1.0
+    beta_accel_reference_high_hz: float = 120.0
+    beta_min_abs: float = 1.0 / 1.2
+    beta_max_abs: float = 1.0 / 0.05
 
     aoa_error_deg: float = 0.0
     frontend_aoa_error_bias_deg: Optional[float] = None
@@ -111,7 +123,7 @@ class Phase1Config:
 
     enable_mixed_scatterer_target: bool = False
     mixed_target_index: int = 0
-    mixed_scatterer_kappas: Sequence[float] = (0.95, 0.35)
+    mixed_scatterer_betas: Sequence[float] = (1.0 / 0.95, 1.0 / 0.35)
     mixed_scatterer_amplitudes: Sequence[float] = (0.7, 0.6)
     mixed_scatterer_biases_rad: Sequence[float] = (0.0, 1.2)
 
