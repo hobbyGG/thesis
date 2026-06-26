@@ -65,6 +65,37 @@ def estimate_itoh_ls(truth, radar, config, target_index=0):
     )
 
 
+def estimate_range_bin_itoh(radar_input, config):
+    wrapped = np.asarray(radar_input.wrapped_phase_rad[0], dtype=float)
+    available = np.asarray(radar_input.available_mask[0], dtype=bool) & np.isfinite(wrapped)
+    corrected = np.full_like(wrapped, np.nan, dtype=float)
+    if np.any(available):
+        corrected[available] = itoh_unwrap(wrapped[available])
+        target_bias = cold_start_reference_mean(corrected, config)
+        corrected[available] -= corrected[available][0] - prediction_correct_wrapped_phase(wrapped[available][0], target_bias)
+    phase_ref = cold_start_reference_mean(corrected, config)
+    kappa = float(np.asarray(radar_input.measured_kappa, dtype=float)[0])
+    theta = (corrected - phase_ref) / max(abs(kappa), 1e-12)
+    dt = 1.0 / config.sample_rate_hz
+    theta_dot = np.gradient(np.nan_to_num(theta, nan=0.0), dt)
+    corrected_all = np.full_like(radar_input.wrapped_phase_rad, np.nan, dtype=float)
+    corrected_all[0] = corrected
+    extra = {"input_view": "range_fft_range_bin", "measured_kappa": kappa}
+    if radar_input.extra:
+        extra.update(radar_input.extra)
+    return MethodResult(
+        method_name="range_bin_itoh",
+        q_hat_m=_phase_to_displacement(theta, config),
+        theta_hat_rad=theta,
+        theta_dot_hat_radps=theta_dot,
+        corrected_phase_rad=corrected_all,
+        kappa_hat=np.array([kappa], dtype=float),
+        r_history=np.full_like(radar_input.wrapped_phase_rad, np.nan, dtype=float),
+        innovation_rad=np.full_like(radar_input.wrapped_phase_rad, np.nan, dtype=float),
+        extra=extra,
+    )
+
+
 def estimate_multitarget_true_kappa_fixed_r(truth, radar, accel, config):
     return run_structural_phase_kalman(
         method_name="multitarget_true_kappa_fixed_r",

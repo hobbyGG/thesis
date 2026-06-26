@@ -2,7 +2,7 @@ import argparse
 from pathlib import Path
 
 from .scenario_diagnostics import write_scenario_diagnostics
-from .scenarios import build_phase1_scenarios
+from .scenarios import build_all_phase1_scenarios, build_phase1_scenarios
 
 
 def main():
@@ -16,17 +16,24 @@ def main():
     parser.add_argument(
         "--include-measured-bridge",
         action="store_true",
-        help="Compatibility flag; the local TDMS-driven semi-measured bridge scenario is included by default.",
+        help="Include the local TDMS-driven semi-measured bridge scenario as an optional diagnostic case.",
     )
     parser.add_argument(
         "--exclude-measured-bridge",
         action="store_true",
-        help="Exclude the local TDMS-driven semi-measured bridge scenario.",
+        help="Compatibility no-op; the local TDMS-driven semi-measured bridge scenario is excluded by default.",
+    )
+    parser.add_argument(
+        "--scenario-set",
+        choices=("paper", "all"),
+        default="all",
+        help="Write all scenario diagnostics by default; pass 'paper' for only the main paper scenarios.",
     )
     args = parser.parse_args()
 
+    scenario_builder = build_phase1_scenarios if args.scenario_set == "paper" else build_all_phase1_scenarios
     written = write_scenario_diagnostics(
-        build_phase1_scenarios(include_measured_bridge=not args.exclude_measured_bridge),
+        scenario_builder(include_measured_bridge=args.include_measured_bridge and not args.exclude_measured_bridge),
         args.output_dir,
     )
     print(f"parameters: {written['parameters_csv']}")

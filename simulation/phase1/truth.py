@@ -27,6 +27,9 @@ def generate_component_frequencies(
     rng = np.random.default_rng(seed)
     frequencies = []
     for nominal in nominal_frequencies_hz:
+        if float(jitter_hz) == 0.0:
+            frequencies.append(float(nominal))
+            continue
         value = rng.uniform(nominal - jitter_hz, nominal + jitter_hz)
         frequencies.append(round(float(value), 2))
     return frequencies
@@ -241,6 +244,13 @@ def generate_multifrequency_truth(config: Phase1Config) -> TruthSignal:
         )
         envelope = _combine_envelopes(envelope, vehicle_envelope)
     elif config.motion_profile == "cold_start_vehicle_event":
+        vehicle_envelope = _cold_start_vehicle_event_envelope(
+            t,
+            config.vehicle_event_center_s,
+            config.vehicle_event_width_s,
+        )
+        envelope = _combine_envelopes(envelope, vehicle_envelope)
+    elif config.motion_profile == "literature_maglev_modal":
         vehicle_envelope = _cold_start_vehicle_event_envelope(
             t,
             config.vehicle_event_center_s,

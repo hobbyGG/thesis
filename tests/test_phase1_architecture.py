@@ -14,6 +14,7 @@ class Phase1ArchitectureTest(unittest.TestCase):
             "cold_start_reference_mean",
             "estimate_proposed",
             "estimate_proposed_full_pipeline",
+            "estimate_proposed_full_pipeline_kappa_confidence",
             "estimate_proposed_full_pipeline_calibrated",
             "estimate_proposed_full_pipeline_kappa_confidence_r",
             "estimate_proposed_full_pipeline_posterior_r",
@@ -25,6 +26,7 @@ class Phase1ArchitectureTest(unittest.TestCase):
         for name in (
             "estimate_oracle",
             "estimate_itoh_ls",
+            "estimate_range_bin_itoh",
             "estimate_single_target_ma_style",
             "estimate_multitarget_true_kappa_fixed_r",
             "estimate_multitarget_aoa_fixed_kappa",
@@ -55,6 +57,7 @@ class Phase1ArchitectureTest(unittest.TestCase):
             "cold_start_reference_mean",
             "estimate_oracle",
             "estimate_itoh_ls",
+            "estimate_range_bin_itoh",
             "estimate_single_target_ma_style",
             "estimate_multitarget_true_kappa_fixed_r",
             "estimate_multitarget_aoa_fixed_kappa",
@@ -65,6 +68,7 @@ class Phase1ArchitectureTest(unittest.TestCase):
             "estimate_ma2026_target",
             "estimate_proposed",
             "estimate_proposed_full_pipeline",
+            "estimate_proposed_full_pipeline_kappa_confidence",
             "estimate_proposed_full_pipeline_calibrated",
             "estimate_proposed_full_pipeline_kappa_confidence_r",
             "estimate_proposed_full_pipeline_posterior_r",
@@ -78,7 +82,7 @@ class Phase1ArchitectureTest(unittest.TestCase):
         self.assertTrue(hasattr(scenarios, "__path__"))
         expected_modules = (
             "nominal_multifrequency",
-            "measured_bridge_point4_transverse",
+            "literature_maglev_modal_response",
             "ma2023_balanced_good_targets",
             "strong_wrapping",
             "aoa_error_bootstrap",
@@ -94,7 +98,23 @@ class Phase1ArchitectureTest(unittest.TestCase):
             self.assertTrue(hasattr(module, "build"), module_name)
 
         scenario_names = [item.scenario_name for item in scenarios.build_phase1_scenarios()]
-        self.assertEqual(scenario_names, list(expected_modules))
+        self.assertEqual(
+            scenario_names,
+            [
+                "literature_maglev_modal_response",
+                "strong_wrapping",
+                "same_range_far_angles",
+                "aoa_error_bootstrap",
+                "target_snr_drop",
+                "vehicle_event_nonstationary",
+            ],
+        )
+
+        all_scenario_names = [item.scenario_name for item in scenarios.build_all_phase1_scenarios()]
+        self.assertEqual(all_scenario_names, list(expected_modules))
+
+        measured_names = [item.scenario_name for item in scenarios.build_phase1_scenarios(include_measured_bridge=True)]
+        self.assertIn("measured_bridge_point4_transverse", measured_names)
 
     def test_pipeline_uses_unified_scenario_inputs_and_method_registry(self):
         inputs = importlib.import_module("simulation.phase1.scenario_inputs")
@@ -185,7 +205,7 @@ class Phase1ArchitectureTest(unittest.TestCase):
             scenario_inputs.frontend.frontend_targets.measured_kappa.shape[0],
         )
 
-    def test_method_registry_is_the_single_core_method_list(self):
+    def test_method_registry_separates_paper_and_diagnostic_methods(self):
         registry = importlib.import_module("simulation.phase1.method_registry")
 
         method_names = [spec.name for spec in registry.default_method_specs()]
@@ -194,21 +214,26 @@ class Phase1ArchitectureTest(unittest.TestCase):
             method_names,
             [
                 "oracle",
-                "itoh_ls",
-                "single_target_ma_style",
-                "range_bin_only_mixed_phase",
-                "ma_style_iterative_beta_range_bin",
+                "range_bin_itoh",
                 "ma2026_reproduction",
-                "multitarget_true_kappa_fixed_r",
-                "multitarget_aoa_fixed_kappa",
                 "selected_aoa_fixed_kappa",
-                "proposed",
-                "proposed_full_pipeline",
-                "proposed_full_pipeline_calibrated",
-                "proposed_full_pipeline_posterior_r",
-                "proposed_full_pipeline_doc_strict",
+                "proposed_full_pipeline_kappa_confidence",
             ],
         )
+        self.assertTrue(all(spec.role in {"reference", "paper"} for spec in registry.default_method_specs()))
+        self.assertTrue(all(spec.status == "active" for spec in registry.default_method_specs()))
+
+        all_method_names = [spec.name for spec in registry.all_method_specs()]
+        self.assertIn("single_target_ma_style", all_method_names)
+        self.assertIn("ma_style_iterative_beta_range_bin", all_method_names)
+        self.assertIn("proposed_full_pipeline_posterior_r", all_method_names)
+        self.assertIn("proposed_full_pipeline_doc_strict", all_method_names)
+
+        spec_by_name = {spec.name: spec for spec in registry.all_method_specs()}
+        self.assertEqual(spec_by_name["single_target_ma_style"].status, "deprecated")
+        self.assertEqual(spec_by_name["proposed_full_pipeline"].status, "deprecated")
+        self.assertEqual(spec_by_name["proposed_full_pipeline_posterior_r"].role, "ablation")
+        self.assertEqual(spec_by_name["ma_style_iterative_beta_range_bin"].role, "diagnostic")
 
 
 if __name__ == "__main__":

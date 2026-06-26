@@ -1,5 +1,6 @@
 from . import (
     aoa_error_bootstrap,
+    literature_maglev_modal_response,
     low_snr_multitarget,
     ma2023_balanced_good_targets,
     mixed_scatterer_rangebin,
@@ -14,8 +15,9 @@ from . import (
 from ..config import Phase1Config
 
 
-_SYNTHETIC_BUILDERS = (
+_ALL_SYNTHETIC_BUILDERS = (
     nominal_multifrequency.build,
+    literature_maglev_modal_response.build,
     ma2023_balanced_good_targets.build,
     strong_wrapping.build,
     aoa_error_bootstrap.build,
@@ -27,6 +29,15 @@ _SYNTHETIC_BUILDERS = (
     vehicle_event_nonstationary.build,
 )
 
+_PAPER_SYNTHETIC_BUILDERS = (
+    literature_maglev_modal_response.build,
+    strong_wrapping.build,
+    same_range_far_angles.build,
+    aoa_error_bootstrap.build,
+    target_snr_drop.build,
+    vehicle_event_nonstationary.build,
+)
+
 
 _MEASURED_BRIDGE_BUILDERS = (
     measured_bridge_point4_transverse.build,
@@ -35,16 +46,27 @@ _MEASURED_BRIDGE_BUILDERS = (
 _DEFAULT_SYNTHETIC_PEAK_DISPLACEMENT_MM = 1.5
 
 
-def build_phase1_scenarios(include_measured_bridge=True):
+def _build_from_builders(builders, include_measured_bridge=False):
     base = Phase1Config(
         motion_profile="cold_start_ramp",
         truth_peak_displacement_mm=_DEFAULT_SYNTHETIC_PEAK_DISPLACEMENT_MM,
     )
-    builders = [nominal_multifrequency.build]
+    selected_builders = list(builders)
     if include_measured_bridge:
-        builders.extend(_MEASURED_BRIDGE_BUILDERS)
-    builders.extend(_SYNTHETIC_BUILDERS[1:])
-    return [builder(base) for builder in builders]
+        selected_builders.extend(_MEASURED_BRIDGE_BUILDERS)
+    return [builder(base) for builder in selected_builders]
+
+
+def build_phase1_scenarios(include_measured_bridge=False):
+    return _build_from_builders(_PAPER_SYNTHETIC_BUILDERS, include_measured_bridge=include_measured_bridge)
+
+
+def build_paper_phase1_scenarios(include_measured_bridge=False):
+    return build_phase1_scenarios(include_measured_bridge=include_measured_bridge)
+
+
+def build_all_phase1_scenarios(include_measured_bridge=False):
+    return _build_from_builders(_ALL_SYNTHETIC_BUILDERS, include_measured_bridge=include_measured_bridge)
 
 
 def build_measured_bridge_scenarios():

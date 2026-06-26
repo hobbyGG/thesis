@@ -26,12 +26,19 @@ MA2026_COMPLIANCE: Mapping[str, Ma2026ComplianceEntry] = {
         status="implemented",
         algorithm_invariant="Correct wrapped radar phase by selecting the integer 2*pi offset nearest to the predicted phase.",
     ),
+    "ma2026_offline_beta_calibration": Ma2026ComplianceEntry(
+        entry_id="ma2026_offline_beta_calibration",
+        paper_source="Ma-family staged conversion-factor calibration; Ma et al. 2026 uses a direction conversion factor before Kalman, with fitting details traced to the earlier structural displacement estimation paper.",
+        implementation_files=("simulation/phase1/ma2026/calibration.py", "simulation/phase1/ma2026/method.py"),
+        status="implemented",
+        algorithm_invariant="Run an offline target/beta calibration stage on the available calibration segment before the Ma 2026 LoS Kalman stage.",
+    ),
     "ma2026_q_energy_selection": Ma2026ComplianceEntry(
         entry_id="ma2026_q_energy_selection",
         paper_source="Ma et al. 2026, Section 3.2 Q energy selection.",
         implementation_files=("simulation/phase1/ma2026/config.py", "simulation/phase1/ma2026/kalman.py"),
         status="implemented",
-        algorithm_invariant="Evaluate the paper Q candidates and select the candidate with minimum corrected-phase energy.",
+        algorithm_invariant="Evaluate the paper Q candidates and select the candidate with minimum estimated continuous-phase energy.",
     ),
     "ma2026_alpha_linear_fit": Ma2026ComplianceEntry(
         entry_id="ma2026_alpha_linear_fit",

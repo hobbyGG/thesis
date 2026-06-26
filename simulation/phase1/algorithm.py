@@ -133,7 +133,7 @@ def calibrated_process_noise_intensity(config):
     return float(value)
 
 
-def estimate_proposed_full_pipeline_calibrated(radar_input, accel, config):
+def estimate_proposed_full_pipeline_kappa_confidence(radar_input, accel, config):
     selected = _select_calibrated_q_result(radar_input, accel, config)
     result = selected["result"]
     process_noise_intensity = float(selected["q"])
@@ -148,8 +148,19 @@ def estimate_proposed_full_pipeline_calibrated(radar_input, accel, config):
     }
     return replace(
         result,
-        method_name="proposed_full_pipeline_calibrated",
+        method_name="proposed_full_pipeline_kappa_confidence",
         extra=extra,
+    )
+
+
+def estimate_proposed_full_pipeline_calibrated(radar_input, accel, config):
+    result = estimate_proposed_full_pipeline_kappa_confidence(radar_input, accel, config)
+    return replace(
+        result,
+        extra={
+            **result.extra,
+            "legacy_alias": "proposed_full_pipeline_calibrated",
+        },
     )
 
 
@@ -175,23 +186,13 @@ def estimate_proposed_full_pipeline_posterior_r(radar_input, accel, config):
 
 
 def estimate_proposed_full_pipeline_kappa_confidence_r(radar_input, accel, config):
-    selected = _select_kappa_confidence_r_q_result(radar_input, accel, config)
-    result = selected["result"]
-    process_noise_intensity = float(selected["q"])
-    extra = {
-        **result.extra,
-        "process_noise_intensity": process_noise_intensity,
-        "calibrated_q": process_noise_intensity,
-        "calibrated_q_candidates": selected["candidates"],
-        "calibrated_q_metric": "innovation_energy",
-        "calibrated_q_metric_values": selected["metric_values"],
-        "calibrated_q_selection_index": int(selected["index"]),
-        "ablation_target": "kappa_confidence_adaptive_r",
-    }
+    result = estimate_proposed_full_pipeline_kappa_confidence(radar_input, accel, config)
     return replace(
         result,
-        method_name="proposed_full_pipeline_kappa_confidence_r",
-        extra=extra,
+        extra={
+            **result.extra,
+            "legacy_alias": "proposed_full_pipeline_kappa_confidence_r",
+        },
     )
 
 
@@ -276,36 +277,6 @@ def _select_posterior_r_q_result(radar_input, accel, config):
     }
 
 
-def _select_kappa_confidence_r_q_result(radar_input, accel, config):
-    explicit_q = getattr(config, "calibrated_process_noise_intensity", None)
-    if explicit_q is not None:
-        q_value = float(explicit_q)
-        result = _run_kappa_confidence_r_candidate(radar_input, accel, config, q_value)
-        return {
-            "q": q_value,
-            "candidates": np.asarray([q_value], dtype=float),
-            "metric_values": np.asarray([_innovation_energy(result)], dtype=float),
-            "index": 0,
-            "result": result,
-        }
-
-    candidates = _calibrated_q_candidates(config)
-    metric_values = np.full(candidates.shape, np.inf, dtype=float)
-    results = []
-    for idx, q_value in enumerate(candidates):
-        result = _run_kappa_confidence_r_candidate(radar_input, accel, config, float(q_value))
-        metric_values[idx] = _innovation_energy(result)
-        results.append(result)
-    selected_idx = _select_calibrated_q_index(candidates, metric_values, config)
-    return {
-        "q": float(candidates[selected_idx]),
-        "candidates": candidates,
-        "metric_values": metric_values,
-        "index": int(selected_idx),
-        "result": results[selected_idx],
-    }
-
-
 def _select_doc_strict_q_result(radar_input, accel, config):
     explicit_q = getattr(config, "calibrated_process_noise_intensity", None)
     if explicit_q is not None:
@@ -339,7 +310,7 @@ def _select_doc_strict_q_result(radar_input, accel, config):
 def _run_full_pipeline_candidate(radar_input, accel, config, process_noise_intensity):
     calibrated_config = replace(config, process_noise_intensity=float(process_noise_intensity))
     return run_structural_phase_kalman(
-        method_name="proposed_full_pipeline_calibration_candidate",
+        method_name="proposed_full_pipeline_kappa_confidence_candidate",
         radar=radar_input,
         accel=accel,
         config=calibrated_config,
@@ -368,24 +339,6 @@ def _run_posterior_r_candidate(radar_input, accel, config, process_noise_intensi
         initial_r=radar_input.initial_r,
         kappa_update_mode="centered_regularized_ls",
         adaptive_r_mode="posterior_residual",
-        initial_r_policy="provided_or_config",
-    )
-
-
-def _run_kappa_confidence_r_candidate(radar_input, accel, config, process_noise_intensity):
-    calibrated_config = replace(config, process_noise_intensity=float(process_noise_intensity))
-    return run_structural_phase_kalman(
-        method_name="proposed_full_pipeline_kappa_confidence_r_candidate",
-        radar=radar_input,
-        accel=accel,
-        config=calibrated_config,
-        initial_kappa=radar_input.measured_kappa.copy(),
-        update_kappa=True,
-        adaptive_r=True,
-        selected_indices=radar_input.selected_indices,
-        initial_r=radar_input.initial_r,
-        kappa_update_mode="centered_regularized_ls",
-        adaptive_r_mode="kappa_confidence",
         initial_r_policy="provided_or_config",
     )
 
@@ -440,6 +393,26 @@ def _select_calibrated_q_index(candidates, metric_values, config):
     return int(tied[local])
 
 
+def _target_quality_scores(radar, n_targets, selected_indices_arr):
+    scores = getattr(radar, "selection_scores", None)
+    quality = np.zeros(n_targets, dtype=float)
+    if scores is None:
+        return quality
+
+    arr = np.asarray(scores, dtype=float).reshape(-1)
+    if arr.size == n_targets:
+        quality = arr.copy()
+    elif arr.size == selected_indices_arr.size:
+        quality[selected_indices_arr] = arr
+    elif arr.size:
+        quality[selected_indices_arr[: min(arr.size, selected_indices_arr.size)]] = arr[
+            : min(arr.size, selected_indices_arr.size)
+        ]
+
+    quality = np.nan_to_num(quality, nan=0.0, posinf=1.0, neginf=0.0)
+    return np.clip(quality, 0.0, 1.0)
+
+
 def run_structural_phase_kalman(
     method_name,
     radar,
@@ -481,6 +454,7 @@ def run_structural_phase_kalman(
     kappa_variance_history = np.full((n_targets, n_samples), np.nan, dtype=float)
     kappa_uncertainty_r_history = np.full((n_targets, n_samples), np.nan, dtype=float)
     use_kappa_confidence_r = adaptive_r_mode == "kappa_confidence"
+    use_quality_gated_r = adaptive_r_mode == "kappa_confidence"
     kappa_variance = np.full(
         n_targets,
         float(getattr(config, "kappa_confidence_initial_variance", 0.04)),
@@ -497,6 +471,9 @@ def run_structural_phase_kalman(
         selected_indices_arr = np.asarray(selected_indices, dtype=int)
     selected_mask = np.zeros(n_targets, dtype=bool)
     selected_mask[selected_indices_arr] = True
+    target_quality = _target_quality_scores(radar, n_targets, selected_indices_arr)
+    target_quality_history = np.full((n_targets, n_samples), np.nan, dtype=float)
+    base_r_update_gate_history = np.full((n_targets, n_samples), np.nan, dtype=float)
 
     target_bias = _estimate_target_biases(radar, config)
     x = _initial_state_from_cold_start(radar, kappa, target_bias, config, selected_indices_arr)
@@ -566,22 +543,34 @@ def run_structural_phase_kalman(
                     h_i = h[local_idx : local_idx + 1]
                     post_var = float((h_i @ p @ h_i.T)[0, 0])
                     residual_for_r = (
-                        posterior_residual if adaptive_r_mode == "posterior_residual" else prediction_residual
+                        posterior_residual
+                        if adaptive_r_mode in ("posterior_residual", "kappa_confidence")
+                        else prediction_residual
                     )
-                    instant_r = float(residual_for_r**2 + post_var)
-                    blended = (
-                        config.adaptive_r_forgetting * r_values[target_idx]
-                        + (1.0 - config.adaptive_r_forgetting) * instant_r
-                    )
+                    variance_for_r = post_var
+                    instant_r = float(residual_for_r**2 + variance_for_r)
+                    if use_quality_gated_r:
+                        delta_r = instant_r - float(r_values[target_idx])
+                        quality = float(target_quality[target_idx])
+                        gate = (1.0 - quality) if delta_r > 0.0 else 1.0
+                        blended = float(r_values[target_idx]) + (1.0 - config.adaptive_r_forgetting) * gate * delta_r
+                    else:
+                        gate = 1.0
+                        blended = (
+                            config.adaptive_r_forgetting * r_values[target_idx]
+                            + (1.0 - config.adaptive_r_forgetting) * instant_r
+                        )
                     r_values[target_idx] = float(
                         np.clip(blended, config.min_measurement_variance, config.max_measurement_variance)
                     )
+                    base_r_update_gate_history[target_idx, sample_idx] = gate
         else:
             x = x_pred
             p = p_pred
 
         theta_hat[sample_idx] = x[0]
         theta_dot_hat[sample_idx] = x[1]
+        target_quality_history[selected_mask, sample_idx] = target_quality[selected_mask]
         if use_kappa_confidence_r:
             r_history[selected_mask, sample_idx] = effective_r_values[selected_mask]
             base_r_history[selected_mask, sample_idx] = base_r_used_values[selected_mask]
@@ -668,6 +657,8 @@ def run_structural_phase_kalman(
             "base_r_history": base_r_history,
             "kappa_variance_history": kappa_variance_history,
             "kappa_uncertainty_r_history": kappa_uncertainty_r_history,
+            "target_quality_history": target_quality_history,
+            "base_r_update_gate_history": base_r_update_gate_history,
         },
     )
 

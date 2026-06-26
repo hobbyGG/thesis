@@ -1,0 +1,12 @@
+.DS_Store
+**/.DS_Store
+**/__pycache__/
+*.pyc
+.pytest_cache/
+.obsidian/
+tmp/
+ref_papers/
+Pasted image*.png
+datafile/*.tdms
+datafile/*.csv
+simulation/outputs/phase1_multifrequency.npz

@@ -28,6 +28,7 @@ class RadarAlgorithmInput:
     selected_indices: Optional[np.ndarray] = None
     initial_r: Optional[np.ndarray] = None
     selection_scores: Optional[np.ndarray] = None
+    extra: Optional[dict] = None
 
 
 def to_algorithm_radar_input(radar: RadarObservation) -> RadarAlgorithmInput:

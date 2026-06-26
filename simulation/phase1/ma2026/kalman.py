@@ -103,9 +103,9 @@ def select_q_by_energy(wrapped_phase_rad, acceleration_mps2, beta, phase1_config
             q_value=float(q_value),
         )
         corrected = result.corrected_phase_rad
-        valid = np.isfinite(corrected)
+        valid = np.isfinite(corrected) & np.isfinite(result.phase_delta_rad)
         if np.count_nonzero(valid):
-            energies[idx] = float(np.mean(corrected[valid] ** 2))
+            energies[idx] = float(np.mean(result.phase_delta_rad[valid] ** 2))
         results.append(result)
     selected_idx = _select_energy_minimizer(candidates, energies, ma_config)
     return float(candidates[selected_idx]), candidates, energies, results[selected_idx]

@@ -13,12 +13,13 @@ from simulation.phase1.methods import (
     estimate_proposed,
     estimate_proposed_full_pipeline,
     estimate_proposed_full_pipeline_doc_strict,
+    estimate_proposed_full_pipeline_kappa_confidence,
     estimate_proposed_full_pipeline_kappa_confidence_r,
     estimate_proposed_full_pipeline_posterior_r,
     estimate_selected_aoa_fixed_kappa,
     estimate_single_target_ma_style,
 )
-from simulation.phase1.accelerometer import simulate_accelerometer
+from simulation.phase1.accelerometer import AccelerometerObservation, simulate_accelerometer
 from simulation.phase1.radar import RadarAlgorithmInput, simulate_radar_targets, to_algorithm_radar_input
 from simulation.phase1.truth import generate_multifrequency_truth
 
@@ -324,7 +325,7 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
         self.assertEqual(result.method_name, "proposed_full_pipeline")
         self.assertEqual(result.q_hat_m.shape, truth.q_m.shape)
 
-    def test_proposed_full_pipeline_calibrated_uses_selected_targets_and_reports_q(self):
+    def test_proposed_full_pipeline_kappa_confidence_uses_selected_targets_and_reports_q(self):
         config = Phase1Config(
             duration_s=0.3,
             sample_rate_hz=1000.0,
@@ -345,21 +346,45 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
         )
 
         old_result = estimate_proposed_full_pipeline(radar_input, accel, config)
-        calibrated_result = phase1_algorithm.estimate_proposed_full_pipeline_calibrated(radar_input, accel, config)
-        used_targets = np.flatnonzero(np.any(np.isfinite(calibrated_result.corrected_phase_rad), axis=1))
+        confidence_result = estimate_proposed_full_pipeline_kappa_confidence(radar_input, accel, config)
+        used_targets = np.flatnonzero(np.any(np.isfinite(confidence_result.corrected_phase_rad), axis=1))
 
-        self.assertEqual(calibrated_result.method_name, "proposed_full_pipeline_calibrated")
-        self.assertEqual(calibrated_result.q_hat_m.shape, truth.q_m.shape)
+        self.assertEqual(confidence_result.method_name, "proposed_full_pipeline_kappa_confidence")
+        self.assertEqual(confidence_result.q_hat_m.shape, truth.q_m.shape)
         np.testing.assert_array_equal(used_targets, selected)
-        np.testing.assert_array_equal(calibrated_result.extra["selected_indices"], selected)
-        self.assertEqual(calibrated_result.extra["process_noise_intensity"], 5.0e4)
-        self.assertEqual(calibrated_result.extra["calibrated_q"], 5.0e4)
-        self.assertEqual(calibrated_result.extra["adaptive_r_mode"], "kappa_confidence")
-        self.assertIn("kappa_variance_history", calibrated_result.extra)
-        self.assertIn("kappa_uncertainty_r_history", calibrated_result.extra)
+        np.testing.assert_array_equal(confidence_result.extra["selected_indices"], selected)
+        self.assertEqual(confidence_result.extra["process_noise_intensity"], 5.0e4)
+        self.assertEqual(confidence_result.extra["calibrated_q"], 5.0e4)
+        self.assertEqual(confidence_result.extra["adaptive_r_mode"], "kappa_confidence")
+        self.assertIn("kappa_variance_history", confidence_result.extra)
+        self.assertIn("kappa_uncertainty_r_history", confidence_result.extra)
         self.assertEqual(config.process_noise_intensity, 5.0)
         self.assertEqual(old_result.method_name, "proposed_full_pipeline")
         self.assertNotIn("calibrated_q", old_result.extra)
+
+    def test_calibrated_name_remains_backward_compatible_alias(self):
+        config = Phase1Config(
+            duration_s=0.3,
+            sample_rate_hz=1000.0,
+            seed=129,
+            calibrated_process_noise_intensity=5.0e4,
+        )
+        truth = generate_multifrequency_truth(config)
+        radar = simulate_radar_targets(truth, config)
+        accel = simulate_accelerometer(truth, config)
+        radar_input = RadarAlgorithmInput(
+            measured_kappa=radar.measured_kappa.copy(),
+            wrapped_phase_rad=radar.wrapped_phase_rad.copy(),
+            available_mask=radar.available_mask.copy(),
+            selected_indices=np.array([0, 1], dtype=int),
+            initial_r=np.full(config.num_targets, config.initial_measurement_variance),
+            selection_scores=np.array([0.9, 0.8], dtype=float),
+        )
+
+        alias_result = phase1_algorithm.estimate_proposed_full_pipeline_calibrated(radar_input, accel, config)
+
+        self.assertEqual(alias_result.method_name, "proposed_full_pipeline_kappa_confidence")
+        self.assertEqual(alias_result.extra["legacy_alias"], "proposed_full_pipeline_calibrated")
 
     def test_doc_strict_full_pipeline_uses_documented_kappa_r_and_initial_r_rules(self):
         config = Phase1Config(
@@ -424,7 +449,7 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
         np.testing.assert_allclose(result.extra["initial_r"], quality_initial_r)
         np.testing.assert_array_equal(result.extra["selected_indices"], selected)
 
-    def test_kappa_confidence_r_full_pipeline_tracks_kappa_uncertainty_in_r(self):
+    def test_kappa_confidence_full_pipeline_tracks_kappa_uncertainty_in_r(self):
         config = Phase1Config(
             duration_s=0.8,
             sample_rate_hz=1000.0,
@@ -455,7 +480,8 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
         kappa_variance = result.extra["kappa_variance_history"]
         kappa_r = result.extra["kappa_uncertainty_r_history"]
 
-        self.assertEqual(result.method_name, "proposed_full_pipeline_kappa_confidence_r")
+        self.assertEqual(result.method_name, "proposed_full_pipeline_kappa_confidence")
+        self.assertEqual(result.extra["legacy_alias"], "proposed_full_pipeline_kappa_confidence_r")
         self.assertEqual(result.extra["adaptive_r_mode"], "kappa_confidence")
         self.assertEqual(kappa_variance.shape, radar.wrapped_phase_rad.shape)
         self.assertEqual(kappa_r.shape, radar.wrapped_phase_rad.shape)
@@ -464,6 +490,79 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
         np.testing.assert_allclose(
             result.r_history[selected, 0],
             result.extra["base_r_history"][selected, 0] + kappa_r[selected, 0],
+        )
+
+    def test_quality_gated_r_suppresses_growth_for_high_quality_target(self):
+        result = self._quality_gated_r_probe(selection_score=1.0)
+
+        self.assertIn("base_r_update_gate_history", result.extra)
+        self.assertIn("target_quality_history", result.extra)
+        base_r = result.extra["base_r_history"][0]
+        gate = result.extra["base_r_update_gate_history"][0]
+        quality = result.extra["target_quality_history"][0]
+
+        self.assertEqual(result.extra["adaptive_r_mode"], "kappa_confidence")
+        self.assertAlmostEqual(quality[1], 1.0)
+        self.assertAlmostEqual(gate[1], 0.0)
+        self.assertLess(np.nanmax(base_r[2:]), 0.02)
+
+    def test_quality_gated_r_allows_growth_for_low_quality_target(self):
+        result = self._quality_gated_r_probe(selection_score=0.0)
+
+        self.assertIn("base_r_update_gate_history", result.extra)
+        self.assertIn("target_quality_history", result.extra)
+        base_r = result.extra["base_r_history"][0]
+        gate = result.extra["base_r_update_gate_history"][0]
+        quality = result.extra["target_quality_history"][0]
+
+        self.assertAlmostEqual(quality[1], 0.0)
+        self.assertAlmostEqual(gate[1], 1.0)
+        self.assertGreater(base_r[2], 0.1)
+
+    def _quality_gated_r_probe(self, selection_score):
+        config = Phase1Config(
+            duration_s=0.4,
+            sample_rate_hz=10.0,
+            seed=130,
+            cold_start_duration_s=0.1,
+            process_noise_intensity=0.0,
+            initial_state_variance=0.01,
+            initial_rate_variance=0.0,
+            initial_measurement_variance=0.01,
+            min_measurement_variance=1.0e-6,
+            max_measurement_variance=25.0,
+            adaptive_r_forgetting=0.5,
+            kappa_confidence_initial_variance=1.0e-6,
+            kappa_confidence_min_variance=1.0e-6,
+            kappa_confidence_max_variance=1.0e-6,
+            kappa_update_start_s=10.0,
+        )
+        wrapped_phase = np.array([[0.0, 1.0, 1.0, 1.0]], dtype=float)
+        radar_input = RadarAlgorithmInput(
+            measured_kappa=np.array([1.0], dtype=float),
+            wrapped_phase_rad=wrapped_phase,
+            available_mask=np.ones_like(wrapped_phase, dtype=bool),
+            selected_indices=np.array([0], dtype=int),
+            initial_r=np.array([0.01], dtype=float),
+            selection_scores=np.array([selection_score], dtype=float),
+        )
+        accel = AccelerometerObservation(
+            true_mps2=np.zeros(wrapped_phase.shape[1], dtype=float),
+            measured_mps2=np.zeros(wrapped_phase.shape[1], dtype=float),
+            bias_mps2=np.zeros(wrapped_phase.shape[1], dtype=float),
+            noise_mps2=np.zeros(wrapped_phase.shape[1], dtype=float),
+        )
+        return phase1_algorithm.run_structural_phase_kalman(
+            method_name="quality_gated_r_probe",
+            radar=radar_input,
+            accel=accel,
+            config=config,
+            initial_kappa=radar_input.measured_kappa.copy(),
+            update_kappa=False,
+            adaptive_r=True,
+            selected_indices=radar_input.selected_indices,
+            initial_r=radar_input.initial_r,
+            adaptive_r_mode="kappa_confidence",
         )
 
 

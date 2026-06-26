@@ -7,8 +7,8 @@ from .algorithm import (
     MethodResult,
     estimate_proposed,
     estimate_proposed_full_pipeline,
-    estimate_proposed_full_pipeline_calibrated,
     estimate_proposed_full_pipeline_doc_strict,
+    estimate_proposed_full_pipeline_kappa_confidence,
     estimate_proposed_full_pipeline_posterior_r,
 )
 from .baselines import (
@@ -17,6 +17,7 @@ from .baselines import (
     estimate_multitarget_aoa_fixed_kappa,
     estimate_multitarget_true_kappa_fixed_r,
     estimate_oracle,
+    estimate_range_bin_itoh,
     estimate_range_bin_only_mixed_phase,
     estimate_selected_aoa_fixed_kappa,
     estimate_single_target_ma_style,
@@ -36,41 +37,90 @@ class MethodSpec:
     name: str
     run: MethodRunner
     target_reference_indices: Optional[ReferenceResolver] = None
+    role: str = "paper"
+    status: str = "active"
 
 
-def default_method_specs() -> tuple[MethodSpec, ...]:
+def all_method_specs() -> tuple[MethodSpec, ...]:
     return (
-        MethodSpec("oracle", _run_oracle),
-        MethodSpec("itoh_ls", _run_itoh_ls),
-        MethodSpec("single_target_ma_style", _run_single_target_ma_style),
-        MethodSpec("range_bin_only_mixed_phase", _run_range_bin_only_mixed_phase, _one_unmatched_reference),
+        MethodSpec("oracle", _run_oracle, role="reference"),
+        MethodSpec("range_bin_itoh", _run_range_bin_itoh, _one_unmatched_reference, role="paper"),
+        MethodSpec("itoh_ls", _run_itoh_ls, role="diagnostic", status="deprecated"),
+        MethodSpec(
+            "single_target_ma_style",
+            _run_single_target_ma_style,
+            role="diagnostic",
+            status="deprecated",
+        ),
+        MethodSpec(
+            "range_bin_only_mixed_phase",
+            _run_range_bin_only_mixed_phase,
+            _one_unmatched_reference,
+            role="ablation",
+        ),
         MethodSpec(
             "ma_style_iterative_beta_range_bin",
             _run_ma_style_iterative_beta_range_bin,
             _one_unmatched_reference,
+            role="diagnostic",
         ),
-        MethodSpec("ma2026_reproduction", _run_ma2026_reproduction, _ma2026_unmatched_reference),
-        MethodSpec("multitarget_true_kappa_fixed_r", _run_multitarget_true_kappa_fixed_r),
-        MethodSpec("multitarget_aoa_fixed_kappa", _run_multitarget_aoa_fixed_kappa),
-        MethodSpec("selected_aoa_fixed_kappa", _run_selected_aoa_fixed_kappa, _frontend_target_references),
-        MethodSpec("proposed", _run_proposed),
-        MethodSpec("proposed_full_pipeline", _run_proposed_full_pipeline, _frontend_target_references),
+        MethodSpec("ma2026_reproduction", _run_ma2026_reproduction, _ma2026_unmatched_reference, role="paper"),
         MethodSpec(
-            "proposed_full_pipeline_calibrated",
-            _run_proposed_full_pipeline_calibrated,
+            "multitarget_true_kappa_fixed_r",
+            _run_multitarget_true_kappa_fixed_r,
+            role="diagnostic",
+        ),
+        MethodSpec(
+            "multitarget_aoa_fixed_kappa",
+            _run_multitarget_aoa_fixed_kappa,
+            role="diagnostic",
+        ),
+        MethodSpec(
+            "selected_aoa_fixed_kappa",
+            _run_selected_aoa_fixed_kappa,
             _frontend_target_references,
+            role="paper",
+        ),
+        MethodSpec("proposed", _run_proposed, role="diagnostic", status="deprecated"),
+        MethodSpec(
+            "proposed_full_pipeline",
+            _run_proposed_full_pipeline,
+            _frontend_target_references,
+            role="diagnostic",
+            status="deprecated",
+        ),
+        MethodSpec(
+            "proposed_full_pipeline_kappa_confidence",
+            _run_proposed_full_pipeline_kappa_confidence,
+            _frontend_target_references,
+            role="paper",
         ),
         MethodSpec(
             "proposed_full_pipeline_posterior_r",
             _run_proposed_full_pipeline_posterior_r,
             _frontend_target_references,
+            role="ablation",
         ),
         MethodSpec(
             "proposed_full_pipeline_doc_strict",
             _run_proposed_full_pipeline_doc_strict,
             _frontend_target_references,
+            role="diagnostic",
+            status="deprecated",
         ),
     )
+
+
+def paper_method_specs() -> tuple[MethodSpec, ...]:
+    return tuple(spec for spec in all_method_specs() if spec.status == "active" and spec.role in {"paper", "reference"})
+
+
+def diagnostic_method_specs() -> tuple[MethodSpec, ...]:
+    return tuple(spec for spec in all_method_specs() if spec.role in {"diagnostic", "ablation"})
+
+
+def default_method_specs() -> tuple[MethodSpec, ...]:
+    return paper_method_specs()
 
 
 def run_method_specs(inputs: ScenarioInputs, method_specs: Optional[Sequence[MethodSpec]] = None):
@@ -97,6 +147,13 @@ def _run_itoh_ls(inputs: ScenarioInputs):
         inputs.radar.target_level,
         inputs.scenario,
         target_index=inputs.radar.best_target_index,
+    )
+
+
+def _run_range_bin_itoh(inputs: ScenarioInputs):
+    return estimate_range_bin_itoh(
+        inputs.radar.range_bin_only,
+        inputs.scenario,
     )
 
 
@@ -176,8 +233,8 @@ def _run_proposed_full_pipeline(inputs: ScenarioInputs):
     )
 
 
-def _run_proposed_full_pipeline_calibrated(inputs: ScenarioInputs):
-    return estimate_proposed_full_pipeline_calibrated(
+def _run_proposed_full_pipeline_kappa_confidence(inputs: ScenarioInputs):
+    return estimate_proposed_full_pipeline_kappa_confidence(
         inputs.radar.selected_frontend,
         inputs.accelerometer,
         inputs.scenario,

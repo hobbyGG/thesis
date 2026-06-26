@@ -24,7 +24,7 @@ from simulation.phase1.ma2026.filtering import acceleration_to_displacement, hig
 from simulation.phase1.ma2026.kalman import _select_energy_minimizer
 from simulation.phase1.metrics import displacement_metrics
 from simulation.phase1.radar import simulate_radar_targets
-from simulation.phase1.scenarios import build_phase1_scenarios
+from simulation.phase1.scenarios import build_all_phase1_scenarios, build_phase1_scenarios
 from simulation.phase1.truth import generate_multifrequency_truth
 
 
@@ -210,7 +210,7 @@ class Ma2026ReproductionTest(unittest.TestCase):
         self.assertEqual(result.corrected_phase_rad.shape, wrapped.shape)
 
     def test_ma2026_q_selection_uses_energy_argmin_candidate(self):
-        phase1 = next(item for item in build_phase1_scenarios() if item.scenario_name == "nominal_multifrequency")
+        phase1 = next(item for item in build_all_phase1_scenarios() if item.scenario_name == "nominal_multifrequency")
         truth = generate_multifrequency_truth(phase1)
         radar = simulate_radar_targets(truth, phase1)
         accel = AccelerometerObservation(
@@ -274,6 +274,60 @@ class Ma2026ReproductionTest(unittest.TestCase):
         self.assertNotIn("Ma2023", result.extra["source"])
         self.assertEqual(result.extra["selected_target_count"], 1)
         self.assertEqual(result.corrected_phase_rad.shape, (1, t.size))
+
+    def test_ma2026_reproduction_uses_offline_beta_stage_before_kalman(self):
+        phase1 = next(
+            item for item in build_phase1_scenarios() if item.scenario_name == "literature_maglev_modal_response"
+        )
+        from simulation.phase1.scenario_inputs import build_scenario_inputs
+
+        inputs = build_scenario_inputs(phase1)
+        ma_config = replace(
+            Ma2026Config(),
+            calibration_max_samples=int(phase1.duration_s * phase1.sample_rate_hz),
+        )
+
+        result = estimate_ma2026_reproduction(
+            inputs.radar.ma2026_rangebin,
+            inputs.accelerometer,
+            phase1,
+            ma_config,
+        )
+        q_ref = cold_start_reference_mean(inputs.truth.q_m, phase1)
+        metrics = displacement_metrics(result.q_hat_m, inputs.truth.q_m - q_ref)
+
+        self.assertEqual(result.extra["calibration_stage"], "offline_target_beta_fit")
+        self.assertEqual(result.extra["selected_beta"], result.extra["offline_calibration"]["selected_beta"])
+        self.assertEqual(
+            int(result.extra["selected_target_index"]),
+            int(result.extra["offline_calibration"]["selected_target_index"]),
+        )
+        self.assertLess(metrics["rmse_mm"], 0.6)
+        self.assertLess(abs(float(result.extra["selected_beta"])), 2.0)
+
+    def test_ma2026_q_energy_selection_reaches_paper_level_accuracy_after_beta_calibration(self):
+        phase1 = next(
+            item for item in build_phase1_scenarios() if item.scenario_name == "literature_maglev_modal_response"
+        )
+        from simulation.phase1.scenario_inputs import build_scenario_inputs
+
+        inputs = build_scenario_inputs(phase1)
+        ma_config = replace(
+            Ma2026Config(),
+            calibration_max_samples=int(phase1.duration_s * phase1.sample_rate_hz),
+        )
+
+        result = estimate_ma2026_reproduction(
+            inputs.radar.ma2026_rangebin,
+            inputs.accelerometer,
+            phase1,
+            ma_config,
+        )
+        q_ref = cold_start_reference_mean(inputs.truth.q_m, phase1)
+        metrics = displacement_metrics(result.q_hat_m, inputs.truth.q_m - q_ref)
+
+        self.assertGreaterEqual(float(result.extra["selected_q"]), 1.0e6)
+        self.assertLess(metrics["rmse_mm"], 0.06)
 
     def test_estimate_ma2026_target_is_paper_target_method_not_rangebin_adapter(self):
         phase1 = Phase1Config(

@@ -7,11 +7,14 @@ from simulation.phase1.config import Phase1Config
 from simulation.phase1.frontend import (
     FrontendConfig,
     ScattererTruth,
+    angle_deg_to_measured_kappa,
     extract_frontend_target_observation,
     range_angle_process,
     simulate_adc_cube,
     to_algorithm_radar_input,
 )
+from simulation.phase1.scenario_inputs import build_frontend_views
+from simulation.phase1.accelerometer import build_accelerometer_observation
 from simulation.phase1.phase_utils import wrap_to_pi
 from simulation.phase1.radar import RadarAlgorithmInput, simulate_radar_targets
 from simulation.phase1.truth import TruthSignal, generate_multifrequency_truth
@@ -246,6 +249,31 @@ class Phase1FrontendTest(unittest.TestCase):
 
         self.assertGreater(phase_noise_std, 0.02)
         self.assertLess(phase_noise_std, 0.08)
+
+    def test_scenario_aoa_error_changes_frontend_measured_kappa(self):
+        config = Phase1Config(
+            duration_s=0.08,
+            sample_rate_hz=1000.0,
+            seed=512,
+            num_targets=1,
+            target_angles_deg=(40.0,),
+            target_snr_db=(120.0,),
+            target_amplitudes=(1.0,),
+            aoa_error_deg=10.0,
+        )
+        truth = generate_multifrequency_truth(config)
+        accelerometer = build_accelerometer_observation(truth, config)
+
+        frontend = build_frontend_views(truth, accelerometer, config)
+        measured_angle_deg = frontend.frontend_targets.angle_deg + config.aoa_error_deg
+        expected = angle_deg_to_measured_kappa(measured_angle_deg)
+        unperturbed = angle_deg_to_measured_kappa(frontend.frontend_targets.angle_deg)
+
+        np.testing.assert_allclose(frontend.frontend_targets.measured_kappa, expected)
+        self.assertGreater(
+            float(np.max(np.abs(frontend.frontend_targets.measured_kappa - unperturbed))),
+            1.0e-3,
+        )
 
     def test_frontend_dropout_removes_target_power_inside_window(self):
         config = Phase1Config(

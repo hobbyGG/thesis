@@ -11,12 +11,16 @@ from simulation.phase1.methods import cold_start_reference_mean
 from simulation.phase1.phase_utils import wrap_to_pi
 from simulation.phase1.radar import simulate_radar_targets
 from simulation.phase1.run_phase1 import run
-from simulation.phase1.scenarios import build_phase1_scenarios
+from simulation.phase1.scenarios import build_all_phase1_scenarios, build_phase1_scenarios
 from simulation.phase1.truth import generate_component_frequencies, generate_multifrequency_truth
 
 
 def _synthetic_phase1_scenarios():
-    return [scenario for scenario in build_phase1_scenarios() if scenario.motion_profile != "measured_bridge"]
+    return [scenario for scenario in build_all_phase1_scenarios() if scenario.motion_profile != "measured_bridge"]
+
+
+def _scenario_by_name(name):
+    return next(scenario for scenario in build_all_phase1_scenarios() if scenario.scenario_name == name)
 
 
 class Phase1SimulationTest(unittest.TestCase):
@@ -103,6 +107,55 @@ class Phase1SimulationTest(unittest.TestCase):
             with self.subTest(scenario=scenario.scenario_name):
                 truth = generate_multifrequency_truth(scenario)
                 self.assertLess(max(truth.frequencies_hz), 0.45 * scenario.sample_rate_hz)
+
+    def test_default_scenarios_include_literature_modal_response_not_tdms_bridge(self):
+        names = [scenario.scenario_name for scenario in build_phase1_scenarios()]
+
+        self.assertEqual(
+            names,
+            [
+                "literature_maglev_modal_response",
+                "strong_wrapping",
+                "same_range_far_angles",
+                "aoa_error_bootstrap",
+                "target_snr_drop",
+                "vehicle_event_nonstationary",
+            ],
+        )
+        self.assertIn("literature_maglev_modal_response", names)
+        self.assertNotIn("nominal_multifrequency", names)
+        self.assertNotIn("measured_bridge_point4_transverse", names)
+
+    def test_literature_maglev_modal_response_uses_reported_main_frequencies(self):
+        scenario = _scenario_by_name("literature_maglev_modal_response")
+        truth = generate_multifrequency_truth(scenario)
+
+        self.assertEqual(scenario.motion_profile, "literature_maglev_modal")
+        self.assertEqual(tuple(truth.frequencies_hz[:3]), (7.7737, 11.5742, 26.5642))
+        self.assertGreaterEqual(scenario.sample_rate_hz, 200.0)
+
+        peak_mm = float(np.max(np.abs(truth.q_m)) * 1e3)
+        self.assertGreaterEqual(peak_mm, 1.0)
+        self.assertLessEqual(peak_mm, 2.0)
+
+    def test_literature_maglev_modal_response_has_broadened_modal_bands(self):
+        scenario = _scenario_by_name("literature_maglev_modal_response")
+        truth = generate_multifrequency_truth(scenario)
+        q = truth.q_m - np.mean(truth.q_m)
+        freqs = np.fft.rfftfreq(q.size, d=1.0 / scenario.sample_rate_hz)
+        spectrum = np.abs(np.fft.rfft(q))
+
+        for modal_hz in (7.7737, 11.5742, 26.5642):
+            with self.subTest(modal_hz=modal_hz):
+                modal_band = (freqs >= modal_hz - 0.75) & (freqs <= modal_hz + 0.75)
+                nearby_floor = (freqs >= modal_hz + 1.25) & (freqs <= modal_hz + 2.75)
+
+                self.assertGreater(float(np.max(spectrum[modal_band])), 0.0)
+                self.assertGreater(
+                    float(np.mean(spectrum[modal_band])),
+                    3.0 * float(np.mean(spectrum[nearby_floor])),
+                )
+                self.assertGreater(np.count_nonzero(spectrum[modal_band] > 0.15 * np.max(spectrum[modal_band])), 1)
 
     def test_strong_wrapping_has_quiet_micro_ramp_and_strong_intervals(self):
         scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "strong_wrapping"][0]

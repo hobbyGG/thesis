@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430">
+<text x="84" y="24" font-size="16" font-family="Arial, sans-serif">same_range_far_angles displacement spectrum</text>
+<rect x="84" y="46" width="850" height="318" fill="white" stroke="#777" />
+<line x1="84" y1="364" x2="934" y2="364" stroke="#333" stroke-width="1" />
+<line x1="84" y1="46" x2="84" y2="364" stroke="#333" stroke-width="1" />
+<line x1="84.00" y1="46" x2="84.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="84.00" y1="364" x2="84.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="84.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">0.000</text>
+<line x1="254.00" y1="46" x2="254.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="254.00" y1="364" x2="254.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="254.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">6.00</text>
+<line x1="424.00" y1="46" x2="424.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="424.00" y1="364" x2="424.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="424.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">12.0</text>
+<line x1="594.00" y1="46" x2="594.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="594.00" y1="364" x2="594.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="594.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">18.0</text>
+<line x1="764.00" y1="46" x2="764.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="764.00" y1="364" x2="764.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="764.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">24.0</text>
+<line x1="934.00" y1="46" x2="934.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="934.00" y1="364" x2="934.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="934.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">30.0</text>
+<line x1="84" y1="364.00" x2="934" y2="364.00" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="364.00" x2="84" y2="364.00" stroke="#333" stroke-width="1" />
+<text x="75" y="368.00" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">-0.035</text>
+<line x1="84" y1="300.40" x2="934" y2="300.40" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="300.40" x2="84" y2="300.40" stroke="#333" stroke-width="1" />
+<text x="75" y="304.40" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">0.118</text>
+<line x1="84" y1="236.80" x2="934" y2="236.80" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="236.80" x2="84" y2="236.80" stroke="#333" stroke-width="1" />
+<text x="75" y="240.80" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">0.270</text>
+<line x1="84" y1="173.20" x2="934" y2="173.20" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="173.20" x2="84" y2="173.20" stroke="#333" stroke-width="1" />
+<text x="75" y="177.20" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">0.423</text>
+<line x1="84" y1="109.60" x2="934" y2="109.60" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="109.60" x2="84" y2="109.60" stroke="#333" stroke-width="1" />
+<text x="75" y="113.60" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">0.575</text>
+<line x1="84" y1="46.00" x2="934" y2="46.00" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="46.00" x2="84" y2="46.00" stroke="#333" stroke-width="1" />
+<text x="75" y="50.00" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">0.728</text>
+<text x="509.00" y="412" text-anchor="middle" font-size="13" font-family="Arial, sans-serif">Frequency (Hz)</text>
+<text transform="translate(22 205.00) rotate(-90)" text-anchor="middle" font-size="13" font-family="Arial, sans-serif">Amplitude (mm)</text>
+<polyline points="84.00,349.55 89.67,334.02 95.33,338.01 101.00,347.87 106.67,327.25 112.33,291.13 118.00,218.00 123.67,60.45 129.33,334.21 135.00,310.94 140.67,314.86 146.33,329.33 152.00,344.08 157.67,340.88 163.33,336.93 169.00,338.57 174.67,342.70 180.33,345.53 186.00,345.09 191.67,343.74 197.33,343.54 203.00,345.16 208.67,344.95 214.33,341.69 220.00,342.85 225.67,338.59 231.33,236.48 237.00,252.29 242.67,321.84 248.33,342.67 254.00,337.66 259.67,335.13 265.33,338.15 271.00,342.85 276.67,343.82 282.33,342.37 288.00,342.45 293.67,343.71 299.33,344.46 305.00,344.39 310.67,344.41 316.33,344.72 322.00,344.97 327.67,345.13 333.33,345.35 339.00,345.61 344.67,345.75 350.33,345.81 356.00,346.09 361.67,346.70 367.33,346.96 373.00,346.48 378.67,346.47 384.33,347.86 390.00,348.44 395.67,345.86 401.33,345.21 407.00,348.15 412.67,339.96 418.33,309.55 424.00,287.17 429.67,344.62 435.33,341.19 441.00,339.54 446.67,341.99 452.33,345.39 458.00,345.70 463.67,344.49 469.33,344.56 475.00,345.46 480.67,345.91 486.33,345.72 492.00,345.66 497.67,345.86 503.33,346.02 509.00,346.09 514.67,346.19 520.33,346.30 526.00,346.36 531.67,346.41 537.33,346.51 543.00,346.60 548.67,346.65 554.33,346.70 560.00,346.76 565.67,346.80 571.33,346.84 577.00,346.88 582.67,346.92 588.33,346.94 594.00,346.97 599.67,347.00 605.33,347.03 611.00,347.06 616.67,347.09 622.33,347.13 628.00,347.16 633.67,347.19 639.33,347.22 645.00,347.25 650.67,347.28 656.33,347.31 662.00,347.34 667.67,347.36 673.33,347.38 679.00,347.40 684.67,347.42 690.33,347.44 696.00,347.46 701.67,347.47 707.33,347.49 713.00,347.51 718.67,347.52 724.33,347.54 730.00,347.56 735.67,347.58 741.33,347.60 747.00,347.61 752.67,347.63 758.33,347.65 764.00,347.67 769.67,347.68 775.33,347.69 781.00,347.71 786.67,347.72 792.33,347.73 798.00,347.75 803.67,347.76 809.33,347.77 815.00,347.78 820.67,347.79 826.33,347.80 832.00,347.81 837.67,347.82 843.33,347.84 849.00,347.85 854.67,347.86 860.33,347.87 866.00,347.88 871.67,347.89 877.33,347.90 883.00,347.91 888.67,347.92 894.33,347.93 900.00,347.94 905.67,347.95 911.33,347.95 917.00,347.96 922.67,347.97 928.33,347.98 934.00,347.99" fill="none" stroke="#0066cc" stroke-width="1.5" />
+<g class="legend">
+<line x1="744" y1="62" x2="766" y2="62" stroke="#0066cc" stroke-width="2" />
+<text x="772" y="66" font-size="11" font-family="Arial, sans-serif">displacement amplitude</text>
+</g>
+</svg>

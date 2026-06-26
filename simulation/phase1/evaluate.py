@@ -4,11 +4,11 @@ from .gates import build_gate_results
 from .pipeline import evaluate_scenario
 
 
-def evaluate_all_scenarios(scenarios):
+def evaluate_all_scenarios(scenarios, method_specs=None):
     all_rows = []
     artifacts_by_scenario = {}
     for scenario in scenarios:
-        rows, artifacts = evaluate_scenario(scenario)
+        rows, artifacts = evaluate_scenario(scenario, method_specs=method_specs)
         all_rows.extend(rows)
         artifacts_by_scenario[scenario.scenario_name] = artifacts
     return {

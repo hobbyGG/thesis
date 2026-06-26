@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430">
+<text x="84" y="24" font-size="16" font-family="Arial, sans-serif">vehicle_event_nonstationary range-angle frame</text>
+<rect x="84" y="46" width="850" height="318" fill="white" stroke="#777" />
+<line x1="84" y1="364" x2="934" y2="364" stroke="#333" stroke-width="1" />
+<line x1="84" y1="46" x2="84" y2="364" stroke="#333" stroke-width="1" />
+<line x1="84.00" y1="46" x2="84.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="84.00" y1="364" x2="84.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="84.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">0.000</text>
+<line x1="254.00" y1="46" x2="254.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="254.00" y1="364" x2="254.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="254.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">12.6</text>
+<line x1="424.00" y1="46" x2="424.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="424.00" y1="364" x2="424.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="424.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">25.2</text>
+<line x1="594.00" y1="46" x2="594.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="594.00" y1="364" x2="594.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="594.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">37.8</text>
+<line x1="764.00" y1="46" x2="764.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="764.00" y1="364" x2="764.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="764.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">50.4</text>
+<line x1="934.00" y1="46" x2="934.00" y2="364" stroke="#e6e6e6" stroke-width="1" />
+<line x1="934.00" y1="364" x2="934.00" y2="369" stroke="#333" stroke-width="1" />
+<text x="934.00" y="386" text-anchor="middle" font-size="11" font-family="Arial, sans-serif" fill="#333">63.0</text>
+<line x1="84" y1="364.00" x2="934" y2="364.00" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="364.00" x2="84" y2="364.00" stroke="#333" stroke-width="1" />
+<text x="75" y="368.00" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">-0.007</text>
+<line x1="84" y1="300.40" x2="934" y2="300.40" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="300.40" x2="84" y2="300.40" stroke="#333" stroke-width="1" />
+<text x="75" y="304.40" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">0.048</text>
+<line x1="84" y1="236.80" x2="934" y2="236.80" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="236.80" x2="84" y2="236.80" stroke="#333" stroke-width="1" />
+<text x="75" y="240.80" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">0.104</text>
+<line x1="84" y1="173.20" x2="934" y2="173.20" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="173.20" x2="84" y2="173.20" stroke="#333" stroke-width="1" />
+<text x="75" y="177.20" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">0.160</text>
+<line x1="84" y1="109.60" x2="934" y2="109.60" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="109.60" x2="84" y2="109.60" stroke="#333" stroke-width="1" />
+<text x="75" y="113.60" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">0.216</text>
+<line x1="84" y1="46.00" x2="934" y2="46.00" stroke="#e6e6e6" stroke-width="1" />
+<line x1="79" y1="46.00" x2="84" y2="46.00" stroke="#333" stroke-width="1" />
+<text x="75" y="50.00" text-anchor="end" font-size="11" font-family="Arial, sans-serif" fill="#333">0.271</text>
+<text x="509.00" y="412" text-anchor="middle" font-size="13" font-family="Arial, sans-serif">Range bin</text>
+<text transform="translate(22 205.00) rotate(-90)" text-anchor="middle" font-size="13" font-family="Arial, sans-serif">Peak range-angle magnitude</text>
+<polyline points="84.00,346.94 97.49,346.61 110.98,345.39 124.48,344.53 137.97,60.45 151.46,346.53 164.95,346.01 178.44,348.28 191.94,346.49 205.43,341.35 218.92,342.89 232.41,345.52 245.90,345.78 259.40,344.37 272.89,346.47 286.38,346.91 299.87,348.35 313.37,341.90 326.86,78.51 340.35,347.35 353.84,344.24 367.33,343.61 380.83,345.05 394.32,347.56 407.81,344.36 421.30,343.67 434.79,346.44 448.29,347.23 461.78,346.23 475.27,347.46 488.76,347.33 502.25,344.55 515.75,348.18 529.24,191.38 542.73,344.81 556.22,346.66 569.71,347.71 583.21,343.00 596.70,344.43 610.19,347.85 623.68,344.70 637.17,348.49 650.67,347.97 664.16,346.30 677.65,342.60 691.14,346.24 704.63,346.99 718.13,344.33 731.62,151.90 745.11,345.42 758.60,349.55 772.10,347.76 785.59,345.72 799.08,344.76 812.57,347.02 826.06,345.28 839.56,345.41 853.05,348.07 866.54,345.14 880.03,346.25 893.52,347.46 907.02,345.71 920.51,69.08 934.00,346.18" fill="none" stroke="#0066cc" stroke-width="1.5" />
+<g class="legend">
+<line x1="744" y1="62" x2="766" y2="62" stroke="#0066cc" stroke-width="2" />
+<text x="772" y="66" font-size="11" font-family="Arial, sans-serif">range_peak_power</text>
+</g>
+</svg>

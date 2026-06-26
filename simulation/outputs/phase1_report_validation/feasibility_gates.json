@@ -1,0 +1,122 @@
+[
+  {
+    "name": "nominal_proposed_rmse_le_0p03mm",
+    "value": 0.00736641142358081,
+    "threshold": 0.03,
+    "passed": true
+  },
+  {
+    "name": "strong_wrapping_rmse_le_0p08mm",
+    "value": 0.039386084420432704,
+    "threshold": 0.08,
+    "passed": true
+  },
+  {
+    "name": "strong_wrapping_unwrap_errors_le_10pct_itoh",
+    "value": 0,
+    "threshold": 1,
+    "passed": true
+  },
+  {
+    "name": "target_snr_drop_proposed_beats_fixed_r",
+    "value": 0.008539005136169951,
+    "threshold": 0.025974203467639033,
+    "passed": true
+  },
+  {
+    "name": "proposed_beats_single_target_in_at_least_4_scenarios",
+    "value": 8,
+    "threshold": 4,
+    "passed": true
+  },
+  {
+    "name": "nominal_full_pipeline_rmse_le_0p05mm",
+    "value": 0.007264851927915894,
+    "threshold": 0.05,
+    "passed": true
+  },
+  {
+    "name": "ma2023_balanced_good_targets_full_pipeline_beats_best_target",
+    "value": 0.0012047745422583604,
+    "threshold": 0.0014603957897170962,
+    "passed": true
+  },
+  {
+    "name": "same_range_far_angles_full_pipeline_selects_two_same_range_targets",
+    "value": 1,
+    "threshold": 1,
+    "passed": true
+  },
+  {
+    "name": "same_range_far_angles_full_pipeline_rmse_le_0p05mm",
+    "value": 0.025305856861013772,
+    "threshold": 0.05,
+    "passed": true
+  },
+  {
+    "name": "same_range_far_angles_full_pipeline_beats_range_bin_only_mixed_phase",
+    "value": 0.025305856861013772,
+    "threshold": 0.03285340574854646,
+    "passed": true
+  },
+  {
+    "name": "same_range_far_angles_range_bin_only_rmse_ge_1p25x_full_pipeline",
+    "value": 1.2982530458852177,
+    "threshold": 1.25,
+    "passed": true
+  },
+  {
+    "name": "same_range_far_angles_full_pipeline_beats_ma_style_iterative_beta_range_bin",
+    "value": 0.025305856861013772,
+    "threshold": 0.03379597782955503,
+    "passed": true
+  },
+  {
+    "name": "same_range_far_angles_full_pipeline_beats_ma2026_reproduction",
+    "value": 0.025305856861013772,
+    "threshold": 0.12733827271309525,
+    "passed": true
+  },
+  {
+    "name": "vehicle_event_full_pipeline_selected_count_between_1_and_4",
+    "value": 4,
+    "threshold": 4,
+    "passed": true
+  },
+  {
+    "name": "vehicle_event_full_pipeline_excludes_target4",
+    "value": 0,
+    "threshold": 0,
+    "passed": true
+  },
+  {
+    "name": "vehicle_event_full_pipeline_unwrap_error_rate_eq_0",
+    "value": 0.0,
+    "threshold": 0.0,
+    "passed": true
+  },
+  {
+    "name": "vehicle_event_full_pipeline_rmse_le_0p03mm",
+    "value": 0.0044738717444606745,
+    "threshold": 0.03,
+    "passed": true
+  },
+  {
+    "name": "target_snr_drop_full_pipeline_beats_selected_fixed_r",
+    "value": 0.009898995794590618,
+    "threshold": 0.02831560571049853,
+    "passed": true
+  },
+  {
+    "name": "low_snr_full_pipeline_selects_at_least_2_targets",
+    "value": 4,
+    "threshold": 2,
+    "passed": true
+  },
+  {
+    "name": "aoa_bootstrap_kappa_median_relative_error_le_0p05",
+    "value": 0.022888443779122206,
+    "threshold": 0.05,
+    "passed": true
+  }
+]

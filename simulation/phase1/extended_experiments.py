@@ -6,8 +6,9 @@ from pathlib import Path
 import numpy as np
 
 from .evaluate import evaluate_scenario
+from .method_registry import all_method_specs
 from .scenario_catalog import scenario_metadata_fields
-from .scenarios import build_phase1_scenarios
+from .scenarios import build_all_phase1_scenarios
 
 
 SCENARIO_METADATA_FIELDS = [
@@ -24,7 +25,7 @@ PAPER_METHODS = (
     "selected_aoa_fixed_kappa",
     "proposed",
     "proposed_full_pipeline",
-    "proposed_full_pipeline_calibrated",
+    "proposed_full_pipeline_kappa_confidence",
 )
 
 ABLATION_METHODS = (
@@ -36,7 +37,7 @@ ABLATION_METHODS = (
     "selected_aoa_fixed_kappa",
     "proposed",
     "proposed_full_pipeline",
-    "proposed_full_pipeline_calibrated",
+    "proposed_full_pipeline_kappa_confidence",
 )
 
 AOA_SENSITIVITY_METHODS = (
@@ -44,7 +45,7 @@ AOA_SENSITIVITY_METHODS = (
     "selected_aoa_fixed_kappa",
     "proposed",
     "proposed_full_pipeline",
-    "proposed_full_pipeline_calibrated",
+    "proposed_full_pipeline_kappa_confidence",
 )
 
 SNR_SENSITIVITY_METHODS = (
@@ -53,7 +54,7 @@ SNR_SENSITIVITY_METHODS = (
     "selected_aoa_fixed_kappa",
     "proposed",
     "proposed_full_pipeline",
-    "proposed_full_pipeline_calibrated",
+    "proposed_full_pipeline_kappa_confidence",
 )
 
 
@@ -86,11 +87,12 @@ def run_extended_experiments(
     reference_seed = seed_values[0]
 
     monte_carlo_rows = []
+    method_specs = all_method_specs()
     for scenario_name in monte_carlo_scenarios:
         base = scenario_by_name[scenario_name]
         for seed in seed_values:
             scenario = replace(base, seed=int(seed))
-            rows, _ = evaluate_scenario(scenario)
+            rows, _ = evaluate_scenario(scenario, method_specs=method_specs)
             for row in _filter_methods(rows, _paper_methods_for_scenario(scenario_name)):
                 monte_carlo_rows.append(_prefixed_row(row, seed=int(seed)))
 
@@ -99,7 +101,7 @@ def run_extended_experiments(
     ablation_rows = []
     for scenario_name in ablation_scenarios:
         scenario = replace(scenario_by_name[scenario_name], seed=reference_seed)
-        rows, _ = evaluate_scenario(scenario)
+        rows, _ = evaluate_scenario(scenario, method_specs=method_specs)
         for row in _filter_methods(rows, _ablation_methods_for_scenario(scenario_name)):
             ablation_rows.append(_prefixed_row(row, seed=reference_seed))
 
@@ -107,7 +109,7 @@ def run_extended_experiments(
     aoa_base = scenario_by_name["aoa_error_bootstrap"]
     for aoa_error in aoa_errors_deg:
         scenario = replace(aoa_base, seed=reference_seed, aoa_error_deg=float(aoa_error))
-        rows, _ = evaluate_scenario(scenario)
+        rows, _ = evaluate_scenario(scenario, method_specs=method_specs)
         for row in _filter_methods(rows, AOA_SENSITIVITY_METHODS):
             enriched = _prefixed_row(row, seed=reference_seed)
             enriched["aoa_error_deg"] = float(aoa_error)
@@ -118,7 +120,7 @@ def run_extended_experiments(
     for snr_floor in snr_floors_db:
         target_snr_db = tuple(float(snr_floor) + offset for offset in (8.0, 6.0, 4.0, 2.0, 0.0))
         scenario = replace(snr_base, seed=reference_seed, target_snr_db=target_snr_db)
-        rows, _ = evaluate_scenario(scenario)
+        rows, _ = evaluate_scenario(scenario, method_specs=method_specs)
         for row in _filter_methods(rows, SNR_SENSITIVITY_METHODS):
             enriched = _prefixed_row(row, seed=reference_seed)
             enriched["snr_floor_db"] = float(snr_floor)
@@ -197,7 +199,7 @@ def write_extended_experiment_report(summary, output_dir):
 
 
 def _scenario_lookup():
-    return {scenario.scenario_name: scenario for scenario in build_phase1_scenarios()}
+    return {scenario.scenario_name: scenario for scenario in build_all_phase1_scenarios()}
 
 
 def _filter_methods(rows, methods):

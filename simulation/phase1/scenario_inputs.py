@@ -159,6 +159,7 @@ def build_frontend_views(
         if scenario.dropout_target_indices
         else 0.0,
     )
+    frontend_targets = apply_frontend_aoa_uncertainty(frontend_targets, scenario)
     selected = select_targets_from_measurements(
         iq=frontend_targets.slow_time,
         wrapped_phase_rad=frontend_targets.wrapped_phase_rad,
@@ -205,6 +206,38 @@ def selected_frontend_algorithm_input(
         selected_indices=selected.selected_indices.copy(),
         initial_r=selected.initial_r.copy(),
         selection_scores=selected.quality_score.copy(),
+    )
+
+
+def apply_frontend_aoa_uncertainty(
+    frontend_targets: FrontendTargetObservation,
+    scenario: Phase1Config,
+) -> FrontendTargetObservation:
+    """Apply the algorithm-visible AoA error used to initialize conversion coefficients."""
+
+    bias_deg = scenario.frontend_aoa_error_bias_deg
+    if bias_deg is None:
+        bias_deg = scenario.aoa_error_deg
+    bias_deg = float(bias_deg)
+    std_deg = float(scenario.frontend_aoa_error_std_deg)
+    if bias_deg == 0.0 and std_deg == 0.0:
+        return frontend_targets
+
+    detected_angle_deg = np.asarray(frontend_targets.angle_deg, dtype=float)
+    aoa_error_deg = frontend_aoa_error_samples(detected_angle_deg.shape, scenario)
+    measured_angle_deg = np.clip(detected_angle_deg + aoa_error_deg, -89.0, 89.0)
+    return type(frontend_targets)(
+        measured_kappa=np.asarray(angle_deg_to_measured_kappa(measured_angle_deg), dtype=float),
+        slow_time=frontend_targets.slow_time.copy(),
+        wrapped_phase_rad=frontend_targets.wrapped_phase_rad.copy(),
+        available_mask=frontend_targets.available_mask.copy(),
+        range_bins=frontend_targets.range_bins.copy(),
+        angle_bins=frontend_targets.angle_bins.copy(),
+        range_m=frontend_targets.range_m.copy(),
+        angle_deg=frontend_targets.angle_deg.copy(),
+        target_reference_indices=None
+        if frontend_targets.target_reference_indices is None
+        else frontend_targets.target_reference_indices.copy(),
     )
 
 
@@ -299,20 +332,21 @@ def slice_frontend_targets(frontend_targets, indices):
 
 def range_bin_only_mixed_input(frontend: FrontendViews, scenario: Phase1Config) -> RadarAlgorithmInput:
     range_angle = frontend.range_angle_maps
-    frontend_targets = frontend.frontend_targets
-    range_bin = range_bin_only_reference_bin(frontend_targets, range_angle)
-    cube = np.asarray(range_angle.range_angle_cube, dtype=complex)
-    if range_bin < 0 or range_bin >= cube.shape[1]:
-        slow_time = np.full(cube.shape[0], np.nan + 1j * np.nan, dtype=complex)
+    range_fft = range_fft_by_rx(frontend)
+    range_bin = range_bin_only_reference_bin(frontend)
+    if range_bin < 0 or range_bin >= range_fft.shape[2]:
+        slow_time = np.full(range_fft.shape[0], np.nan + 1j * np.nan, dtype=complex)
         measured_kappa = np.array([1.0], dtype=float)
+        angle_bin = -1
+        rx_index = -1
     else:
-        slow_time = np.sum(cube[:, range_bin, :], axis=1)
+        power_by_rx = np.nanmedian(np.abs(range_fft[:, :, range_bin]) ** 2, axis=0)
+        rx_index = int(np.nanargmax(power_by_rx)) if power_by_rx.size else 0
+        slow_time = range_fft[:, rx_index, range_bin]
+        cube = np.asarray(range_angle.range_angle_cube, dtype=complex)
         power_by_angle = np.nanmedian(np.abs(cube[:, range_bin, :]) ** 2, axis=0)
         angle_bin = int(np.nanargmax(power_by_angle)) if power_by_angle.size else 0
-        measured_kappa = np.array(
-            [angle_deg_to_measured_kappa(range_angle.angle_axis_deg[angle_bin])],
-            dtype=float,
-        )
+        measured_kappa = measured_kappa_from_frontend_angle(range_angle.angle_axis_deg[angle_bin], scenario)
     available = np.isfinite(slow_time.real) & np.isfinite(slow_time.imag) & (np.abs(slow_time) > 0.0)
     wrapped = np.angle(slow_time).astype(float)[None, :]
     wrapped[:, ~available] = np.nan
@@ -323,10 +357,52 @@ def range_bin_only_mixed_input(frontend: FrontendViews, scenario: Phase1Config) 
         selected_indices=np.array([0], dtype=int),
         initial_r=np.array([scenario.initial_measurement_variance], dtype=float),
         selection_scores=np.array([1.0], dtype=float),
+        extra={
+            "range_bin": int(range_bin),
+            "rx_index": int(rx_index),
+            "angle_bin_for_kappa": int(angle_bin),
+            "input_view": "range_fft_range_bin",
+        },
     )
 
 
-def range_bin_only_reference_bin(frontend_targets, range_angle):
+def measured_kappa_from_frontend_angle(angle_deg, scenario: Phase1Config) -> np.ndarray:
+    angle_arr = np.atleast_1d(np.asarray(angle_deg, dtype=float))
+    aoa_error_deg = frontend_aoa_error_samples(angle_arr.shape, scenario)
+    measured_angle_deg = np.clip(angle_arr + aoa_error_deg, -89.0, 89.0)
+    return np.asarray(angle_deg_to_measured_kappa(measured_angle_deg), dtype=float)
+
+
+def frontend_aoa_error_samples(shape, scenario: Phase1Config) -> np.ndarray:
+    bias_deg = scenario.frontend_aoa_error_bias_deg
+    if bias_deg is None:
+        bias_deg = scenario.aoa_error_deg
+    bias_deg = float(bias_deg)
+    std_deg = float(scenario.frontend_aoa_error_std_deg)
+    aoa_error_deg = np.full(shape, bias_deg, dtype=float)
+    if std_deg > 0.0:
+        rng = np.random.default_rng(int(scenario.seed) + 91)
+        aoa_error_deg = aoa_error_deg + rng.normal(0.0, std_deg, size=shape)
+    return aoa_error_deg
+
+
+def range_fft_by_rx(frontend: FrontendViews):
+    adc_cube = np.asarray(frontend.adc_cube.adc_cube, dtype=complex)
+    range_fft = np.fft.fft(adc_cube, n=frontend.frontend_config.num_range_bins, axis=2)
+    return range_fft / float(frontend.frontend_config.num_adc_samples)
+
+
+def range_bin_only_reference_bin(frontend, range_angle=None):
+    if isinstance(frontend, FrontendViews):
+        range_fft = range_fft_by_rx(frontend)
+        if range_fft.size:
+            magnitude = np.nanmedian(np.abs(range_fft), axis=(0, 1))
+            return int(np.nanargmax(magnitude)) if magnitude.size else -1
+        return -1
+    if range_angle is None:
+        frontend_targets, range_angle = frontend
+    else:
+        frontend_targets = frontend
     if frontend_targets is not None and frontend_targets.range_bins.size:
         range_bins = np.asarray(frontend_targets.range_bins, dtype=int)
         angles = np.asarray(frontend_targets.angle_deg, dtype=float)

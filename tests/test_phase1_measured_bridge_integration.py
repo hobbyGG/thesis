@@ -47,7 +47,7 @@ class TestMeasuredBridgeIntegration(unittest.TestCase):
         self.assertGreater(np.std(accel.measured_mps2), 0.0)
 
     def test_measured_bridge_scenario_is_registered(self):
-        scenarios = build_phase1_scenarios()
+        scenarios = build_phase1_scenarios(include_measured_bridge=True)
         names = [scenario.scenario_name for scenario in scenarios]
 
         self.assertIn("measured_bridge_point4_transverse", names)
@@ -55,7 +55,7 @@ class TestMeasuredBridgeIntegration(unittest.TestCase):
     def test_default_measured_bridge_scenario_uses_radar_slow_time_rate(self):
         scenario = next(
             scenario
-            for scenario in build_phase1_scenarios()
+            for scenario in build_phase1_scenarios(include_measured_bridge=True)
             if scenario.scenario_name == "measured_bridge_point4_transverse"
         )
 

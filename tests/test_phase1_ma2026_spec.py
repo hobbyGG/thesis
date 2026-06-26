@@ -9,6 +9,7 @@ class Ma2026ComplianceSpecTest(unittest.TestCase):
         expected_ids = {
             "ma2026_state_space_model",
             "ma2026_predictive_phase_correction",
+            "ma2026_offline_beta_calibration",
             "ma2026_q_energy_selection",
             "ma2026_alpha_linear_fit",
             "ma2026_convergence_time",
@@ -38,6 +39,13 @@ class Ma2026ComplianceSpecTest(unittest.TestCase):
         self.assertIn("Eq. (18)", alpha_entry.paper_source)
         self.assertIn("Eq. (19)", alpha_entry.paper_source)
         self.assertNotIn("beta grid", alpha_entry.algorithm_invariant.lower())
+
+    def test_reproduction_tracks_offline_beta_calibration_stage(self):
+        beta_entry = compliance_by_id("ma2026_offline_beta_calibration")
+
+        self.assertIn("offline", beta_entry.algorithm_invariant)
+        self.assertIn("target/beta", beta_entry.algorithm_invariant)
+        self.assertIn("calibration.py", " ".join(beta_entry.implementation_files))
 
     def test_source_classification_matches_ma2026_reproduction_boundary(self):
         self.assertIn("Section 3.1", compliance_by_id("ma2026_state_space_model").paper_source)

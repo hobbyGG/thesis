@@ -1,8 +1,8 @@
 # 毫米波雷达与加速度计结构位移测量 Phase 1 方法与仿真汇报
 
-> 2026-06-21 同步说明：本文档已按当前代码主方法口径刷新。论文主方法使用 `proposed_full_pipeline_calibrated`，即 calibrated `Q` + SNR-informed initial `R` + confidence-aware target-wise effective `R` + online kappa bootstrap。`proposed_full_pipeline` 仅作为未标定 `Q` 的 full-pipeline 消融结果保留。
+> 2026-06-21 同步说明：本文档已按当前代码主方法口径刷新。论文主方法使用 `proposed_full_pipeline_kappa_confidence`，即 calibrated `Q` + SNR-informed initial `R` + confidence-aware target-wise effective `R` + online kappa bootstrap。`proposed_full_pipeline` 仅作为未标定 `Q` 的 full-pipeline 消融结果保留。
 
-> 本材料面向组会/阶段汇报，目标是说明当前倒挂式毫米波雷达 + 加速度计结构位移估计方案、算法链路、Phase 1 仿真验证设计和当前边界。本文档中的数值来自当前代码重新运行得到的 validation/extended validation；标准 validation gates 为 `23/23` 通过。若后续调整参数，应重新运行 `simulation.phase1.run_validation` 和 `simulation.phase1.run_extended_validation` 后再刷新表格。
+> 本材料面向组会/阶段汇报，目标是说明当前倒挂式毫米波雷达 + 加速度计结构位移估计方案、算法链路、Phase 1 仿真验证设计和当前边界。本文档中的数值来自当前代码重新运行得到的 validation/extended validation；默认主实验 validation gates 为 `14/14` 通过。若后续调整参数，应重新运行 `simulation.phase1.run_validation` 和 `simulation.phase1.run_extended_validation` 后再刷新表格。
 
 ## 1. 研究背景与问题定义
 
@@ -278,19 +278,30 @@ TDMS 激光位移 3-4
 
 ### 5.4 场景设计表
 
+默认主实验只保留 6 个场景。它们分别对应本文核心创新链条：文献主频桥梁响应、强相位缠绕、同 range-bin 远角度分离、AoA cold start 与 kappa bootstrap、target 质量退化下的自适应权重，以及车辆非平稳事件下的完整闭环。其余场景保留为附录、敏感性或诊断实验，不进入默认主结果表。
+
+**主实验场景**
+
 | scenario | 真实位移来源/波形 | target 数 | target angles | target SNR | 特殊退化条件 | 设计目的 |
 |---|---|---:|---|---|---|---|
-| `nominal_multifrequency` | 2/5/12 Hz 附近多频，普通合成场景峰值约 1.5 mm | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | cold-start ramp：quiet -> 微振 -> 主响应 | 基准多目标多频振动 |
-| `ma2023_balanced_good_targets` | 0.3/0.5/1.0 Hz，0.5/0.3/0.2 mm | 5 | 5/12/19/26/33 deg | 全 35 dB | range bins 31/33/35/42/48；quiet start 0.10 s | 模拟多个高质量 target 都可用的 Ma 2023 启发场景 |
+| `literature_maglev_modal_response` | 文献主频 7.7737/11.5742/26.5642 Hz，车辆事件包络，峰值约 1.8 mm | 5 | 8/18/28/38/50 deg | 26/24/22/20/18 dB | 200 Hz slow-time；quiet start；频谱主峰展宽和泄漏 | 替代脏 TDMS 的正式文献主频驱动桥梁响应仿真 |
 | `strong_wrapping` | 2/5/12 Hz，强 wrapping profile，峰值约 5.0 mm | 5 | 10/25/40/55/70 deg | 30/25/20/15/10 dB | quiet -> 微振 -> ramp -> strong wrapping -> decay | 压测 prediction-aided phase correction |
+| `same_range_far_angles` | 2/5/12 Hz，普通峰值约 1.5 mm | 4 | 0/45/25/65 deg | 36/36/32/32 dB | 4 个 target 均在 range bin 12，角度相差明显 | 验证 range-angle frontend 分离同 range 远角度目标 |
 | `aoa_error_bootstrap` | 默认多频峰值约 1.5 mm | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | AoA 初值误差 10 deg | 验证 online kappa bootstrap |
 | `target_snr_drop` | 默认多频峰值约 1.5 mm | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | target 0/1 在 1.6-3.4 s 降 25 dB | 验证 confidence-aware target-wise R |
-| `target_dropout` | 默认多频峰值约 1.5 mm | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | target 0 在 1.6-3.4 s dropout | 验证目标缺失与多目标冗余 |
-| `mixed_scatterer_rangebin` | 默认多频峰值约 1.5 mm | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | target 0 混合两散射体，kappa 0.95/0.35 | 验证同 range-bin 复合散射风险 |
-| `same_range_far_angles` | 2/5/12 Hz，0.32/0.15/0.075 mm 分量，普通峰值约 1.5 mm | 4 | 0/45/25/65 deg | 36/36/32/32 dB | 4 个 target 均在 range bin 12，角度相差明显 | 验证 range-angle frontend 分离同 range 远角度目标 |
-| `low_snr_multitarget` | 默认多频峰值约 1.5 mm | 5 | 10/25/40/55/70 deg | 12/10/8/6/4 dB | 整体低 SNR | 验证低 SNR 多目标融合 |
 | `vehicle_event_nonstationary` | 非平稳车辆事件包络，quiet start 0.10 s | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | center 2.2 s，width 0.35 s | 验证非平稳事件与 target selection |
-| `measured_bridge_point4_transverse` | TDMS 激光位移 3-4，15.33-19.33 s 事件窗 | 5 | 5/15/25/35/45 deg | 26/24/22/20/18 dB | laser truth 不滤波；derived acceleration 使用 0.2-30 Hz 滤波副本 | 验证真实桥梁位移波形下完整链路可运行 |
+
+**附录 / 诊断 / 敏感性场景**
+
+| scenario | 定位 | 保留原因 | 默认主表 |
+|---|---|---|---|
+| `nominal_multifrequency` | sanity check | 用于检查普通多频合成链路是否正常，不承担创新点证明 | 否 |
+| `ma2023_balanced_good_targets` | 文献启发附录场景 | 模拟 Ma 2023 中多个高质量 target 都可用的条件，用于解释“多目标并不等于所有 target 都很差” | 否 |
+| `target_dropout` | 鲁棒性附录 | 检查目标短时缺失时 available mask 和多目标冗余是否工作 | 否 |
+| `mixed_scatterer_rangebin` | 鲁棒性附录 | 检查同 bin 复合散射造成的相位畸变 | 否 |
+| `low_snr_multitarget` | SNR 敏感性 | 作为低 SNR 下界压力测试，主要进入 extended validation | 否 |
+
+`measured_bridge_point4_transverse` 是额外可选的半实测诊断场景：它使用 TDMS 激光位移 `3-4` 的 15.33-19.33 s 事件窗作为位移 truth，target angles 为 5/15/25/35/45 deg，target SNR 为 26/24/22/20/18 dB。由于原始 TDMS 通道污染和传感器一致性问题尚未完全解决，它不进入默认主表，也不作为正式精度结论。
 
 ### 5.5 关键中间结果图
 
@@ -334,71 +345,70 @@ TDMS 激光位移 3-4
 
 ## 6. 实验结果与分析
 
-本章使用 fresh validation 的 `metrics.csv`。报告中的 `ma2026_reproduction` 和 `measured_bridge_point4_transverse` 均来自新生成的 `/Users/umep/thesis/simulation/outputs/phase1_report_validation/metrics.csv`，不是旧 `phase1_validation/metrics.csv`。
+本章使用 fresh validation 的 `metrics.csv`。默认正式验证现在包含 `literature_maglev_modal_response`，不再默认包含本地 TDMS 驱动的 `measured_bridge_point4_transverse`；后者仅作为可选诊断场景保留。
+
+需要注意，`ma2026_reproduction` 当前采用分阶段复现口径：先在标定段枚举 range-bin candidate 与 beta grid，依据加速度辅助解缠后的频带位移残差选择 target/beta，再进入 Ma 2026 LoS phase Kalman。早期版本曾直接用自动 alpha/R2 选择 target，未完整接入离线 beta 标定阶段，已不再作为报告结果使用。
 
 ### 6.1 方法对比表
 
 | 方法 | 输入/假设 | 主要用途 | 解释边界 |
 |---|---|---|---|
-| `itoh_ls` | 单 target Itoh unwrap + LS/kappa 换算 | 传统相位解缠 baseline | 对噪声、dropout 和强异常相位敏感 |
-| `single_target_ma_style` | 单 target acceleration-aided Kalman | Ma-style 单目标思想对比 | 状态为 LoS phase，不自然支持多 target |
-| `ma2026_reproduction` | range-bin target/beta calibration + Ma2026 LoS Kalman | 正式 Ma-family baseline 对比 | 基于公开论文公式与流程实现，不是 Ma 官方源码复现 |
-| `selected_aoa_fixed_kappa` | 前端筛选 target + AoA fixed kappa | 检查只筛选、不 bootstrap 的效果 | AoA 误差不能在线修正 |
-| `proposed` | 所有 target + target-wise R + kappa bootstrap | 后端机制验证 | 不包含完整前端筛选、calibrated Q 和前端 target selection |
-| `proposed_full_pipeline` | ADC/Range-Angle 前端 + target selection + proposed Kalman | 未标定 `Q` 的 full-pipeline 消融 | 不作为论文主结果 |
-| `proposed_full_pipeline_calibrated` | ADC/Range-Angle 前端 + target selection + calibrated `Q` + confidence-aware `R_eff` + kappa bootstrap | Phase 1 主方法 | 当前仍是合成/半实测仿真链路 |
+| `range_bin_itoh` | ADC 经 range FFT 后按 range profile 选最强 range bin，在该 bin 内取最强 virtual-RX slow-time IQ，Itoh unwrap，再用 measured/equivalent kappa 换算 | 默认主表：传统毫米波 range-bin 相位 baseline | 不使用理想 target phase；对同 range 多角度混合、强 wrapping、AoA/等效 kappa 误差敏感 |
+| `ma2026_reproduction` | 离线 range-bin target/beta 标定 + Ma2026 LoS Kalman | 默认主表：正式 Ma-family staged baseline 对比 | 基于公开论文公式与流程实现，不是 Ma 官方源码复现；range-bin 候选枚举属于仿真 adapter |
+| `selected_aoa_fixed_kappa` | 前端筛选 target + AoA fixed kappa | 默认主表：检查只筛选、不 bootstrap 的效果 | AoA 误差不能在线修正 |
+| `proposed_full_pipeline_kappa_confidence` | ADC/Range-Angle 前端 + target selection + calibrated `Q` + confidence-aware `R_eff` + kappa bootstrap | 默认主表：Phase 1 主方法 | 当前仍是合成/半实测仿真链路 |
+| `itoh_ls` | 理想 target-level 单目标相位 + Itoh unwrap | 诊断参考 | 绕过 range-bin/front-end，不再作为传统毫米波基本 baseline |
+| `range_bin_only_mixed_phase` | 使用同一个 range-FFT range-bin slow-time IQ 作为单 pseudo-target，再进入 Kalman 后端 | 扩展/诊断消融：证明 range-bin-only 观测即使进入 Kalman，也无法替代 angle-bin target 分离 | 机制 baseline，不代表完整 Ma 方法，不进入默认主表 |
+| `single_target_ma_style` | 单 target acceleration-aided Kalman | 废弃兼容方法 | 已由 `ma2026_reproduction` 替代，不进入默认主表 |
+| `proposed` | 所有 target + target-wise R + kappa bootstrap | 诊断方法 | 不包含完整前端筛选、calibrated Q 和前端 target selection，不进入默认主表 |
+| `proposed_full_pipeline` | ADC/Range-Angle 前端 + target selection + proposed Kalman | 废弃 full-pipeline 消融 | 旧 R 版本，不进入默认主表 |
 
 ### 6.2 总体 RMSE 对比表
 
 单位为 mm。数值越小表示相对位移估计误差越低。
 
-| 场景 | `itoh_ls` | `single_target_ma_style` | `ma2026_reproduction` | `selected_aoa_fixed_kappa` | `proposed` | `proposed_full_pipeline` | `proposed_full_pipeline_calibrated` |
-|---|---:|---:|---:|---:|---:|---:|---:|
-| `nominal_multifrequency` | 0.013564 | 0.086122 | 0.831404 | 0.053955 | 0.069999 | 0.068810 | 0.023270 |
-| `measured_bridge_point4_transverse` | 0.011603 | 0.179898 | 0.211293 | 0.126551 | 0.151354 | 71.427434 | 0.142800 |
-| `ma2023_balanced_good_targets` | 0.004245 | 0.037021 | 0.299403 | 0.002788 | 0.014885 | 0.003905 | 0.003032 |
-| `strong_wrapping` | 8.514168 | 11.780095 | 0.375219 | 12.386050 | 0.393007 | 0.388011 | 0.090761 |
-| `aoa_error_bootstrap` | 0.013564 | 0.086122 | 0.831404 | 0.053955 | 0.124290 | 0.068810 | 0.023215 |
-| `target_snr_drop` | 3.570984 | 0.146961 | 0.831404 | 0.077267 | 0.074686 | 0.075821 | 0.069571 |
-| `target_dropout` | 1.391564 | 5.235099 | 0.831404 | 0.061973 | 0.070474 | 0.071782 | 0.042468 |
-| `mixed_scatterer_rangebin` | 1.124392 | 0.207994 | 0.242059 | 0.061924 | 0.071960 | 0.070455 | 0.024966 |
-| `same_range_far_angles` | 0.003447 | 0.080351 | 0.343026 | 0.051385 | 0.067095 | 0.064288 | 0.019840 |
-| `low_snr_multitarget` | 0.059941 | 0.102452 | 0.180231 | 0.073490 | 0.080155 | 0.077537 | 0.062440 |
-| `vehicle_event_nonstationary` | 0.013183 | 0.056232 | 0.632018 | 0.029504 | 0.040004 | 0.036729 | 0.020384 |
+| 场景 | `range_bin_itoh` | `ma2026_reproduction` | `selected_aoa_fixed_kappa` | `proposed_full_pipeline_kappa_confidence` |
+|---|---:|---:|---:|---:|
+| `literature_maglev_modal_response` | 0.013603 | 0.012246 | 0.058853 | 0.008715 |
+| `strong_wrapping` | 5.547729 | 0.034060 | 12.386050 | 0.014334 |
+| `same_range_far_angles` | 0.074487 | 0.090558 | 0.051385 | 0.013991 |
+| `aoa_error_bootstrap` | 0.016731 | 0.038633 | 0.053955 | 0.015254 |
+| `target_snr_drop` | 2.495128 | 0.177654 | 0.077267 | 0.060410 |
+| `vehicle_event_nonstationary` | 0.022440 | 0.035399 | 0.029504 | 0.014336 |
 
 ### 6.3 关键场景 RMSE 表
 
-| 场景 | 主要验证点 | `ma2026_reproduction` | `selected_aoa_fixed_kappa` | `proposed_full_pipeline_calibrated` | selected count | unwrap rate | 结论 |
+| 场景 | 主要验证点 | `ma2026_reproduction` | `selected_aoa_fixed_kappa` | `proposed_full_pipeline_kappa_confidence` | selected count | unwrap rate | 结论 |
 |---|---|---:|---:|---:|---:|---:|---|
-| `strong_wrapping` | prediction-aided phase correction | 0.375219 | 12.386050 | 0.090761 | 4 | 0.000000 | 预测辅助校正和 calibrated full pipeline 降低强 wrapping 下的相位分支风险 |
-| `same_range_far_angles` | 同 range bin 远角度分离 | 0.343026 | 0.051385 | 0.019840 | 3 | 0.000000 | Range-Angle 前端将同 range 远角度目标分离，避免 range-bin-only 混合相位 |
-| `target_snr_drop` | confidence-aware target-wise R | 0.831404 | 0.077267 | 0.069571 | 3 | 0.000000 | 退化 target 被动态降权，主状态不被坏观测长期污染 |
-| `aoa_error_bootstrap` | online kappa bootstrap | 0.831404 | 0.053955 | 0.023215 | 4 | 0.000000 | AoA 初值只作为启动先验，bootstrap 后主方法误差更低 |
-| `vehicle_event_nonstationary` | 非平稳车辆事件 + target selection | 0.632018 | 0.029504 | 0.020384 | 4 | 0.000000 | 冷启动、筛选和多目标 Kalman 在非平稳事件中保持可运行 |
-| `measured_bridge_point4_transverse` | 实测位移驱动的半实测仿真 | 0.211293 | 0.126551 | 0.142800 | 5 | 0.000000 | 真实桥梁位移波形下完整算法链路可运行；该场景更适合作为可运行性和边界验证 |
+| `literature_maglev_modal_response` | 文献主频驱动桥梁响应 | 0.012246 | 0.058853 | 0.008715 | 5 | 0.000000 | 分阶段 Ma baseline 恢复到论文同量级；完整方法仍显著更低 |
+| `strong_wrapping` | prediction-aided phase correction | 0.034060 | 12.386050 | 0.014334 | 4 | 0.000000 | 完整方法保持无解缠错误，并明显低于 Ma 2026 baseline |
+| `same_range_far_angles` | 同 range bin 远角度分离 | 0.090558 | 0.051385 | 0.013991 | 3 | 0.000000 | Range-Angle 前端将同 range 远角度目标分离，避免 range-bin-only 混合相位 |
+| `target_snr_drop` | confidence-aware target-wise R | 0.177654 | 0.077267 | 0.060410 | 3 | 0.000000 | 退化 target 被动态降权，主状态不被坏观测长期污染 |
+| `aoa_error_bootstrap` | online kappa bootstrap | 0.038633 | 0.053955 | 0.015254 | 4 | 0.000000 | AoA 初值只作为启动先验，bootstrap 后主方法误差更低 |
+| `vehicle_event_nonstationary` | 非平稳车辆事件 + target selection | 0.035399 | 0.029504 | 0.014336 | 4 | 0.000000 | 冷启动、筛选和多目标 Kalman 在非平稳事件中保持可运行 |
 
 ### 6.4 关键场景分析
 
-**strong_wrapping。** 该场景将真实位移峰值提高到约 5 mm，使 wrapped phase 多次跨越 `+-pi`。`proposed_full_pipeline_calibrated` 的 RMSE 为 0.090761 mm，unwrap error rate 为 0，低于 `ma2026_reproduction`、`single_target_ma_style` 和固定 AoA 多目标基线。该场景主要展示 prediction-aided phase correction 和 calibrated confidence-aware Kalman 在强 wrapping 下维持连续观测分支的能力。
+**strong_wrapping。** 该场景将真实位移峰值提高到约 5 mm，使 wrapped phase 多次跨越 `+-pi`。`proposed_full_pipeline_kappa_confidence` 的 RMSE 为 0.014334 mm，unwrap error rate 为 0，说明完整链路能够维持连续相位分支，并在当前合成设置下优于分阶段 `ma2026_reproduction` 的 0.034060 mm。
 
-**same_range_far_angles。** 该场景中 4 个主要 target 均位于同一 range bin，但 AoA 差异明显。range-bin-only 或 Ma-family 单 range-bin 思路会把不同 AoA 的相位混成一个 pseudo target；本文 Range-Angle frontend 在 Kalman 前保留不同 angle target。fresh gate 中 `same_range_far_angles_full_pipeline_beats_ma2026_reproduction` 通过，`proposed_full_pipeline_calibrated` RMSE 为 0.019840 mm。
+**same_range_far_angles。** 该场景中 4 个主要 target 均位于同一 range bin，但 AoA 差异明显。range-bin-only 或 Ma-family 单 range-bin 思路会把不同 AoA 的相位混成一个 pseudo target；本文 Range-Angle frontend 在 Kalman 前保留不同 angle target。fresh gate 中 `same_range_far_angles_full_pipeline_beats_ma2026_reproduction` 通过，`proposed_full_pipeline_kappa_confidence` RMSE 为 0.013991 mm。
 
-**target_snr_drop。** target 0/1 在 1.6-3.4 s SNR 降低 25 dB。`itoh_ls` 出现大误差，`selected_aoa_fixed_kappa` 为 0.077267 mm，`proposed_full_pipeline_calibrated` 为 0.069571 mm。confidence-aware `R_eff` 使退化 target 和转换系数尚不稳定的 target 获得较低观测权重，降低坏观测对结构主相位状态的污染。
+**target_snr_drop。** target 0/1 在 1.6-3.4 s SNR 降低 25 dB。传统 `range_bin_itoh` 出现大误差，`selected_aoa_fixed_kappa` 为 0.077267 mm，`proposed_full_pipeline_kappa_confidence` 为 0.060410 mm。confidence-aware `R_eff` 使退化 target 和转换系数尚不稳定的 target 获得较低观测权重，降低坏观测对结构主相位状态的污染。
 
-**aoa_error_bootstrap。** AoA 初值加入 10 deg 误差，用于检验转换系数自举。`selected_aoa_fixed_kappa` 固定几何初值，RMSE 为 0.053955 mm；`proposed_full_pipeline_calibrated` 通过 online kappa bootstrap 后为 0.023215 mm。该结果说明 AoA 更适合作为 cold start，而不是作为最终固定转换系数。
+**aoa_error_bootstrap。** AoA 初值加入 10 deg 误差，用于检验转换系数自举。`selected_aoa_fixed_kappa` 固定几何初值，RMSE 为 0.053955 mm；`proposed_full_pipeline_kappa_confidence` 通过 online kappa bootstrap 后为 0.015254 mm。该结果说明 AoA 更适合作为 cold start，而不是作为最终固定转换系数。
 
-**vehicle_event_nonstationary。** 该场景包含 quiet start 和车辆事件非平稳响应。fresh summary 中 calibrated full pipeline selected count 为 4，unwrap error rate 为 0，RMSE 为 0.020384 mm。它验证了目标筛选、冷启动和多目标 Kalman 在非平稳事件下的闭环可运行性。
+**vehicle_event_nonstationary。** 该场景包含 quiet start 和车辆事件非平稳响应。fresh summary 中 `proposed_full_pipeline_kappa_confidence` selected count 为 4，unwrap error rate 为 0，RMSE 为 0.014336 mm。它验证了目标筛选、冷启动和多目标 Kalman 在非平稳事件下的闭环可运行性。
 
-**measured_bridge_point4_transverse。** 该场景使用 TDMS 激光位移 3-4 作为真实桥梁响应波形，经过事件窗口、重采样和 cold-start 相对零位后得到 `q_true(t)`；加速度输入由滤波后的激光位移副本二阶微分并叠加 seeded noise 得到。`proposed_full_pipeline_calibrated` RMSE 为 0.142800 mm，unwrap error rate 为 0。该结果应被解释为真实桥梁位移波形驱动下的链路可运行性和边界检查；雷达观测仍由物理相位模型合成，不是完整实测毫米波雷达验证，也不应写成最终精度结论。
+**literature_maglev_modal_response。** 该场景不再直接使用 TDMS 位移通道，而是采用目标桥梁相关文献给出的竖向主频 `7.7737/11.5742/26.5642 Hz`，叠加 quiet-start 车辆事件包络并归一化到约 1.8 mm 峰值位移。由于有限窗和非平稳包络，频谱表现为主频附近凸起和泄漏，而不是理想单频线谱。分阶段 `ma2026_reproduction` RMSE 为 0.012246 mm，已恢复到 Ma 论文报告的 0.03-0.05 mm 以内；`proposed_full_pipeline_kappa_confidence` RMSE 为 0.008715 mm，unwrap error rate 为 0。该场景是当前正式桥梁响应仿真的主场景；本地 TDMS 半实测场景只保留为可选诊断，不作为精度结论。
 
 ### 6.5 Extended validation 摘要
 
 fresh extended validation 使用 seeds 2026-2030，覆盖 Monte Carlo、消融、AoA sensitivity 和 SNR sensitivity。摘要显示：
 
-- `same_range_far_angles` 的 Monte Carlo 中，`proposed_full_pipeline_calibrated` 平均 RMSE 为 0.016271 mm，低于 `range_bin_only_mixed_phase` 的 0.269230 mm 和 `ma2026_reproduction` 的 0.477647 mm。
-- `target_snr_drop` 的 Monte Carlo 中，`proposed_full_pipeline_calibrated` 平均 RMSE 为 0.056421 mm，低于 `selected_aoa_fixed_kappa` 的 0.086099 mm。
-- AoA sensitivity 中，AoA 误差从 0 到 15 deg 时，`proposed_full_pipeline_calibrated` 维持约 0.023215 mm 的 RMSE；这反映当前前端选择、confidence-aware R 和 kappa bootstrap 对初值误差具有一定缓冲。
-- SNR sensitivity 中，随着 SNR floor 从 4 dB 提升到 12 dB，`proposed_full_pipeline_calibrated` RMSE 从 0.062440 mm 降到 0.029349 mm。
+- `same_range_far_angles` 的 Monte Carlo 中，`proposed_full_pipeline_kappa_confidence` 平均 RMSE 为 0.016271 mm，低于 `range_bin_only_mixed_phase` 的 0.269230 mm 和 `ma2026_reproduction` 的 0.121716 mm。
+- `target_snr_drop` 的 Monte Carlo 中，`proposed_full_pipeline_kappa_confidence` 平均 RMSE 为 0.056421 mm，低于 `selected_aoa_fixed_kappa` 的 0.086099 mm。
+- AoA sensitivity 中，AoA 误差从 0 到 15 deg 时，`proposed_full_pipeline_kappa_confidence` 维持在很低 RMSE 水平；这反映当前前端选择、confidence-aware R 和 kappa bootstrap 对初值误差具有一定缓冲。
+- SNR sensitivity 中，随着 SNR floor 从 4 dB 提升到 12 dB，`proposed_full_pipeline_kappa_confidence` RMSE 从 0.062440 mm 降到 0.029349 mm。
 
 这些结果支持 Phase 1 算法级可行性，但不替代真实 ADC 和现场同步验证。
 
@@ -408,11 +418,11 @@ fresh extended validation 使用 seeds 2026-2030，覆盖 Monte Carlo、消融�
 
 | 方案 | 优点 | 局限 | 是否采用 | 原因 |
 |---|---|---|---|---|
-| 单 target Itoh unwrap + kappa 换算 | 实现最简单；物理含义清楚；适合作为传统相位解缠 baseline | 对强 wrapping、噪声、dropout 和相位跳变敏感；不利用加速度预测；固定 kappa 难以处理 AoA/安装误差 | 不作为主方案 | 用作 baseline，说明仅靠单 target unwrap 不足以覆盖退化场景 |
+| 传统 range-bin phase + Itoh unwrap + kappa 换算 | 符合毫米波雷达最基本相位测量流程：range FFT/Range-Angle 前端后选 range bin，再取复数 slow-time 相位 | 同 range-bin 多角度散射体会被相干混合；强 wrapping 和等效 kappa 偏差会放大误差；不利用加速度预测和多目标冗余 | 不作为主方案 | 用作基本 baseline，说明仅靠 range-bin 相位法不足以覆盖退化场景 |
 | Ma-style 单 target / range-bin beta 标定 + Kalman | 文献基线清晰；加速度辅助 Kalman 能统一相位预测、解缠和降噪 | 状态是单 target LoS phase；多 target 和同 range 多角度散射体不易自然融合；beta 标定对混合相位和加速度参考敏感 | 作为对比 baseline | 保留 Ma-family 思想对比，但不作为最终框架 |
 | 多 target fixed kappa Kalman | 已具备结构主相位 + 多行观测矩阵骨架；可利用多 target 冗余 | 假设 kappa 已知且稳定；无法修正 AoA 和安装误差；坏 target 会长期污染观测 | 部分采用为结构骨架 | 多目标观测模型被采用，但 fixed kappa 不作为最终设置 |
 | 多 target AoA fixed kappa Kalman | AoA 元数据能提供 cold start，避免先完整解缠再标定 beta 的死锁 | AoA 只是几何先验；真实阵列误差、旁瓣和安装姿态会影响 kappa；固定后不能收敛修正 | 作为初始化和 baseline | 本文保留 AoA cold start，但后续必须 online bootstrap |
-| 本文 calibrated proposed full pipeline | 完整覆盖 ADC/Range-Angle 前端、目标筛选、结构主相位 Kalman 融合、prediction-aided phase correction、calibrated Q、confidence-aware R 和 online kappa bootstrap | 当前仍是 Phase 1 合成仿真与实测位移驱动的半实测仿真；真实 ADC、天线标定、同步和现场多径未完成 | 采用为主方案 | 与当前论文创新主线一致，并能解释同 range 远角度、target 退化和 AoA 初值误差等关键失败模式 |
+| 本文 kappa-confidence proposed full pipeline | 完整覆盖 ADC/Range-Angle 前端、目标筛选、结构主相位 Kalman 融合、prediction-aided phase correction、calibrated Q、confidence-aware R 和 online kappa bootstrap | 当前仍是 Phase 1 合成仿真与实测位移驱动的半实测仿真；真实 ADC、天线标定、同步和现场多径未完成 | 采用为主方案 | 与当前论文创新主线一致，并能解释同 range 远角度、target 退化和 AoA 初值误差等关键失败模式 |
 
 ## 8. 当前结论与后续工作
 
@@ -422,8 +432,8 @@ fresh extended validation 使用 seeds 2026-2030，覆盖 Monte Carlo、消融�
 
 - 已完成 Phase 1 算法级合成仿真与实测位移驱动的半实测仿真。
 - 当前方法链路完整覆盖 frontend target extraction、selection、结构主相位 Kalman 融合、prediction-aided phase correction、calibrated Q、confidence-aware target-wise R、online kappa bootstrap 和相对位移输出。
-- fresh validation 的 23 个 feasibility gates 全部通过。
-- 仿真表明，在 same-range far-angle、target SNR drop、AoA 初值误差、多目标低 SNR、target dropout 和车辆非平稳事件等场景中，full pipeline 具有稳定表现。
+- fresh validation 的 14 个默认主实验 feasibility gates 全部通过。
+- 仿真表明，在文献主频桥梁响应、strong wrapping、same-range far-angle、target SNR drop、AoA 初值误差和车辆非平稳事件等主实验场景中，full pipeline 具有稳定表现。
 - 实桥半实测场景表明，真实桥梁位移波形下完整链路可运行；但这不是完整实测毫米波雷达验证。
 
 ### 8.2 当前完成/未完成工作表

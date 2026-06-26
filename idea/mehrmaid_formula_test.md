@@ -43,7 +43,7 @@ flowchart TD
 
     BETA("转换系数短窗口自举<br/>$\hat{\kappa}_{i}=\frac{\sum \hat{\Theta}_{k}(z_{i,k}^{\mathrm{corr}}-b_i)}{\sum \hat{\Theta}_{k}^{2}}$<br/>$\hat{\beta}_{i}=1/\hat{\kappa}_{i}$")
 
-    RADAPT("target-wise adaptive $R$<br/>$s_{i,k}=z_{i,k}^{\mathrm{corr}}-(\mathbf{h}_{i,k}\mathbf{x}_{k}+b_i)$<br/>$r_{i,k+1}=\operatorname{clip}(\alpha r_{i,k}+(1-\alpha)\tilde r_{i,k})$")
+    RADAPT("target-wise adaptive $R$<br/>$\varepsilon_{i,k}=z_{i,k}^{\mathrm{corr}}-(\mathbf{h}_{i,k}\mathbf{x}_{k}^{+}+b_i)$<br/>posterior residual + quality gate")
 
     ACC --> PRED
     XPREV --> PRED

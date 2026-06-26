@@ -1,0 +1,16 @@
+Extracted from mysql报告.pptx visual theme.
+Palette:
+  dk2 #17406D
+  lt2 #DBEFF9
+  accent1 #0F6FC6
+  accent2 #009DD9
+  accent3 #0BD0D9
+  accent4 #10CF9B
+  accent5 #7CCA62
+  accent6 #A5C249
+  hyperlink #F49100
+Fonts:
+  Title: SimHei / Arial Black style
+  Body: Microsoft YaHei
+Generated template:
+  /Users/umep/thesis/reports/thesis_progress_template.pptx

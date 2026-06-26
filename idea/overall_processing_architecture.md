@@ -22,7 +22,7 @@ $$
 \text{结构主相位 Kalman 融合}.
 $$
 
-其中，target 提取阶段不依赖相位解缠；AoA 几何初始化为每个 target 给出可启动的转换系数初值；冷启动和初始微振阶段通过固定过程噪声 $Q$ 与自适应测量噪声 $R$ 使滤波器优先依赖加速度预测，并在短窗口内递推修正转换系数。wrapped phase 的在线分支校正、降噪和多 target 融合统一在结构主相位 Kalman 框架内部完成。
+其中，target 提取阶段不依赖相位解缠；AoA 几何初始化为每个 target 给出可启动的转换系数初值；冷启动和初始微振阶段通过固定/标定过程噪声 $Q$ 与 posterior-residual、target-quality-gated 自适应测量噪声 $R$ 使滤波器优先依赖加速度预测，并在短窗口内递推修正转换系数。wrapped phase 的在线分支校正、降噪和多 target 融合统一在结构主相位 Kalman 框架内部完成。
 
 ## 2. 总体数据流
 
@@ -84,7 +84,7 @@ flowchart TD
 
     subgraph UPD["在线参数更新"]
         LS("转换系数中心化正则 LS 更新<br/>$\hat{\kappa}_{i,k+1}=\frac{\sum_{\tau\in\mathcal{W}_{\beta}}\tilde{\Theta}_{\tau}\tilde{z}_{i,\tau}+\lambda_{\kappa}\hat{\kappa}_{i,0}}{\sum_{\tau\in\mathcal{W}_{\beta}}\tilde{\Theta}_{\tau}^{2}+\lambda_{\kappa}}$<br/>$\hat{\beta}_{i,k+1}=1/\hat{\kappa}_{i,k+1}$")
-        RUP("target-wise adaptive $R$<br/>$e_{i,k}^{-}=z_{i,k}^{\mathrm{corr}}-(\mathbf{h}_{i,k}\mathbf{x}_{k}^{-}+b_i)$<br/>$e_{i,k}^{-}\rightarrow r_{i,k+1}$")
+        RUP("target-wise adaptive $R$<br/>$\varepsilon_{i,k}=z_{i,k}^{\mathrm{corr}}-(\mathbf{h}_{i,k}\mathbf{x}_{k}^{+}+b_i)$<br/>posterior residual + quality gate $\rightarrow r_{i,k+1}$")
     end
 
     AB --> MT
@@ -570,7 +570,7 @@ $$
 \right).
 $$
 
-Kalman 更新后，当前主方法使用第 $i$ 个 target 的预测创新来更新基础测量噪声，而不是默认使用后验残差：
+Kalman 更新后，当前主方法不直接使用第 $i$ 个 target 的预测创新来更新基础测量噪声。预测创新为：
 
 $$
 e_{i,k}^-
@@ -582,30 +582,65 @@ z_{i,k}^{\mathrm{corr}}
 \right).
 $$
 
-参考 residual-based adaptive Kalman filtering，可用遗忘因子更新该 target 的测量噪声：
+同时包含过程模型误差、加速度输入误差和 radar 观测误差。参考 Akhlaghi 等人关于 adaptive adjustment of noise covariance 的分工，prediction innovation 更适合反映过程模型或 $Q$ 的不确定性，而 posterior residual 更适合用于 measurement noise covariance estimation。因此本文采用后验残差：
+
+$$
+\varepsilon_{i,k}
+=
+z_{i,k}^{\mathrm{corr}}
+-
+\left(
+\mathbf{h}_{i,k}\mathbf{x}_k^++b_i
+\right).
+$$
+
+基础测量噪声的瞬时估计写为：
 
 $$
 \tilde{r}_{i,k}
 =
-{e_{i,k}^{-}}^2
+\varepsilon_{i,k}^{2}
 +
-\mathbf{h}_{i,k}\mathbf{P}_k\mathbf{h}_{i,k}^{\mathrm{T}},
+\mathbf{h}_{i,k}\mathbf{P}_k^+\mathbf{h}_{i,k}^{\mathrm{T}},
 $$
+
+并引入 target quality gate。令 $\rho_{i,k}\in[0,1]$ 表示由 SNR、presence、range-angle 稳定性、IQ 幅值稳定性和转换系数置信度等可见量构造的 target 质量，定义
+
+$$
+\Delta r_{i,k}
+=
+\tilde{r}_{i,k}
+-
+r_{i,k},
+$$
+
+$$
+g_{i,k}
+=
+\begin{cases}
+1-\rho_{i,k}, & \Delta r_{i,k}>0,\\
+1, & \Delta r_{i,k}\le 0.
+\end{cases}
+$$
+
+最终用遗忘因子与上下限约束更新该 target 的基础测量噪声：
 
 $$
 r_{i,k+1}
 =
 \operatorname{clip}
 \left[
-\alpha r_{i,k}
+r_{i,k}
 +
-(1-\alpha)\tilde{r}_{i,k},
+(1-\alpha)g_{i,k}\Delta r_{i,k},
 \ r_{\min},
 \ r_{\max}
 \right],
 $$
 
-其中 $0<\alpha<1$ 为遗忘因子。初始阶段 $r_{i,0}$ 由 target 初始质量、SNR、presence 和几何投影等信息给出；低质量 target 会得到较大的初始测量噪声，高质量 target 可更早参与更新。随着转换系数和分支校正稳定，prediction innovation 减小，$r_{i,k}$ 自动下降，多 target 相位观测逐步恢复正常权重。针对 AoA cold start 阶段转换系数尚未收敛的问题，当前主方法将 $((\hat{\Theta}_k^-)^2+P_{\Theta\Theta,k}^-)\sigma_{\kappa_i,k}^2$ 作为观测模型不确定性加入有效测量噪声，从而使“转换系数越不确定，越降低观测权重”与在线 bootstrap 收敛过程对应起来。posterior residual 形式保留为代码消融候选，不作为论文主线展开。
+其中 $0<\alpha<1$ 为遗忘因子。初始阶段 $r_{i,0}$ 由 target 初始质量、SNR、presence 和几何投影等信息给出；低质量 target 会得到较大的初始测量噪声，高质量 target 可更早参与更新。该门控机制使 target 质量下降且后验残差增大时自动降低对应 target 的观测权重；当结构响应突然增强但 target 质量正常时，抑制将预测模型误差误归因于 measurement noise 的 $R$ 异常上涨。针对 AoA cold start 阶段转换系数尚未收敛的问题，当前主方法仍将 $((\hat{\Theta}_k^-)^2+P_{\Theta\Theta,k}^-)\sigma_{\kappa_i,k}^2$ 作为观测模型不确定性加入有效测量噪声，从而使“转换系数越不确定，越降低观测权重”与在线 bootstrap 收敛过程对应起来。
+
+该设计参考 Akhlaghi、Zhou 和 Huang 的 *Adaptive Adjustment of Noise Covariance in Kalman Filter for Dynamic State Estimation* 中“prediction innovation 更适合反映过程模型误差、posterior residual 更适合估计 measurement noise”的 Q/R 归因思想，同时参考 Mehra 的 covariance matching 框架和 Li 等人在 INS/GNSS 多观测通道中的 measurement noise covariance estimation。本文的改进不在于重复已有 adaptive Kalman 公式，而在于把该思想改造为 radar target-wise 观测权重模型：每个 target 拥有独立 $r_{i,k}$，基础噪声估计使用后验协方差投影 $\mathbf{h}_{i,k}\mathbf{P}_k^+\mathbf{h}_{i,k}^{\mathrm{T}}$，$R$ 的上涨受 target quality gate 约束，并额外叠加 AoA cold start 下的 $\kappa_i$ 置信度传播项。由此，已有文献提供统计依据，本文解决的是倒挂毫米波雷达多 target 相位融合中的观测质量归因问题。
 
 ## 8. 关键接口关系
 
@@ -617,7 +652,7 @@ $$
 | target 选择 | range-angle map、加速度频带 | 可用 target 集合、wrapped phase | 否 |
 | AoA 与冷启动初始化 | target AoA、静止初始相位 | $\beta_i^{(0)}$、$b_i$、较大的 $r_{i,0}$ | 否 |
 | 转换系数自举更新 | Kalman 预测辅助校正相位、结构主相位估计 | $\hat{\beta}_{i,k}$、$e_{\beta,i}$、$S_{\beta,i}$ | 依赖已启动的 Kalman 递推，但不依赖预先完整解缠 |
-| Kalman 融合 | wrapped phase、$\hat{\beta}_{i,k}$、加速度、confidence-aware effective $\mathbf{R}_k$ | 连续主相位、结构位移 | 是，在框架内部完成 |
+| Kalman 融合 | wrapped phase、$\hat{\beta}_{i,k}$、加速度、posterior-residual / quality-gated confidence-aware effective $\mathbf{R}_k$ | 连续主相位、结构位移 | 是，在框架内部完成 |
 
 因此，本文流程中不存在一套独立于 Kalman 的预处理式完整相位解缠。wrapped phase 的 $2\pi$ 分支选择在 Kalman 预测辅助相位校正步骤中在线完成，校正后的 $z_{i,k}^{\mathrm{corr}}$ 同时服务于观测更新和转换系数自举。转换系数不再要求由一段预先完整解缠的雷达相位单独标定，而是以 AoA 几何值启动，并在初始微振阶段借助加速度预测、基础测量噪声更新和转换系数置信度传播逐步收敛。这样，转换系数需要连续相位、连续相位校正又需要转换系数的循环依赖被打断。
 
@@ -627,7 +662,7 @@ $$
 
 1. **在线多 target 选择**：对应 Range-Angle Map、角度合并、滑动窗口稳定性确认和结构频带一致性筛选，解决“哪些环境散射体可作为参考 target”的问题。
 2. **复合 target 等效转换系数稳定性**：对应 AoA 几何初始化、短窗口自举更新和稳定性评价，解释 angle cluster 或复合散射 target 何时可用一个稳定 $\beta_i$ 表示。
-3. **结构主相位多 target Kalman 融合**：对应最终在线融合框架，将 Ma 等人的单目标 LoS 相位状态改写为结构振动方向主相位状态，并把多个 target wrapped phase 作为多通道观测共同更新；固定/标定 $Q$ 与 confidence-aware target-wise $R$ 共同完成初始自举和稳定融合。
+3. **结构主相位多 target Kalman 融合**：对应最终在线融合框架，将 Ma 等人的单目标 LoS 相位状态改写为结构振动方向主相位状态，并把多个 target wrapped phase 作为多通道观测共同更新；固定/标定 $Q$ 与 posterior-residual、quality-gated、confidence-aware target-wise $R$ 共同完成初始自举和稳定融合。
 
 该架构使论文主线形成闭环：
 

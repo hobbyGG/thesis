@@ -182,7 +182,7 @@ z_{i,k}^{\mathrm{corr}}-b_i
 \hat{\beta}_i=\frac{1}{\hat{\kappa}_i}.
 $$
 
-target-wise 测量噪声由后验残差自适应更新：
+target-wise 测量噪声由后验残差和 target quality gate 自适应更新：
 
 $$
 s_{i,k}
@@ -195,18 +195,32 @@ z_{i,k}^{\mathrm{corr}}
 $$
 
 $$
+\Delta r_{i,k}
+=
+\left(
+s_{i,k}^2
++
+\mathbf{h}_{i,k}\mathbf{P}_k^+\mathbf{h}_{i,k}^{\mathrm{T}}
+\right)
+-
+r_{i,k},
+\qquad
+g_{i,k}
+=
+\begin{cases}
+1-\rho_{i,k}, & \Delta r_{i,k}>0,\\
+1, & \Delta r_{i,k}\le 0.
+\end{cases}
+$$
+
+$$
 r_{i,k+1}
 =
 \operatorname{clip}
 \left[
-\alpha r_{i,k}
+r_{i,k}
 +
-(1-\alpha)
-\left(
-s_{i,k}^2
-+
-\mathbf{h}_{i,k}\mathbf{P}_k\mathbf{h}_{i,k}^{\mathrm{T}}
-\right),
+(1-\alpha)g_{i,k}\Delta r_{i,k},
 \ r_{\min},
 \ r_{\max}
 \right].

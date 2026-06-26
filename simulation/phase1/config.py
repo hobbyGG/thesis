@@ -97,6 +97,8 @@ class Phase1Config:
     kappa_max_abs: float = 1.2
 
     aoa_error_deg: float = 0.0
+    frontend_aoa_error_bias_deg: Optional[float] = None
+    frontend_aoa_error_std_deg: float = 0.0
 
     degraded_target_indices: Sequence[int] = ()
     degradation_start_s: float = 2.0

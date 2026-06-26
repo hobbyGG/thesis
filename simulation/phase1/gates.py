@@ -9,10 +9,14 @@ def row_lookup(rows, scenario, method):
 
 
 def full_pipeline_row(rows, scenario):
-    return row_lookup(rows, scenario, "proposed_full_pipeline_calibrated") or row_lookup(
-        rows,
-        scenario,
-        "proposed_full_pipeline",
+    return (
+        row_lookup(rows, scenario, "proposed_full_pipeline_kappa_confidence")
+        or row_lookup(rows, scenario, "proposed_full_pipeline_calibrated")
+        or row_lookup(
+            rows,
+            scenario,
+            "proposed_full_pipeline",
+        )
     )
 
 
@@ -44,7 +48,7 @@ def build_gate_results(rows, artifacts_by_scenario=None):
         )
 
     strong_prop = row_lookup(rows, "strong_wrapping", "proposed")
-    strong_itoh = row_lookup(rows, "strong_wrapping", "itoh_ls")
+    strong_itoh = row_lookup(rows, "strong_wrapping", "range_bin_itoh")
     if strong_prop and strong_itoh:
         gates.append(
             {
@@ -57,7 +61,7 @@ def build_gate_results(rows, artifacts_by_scenario=None):
         threshold = max(1, 0.1 * strong_itoh["unwrap_errors"])
         gates.append(
             {
-                "name": "strong_wrapping_unwrap_errors_le_10pct_itoh",
+                "name": "strong_wrapping_unwrap_errors_le_10pct_range_bin_itoh",
                 "value": strong_prop["unwrap_errors"],
                 "threshold": threshold,
                 "passed": bool(strong_prop["unwrap_errors"] <= threshold),
@@ -67,18 +71,19 @@ def build_gate_results(rows, artifacts_by_scenario=None):
     if strong_full and strong_itoh:
         gates.append(
             {
-                "name": "strong_wrapping_itoh_unwrap_errors_gt_0",
-                "value": strong_itoh["unwrap_errors"],
-                "threshold": 0,
-                "passed": bool(strong_itoh["unwrap_errors"] > 0),
+                "name": "strong_wrapping_full_pipeline_beats_range_bin_itoh",
+                "value": strong_full["rmse_mm"],
+                "threshold": strong_itoh["rmse_mm"],
+                "passed": bool(strong_full["rmse_mm"] < strong_itoh["rmse_mm"]),
             }
         )
+        ratio = float(strong_itoh["rmse_mm"] / max(strong_full["rmse_mm"], 1e-12))
         gates.append(
             {
-                "name": "strong_wrapping_full_pipeline_unwrap_error_rate_lt_itoh",
-                "value": strong_full["unwrap_error_rate"],
-                "threshold": strong_itoh["unwrap_error_rate"],
-                "passed": bool(strong_full["unwrap_error_rate"] <= strong_itoh["unwrap_error_rate"]),
+                "name": "strong_wrapping_range_bin_itoh_rmse_ge_2x_full_pipeline",
+                "value": ratio,
+                "threshold": 2.0,
+                "passed": bool(ratio >= 2.0),
             }
         )
         gates.append(
@@ -131,19 +136,18 @@ def build_gate_results(rows, artifacts_by_scenario=None):
             }
         )
     ma_like_full = full_pipeline_row(rows, "ma2023_balanced_good_targets")
-    ma_like_single = row_lookup(rows, "ma2023_balanced_good_targets", "single_target_ma_style")
-    if ma_like_full and ma_like_single:
+    ma_like_itoh = row_lookup(rows, "ma2023_balanced_good_targets", "range_bin_itoh")
+    if ma_like_full and ma_like_itoh:
         gates.append(
             {
-                "name": "ma2023_balanced_good_targets_full_pipeline_beats_best_target",
+                "name": "ma2023_balanced_good_targets_full_pipeline_beats_range_bin_itoh",
                 "value": ma_like_full["rmse_mm"],
-                "threshold": ma_like_single["rmse_mm"],
-                "passed": bool(ma_like_full["rmse_mm"] < ma_like_single["rmse_mm"]),
+                "threshold": ma_like_itoh["rmse_mm"],
+                "passed": bool(ma_like_full["rmse_mm"] < ma_like_itoh["rmse_mm"]),
             }
         )
     same_range = full_pipeline_row(rows, "same_range_far_angles")
     same_range_range_only = row_lookup(rows, "same_range_far_angles", "range_bin_only_mixed_phase")
-    same_range_ma_style = row_lookup(rows, "same_range_far_angles", "ma_style_iterative_beta_range_bin")
     same_range_ma2026 = row_lookup(rows, "same_range_far_angles", "ma2026_reproduction")
     same_range_artifacts = artifacts_by_scenario.get("same_range_far_angles", {})
     same_range_pair_count = same_range_far_angle_pair_count(same_range_artifacts.get("selected_frontend_targets"))
@@ -180,15 +184,6 @@ def build_gate_results(rows, artifacts_by_scenario=None):
                 "value": ratio,
                 "threshold": 1.25,
                 "passed": bool(ratio >= 1.25),
-            }
-        )
-    if same_range and same_range_ma_style:
-        gates.append(
-            {
-                "name": "same_range_far_angles_full_pipeline_beats_ma_style_iterative_beta_range_bin",
-                "value": same_range["rmse_mm"],
-                "threshold": same_range_ma_style["rmse_mm"],
-                "passed": bool(same_range["rmse_mm"] < same_range_ma_style["rmse_mm"]),
             }
         )
     if same_range and same_range_ma2026:

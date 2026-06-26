@@ -376,7 +376,7 @@ $$
 
 其中 $R_{i,k}$ 表示第 $i$ 个 target 当前相位观测的不确定度。
 
-本文主方法采用固定/标定 $\mathbf{Q}$ 与 confidence-aware target-wise effective $\mathbf{R}_k$ 的分工。也就是说，$\mathbf{Q}$ 表示结构主相位动力学预测误差，主要由加速度传感器噪声、同步误差和状态模型未建模项决定，属于全局标定参数；$\mathbf{R}_k$ 表示 radar target 相位观测误差与转换系数不确定性共同形成的等效观测噪声，受目标 SNR、遮挡、复合散射、AoA/转换系数误差和短时观测条件影响，更适合作为在线估计对象。桥梁 acceleration+strain displacement estimation 的相关工作也采用类似分工：过程噪声可依据传感器或模型误差预先给定，而测量噪声随观测条件变化进行自适应估计。
+本文主方法采用固定/标定 $\mathbf{Q}$ 与 posterior-residual / quality-gated confidence-aware target-wise effective $\mathbf{R}_k$ 的分工。也就是说，$\mathbf{Q}$ 表示结构主相位动力学预测误差，主要由加速度传感器噪声、同步误差和状态模型未建模项决定，属于全局标定参数；$\mathbf{R}_k$ 表示 radar target 相位观测误差与转换系数不确定性共同形成的等效观测噪声，受目标 SNR、遮挡、复合散射、AoA/转换系数误差和短时观测条件影响，更适合作为在线估计对象。桥梁 acceleration+strain displacement estimation 的相关工作也采用类似分工：过程噪声可依据传感器或模型误差预先给定，而测量噪声随观测条件变化进行自适应估计。
 
 在当前仿真实现中，$\mathbf{Q}$ 的标定采用候选网格而不是单个硬编码常数。具体地，对候选 $q \in \mathcal{Q}$ 分别运行相同的结构主相位 Kalman 滤波器，并以目标级 prediction innovation energy 作为无真值标定准则：
 
@@ -411,7 +411,7 @@ $$
 R_{i,0}=R_{\max}.
 $$
 
-Kalman 更新后，主方法先采用预测创新更新第 $i$ 个 target 的基础测量噪声：
+Kalman 更新后，本文不再直接将预测创新作为第 $i$ 个 target 的测量噪声更新量。预测创新定义为：
 
 $$
 e_{i,k}^{-}
@@ -428,26 +428,67 @@ z_{i,k}^{\mathrm{corr}}
 \end{bmatrix}.
 $$
 
-参考 Mehra 的 innovation/covariance matching 思想、Mohamed-Schwarz 的 measurement noise covariance estimation、Li 等人在 INS-GNSS 多观测通道中的自适应测量噪声处理，以及 Sage-Husa radar tracking 中对噪声协方差在线估计和鲁棒约束的使用，可得到该 target 的瞬时测量噪声估计：
+该量同时包含状态预测误差、加速度输入误差、过程噪声尺度不足和 radar 相位观测误差。Akhlaghi 等人关于 dynamic state estimation 的自适应噪声协方差研究进一步指出，prediction innovation 更适合用于反映过程模型或 $\mathbf{Q}$ 的不确定性，而 posterior residual 更适合用于估计测量噪声 $\mathbf{R}$。因此，在强结构响应阶段，若 target 的 SNR、presence、IQ 稳定性和转换系数置信度均正常，较大的 $e_{i,k}^{-}$ 不应被直接解释为 radar measurement noise 增大。
+
+本文据此采用后验残差作为基础测量噪声的主要统计量：
+
+$$
+\varepsilon_{i,k}
+=
+z_{i,k}^{\mathrm{corr}}
+-
+\left(
+\mathbf{h}_{i,k}\mathbf{x}_k^+ + b_i
+\right).
+$$
+
+参考 residual-based adaptive Kalman filtering，可得到第 $i$ 个 target 的瞬时基础测量噪声估计：
 
 $$
 \tilde{R}_{i,k}
 =
-{e_{i,k}^{-}}^2
+\varepsilon_{i,k}^{2}
 +
-\mathbf{h}_{i,k}\mathbf{P}_k\mathbf{h}_{i,k}^{\mathrm{T}}.
+\mathbf{h}_{i,k}\mathbf{P}_k^+\mathbf{h}_{i,k}^{\mathrm{T}}.
 $$
 
-然后用遗忘因子平滑并进行上下限约束：
+仅使用后验残差仍可能在复合散射或污染观测被 Kalman 更新吸收时低估测量噪声。为避免测量噪声更新只由单一残差量驱动，本文进一步引入 target quality gate。令
+
+$$
+\rho_{i,k}\in[0,1]
+$$
+
+表示第 $i$ 个 target 的瞬时观测质量，可由 SNR、presence、range-angle 位置稳定性、IQ 幅值稳定性和 $\kappa_i$ 置信度等算法可见量构造。$\rho_{i,k}$ 越大，说明该 target 当前越可信。定义
+
+$$
+\Delta R_{i,k}
+=
+\tilde{R}_{i,k}
+-
+R_{i,k}.
+$$
+
+当 $\Delta R_{i,k}>0$ 时，测量噪声有上涨趋势，此时需要判断 target 质量是否确实下降；当 $\Delta R_{i,k}\le 0$ 时，测量噪声下降不会降低鲁棒性，可允许其正常恢复。由此定义门控因子：
+
+$$
+g_{i,k}
+=
+\begin{cases}
+1-\rho_{i,k}, & \Delta R_{i,k}>0,\\
+1, & \Delta R_{i,k}\le 0.
+\end{cases}
+$$
+
+最终的基础测量噪声更新为：
 
 $$
 R_{i,k+1}
 =
 \operatorname{clip}
 \left[
-\alpha R_{i,k}
+R_{i,k}
 +
-(1-\alpha)\tilde{R}_{i,k},
+(1-\alpha)g_{i,k}\Delta R_{i,k},
 \ R_{\min},
 \ R_{\max}
 \right],
@@ -455,21 +496,11 @@ R_{i,k+1}
 0<\alpha<1.
 $$
 
-该基础更新机制使滤波器在 target SNR 下降或相位残差异常时自动降低对应 target 的观测权重；随着预测辅助相位校正稳定，prediction innovation 减小，$R_{i,k}$ 随之下降，radar 相位观测以正常权重参与多目标融合。上下限 clipping 的作用不是人为修饰结果，而是防止单帧异常残差导致测量噪声估计发散或退化为零，从而维持 Kalman 增益的数值稳定性和鲁棒性。
+该机制的作用是：当 target 质量下降且后验残差增大时，$R_{i,k}$ 上涨并降低该 target 的观测权重；当结构响应突然增强但 target 质量正常时，$R_{i,k}$ 的上涨被抑制，避免将过程预测误差误归因于 radar 测量噪声；当冷启动或低质量阶段结束后，$R_{i,k}$ 仍可随残差下降而恢复较高观测权重。上下限 clipping 用于防止单帧异常残差导致测量噪声估计发散或退化为零，从而维持 Kalman 增益的数值稳定性和鲁棒性。
 
-需要说明的是，posterior residual
+上述处理的主要参考来源包括 Akhlaghi、Zhou 和 Huang 的 *Adaptive Adjustment of Noise Covariance in Kalman Filter for Dynamic State Estimation*、Mehra 对 adaptive filtering / covariance matching 方法的分类，以及 Li 等人在 INS/GNSS 紧组合中利用多观测通道估计 measurement noise covariance 的工作。已有文献提供的基础思想是：innovation 与 residual 均可用于噪声统计匹配，但 prediction innovation 不能被简单等同于 measurement noise；residual-based 估计更适合更新 $\mathbf{R}$，而多观测通道的 $\mathbf{R}$ 可根据各通道观测质量分别调整。
 
-$$
-e_{i,k}^{+}
-=
-z_{i,k}^{\mathrm{corr}}
--
-\left(
-\mathbf{h}_{i,k}\mathbf{x}_k+b_i
-\right)
-$$
-
-也可用于构造 adaptive $R$。当前仿真消融表明，posterior residual 在 strong wrapping、vehicle event 和 same range far angles 等预测误差主导场景中可降低 RMSE；但在 mixed scatterer 和半实测桥梁场景中，它可能由于 Kalman 更新已吸收污染观测而低估测量噪声，并进一步影响 $q^\star$ 的选择。因此，本文采用 prediction-innovation 作为基础 $R$ 的更新残差口径，posterior-residual adaptive $R$ 仅作为代码消融候选和后续 R 机制讨论对象。
+本文并非直接照搬上述 adaptive Kalman 公式，而是在毫米波雷达-加速度结构位移估计场景中进行了三点改造。第一，已有方法通常面向单一传感器通道或 GNSS/PMU 等固定观测方程，本文将其改写为多 target 相位观测下的 target-wise 标量噪声更新，使每个 radar target 都拥有独立的 $R_{i,k}$；同时使用后验协方差投影 $\mathbf{h}_{i,k}\mathbf{P}_k^+\mathbf{h}_{i,k}^{\mathrm{T}}$ 表征 Kalman 更新后仍未被状态吸收的相位不确定性，避免将先验状态不确定性重复归入测量噪声。第二，本文不把 residual-based 更新单独作为充分条件，而是引入由 SNR、presence、range-angle 稳定性、IQ 稳定性和 $\kappa_i$ 置信度构成的 target quality gate，只允许低质量 target 推动 $R_{i,k}$ 快速上涨，从而避免强结构响应阶段将过程模型误差误判为 radar measurement noise。第三，本文进一步把 AoA cold start 和在线转换系数自举中的 $\kappa_i$ 不确定性传播到有效测量噪声中，使观测权重同时反映相位观测质量和转换系数可信度。也就是说，参考文献支撑的是“innovation/residual 与 Q/R 归因”的统计原则，本文的改进是将该原则嵌入多目标结构主相位 Kalman 框架，并服务于 AoA 冷启动、相位分支校正和在线转换系数自举。
 
 由于本文的完整链路以 AoA 结果作为转换系数初值，冷启动阶段 $\kappa_i$ 尚未完全由相位数据自举收敛。为避免此时过度信任观测模型，主方法将转换系数不确定性传播到等效观测噪声中：
 
@@ -488,7 +519,7 @@ P_{\Theta\Theta,k}^-
 \kappa_i=\frac{1}{\beta_i}.
 $$
 
-其中 $\sigma_{\phi_i,k}^2$ 表示第 $i$ 个 target 的基础相位测量噪声，$\sigma_{\kappa_i,k}^2$ 表示转换系数倒数的不确定度，$P_{\Theta\Theta,k}^-$ 为预测主相位方差。该式说明，转换系数误差会随结构主相位幅值及状态不确定度放大，并最终表现为观测模型误差。这一点与本文前述复合 target 等效转换系数稳定性分析一致。实现上，基础 $R_{i,k}$ 仍由 target 质量和 prediction innovation 更新，额外的 $\kappa_i$ 置信度项只用于描述 AoA cold start 至短窗口自举收敛过程中的观测方程不确定性。该处理是为了支撑本文的 AoA cold start 与在线转换系数自举，并不作为独立创新点展开。
+其中 $\sigma_{\phi_i,k}^2$ 表示由 posterior residual 与 target quality gate 更新得到的基础相位测量噪声，$\sigma_{\kappa_i,k}^2$ 表示转换系数倒数的不确定度，$P_{\Theta\Theta,k}^-$ 为预测主相位方差。该式说明，转换系数误差会随结构主相位幅值及状态不确定度放大，并最终表现为观测模型误差。这一点与本文前述复合 target 等效转换系数稳定性分析一致。额外的 $\kappa_i$ 置信度项只用于描述 AoA cold start 至短窗口自举收敛过程中的观测方程不确定性。该处理是为了支撑本文的 AoA cold start 与在线转换系数自举，并不作为独立创新点展开。
 
 进一步地，若多个 target 来自同一 rangeBin 或同一分离过程，其相位误差可能存在相关性。此时不宜简单假设所有 target 观测相互独立，否则会因为观测数量增加而使 Kalman 过度自信。可将 $\mathbf{R}_k$ 写成：
 

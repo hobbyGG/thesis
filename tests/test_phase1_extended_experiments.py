@@ -27,8 +27,8 @@ class Phase1ExtendedExperimentsTest(unittest.TestCase):
         mc_summary = summary["monte_carlo_summary_rows"]
         self.assertTrue(any(row["method"] == "ma2026_reproduction" for row in mc_summary))
         self.assertTrue(any(row["method"] == "proposed_full_pipeline" for row in mc_summary))
-        self.assertTrue(any(row["method"] == "proposed_full_pipeline_calibrated" for row in mc_summary))
-        full_mc = next(row for row in mc_summary if row["method"] == "proposed_full_pipeline_calibrated")
+        self.assertTrue(any(row["method"] == "proposed_full_pipeline_kappa_confidence" for row in mc_summary))
+        full_mc = next(row for row in mc_summary if row["method"] == "proposed_full_pipeline_kappa_confidence")
         self.assertEqual(full_mc["scenario_label_zh"], "同 rangeBin 远角度多目标")
         self.assertIn("angle-bin 分离", full_mc["validation_purpose_zh"])
         self.assertIn("rmse_mean_mm", full_mc)
@@ -39,16 +39,16 @@ class Phase1ExtendedExperimentsTest(unittest.TestCase):
         self.assertIn("ma_style_iterative_beta_range_bin", ablation_methods)
         self.assertIn("ma2026_reproduction", ablation_methods)
         self.assertIn("proposed_full_pipeline", ablation_methods)
-        self.assertIn("proposed_full_pipeline_calibrated", ablation_methods)
+        self.assertIn("proposed_full_pipeline_kappa_confidence", ablation_methods)
 
         self.assertEqual({row["aoa_error_deg"] for row in summary["sensitivity_aoa_rows"]}, {0.0, 8.0})
         self.assertEqual({row["snr_floor_db"] for row in summary["sensitivity_snr_rows"]}, {6.0, 10.0})
         self.assertIn(
-            "proposed_full_pipeline_calibrated",
+            "proposed_full_pipeline_kappa_confidence",
             {row["method"] for row in summary["sensitivity_aoa_rows"]},
         )
         self.assertIn(
-            "proposed_full_pipeline_calibrated",
+            "proposed_full_pipeline_kappa_confidence",
             {row["method"] for row in summary["sensitivity_snr_rows"]},
         )
 
@@ -78,7 +78,7 @@ class Phase1ExtendedExperimentsTest(unittest.TestCase):
 
             with written["ablation_csv"].open() as f:
                 rows = list(csv.DictReader(f))
-            self.assertTrue(any(row["method"] == "proposed_full_pipeline_calibrated" for row in rows))
+            self.assertTrue(any(row["method"] == "proposed_full_pipeline_kappa_confidence" for row in rows))
             self.assertIn("Monte Carlo", written["summary_md"].read_text())
 
 

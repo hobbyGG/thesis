@@ -49,6 +49,8 @@ def scenario_parameter_rows(scenarios):
             "chirp_duration_s": float(scenario.chirp_duration_s),
             "chirps_per_frame": int(scenario.chirps_per_frame),
             "aoa_error_deg": float(scenario.aoa_error_deg),
+            "frontend_aoa_error_bias_deg": _optional_float(scenario.frontend_aoa_error_bias_deg),
+            "frontend_aoa_error_std_deg": float(scenario.frontend_aoa_error_std_deg),
             "degraded_target_indices": _join_numbers(scenario.degraded_target_indices),
             "dropout_target_indices": _join_numbers(scenario.dropout_target_indices),
         }
@@ -145,7 +147,12 @@ def _write_scenario_plots(plots_dir, scenario):
 
 
 def _frequency_plot_max_hz(scenario):
-    limit_hz = 120.0 if scenario.motion_profile == "measured_bridge" else 30.0
+    if scenario.motion_profile == "measured_bridge":
+        limit_hz = 120.0
+    elif scenario.scenario_name == "literature_maglev_modal_response":
+        limit_hz = 40.0
+    else:
+        limit_hz = 30.0
     return min(0.5 * float(scenario.sample_rate_hz), limit_hz)
 
 

@@ -22,6 +22,12 @@ _SCENARIO_DESCRIPTIONS = {
         validation_focus_zh="半实测波形、真实车辆响应形态、雷达相位合成",
         paper_section_zh="主实验",
     ),
+    "literature_maglev_modal_response": ScenarioDescription(
+        label_zh="文献主频驱动磁浮轨道梁响应",
+        validation_purpose_zh="基于实桥文献给出的轨道梁主频构造可解释的非平稳车辆响应仿真",
+        validation_focus_zh="文献主频、车辆事件包络、频谱泄漏、半实测替代场景",
+        paper_section_zh="主实验",
+    ),
     "ma2023_balanced_good_targets": ScenarioDescription(
         label_zh="Ma 2023 多优质目标仿真",
         validation_purpose_zh="模拟文献中多个候选目标质量接近的情况，检验多目标融合是否优于单目标选择",

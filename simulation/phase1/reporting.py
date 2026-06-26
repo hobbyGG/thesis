@@ -130,7 +130,8 @@ def _find_result(results, method_name):
 
 def _preferred_full_pipeline_result(results):
     return (
-        _find_result(results, "proposed_full_pipeline_calibrated")
+        _find_result(results, "proposed_full_pipeline_kappa_confidence")
+        or _find_result(results, "proposed_full_pipeline_calibrated")
         or _find_result(results, "proposed_full_pipeline")
         or _find_result(results, "proposed")
     )
@@ -295,7 +296,7 @@ def _write_selection_timeline_plot(plots_dir, artifacts):
     )
 
 
-def _write_selected_vs_all_displacement_plot(plots_dir, artifacts):
+def _write_vehicle_event_paper_methods_plot(plots_dir, artifacts):
     scenario = artifacts.get("vehicle_event_nonstationary")
     if not scenario:
         return
@@ -304,24 +305,23 @@ def _write_selected_vs_all_displacement_plot(plots_dir, artifacts):
     results = scenario.get("results", [])
     if truth is None or scenario_config is None:
         return
-    all_target = _find_result(results, "proposed")
-    full = _find_result(results, "proposed_full_pipeline")
-    calibrated = _find_result(results, "proposed_full_pipeline_calibrated")
-    if all_target is None or full is None:
+    kappa_confidence = _preferred_full_pipeline_result(results)
+    ma2026 = _find_result(results, "ma2026_reproduction")
+    selected_fixed = _find_result(results, "selected_aoa_fixed_kappa")
+    if kappa_confidence is None:
         return
     q_ref = cold_start_reference_mean(truth.q_m, scenario_config)
-    series = [
-        ("truth", (truth.q_m - q_ref) * 1e3, "#111111"),
-        ("proposed_all_targets", all_target.q_hat_m * 1e3, "#cc5500"),
-        ("proposed_full_pipeline", full.q_hat_m * 1e3, "#0066cc"),
-    ]
-    if calibrated is not None:
-        series.append(("proposed_full_pipeline_calibrated", calibrated.q_hat_m * 1e3, "#228833"))
+    series = [("truth", (truth.q_m - q_ref) * 1e3, "#111111")]
+    if ma2026 is not None:
+        series.append(("ma2026_reproduction", ma2026.q_hat_m * 1e3, "#ddaa33"))
+    if selected_fixed is not None:
+        series.append(("selected_aoa_fixed_kappa", selected_fixed.q_hat_m * 1e3, "#aa3377"))
+    series.append((kappa_confidence.method_name, kappa_confidence.q_hat_m * 1e3, "#228833"))
     write_basic_svg(
-        plots_dir / "vehicle_event_nonstationary_selected_vs_all_targets_displacement.svg",
+        plots_dir / "vehicle_event_nonstationary_paper_methods_displacement.svg",
         truth.t,
         series,
-        "vehicle_event_nonstationary selected vs all targets",
+        "vehicle_event_nonstationary paper methods",
         x_label="Time (s)",
         y_label="Relative displacement (mm)",
     )
@@ -333,7 +333,7 @@ def _write_diagnostic_plots(plots_dir, artifacts):
     _write_phase_correction_plot(plots_dir, artifacts)
     _write_range_angle_frame_plot(plots_dir, artifacts)
     _write_selection_timeline_plot(plots_dir, artifacts)
-    _write_selected_vs_all_displacement_plot(plots_dir, artifacts)
+    _write_vehicle_event_paper_methods_plot(plots_dir, artifacts)
 
 
 def write_validation_report(summary, output_dir):
@@ -399,6 +399,8 @@ def write_validation_report(summary, output_dir):
 
     plots_dir = output / "plots"
     plots_dir.mkdir(exist_ok=True)
+    for stale_svg in plots_dir.glob("*.svg"):
+        stale_svg.unlink()
     artifacts = summary.get("artifacts", {})
     if artifacts:
         first_name = sorted(artifacts.keys())[0]
@@ -411,23 +413,23 @@ def write_validation_report(summary, output_dir):
             for res in results
             if res.method_name
             in (
-                "single_target_ma_style",
+                "itoh_ls",
+                "range_bin_itoh",
+                "range_bin_only_mixed_phase",
                 "selected_aoa_fixed_kappa",
-                "proposed",
-                "proposed_full_pipeline",
-                "proposed_full_pipeline_calibrated",
+                "proposed_full_pipeline_kappa_confidence",
             )
             or res.method_name == "ma2026_reproduction"
         ]
         q_ref = cold_start_reference_mean(truth.q_m, scenario)
         series = [("truth", (truth.q_m - q_ref) * 1e3, "#111111")]
         colors = {
-            "single_target_ma_style": "#cc5500",
+            "itoh_ls": "#cc5500",
+            "range_bin_itoh": "#cc5500",
+            "range_bin_only_mixed_phase": "#777777",
             "ma2026_reproduction": "#ddaa33",
             "selected_aoa_fixed_kappa": "#aa3377",
-            "proposed": "#0066cc",
-            "proposed_full_pipeline": "#228833",
-            "proposed_full_pipeline_calibrated": "#009988",
+            "proposed_full_pipeline_kappa_confidence": "#009988",
         }
         for res in selected:
             series.append((res.method_name, res.q_hat_m * 1e3, colors[res.method_name]))
