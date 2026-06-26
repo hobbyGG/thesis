@@ -20,7 +20,15 @@ $$
 
 不做最终意义上的相位解缠，也不依赖已知转换系数。
 
-第二，**AoA 冷启动与转换系数自举**。对筛选后的 $m$ 个可用 target，先由 AoA 给出转换系数倒数的几何初值：
+第二，**AoA 冷启动与转换系数自举**。Ma 等人的 direction conversion factor 在本文统一记为 $\beta_i$，其方向为 LoS 位移/相位到结构真实振动方向位移/主相位：
+
+$$
+q_k=\beta_i d_{i,k}^{\mathrm{LOS}},
+\qquad
+\Theta_k=\beta_i\phi_{i,k}^{\mathrm{LOS}}.
+$$
+
+当前代码和若干实现公式中出现的 $\kappa_i$ 不是 Ma 的转换系数本身，而是其倒数，即从结构主相位投影到第 $i$ 个 target LoS 相位的逆转换系数：
 
 $$
 \hat{\kappa}_{i,0}=\cos\theta_i,
@@ -28,32 +36,37 @@ $$
 \hat{\beta}_{i,0}=1/\hat{\kappa}_{i,0}.
 $$
 
-冷启动阶段结构近似静止，用于确定相位偏置 $b_i$，并根据 target 初始质量给出 target-wise 测量噪声初值 $r_{i,0}$。当初始微小振动到来时，Kalman 预测模型先对 wrapped phase 进行预测辅助相位校正，得到局部连续相位 $z_{i,k}^{\mathrm{corr}}$；随后用 $z_{i,k}^{\mathrm{corr}}$ 与结构主相位 $\hat{\Theta}_k$ 在短窗口内进行中心化并带 AoA 先验约束的最小二乘自举。令
+其中 $\kappa_i=1/\beta_i$。冷启动阶段结构近似静止，用于确定相位偏置 $b_i$，并根据 target 初始质量给出 target-wise 测量噪声初值。在线运行时，Kalman 预测模型先在结构方向得到主相位先验 $\Theta_k^-$，再投影回 LoS 相位空间辅助 wrapped phase 分支选择，得到第 $i$ 个 target 的 LoS 连续校正相位 $\phi_{i,k}^{\mathrm{LOS,corr}}$。注意，$\phi_{i,k}^{\mathrm{LOS,corr}}$ 仍然是 LoS 相位，不是结构方向主相位。随后将其乘以 $\beta_i$ 构造结构方向主相位观测：
 
 $$
-\tilde{\Theta}_\tau=\hat{\Theta}_\tau-\bar{\Theta},
+y_{i,k}
+=
+\hat{\beta}_{i,k}^{-}
+\left(
+\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
+\right).
+$$
+
+短窗口自举也应优先表述为估计 $\beta_i$ 的斜率。令：
+
+$$
+x_\tau=\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i,
 \qquad
-\tilde{z}_{i,\tau}=z_{i,\tau}^{\mathrm{corr}}-b_i-\bar{z}_i,
+y_\tau=\hat{\Theta}_{\tau}^{+}.
 $$
 
-则当前主方法采用：
+中心化后有：
 
 $$
-\hat{\kappa}_{i,k+1}
+\hat{\beta}_{i,k+1}
 =
 \frac{
-\sum_{\tau\in\mathcal{W}_{\beta}}
-\tilde{\Theta}_{\tau}\tilde{z}_{i,\tau}
-+
-\lambda_\kappa\hat{\kappa}_{i,0}
+\sum_{\tau\in\mathcal{W}_{\beta}} x_{\tau,c}y_{\tau,c}
 }{
-\sum_{\tau\in\mathcal{W}_{\beta}}
-\tilde{\Theta}_{\tau}^{2}
-+
-\lambda_\kappa
+\sum_{\tau\in\mathcal{W}_{\beta}} x_{\tau,c}^{2}
 },
 \qquad
-\hat{\beta}_{i,k+1}=1/\hat{\kappa}_{i,k+1}.
+\hat{\kappa}_{i,k+1}=1/\hat{\beta}_{i,k+1}.
 $$
 
 第三，**结构主相位多 target Kalman 融合**。状态变量不再定义为 Ma 等人单 target 的 LoS 相位，而定义为结构振动方向主相位：
@@ -68,58 +81,85 @@ $$
 \Theta_k=\frac{4\pi}{\lambda}q_k.
 $$
 
-加速度直接进入系统模型预测主相位；当前转换系数构成观测矩阵：
+加速度直接进入系统模型预测主相位。多 target 融合的正文主叙事采用结构方向观测模型：每个 target 的 LoS 校正相位先乘以当前 $\hat{\beta}_{i,k}^{-}$，得到结构主相位观测
 
 $$
-\mathbf{h}_{i,k}
+y_{i,k}
 =
+\hat{\beta}_{i,k}^{-}
+\left(
+\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
+\right),
+\qquad
+y_{i,k}=\Theta_k+e_{i,k}.
+$$
+
+因此结构方向观测行可写为：
+
+$$
+H_i=
 \begin{bmatrix}
-1/\hat{\beta}_{i,k}&0
+1&0
 \end{bmatrix}.
 $$
 
-预测模型先给出第 $i$ 个 target 的 LoS 相位先验：
+只有在 prediction-aided phase correction 中需要回到 LoS 相位空间，因为雷达缠绕发生在 LoS 相位上。预测模型先给出第 $i$ 个 target 的 LoS 相位先验：
 
 $$
-\hat{\phi}_{i,k}^{-}
+\hat{\phi}_{i,k}^{\mathrm{LOS},-}
 =
-\mathbf{h}_{i,k}\mathbf{x}_k^-+b_i,
+\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i
+=
+\hat{\kappa}_{i,k}^{-}\hat{\Theta}_k^-+b_i.
 $$
 
-再对 wrapped phase 进行统一校正：
+再对 wrapped phase 进行统一校正，得到 LoS corrected phase：
 
 $$
-z_{i,k}^{\mathrm{corr}}
+\phi_{i,k}^{\mathrm{LOS,corr}}
 =
 \psi_{i,k}
 +
 2\pi
 \operatorname{round}
 \left(
-\frac{\hat{\phi}_{i,k}^{-}-\psi_{i,k}}{2\pi}
+\frac{\hat{\phi}_{i,k}^{\mathrm{LOS},-}-\psi_{i,k}}{2\pi}
 \right).
 $$
 
-同一个 $z_{i,k}^{\mathrm{corr}}$ 同时进入 Kalman 观测更新和转换系数自举更新，从而形成：
+同一个 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 同时进入结构方向观测构造和转换系数自举更新，从而形成：
 
 $$
 \text{AoA 冷启动}
 \rightarrow
 \text{预测辅助相位校正}
 \rightarrow
-z^{\mathrm{corr}}
+\phi^{\mathrm{LOS,corr}}
 \rightarrow
 \begin{cases}
-\text{Kalman 主相位更新}\\
-\text{转换系数自举更新}
+\text{乘以 }\beta_i\text{ 后进行 Kalman 主相位更新}\\
+\text{用 LoS 相位与 }\Theta_k^+\text{ 自举 }\beta_i
 \end{cases}
 \rightarrow
-\text{下一时刻更准确的 } \mathbf{H}.
+\text{下一时刻更准确的 } \beta_i.
 $$
 
 因此，当前方案不依赖预先完整解缠相位来估计转换系数，而是在 Kalman 闭环内部产生统一的局部连续校正相位，解决“转换系数需要解缠、解缠又需要转换系数”的循环依赖。
 
-当前主方法采用 fixed/calibrated $\mathbf{Q}$ 与 confidence-aware target-wise $\mathbf{R}_k$ 的分工：过程噪声强度 $q^\star$ 通过候选集和无真值 prediction innovation energy 标定后在在线估计阶段保持固定；每个 target 的 $R_{i,0}$ 由 SNR、presence、geometry 等初始质量给出，基础测量噪声在滤波过程中由 prediction innovation 更新。围绕冷启动阶段 AoA 转换系数尚未收敛的问题，本文将 $\hat{\kappa}_{i,k}$ 的估计方差通过 $((\hat{\Theta}_k^-)^2+P_{\Theta\Theta,k}^-)\sigma_{\kappa_i,k}^2$ 传播为有效观测噪声，使“转换系数越不确定，越降低该 target 观测权重”的机制与在线 bootstrap 自然对应。posterior residual 形式的 $R$ 更新保留为代码消融，不作为论文主线展开。
+当前主方法采用 fixed/calibrated $\mathbf{Q}$ 与 confidence-aware target-wise $\mathbf{R}_k$ 的分工：过程噪声强度 $q^\star$ 通过候选集和无真值 prediction innovation energy 标定后在在线估计阶段保持固定；每个 target 的 $R_{i,0}$ 由 SNR、presence、geometry 等初始质量给出。若观测写在结构方向，则第 $i$ 个 target 的等效观测噪声应写为：
+
+$$
+R_{i,k}^{\Theta}
+\approx
+\left(\hat{\beta}_{i,k}^{-}\right)^2R_{i,k}^{\mathrm{LOS}}
++
+\left(
+\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
+\right)^2
+\sigma_{\beta_i,k}^{2}.
+$$
+
+这说明 LoS 相位噪声会被 $\beta_i^2$ 放大，$\beta_i$ 自身不确定也会进入结构方向观测误差。若连接当前代码实现，可补充等价的 LoS 观测形式：代码令 $\kappa_i=1/\beta_i$，直接使用 $\phi_{i,k}^{\mathrm{LOS}}=\kappa_i\Theta_k+b_i$ 和 $\kappa_i$ 置信度传播项；这与结构方向观测模型在 $\beta_i$ 已知时等价，只是噪声协方差所在坐标系不同。
 
 ## 1. 数学模型说明
 
@@ -720,7 +760,15 @@ $$
 
 ### 4.4 当前结论：AoA 冷启动与预测校正自举
 
-转换因子的获取方式已经从“离线完整标定”调整为“几何初值 + 在线自举”。当前方案中，AoA 不被视为最终精确转换系数，而是作为 Kalman 闭环启动所需的几何先验：
+转换因子的获取方式已经从“离线完整标定”调整为“几何初值 + 在线自举”。本文沿用 Ma 等人的方向定义，将 $\beta_i$ 作为 LoS 位移/相位到结构真实振动方向位移/主相位的转换系数：
+
+$$
+q(k)=\beta_i d_{\mathrm{LOS},i}(k),
+\qquad
+\Theta_k=\beta_i\phi_{i,k}^{\mathrm{LOS}}.
+$$
+
+当前方案中，AoA 不被视为最终精确转换系数，而是作为 Kalman 闭环启动所需的几何先验。若第 $i$ 个 target 的 AoA 与结构振动方向夹角为 $\theta_i$，则先得到结构主相位到 LoS 相位的投影系数初值：
 
 $$
 \hat{\kappa}_{i,0}=\cos\theta_i,
@@ -728,39 +776,74 @@ $$
 \hat{\beta}_{i,0}=1/\hat{\kappa}_{i,0}.
 $$
 
-进入 Kalman 框架的 target 相位仍是 wrapped phase。由加速度驱动的预测模型先给出结构主相位先验，再通过当前 $\hat{\beta}_{i,k}$ 映射为各 target 的 LoS 相位先验，并对 wrapped phase 进行预测辅助相位校正，得到 $z_{i,k}^{\mathrm{corr}}$。该校正相位同时用于 Kalman 观测更新和转换系数自举。
-
-因此，转换系数计算不再要求预先获得一段完整解缠相位，而是使用 Kalman 闭环中生成的局部连续校正相位。为降低冷启动相位偏置和微弱振动阶段均值误差对斜率估计的影响，当前主方法不采用未中心化 plain LS，而采用中心化并带 AoA 先验约束的窗口 LS。令：
+其中 $\kappa_i=1/\beta_i$，它是逆转换系数或投影系数，不应单独称为 Ma 的 direction conversion factor。进入 Kalman 框架的 target 相位仍是 wrapped phase。由加速度驱动的预测模型先给出结构主相位先验，再通过当前 $\hat{\beta}_{i,k}^{-}$ 投影为各 target 的 LoS 相位先验：
 
 $$
-\tilde{\Theta}_\tau=\hat{\Theta}_\tau-\bar{\Theta},
+\hat{\phi}_{i,k}^{\mathrm{LOS},-}
+=
+\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i.
+$$
+
+随后对 wrapped phase 进行预测辅助相位校正，得到 LoS corrected phase：
+
+$$
+\phi_{i,k}^{\mathrm{LOS,corr}}
+=
+\psi_{i,k}
++
+2\pi
+\operatorname{round}
+\left(
+\frac{
+\hat{\phi}_{i,k}^{\mathrm{LOS},-}-\psi_{i,k}
+}{2\pi}
+\right).
+$$
+
+该校正相位仍然位于 LoS 相位空间；它不是结构主相位 $\Theta_k$。用于 Kalman 更新时，先转换成结构方向主相位观测：
+
+$$
+y_{i,k}
+=
+\hat{\beta}_{i,k}^{-}
+\left(
+\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
+\right),
 \qquad
-\tilde{z}_{i,\tau}=z_{i,\tau}^{\mathrm{corr}}-b_i-\bar{z}_i,
+y_{i,k}=\Theta_k+e_{i,k}.
 $$
 
-则：
+因此，转换系数计算不再要求预先获得一段完整解缠相位，而是使用 Kalman 闭环中生成的局部连续 LoS 校正相位。为降低冷启动相位偏置和微弱振动阶段均值误差对斜率估计的影响，当前主方法不采用未中心化 plain LS，而采用中心化并带 AoA 先验约束的窗口 LS。令：
 
 $$
-\hat{\kappa}_{i,k+1}
+x_\tau=\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i,
+\qquad
+y_\tau=\hat{\Theta}_\tau^+,
+$$
+
+中心化后：
+
+$$
+\hat{\beta}_{i,k+1}
 =
 \frac{
 \sum_{\tau\in\mathcal{W}_{\beta}}
-\tilde{\Theta}_{\tau}\tilde{z}_{i,\tau}
+x_{\tau,c}y_{\tau,c}
 +
-\lambda_\kappa\hat{\kappa}_{i,0}
+\lambda_\beta\hat{\beta}_{i,0}
 }{
 \sum_{\tau\in\mathcal{W}_{\beta}}
-\tilde{\Theta}_{\tau}^{2}
+x_{\tau,c}^{2}
 +
-\lambda_\kappa
+\lambda_\beta
 },
 \qquad
-\hat{\beta}_{i,k+1}=1/\hat{\kappa}_{i,k+1}.
+\hat{\kappa}_{i,k+1}=1/\hat{\beta}_{i,k+1}.
 $$
 
-该更新仅在窗口内结构主相位能量足够时执行；若振动过弱，则保持 AoA 初值或上一时刻估计值。转换系数稳定性仍可作为后续质量评价指标：稳定的转换系数说明该 target 更可能是可靠静止参考目标，不稳定则可能意味着多散射混叠、遮挡或动态干扰。但它不作为前端 target selection 的主判据，也不作为 Kalman 启动前的必要条件。
+该更新仅在窗口内结构响应激励足够、target quality 足够好、相位分支稳定时执行；若条件不足，则保持上一时刻 $\beta_i$。转换系数稳定性仍可作为后续质量评价指标：稳定的 $\beta_i$ 说明该 target 更可能是可靠静止参考目标，不稳定则可能意味着多散射混叠、遮挡或动态干扰。但它不作为前端 target selection 的主判据，也不作为 Kalman 启动前的必要条件。
 
-相对于 Ma 等人的离线转换因子标定，本文的处理保留了其“加速度辅助相位预测”的核心思想，但改变了相位状态和参数更新位置。Ma 等人的状态是单 target 的 LoS 相位，转换因子通常在滤波前通过离线遍历或标定得到；本文的状态是结构振动方向主相位，转换系数由 AoA 冷启动，并在统一校正相位 $z_{i,k}^{\mathrm{corr}}$ 的支持下随 Kalman 递推在线收敛。由此，转换系数估计不再与预先相位解缠形成死锁。
+相对于 Ma 等人的离线转换因子标定，本文的处理保留了其“加速度辅助相位预测”的核心思想，但改变了相位状态和参数更新位置。Ma 等人的状态是单 target 的 LoS 相位，转换因子 $\beta_i$ 通常在滤波前通过离线遍历或标定得到；本文的状态是结构振动方向主相位，$\beta_i$ 由 AoA 冷启动，并在 LoS corrected phase $\phi_{i,k}^{\mathrm{LOS,corr}}$ 与结构主相位后验 $\Theta_k^+$ 的支持下随 Kalman 递推在线收敛。当前代码中为了在 LoS measurement space 写观测方程，会等价估计和使用 $\kappa_i=1/\beta_i$；论文正文中应优先使用 $\beta_i$ 表达转换方向，避免把 $\kappa_i$ 与 Ma 的 direction conversion factor 混为一谈。
 
 ### 4.5 当前硬件约束：TI IWR1843
 

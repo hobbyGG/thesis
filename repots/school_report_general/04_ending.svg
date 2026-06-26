@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="endBand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#17406D"/>
+      <stop offset="0.55" stop-color="#0F6FC6"/>
+      <stop offset="1" stop-color="#009DD9"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="#FFFFFF"/>
+  <path d="M0 0H1920V328C1542 278 1220 310 918 386C572 472 286 468 0 414Z" fill="#D8F0FA"/>
+  <rect x="0" y="390" width="1920" height="260" fill="url(#endBand)"/>
+  <text x="960" y="540" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="72" font-weight="700" fill="#FFFFFF">{{THANK_YOU}}</text>
+  <text x="960" y="720" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="34" fill="#17406D">{{ENDING_SUBTITLE}}</text>
+  <text x="960" y="792" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="28" fill="#5B6B7C">{{CONTACT_INFO}}</text>
+  <circle cx="390" cy="520" r="72" fill="#75B8F5" stroke="#FFFFFF" stroke-width="8"/>
+  <circle cx="1516" cy="790" r="112" fill="none" stroke="#0BD0D9" stroke-width="16" opacity="0.24"/>
+  <circle cx="1600" cy="874" r="40" fill="#10CF9B" opacity="0.26"/>
+</svg>

@@ -1,6 +1,6 @@
 # 毫米波雷达与加速度计结构位移测量 Phase 1 方法与仿真汇报
 
-> 2026-06-21 同步说明：本文档已按当前代码主方法口径刷新。论文主方法使用 `proposed_full_pipeline_kappa_confidence`，即 calibrated `Q` + SNR-informed initial `R` + confidence-aware target-wise effective `R` + online kappa bootstrap。`proposed_full_pipeline` 仅作为未标定 `Q` 的 full-pipeline 消融结果保留。
+> 2026-06-21 同步说明：本文档已按当前代码主方法口径刷新。论文主方法使用代码实现名 `proposed_full_pipeline_kappa_confidence`，即 calibrated `Q` + SNR-informed initial `R` + confidence-aware target-wise effective `R` + online beta bootstrap（代码等价维护 `kappa=1/beta` 的置信度）。`proposed_full_pipeline` 仅作为未标定 `Q` 的 full-pipeline 消融结果保留。
 
 > 本材料面向组会/阶段汇报，目标是说明当前倒挂式毫米波雷达 + 加速度计结构位移估计方案、算法链路、Phase 1 仿真验证设计和当前边界。本文档中的数值来自当前代码重新运行得到的 validation/extended validation；默认主实验 validation gates 为 `14/14` 通过。若后续调整参数，应重新运行 `simulation.phase1.run_validation` 和 `simulation.phase1.run_extended_validation` 后再刷新表格。
 
@@ -33,11 +33,11 @@ ADC 原始数据
 -> 同 rangeBin 近角度合并 / 远角度分离
 -> 滑动窗口稳定性筛选
 -> 频带一致性筛选
--> AoA cold start 得到 kappa 初值
+-> AoA cold start 得到 beta/kappa 初值
 -> 多 target 结构主相位 Kalman 融合
 -> prediction-aided phase correction
 -> confidence-aware target-wise R
--> online kappa bootstrap
+-> online beta bootstrap
 -> 相对位移输出
 ```
 
@@ -54,18 +54,21 @@ x_k = [Theta_k, dotTheta_k]^T
 Theta_k = 4*pi*delta_q_k/lambda
 ```
 
-这样，加速度可以直接进入结构主相位系统模型；不同 target 的几何差异不再进入状态预测，而是进入观测矩阵。第 `i` 个 target 的观测写成：
+这样，加速度可以直接进入结构主相位系统模型；不同 target 的几何差异不再进入状态预测。正文主叙事中，先把第 `i` 个 target 的 LoS corrected phase 转换为结构方向主相位观测：
 
 ```text
-z_i,k = kappa_i * Theta_k + b_i + v_i,k
-H_i = [kappa_i, 0]
+y_i,k = beta_i * (phi_i,k^LOS,corr - b_i)
+y_i,k = Theta_k + e_i,k
+H_i = [1, 0]
 ```
+
+这里 `beta_i` 是 Ma-family direction conversion factor，方向为 `LOS -> 结构真实振动方向`。当前代码中的 `kappa_i = 1 / beta_i` 是逆转换系数/投影系数；代码可等价写成 `phi_i,k^LOS = kappa_i * Theta_k + b_i`，但不应把 `kappa_i` 称为 Ma 的转换系数本身。
 
 因此，多 target 不再是“多个目标各自估计位移后再平均”，而是在结构主相位状态层进行统一融合。本文的 Ma-family baseline 是“基于公开论文公式与流程实现的 Ma-family baseline”，英文可表述为 “Ma-family baseline based on public formulas/procedures”；它不是 Ma 官方源码复现，也不是 Ma 原始实测数据 replay。
 
 ## 3. 完整算法流程图
 
-本章给出两个图：一个用于解释完整数据流，一个用于汇报页快速展示模块关系。图中 `z_corr` 同时进入 Kalman update 和 online kappa bootstrap，这是当前闭环设计的关键。
+本章给出两个图：一个用于解释完整数据流，一个用于汇报页快速展示模块关系。图中 LoS corrected phase 同时服务两条路径：先乘 `beta_i` 构造结构方向观测进入 Kalman update，同时与结构主相位后验一起用于 online beta bootstrap。
 
 ### 3.1 完整数据流图
 
@@ -92,25 +95,26 @@ flowchart TD
         M --> O["band consistency gate"]
         N --> O
         O --> P["SNR / geometry / max target gates"]
-        P --> Q["N 个 selected targets<br/>psi_i,k, theta_i, b_i, measured kappa_i"]
+        P --> Q["N 个 selected targets<br/>psi_i,k, theta_i, b_i, measured beta/kappa"]
     end
 
     subgraph Fusion["结构主相位 Kalman 融合闭环"]
-        Q --> R["AoA cold start<br/>kappa_i,0 = cos(theta_i)"]
-        R --> S["H matrix<br/>H_i=[kappa_i,0]"]
+        Q --> R["AoA cold start<br/>kappa_i,0 = cos(theta_i)<br/>beta_i,0 = 1/kappa_i,0"]
+        R --> S["beta prediction<br/>beta_i,k^- = beta_i,k-1^+"]
         D --> T["系统模型预测<br/>x_k^- = A x_k-1 + B a_meas,k-1"]
-        S --> U["target-wise LoS phase prediction<br/>phi_i,k^- = kappa_i Theta_k^- + b_i"]
+        S --> U["target-wise LoS phase prediction<br/>phi_i,k^LOS,- = Theta_k^- / beta_i + b_i"]
         T --> U
         Q --> V["target-wise wrapped phase<br/>psi_i,k"]
         U --> W["prediction-aided phase correction"]
         V --> W
-        W --> X["z_corr_i,k"]
-        X --> Y["Kalman update<br/>结构主相位后验 Theta_k"]
-        X --> Z["online kappa bootstrap<br/>短窗口 LS 更新 kappa_i"]
+        W --> X["phi_i,k^LOS,corr"]
+        X --> YC["结构方向观测<br/>y_i,k = beta_i(phi_i,k^LOS,corr - b_i)"]
+        YC --> Y["Kalman update<br/>结构主相位后验 Theta_k"]
+        X --> Z["online beta bootstrap<br/>短窗口 LS 更新 beta_i"]
         Y --> Z
         Y --> AA["相对位移输出<br/>delta_q_hat = lambda Theta_hat/(4*pi)"]
         Y --> AB["innovation / residual"]
-        AB --> AC["confidence-aware target-wise R<br/>base R + kappa uncertainty"]
+        AB --> AC["confidence-aware target-wise R^Theta<br/>LOS noise beta^2 scaling + beta uncertainty"]
         Z --> S
         AC --> Y
     end
@@ -123,7 +127,7 @@ flowchart LR
     S["Radar frontend<br/>ADC / Range FFT / Angle FFT"]
     T["Target screening<br/>2D peaks / merge / stability / band consistency"]
     K["Structural-main-phase Kalman fusion<br/>Theta state + acceleration prediction"]
-    A["Online kappa/R adaptation<br/>bootstrap + confidence-aware R"]
+    A["Online beta/R adaptation<br/>bootstrap + confidence-aware R"]
     O["Displacement output<br/>relative delta_q"]
 
     S --> T --> K --> O
@@ -171,20 +175,22 @@ Theta_k = 4*pi*delta_q_k/lambda
 x_k^- = A x_{k-1}^+ + B a_meas,k-1
 ```
 
-观测模型为：
+结构方向观测模型为：
 
 ```text
-z_i,k = kappa_i Theta_k + b_i + v_i,k
-H_i = [kappa_i, 0]
+y_i,k = beta_i * (phi_i,k^LOS,corr - b_i)
+y_i,k = Theta_k + e_i,k
+H_i = [1, 0]
 ```
 
-当前主方法采用 calibrated `Q`，即在候选过程噪声强度中用无真值 prediction innovation energy 选出 `q^\star`，在线阶段固定使用 `Q=q^\star Q_0`。每个 target 的基础 `R_i,k` 由 SNR-informed 初值、prediction innovation 和状态不确定性递推；同时将当前 `kappa_i` 的估计方差传播为有效观测噪声：
+当前主方法采用 calibrated `Q`，即在候选过程噪声强度中用无真值 prediction innovation energy 选出 `q^\star`，在线阶段固定使用 `Q=q^\star Q_0`。每个 target 的基础 `R_i,k` 由 SNR-informed 初值、posterior residual 和状态不确定性递推；若观测写在结构方向，有效观测噪声需包含 LoS 相位噪声被 `beta_i^2` 放大，以及 `beta_i` 自身不确定性的传播：
 
 ```text
-R_eff_i,k = R_base_i,k + (Theta_pred^2 + P_ThetaTheta_pred) * sigma_kappa_i,k^2
+R_i,k^Theta ~= beta_i^2 * R_i,k^LOS
+              + (phi_i,k^LOS,corr - b_i)^2 * sigma_beta_i,k^2
 ```
 
-这个 confidence-aware 项只用于支撑 AoA cold start 和 online kappa bootstrap：当转换系数尚未收敛时降低对应 target 的观测权重，bootstrap 收敛后该项自然回落。它不是本文单独包装的创新点。
+当前代码使用 LoS-space 等价实现时，会以 `kappa_i=1/beta_i` 的方差传播为有效观测噪声。这个 confidence-aware 项只用于支撑 AoA cold start 和 online beta bootstrap：当转换系数尚未收敛时降低对应 target 的观测权重，bootstrap 收敛后该项自然回落。它不是本文单独包装的创新点。
 
 原始相位是 wrapped phase：
 
@@ -195,16 +201,16 @@ psi_i,k = angle(z_i(k)), psi_i,k in (-pi, pi]
 Kalman 预测主相位后，先映射到 target LoS phase：
 
 ```text
-phi_i,k^- = kappa_i Theta_k^- + b_i
+phi_i,k^LOS,- = Theta_k^- / beta_i + b_i
 ```
 
 再执行 prediction-aided phase correction：
 
 ```text
-z_corr_i,k = psi_i,k + 2*pi*round((phi_i,k^- - psi_i,k)/(2*pi))
+phi_i,k^LOS,corr = psi_i,k + 2*pi*round((phi_i,k^LOS,- - psi_i,k)/(2*pi))
 ```
 
-同一个 `z_corr_i,k` 同时用于 Kalman update 和 kappa bootstrap，这样避免了“先估转换系数需要连续相位，而连续相位又需要转换系数”的循环依赖。
+同一个 `phi_i,k^LOS,corr` 先乘 `beta_i` 构造结构方向观测进入 Kalman update，同时用于 beta bootstrap。这样避免了“先估转换系数需要连续相位，而连续相位又需要转换系数”的循环依赖。
 
 ### 4.4 与 Ma-family baseline 的对比
 
@@ -216,7 +222,7 @@ Ma-family baseline 的优势在于把加速度预测、相位分支校正和 Kal
 | 加速度进入方式 | 需经转换系数映射到 LoS phase | 直接预测结构主相位 |
 | 目标组织 | 单 target 或 range-bin 级候选 | range-angle target / angle cluster |
 | 同 range 远角度目标 | 容易相干混合为一个 pseudo target | 在前端分离为不同 target |
-| 转换系数 | 常依赖离线 beta 标定或 range-bin 拟合 | AoA cold start + online kappa bootstrap |
+| 转换系数 | 常依赖离线 beta 标定或 range-bin 拟合 | AoA cold start + online beta bootstrap；代码侧保留 `kappa=1/beta` 诊断 |
 | 观测噪声 | 公开流程中以固定设置为主 | confidence-aware target-wise `R_eff` |
 
 需要强调：`ma2026_reproduction` 是根据公开论文公式与流程实现的 Ma-family baseline，不是 Ma 官方源码复现；`ma_style_iterative_beta_range_bin` 是机制消融 baseline，不应写成 Ma 官方完整方法。
@@ -247,14 +253,17 @@ delta_q(t) = q(t) - mean(q over cold_start_window)
 
 ### 5.2 雷达观测仿真
 
-每个 target 的结构主相位和 LoS 相位关系为：
+每个 target 的结构主相位和 LoS 相位关系优先写为：
 
 ```text
 Theta(t) = 4*pi*q(t)/lambda
-phi_i(t) = kappa_i*Theta(t) + b_i
-IQ_i(t) = A_i exp(j phi_i(t)) + complex_noise
+Theta(t) = beta_i * phi_i^LOS(t)
+phi_i^LOS(t) = Theta(t)/beta_i + b_i
+IQ_i(t) = A_i exp(j phi_i^LOS(t)) + complex_noise
 wrapped_phase_i(t) = angle(IQ_i(t))
 ```
+
+当前代码的 LoS-space 等价写法是 `phi_i^LOS(t)=kappa_i*Theta(t)+b_i`，其中 `kappa_i=1/beta_i`，只表示结构主相位到 LoS 相位的投影系数/逆转换系数。
 
 full pipeline 进一步生成 synthetic ADC cube，并通过 Range FFT、Angle FFT/DBF 和 Range-Angle Map 前端提取候选 target。这样可以检查“ADC -> range-angle -> target selection -> Kalman”完整链路，而不是只在理想 target phase 上做后端滤波。
 
@@ -278,7 +287,7 @@ TDMS 激光位移 3-4
 
 ### 5.4 场景设计表
 
-默认主实验只保留 6 个场景。它们分别对应本文核心创新链条：文献主频桥梁响应、强相位缠绕、同 range-bin 远角度分离、AoA cold start 与 kappa bootstrap、target 质量退化下的自适应权重，以及车辆非平稳事件下的完整闭环。其余场景保留为附录、敏感性或诊断实验，不进入默认主结果表。
+默认主实验只保留 6 个场景。它们分别对应本文核心创新链条：文献主频桥梁响应、强相位缠绕、同 range-bin 远角度分离、AoA cold start 与 beta bootstrap（代码侧 `kappa=1/beta` 等价实现）、target 质量退化下的自适应权重，以及车辆非平稳事件下的完整闭环。其余场景保留为附录、敏感性或诊断实验，不进入默认主结果表。
 
 **主实验场景**
 
@@ -287,7 +296,7 @@ TDMS 激光位移 3-4
 | `literature_maglev_modal_response` | 文献主频 7.7737/11.5742/26.5642 Hz，车辆事件包络，峰值约 1.8 mm | 5 | 8/18/28/38/50 deg | 26/24/22/20/18 dB | 200 Hz slow-time；quiet start；频谱主峰展宽和泄漏 | 替代脏 TDMS 的正式文献主频驱动桥梁响应仿真 |
 | `strong_wrapping` | 2/5/12 Hz，强 wrapping profile，峰值约 5.0 mm | 5 | 10/25/40/55/70 deg | 30/25/20/15/10 dB | quiet -> 微振 -> ramp -> strong wrapping -> decay | 压测 prediction-aided phase correction |
 | `same_range_far_angles` | 2/5/12 Hz，普通峰值约 1.5 mm | 4 | 0/45/25/65 deg | 36/36/32/32 dB | 4 个 target 均在 range bin 12，角度相差明显 | 验证 range-angle frontend 分离同 range 远角度目标 |
-| `aoa_error_bootstrap` | 默认多频峰值约 1.5 mm | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | AoA 初值误差 10 deg | 验证 online kappa bootstrap |
+| `aoa_error_bootstrap` | 默认多频峰值约 1.5 mm | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | AoA 初值误差 10 deg | 验证 online beta bootstrap；代码诊断为 kappa 收敛 |
 | `target_snr_drop` | 默认多频峰值约 1.5 mm | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | target 0/1 在 1.6-3.4 s 降 25 dB | 验证 confidence-aware target-wise R |
 | `vehicle_event_nonstationary` | 非平稳车辆事件包络，quiet start 0.10 s | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | center 2.2 s，width 0.35 s | 验证非平稳事件与 target selection |
 
@@ -325,11 +334,11 @@ TDMS 激光位移 3-4
 
 ![target SNR drop 场景 confidence-aware R](/Users/umep/thesis/reports/numerical_simulation_assets_png/target_snr_drop_adaptive_r.png)
 
-图 5 展示目标质量退化时 confidence-aware target-wise `R` 的变化。低质量 target 的基础观测噪声会随 innovation 增大；AoA cold start 阶段的 `kappa` 不确定性也会进入有效观测噪声，从而在 Kalman update 中降低不可靠 target 的权重。
+图 5 展示目标质量退化时 confidence-aware target-wise `R` 的变化。低质量 target 的基础观测噪声会随 innovation 增大；结构方向表述中 `beta` 不确定性会传播到 `R_i^Theta`，当前代码等价记录 `kappa=1/beta` 不确定性，从而在 Kalman update 中降低不可靠 target 的权重。
 
-![AoA error 场景 kappa bootstrap](/Users/umep/thesis/reports/numerical_simulation_assets_png/aoa_error_bootstrap_kappa_bootstrap.png)
+![AoA error 场景 beta bootstrap 诊断](/Users/umep/thesis/reports/numerical_simulation_assets_png/aoa_error_bootstrap_kappa_bootstrap.png)
 
-图 6 展示 AoA 初值误差场景下 `kappa` 在线估计与真实参考值的关系。fresh gate 中 `aoa_bootstrap_kappa_median_relative_error_le_0p05` 通过，说明 bootstrap 能缓解 AoA 初值偏差。
+图 6 展示 AoA 初值误差场景下代码侧 `kappa=1/beta` 在线估计与真实参考值的关系。fresh gate 中 `aoa_bootstrap_kappa_median_relative_error_le_0p05` 通过，等价说明 `beta` bootstrap 能缓解 AoA 初值偏差。
 
 ![实测激光位移通道时域图](/Users/umep/thesis/reports/numerical_simulation_assets_png/laser_time_channels.png)
 
@@ -353,14 +362,14 @@ TDMS 激光位移 3-4
 
 | 方法 | 输入/假设 | 主要用途 | 解释边界 |
 |---|---|---|---|
-| `range_bin_itoh` | ADC 经 range FFT 后按 range profile 选最强 range bin，在该 bin 内取最强 virtual-RX slow-time IQ，Itoh unwrap，再用 measured/equivalent kappa 换算 | 默认主表：传统毫米波 range-bin 相位 baseline | 不使用理想 target phase；对同 range 多角度混合、强 wrapping、AoA/等效 kappa 误差敏感 |
+| `range_bin_itoh` | ADC 经 range FFT 后按 range profile 选最强 range bin，在该 bin 内取最强 virtual-RX slow-time IQ，Itoh unwrap，再用 measured/equivalent beta 或 `kappa=1/beta` 换算 | 默认主表：传统毫米波 range-bin 相位 baseline | 不使用理想 target phase；对同 range 多角度混合、强 wrapping、AoA/等效 beta 误差敏感 |
 | `ma2026_reproduction` | 离线 range-bin target/beta 标定 + Ma2026 LoS Kalman | 默认主表：正式 Ma-family staged baseline 对比 | 基于公开论文公式与流程实现，不是 Ma 官方源码复现；range-bin 候选枚举属于仿真 adapter |
-| `selected_aoa_fixed_kappa` | 前端筛选 target + AoA fixed kappa | 默认主表：检查只筛选、不 bootstrap 的效果 | AoA 误差不能在线修正 |
-| `proposed_full_pipeline_kappa_confidence` | ADC/Range-Angle 前端 + target selection + calibrated `Q` + confidence-aware `R_eff` + kappa bootstrap | 默认主表：Phase 1 主方法 | 当前仍是合成/半实测仿真链路 |
+| `selected_aoa_fixed_kappa` | 前端筛选 target + AoA fixed `kappa=1/beta` | 默认主表：检查只筛选、不 bootstrap 的效果 | AoA 误差不能在线修正 |
+| `proposed_full_pipeline_kappa_confidence` | ADC/Range-Angle 前端 + target selection + calibrated `Q` + confidence-aware `R_eff` + online beta bootstrap；方法名保留 kappa 是代码侧倒数实现 | 默认主表：Phase 1 主方法 | 当前仍是合成/半实测仿真链路 |
 | `itoh_ls` | 理想 target-level 单目标相位 + Itoh unwrap | 诊断参考 | 绕过 range-bin/front-end，不再作为传统毫米波基本 baseline |
 | `range_bin_only_mixed_phase` | 使用同一个 range-FFT range-bin slow-time IQ 作为单 pseudo-target，再进入 Kalman 后端 | 扩展/诊断消融：证明 range-bin-only 观测即使进入 Kalman，也无法替代 angle-bin target 分离 | 机制 baseline，不代表完整 Ma 方法，不进入默认主表 |
 | `single_target_ma_style` | 单 target acceleration-aided Kalman | 废弃兼容方法 | 已由 `ma2026_reproduction` 替代，不进入默认主表 |
-| `proposed` | 所有 target + target-wise R + kappa bootstrap | 诊断方法 | 不包含完整前端筛选、calibrated Q 和前端 target selection，不进入默认主表 |
+| `proposed` | 所有 target + target-wise R + online beta bootstrap；代码侧更新 kappa | 诊断方法 | 不包含完整前端筛选、calibrated Q 和前端 target selection，不进入默认主表 |
 | `proposed_full_pipeline` | ADC/Range-Angle 前端 + target selection + proposed Kalman | 废弃 full-pipeline 消融 | 旧 R 版本，不进入默认主表 |
 
 ### 6.2 总体 RMSE 对比表
@@ -384,7 +393,7 @@ TDMS 激光位移 3-4
 | `strong_wrapping` | prediction-aided phase correction | 0.034060 | 12.386050 | 0.014334 | 4 | 0.000000 | 完整方法保持无解缠错误，并明显低于 Ma 2026 baseline |
 | `same_range_far_angles` | 同 range bin 远角度分离 | 0.090558 | 0.051385 | 0.013991 | 3 | 0.000000 | Range-Angle 前端将同 range 远角度目标分离，避免 range-bin-only 混合相位 |
 | `target_snr_drop` | confidence-aware target-wise R | 0.177654 | 0.077267 | 0.060410 | 3 | 0.000000 | 退化 target 被动态降权，主状态不被坏观测长期污染 |
-| `aoa_error_bootstrap` | online kappa bootstrap | 0.038633 | 0.053955 | 0.015254 | 4 | 0.000000 | AoA 初值只作为启动先验，bootstrap 后主方法误差更低 |
+| `aoa_error_bootstrap` | online beta bootstrap；代码侧 kappa 诊断 | 0.038633 | 0.053955 | 0.015254 | 4 | 0.000000 | AoA 初值只作为启动先验，bootstrap 后主方法误差更低 |
 | `vehicle_event_nonstationary` | 非平稳车辆事件 + target selection | 0.035399 | 0.029504 | 0.014336 | 4 | 0.000000 | 冷启动、筛选和多目标 Kalman 在非平稳事件中保持可运行 |
 
 ### 6.4 关键场景分析
@@ -395,7 +404,7 @@ TDMS 激光位移 3-4
 
 **target_snr_drop。** target 0/1 在 1.6-3.4 s SNR 降低 25 dB。传统 `range_bin_itoh` 出现大误差，`selected_aoa_fixed_kappa` 为 0.077267 mm，`proposed_full_pipeline_kappa_confidence` 为 0.060410 mm。confidence-aware `R_eff` 使退化 target 和转换系数尚不稳定的 target 获得较低观测权重，降低坏观测对结构主相位状态的污染。
 
-**aoa_error_bootstrap。** AoA 初值加入 10 deg 误差，用于检验转换系数自举。`selected_aoa_fixed_kappa` 固定几何初值，RMSE 为 0.053955 mm；`proposed_full_pipeline_kappa_confidence` 通过 online kappa bootstrap 后为 0.015254 mm。该结果说明 AoA 更适合作为 cold start，而不是作为最终固定转换系数。
+**aoa_error_bootstrap。** AoA 初值加入 10 deg 误差，用于检验转换系数自举。`selected_aoa_fixed_kappa` 固定几何初值，RMSE 为 0.053955 mm；`proposed_full_pipeline_kappa_confidence` 通过 online beta bootstrap 后为 0.015254 mm，其中方法名里的 kappa 表示代码侧 `kappa=1/beta` 的等价诊断。该结果说明 AoA 更适合作为 cold start，而不是作为最终固定转换系数。
 
 **vehicle_event_nonstationary。** 该场景包含 quiet start 和车辆事件非平稳响应。fresh summary 中 `proposed_full_pipeline_kappa_confidence` selected count 为 4，unwrap error rate 为 0，RMSE 为 0.014336 mm。它验证了目标筛选、冷启动和多目标 Kalman 在非平稳事件下的闭环可运行性。
 
@@ -407,22 +416,22 @@ fresh extended validation 使用 seeds 2026-2030，覆盖 Monte Carlo、消融�
 
 - `same_range_far_angles` 的 Monte Carlo 中，`proposed_full_pipeline_kappa_confidence` 平均 RMSE 为 0.016271 mm，低于 `range_bin_only_mixed_phase` 的 0.269230 mm 和 `ma2026_reproduction` 的 0.121716 mm。
 - `target_snr_drop` 的 Monte Carlo 中，`proposed_full_pipeline_kappa_confidence` 平均 RMSE 为 0.056421 mm，低于 `selected_aoa_fixed_kappa` 的 0.086099 mm。
-- AoA sensitivity 中，AoA 误差从 0 到 15 deg 时，`proposed_full_pipeline_kappa_confidence` 维持在很低 RMSE 水平；这反映当前前端选择、confidence-aware R 和 kappa bootstrap 对初值误差具有一定缓冲。
+- AoA sensitivity 中，AoA 误差从 0 到 15 deg 时，`proposed_full_pipeline_kappa_confidence` 维持在很低 RMSE 水平；这反映当前前端选择、confidence-aware R 和 online beta bootstrap 对初值误差具有一定缓冲，代码侧通过 kappa 诊断呈现。
 - SNR sensitivity 中，随着 SNR floor 从 4 dB 提升到 12 dB，`proposed_full_pipeline_kappa_confidence` RMSE 从 0.062440 mm 降到 0.029349 mm。
 
 这些结果支持 Phase 1 算法级可行性，但不替代真实 ADC 和现场同步验证。
 
 ## 7. 方案比选
 
-本章把旧稿中的方案讨论整理为当前方案比选表。最终采用的是 `Range-Angle frontend + target selection + structural-main-phase Kalman + calibrated Q + confidence-aware R + online kappa bootstrap`。
+本章把旧稿中的方案讨论整理为当前方案比选表。最终采用的是 `Range-Angle frontend + target selection + structural-main-phase Kalman + calibrated Q + confidence-aware R + online beta bootstrap`，代码实现名中保留 `kappa` 是因为实现维护的是 `kappa=1/beta`。
 
 | 方案 | 优点 | 局限 | 是否采用 | 原因 |
 |---|---|---|---|---|
-| 传统 range-bin phase + Itoh unwrap + kappa 换算 | 符合毫米波雷达最基本相位测量流程：range FFT/Range-Angle 前端后选 range bin，再取复数 slow-time 相位 | 同 range-bin 多角度散射体会被相干混合；强 wrapping 和等效 kappa 偏差会放大误差；不利用加速度预测和多目标冗余 | 不作为主方案 | 用作基本 baseline，说明仅靠 range-bin 相位法不足以覆盖退化场景 |
+| 传统 range-bin phase + Itoh unwrap + beta/kappa 换算 | 符合毫米波雷达最基本相位测量流程：range FFT/Range-Angle 前端后选 range bin，再取复数 slow-time 相位 | 同 range-bin 多角度散射体会被相干混合；强 wrapping 和等效 beta 或其倒数 kappa 偏差会放大误差；不利用加速度预测和多目标冗余 | 不作为主方案 | 用作基本 baseline，说明仅靠 range-bin 相位法不足以覆盖退化场景 |
 | Ma-style 单 target / range-bin beta 标定 + Kalman | 文献基线清晰；加速度辅助 Kalman 能统一相位预测、解缠和降噪 | 状态是单 target LoS phase；多 target 和同 range 多角度散射体不易自然融合；beta 标定对混合相位和加速度参考敏感 | 作为对比 baseline | 保留 Ma-family 思想对比，但不作为最终框架 |
-| 多 target fixed kappa Kalman | 已具备结构主相位 + 多行观测矩阵骨架；可利用多 target 冗余 | 假设 kappa 已知且稳定；无法修正 AoA 和安装误差；坏 target 会长期污染观测 | 部分采用为结构骨架 | 多目标观测模型被采用，但 fixed kappa 不作为最终设置 |
-| 多 target AoA fixed kappa Kalman | AoA 元数据能提供 cold start，避免先完整解缠再标定 beta 的死锁 | AoA 只是几何先验；真实阵列误差、旁瓣和安装姿态会影响 kappa；固定后不能收敛修正 | 作为初始化和 baseline | 本文保留 AoA cold start，但后续必须 online bootstrap |
-| 本文 kappa-confidence proposed full pipeline | 完整覆盖 ADC/Range-Angle 前端、目标筛选、结构主相位 Kalman 融合、prediction-aided phase correction、calibrated Q、confidence-aware R 和 online kappa bootstrap | 当前仍是 Phase 1 合成仿真与实测位移驱动的半实测仿真；真实 ADC、天线标定、同步和现场多径未完成 | 采用为主方案 | 与当前论文创新主线一致，并能解释同 range 远角度、target 退化和 AoA 初值误差等关键失败模式 |
+| 多 target fixed beta/kappa Kalman | 已具备结构主相位 + 多通道观测骨架；可利用多 target 冗余 | 假设 beta 或其倒数 kappa 已知且稳定；无法修正 AoA 和安装误差；坏 target 会长期污染观测 | 部分采用为结构骨架 | 多目标观测模型被采用，但 fixed conversion 不作为最终设置 |
+| 多 target AoA fixed beta/kappa Kalman | AoA 元数据能提供 cold start，避免先完整解缠再标定 beta 的死锁 | AoA 只是几何先验；真实阵列误差、旁瓣和安装姿态会影响 beta；固定后不能收敛修正 | 作为初始化和 baseline | 本文保留 AoA cold start，但后续必须 online bootstrap |
+| 本文 beta-bootstrap / confidence-aware proposed full pipeline | 完整覆盖 ADC/Range-Angle 前端、目标筛选、结构主相位 Kalman 融合、prediction-aided phase correction、calibrated Q、confidence-aware R 和 online beta bootstrap；代码侧以 `kappa=1/beta` 记录置信度 | 当前仍是 Phase 1 合成仿真与实测位移驱动的半实测仿真；真实 ADC、天线标定、同步和现场多径未完成 | 采用为主方案 | 与当前论文创新主线一致，并能解释同 range 远角度、target 退化和 AoA 初值误差等关键失败模式 |
 
 ## 8. 当前结论与后续工作
 
@@ -431,7 +440,7 @@ fresh extended validation 使用 seeds 2026-2030，覆盖 Monte Carlo、消融�
 ### 8.1 当前结论
 
 - 已完成 Phase 1 算法级合成仿真与实测位移驱动的半实测仿真。
-- 当前方法链路完整覆盖 frontend target extraction、selection、结构主相位 Kalman 融合、prediction-aided phase correction、calibrated Q、confidence-aware target-wise R、online kappa bootstrap 和相对位移输出。
+- 当前方法链路完整覆盖 frontend target extraction、selection、结构主相位 Kalman 融合、prediction-aided phase correction、calibrated Q、confidence-aware target-wise R、online beta bootstrap（代码侧 `kappa=1/beta` 等价实现）和相对位移输出。
 - fresh validation 的 14 个默认主实验 feasibility gates 全部通过。
 - 仿真表明，在文献主频桥梁响应、strong wrapping、same-range far-angle、target SNR drop、AoA 初值误差和车辆非平稳事件等主实验场景中，full pipeline 具有稳定表现。
 - 实桥半实测场景表明，真实桥梁位移波形下完整链路可运行；但这不是完整实测毫米波雷达验证。
@@ -445,10 +454,10 @@ fresh extended validation 使用 seeds 2026-2030，覆盖 Monte Carlo、消融�
 | same rangeBin far-angle separation | 已完成 | 同 range 远角度 target 在 Kalman 前分离 |
 | 滑动窗口稳定性与频带一致性筛选 | 已完成 | 使用 presence 和加速度频谱先验筛选可用 target |
 | Ma-style / Ma2026 baseline | 已完成 Phase 1 合成复现 | 包含 Ma-style iterative beta 消融和 `ma2026_reproduction` |
-| 结构主相位多 target Kalman | 已完成 | 使用 `H_i=[kappa_i,0]` 多行观测模型 |
+| 结构主相位多 target Kalman | 已完成 | 论文正文写为结构方向观测 `H_i=[1,0]`；代码等价使用 LoS-space `H_i=[kappa_i,0]`, `kappa_i=1/beta_i` |
 | prediction-aided phase correction | 已完成 | 用结构主相位预测辅助 wrapped phase 分支选择 |
-| confidence-aware target-wise R | 已完成 | 退化 target 动态降权，并在 AoA cold start 阶段传播 kappa 不确定性 |
-| online kappa bootstrap | 已完成 | 同一 `z_corr` 用于 Kalman update 和 kappa 更新 |
+| confidence-aware target-wise R | 已完成 | 退化 target 动态降权；结构方向表述传播 beta 不确定性，代码等价传播 kappa 不确定性 |
+| online beta bootstrap | 已完成 | 同一 `phi_i,k^LOS,corr` 用于结构方向 Kalman update 和 beta 更新；代码等价更新 kappa |
 | 实桥半实测场景 | 已完成 Phase 1 验证 | 使用 TDMS 激光位移驱动，雷达观测仍由物理相位模型合成 |
 | 真实 IWR1843 ADC 文件解析 | 未完成 | 需要接入真实 raw ADC 文件格式、帧结构和通道组织 |
 | 真实天线幅相标定 | 未完成 | 包括 RX/TX 通道幅相、阵列误差和角度轴校准 |

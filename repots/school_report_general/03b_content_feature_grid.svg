@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#FFFFFF"/>
+  <circle cx="156" cy="74" r="43" fill="#75B8F5"/>
+  <path d="M190 28H650L696 74L650 120H190Z" fill="#0F6FC6"/>
+  <rect x="232" y="28" width="464" height="92" fill="#101820"/>
+  <text x="464" y="91" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="50" font-weight="700" fill="#FFFFFF">{{PAGE_TITLE}}</text>
+  <text x="112" y="180" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="32" fill="#5B6B7C">{{CONTENT_AREA}}</text>
+  <g id="feature-grid" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif">
+    <g transform="translate(112 250)">
+      <rect width="520" height="250" rx="14" fill="#F4F8FC" stroke="#D8F0FA" stroke-width="2"/>
+      <circle cx="76" cy="76" r="34" fill="#0F6FC6"/><text x="76" y="88" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">1</text>
+      <text x="132" y="83" font-size="34" font-weight="700" fill="#101820">模块标题</text>
+      <text x="54" y="160" font-size="26" fill="#5B6B7C">简要描述功能、方法或成果。</text>
+    </g>
+    <g transform="translate(700 250)">
+      <rect width="520" height="250" rx="14" fill="#F4F8FC" stroke="#D8F0FA" stroke-width="2"/>
+      <circle cx="76" cy="76" r="34" fill="#009DD9"/><text x="76" y="88" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">2</text>
+      <text x="132" y="83" font-size="34" font-weight="700" fill="#101820">模块标题</text>
+      <text x="54" y="160" font-size="26" fill="#5B6B7C">适合功能清单或贡献点。</text>
+    </g>
+    <g transform="translate(1288 250)">
+      <rect width="520" height="250" rx="14" fill="#F4F8FC" stroke="#D8F0FA" stroke-width="2"/>
+      <circle cx="76" cy="76" r="34" fill="#0BD0D9"/><text x="76" y="88" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">3</text>
+      <text x="132" y="83" font-size="34" font-weight="700" fill="#101820">模块标题</text>
+      <text x="54" y="160" font-size="26" fill="#5B6B7C">突出课程或项目重点。</text>
+    </g>
+    <g transform="translate(112 560)">
+      <rect width="520" height="250" rx="14" fill="#FFFFFF" stroke="#D8F0FA" stroke-width="2"/>
+      <circle cx="76" cy="76" r="34" fill="#10CF9B"/><text x="76" y="88" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">4</text>
+      <text x="132" y="83" font-size="34" font-weight="700" fill="#101820">模块标题</text>
+      <text x="54" y="160" font-size="26" fill="#5B6B7C">可放实验、数据或结果。</text>
+    </g>
+    <g transform="translate(700 560)">
+      <rect width="520" height="250" rx="14" fill="#FFFFFF" stroke="#D8F0FA" stroke-width="2"/>
+      <circle cx="76" cy="76" r="34" fill="#7CCA62"/><text x="76" y="88" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">5</text>
+      <text x="132" y="83" font-size="34" font-weight="700" fill="#101820">模块标题</text>
+      <text x="54" y="160" font-size="26" fill="#5B6B7C">保持三列网格节奏。</text>
+    </g>
+    <g transform="translate(1288 560)">
+      <rect width="520" height="250" rx="14" fill="#FFFFFF" stroke="#D8F0FA" stroke-width="2"/>
+      <circle cx="76" cy="76" r="34" fill="#A5C249"/><text x="76" y="88" text-anchor="middle" font-size="32" font-weight="700" fill="#FFFFFF">6</text>
+      <text x="132" y="83" font-size="34" font-weight="700" fill="#101820">模块标题</text>
+      <text x="54" y="160" font-size="26" fill="#5B6B7C">用于综合概览。</text>
+    </g>
+  </g>
+  <text x="1808" y="1022" text-anchor="end" font-family="Arial, sans-serif" font-size="24" fill="#5B6B7C">{{PAGE_NUM}}</text>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10Z" fill="#0F6FC6"/>
+    </marker>
+  </defs>
+  <rect width="1920" height="1080" fill="#FFFFFF"/>
+  <circle cx="156" cy="74" r="43" fill="#75B8F5"/>
+  <path d="M190 28H650L696 74L650 120H190Z" fill="#0F6FC6"/>
+  <rect x="232" y="28" width="464" height="92" fill="#101820"/>
+  <text x="464" y="91" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="50" font-weight="700" fill="#FFFFFF">{{PAGE_TITLE}}</text>
+  <text x="112" y="188" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="30" fill="#5B6B7C">{{CONTENT_AREA}}</text>
+  <g id="architecture-diagram" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif">
+    <rect x="170" y="300" width="360" height="480" rx="16" fill="#F4F8FC" stroke="#D8F0FA" stroke-width="3"/>
+    <text x="350" y="370" text-anchor="middle" font-size="34" font-weight="700" fill="#17406D">输入 / 用户层</text>
+    <rect x="220" y="450" width="260" height="72" rx="8" fill="#FFFFFF" stroke="#C7D7E6"/><text x="350" y="497" text-anchor="middle" font-size="26" fill="#101820">页面 / 表单</text>
+    <rect x="220" y="570" width="260" height="72" rx="8" fill="#FFFFFF" stroke="#C7D7E6"/><text x="350" y="617" text-anchor="middle" font-size="26" fill="#101820">数据 / 请求</text>
+    <rect x="780" y="260" width="360" height="560" rx="16" fill="#EAF5FB" stroke="#0F6FC6" stroke-width="3"/>
+    <text x="960" y="334" text-anchor="middle" font-size="34" font-weight="700" fill="#17406D">核心处理层</text>
+    <rect x="830" y="430" width="260" height="72" rx="8" fill="#FFFFFF" stroke="#C7D7E6"/><text x="960" y="477" text-anchor="middle" font-size="26" fill="#101820">算法 / 服务</text>
+    <rect x="830" y="550" width="260" height="72" rx="8" fill="#FFFFFF" stroke="#C7D7E6"/><text x="960" y="597" text-anchor="middle" font-size="26" fill="#101820">规则 / 逻辑</text>
+    <rect x="1390" y="300" width="360" height="480" rx="16" fill="#F4F8FC" stroke="#D8F0FA" stroke-width="3"/>
+    <text x="1570" y="370" text-anchor="middle" font-size="34" font-weight="700" fill="#17406D">输出 / 结果层</text>
+    <rect x="1440" y="450" width="260" height="72" rx="8" fill="#FFFFFF" stroke="#C7D7E6"/><text x="1570" y="497" text-anchor="middle" font-size="26" fill="#101820">结果展示</text>
+    <rect x="1440" y="570" width="260" height="72" rx="8" fill="#FFFFFF" stroke="#C7D7E6"/><text x="1570" y="617" text-anchor="middle" font-size="26" fill="#101820">分析结论</text>
+  </g>
+  <line x1="540" y1="540" x2="760" y2="540" stroke="#0F6FC6" stroke-width="8" marker-end="url(#arrow)"/>
+  <line x1="1150" y1="540" x2="1370" y2="540" stroke="#0F6FC6" stroke-width="8" marker-end="url(#arrow)"/>
+  <text x="1808" y="1022" text-anchor="end" font-family="Arial, sans-serif" font-size="24" fill="#5B6B7C">{{PAGE_NUM}}</text>
+</svg>

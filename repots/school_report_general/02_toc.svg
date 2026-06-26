@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <rect width="1920" height="1080" fill="#FFFFFF"/>
+  <rect x="0" y="0" width="1920" height="128" fill="#F4F8FC"/>
+  <circle cx="118" cy="64" r="34" fill="#75B8F5"/>
+  <path d="M162 26H604L642 64L604 102H162Z" fill="#0F6FC6"/>
+  <rect x="220" y="26" width="422" height="76" fill="#101820"/>
+  <text x="431" y="78" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="44" font-weight="700" fill="#FFFFFF">汇报提纲</text>
+  <text x="1710" y="74" text-anchor="end" font-family="Arial, sans-serif" font-size="24" fill="#5B6B7C">COURSE REPORT</text>
+  <g id="toc-list" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif">
+    <g transform="translate(260 250)">
+      <circle cx="0" cy="0" r="46" fill="#0F6FC6"/>
+      <text x="0" y="14" text-anchor="middle" font-size="42" font-weight="700" fill="#FFFFFF">01</text>
+      <text x="94" y="-10" font-size="42" font-weight="700" fill="#101820">{{TOC_ITEM_1_TITLE}}</text>
+      <text x="94" y="42" font-size="28" fill="#5B6B7C">{{TOC_ITEM_1_DESC}}</text>
+      <line x1="0" y1="64" x2="0" y2="132" stroke="#0BD0D9" stroke-width="6" opacity="0.55"/>
+    </g>
+    <g transform="translate(260 430)">
+      <circle cx="0" cy="0" r="46" fill="#009DD9"/>
+      <text x="0" y="14" text-anchor="middle" font-size="42" font-weight="700" fill="#FFFFFF">02</text>
+      <text x="94" y="-10" font-size="42" font-weight="700" fill="#101820">{{TOC_ITEM_2_TITLE}}</text>
+      <text x="94" y="42" font-size="28" fill="#5B6B7C">{{TOC_ITEM_2_DESC}}</text>
+      <line x1="0" y1="64" x2="0" y2="132" stroke="#0BD0D9" stroke-width="6" opacity="0.55"/>
+    </g>
+    <g transform="translate(260 610)">
+      <circle cx="0" cy="0" r="46" fill="#0BD0D9"/>
+      <text x="0" y="14" text-anchor="middle" font-size="42" font-weight="700" fill="#FFFFFF">03</text>
+      <text x="94" y="-10" font-size="42" font-weight="700" fill="#101820">{{TOC_ITEM_3_TITLE}}</text>
+      <text x="94" y="42" font-size="28" fill="#5B6B7C">{{TOC_ITEM_3_DESC}}</text>
+      <line x1="0" y1="64" x2="0" y2="132" stroke="#0BD0D9" stroke-width="6" opacity="0.55"/>
+    </g>
+    <g transform="translate(260 790)">
+      <circle cx="0" cy="0" r="46" fill="#10CF9B"/>
+      <text x="0" y="14" text-anchor="middle" font-size="42" font-weight="700" fill="#FFFFFF">04</text>
+      <text x="94" y="-10" font-size="42" font-weight="700" fill="#101820">{{TOC_ITEM_4_TITLE}}</text>
+      <text x="94" y="42" font-size="28" fill="#5B6B7C">{{TOC_ITEM_4_DESC}}</text>
+    </g>
+  </g>
+  <path d="M1420 270C1542 300 1640 404 1670 526C1700 648 1658 790 1564 866" fill="none" stroke="#D8F0FA" stroke-width="48" stroke-linecap="round"/>
+  <path d="M1492 346C1572 378 1626 455 1634 540C1642 626 1602 720 1530 768" fill="none" stroke="#0F6FC6" stroke-width="12" opacity="0.35"/>
+</svg>

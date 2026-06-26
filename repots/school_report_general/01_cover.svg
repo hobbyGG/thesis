@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="coverBand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#17406D"/>
+      <stop offset="0.52" stop-color="#0F6FC6"/>
+      <stop offset="1" stop-color="#009DD9"/>
+    </linearGradient>
+    <linearGradient id="coverTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EAF5FB"/>
+      <stop offset="1" stop-color="#FFFFFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#coverTop)"/>
+  <path d="M0 0H1920V368C1582 310 1250 318 930 392C592 470 296 470 0 414Z" fill="#D8F0FA"/>
+  <path d="M0 0H1920V292C1570 248 1240 258 930 322C585 394 296 398 0 354Z" fill="#C7E8F7"/>
+  <rect x="0" y="332" width="1920" height="302" fill="url(#coverBand)"/>
+  <circle cx="200" cy="483" r="84" fill="#75B8F5" stroke="#FFFFFF" stroke-width="6"/>
+  <path d="M224 483L320 405H486L570 483L486 561H320Z" fill="#FFFFFF" opacity="0.18"/>
+  <text x="960" y="459" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="76" font-weight="700" fill="#FFFFFF">{{TITLE}}</text>
+  <text x="960" y="552" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="38" fill="#EAF5FB">{{SUBTITLE}}</text>
+  <line x1="586" y1="690" x2="1334" y2="690" stroke="#0F6FC6" stroke-width="4"/>
+  <text x="960" y="760" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="34" fill="#17406D">{{ORGANIZATION}}</text>
+  <text x="960" y="820" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="32" fill="#101820">{{AUTHOR}}</text>
+  <text x="960" y="918" text-anchor="middle" font-family="Arial, 'Microsoft YaHei', sans-serif" font-size="30" fill="#5B6B7C">{{DATE}}</text>
+  <circle cx="1682" cy="842" r="116" fill="none" stroke="#0BD0D9" stroke-width="16" opacity="0.28"/>
+  <circle cx="1724" cy="884" r="56" fill="#10CF9B" opacity="0.18"/>
+</svg>

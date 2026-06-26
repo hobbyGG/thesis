@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <defs>
+    <linearGradient id="chapterBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F4F8FC"/>
+      <stop offset="1" stop-color="#FFFFFF"/>
+    </linearGradient>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#chapterBg)"/>
+  <path d="M0 0H1920V278C1476 220 1160 258 862 344C526 440 244 448 0 398Z" fill="#D8F0FA"/>
+  <circle cx="620" cy="540" r="78" fill="#75B8F5" stroke="#FFFFFF" stroke-width="8"/>
+  <path d="M656 454H1262L1348 540L1262 626H656Z" fill="#0F6FC6"/>
+  <rect x="706" y="454" width="642" height="172" fill="#101820"/>
+  <text x="1027" y="565" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="72" font-weight="700" fill="#FFFFFF">{{CHAPTER_TITLE}}</text>
+  <text x="960" y="730" text-anchor="middle" font-family="'Microsoft YaHei', 'PingFang SC', Arial, sans-serif" font-size="34" fill="#5B6B7C">{{CHAPTER_DESC}}</text>
+  <text x="960" y="392" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-size="58" fill="#17406D">{{CHAPTER_NUM}}</text>
+  <circle cx="1540" cy="804" r="104" fill="none" stroke="#0BD0D9" stroke-width="18" opacity="0.22"/>
+  <circle cx="1620" cy="884" r="38" fill="#10CF9B" opacity="0.32"/>
+</svg>

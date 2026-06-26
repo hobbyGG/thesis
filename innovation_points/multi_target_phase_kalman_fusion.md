@@ -166,7 +166,15 @@ $$
 \psi_{i,k}\in(-\pi,\pi].
 $$
 
-因此，转换系数计算所需的连续相位不能直接由 $\psi_{i,k}$ 给出，而必须由当前滤波预测进行分支校正。本文首先利用 range-angle bin 的 AoA 几何关系给出可启动初值：
+因此，转换系数计算所需的连续相位不能直接由 $\psi_{i,k}$ 给出，而必须由当前滤波预测进行分支校正。本文沿用 Ma 等人的方向定义，将 $\beta_i$ 定义为 LoS 位移/相位到结构真实振动方向位移/主相位的转换系数：
+
+$$
+q_k=\beta_i d_{\mathrm{LOS},i,k},
+\qquad
+\Theta_k=\beta_i\phi_{i,k}^{\mathrm{LOS}}.
+$$
+
+本文首先利用 range-angle bin 的 AoA 几何关系给出可启动初值：
 
 $$
 \hat{\kappa}_{i,0}=\cos\theta_i,
@@ -176,150 +184,132 @@ $$
 \kappa_i=\frac{1}{\beta_i}.
 $$
 
-冷启动阶段结构近似静止，用于确定每个 target 的初始相位偏置 $b_i$，并将对应 target 的测量噪声初始化为较大值，使滤波器在初始阶段主要依赖加速度预测模型。该 AoA 初值不要求精确等于真实转换系数，只需为初始微振阶段提供可用的相位分支预测。
-
-在第 $k$ 个时刻，先由当前转换系数估计构造观测行：
-
-$$
-\mathbf{h}_{i,k}
-=
-\begin{bmatrix}
-1/\hat{\beta}_{i,k} & 0
-\end{bmatrix}
-=
-\begin{bmatrix}
-\hat{\kappa}_{i,k} & 0
-\end{bmatrix}.
-$$
+这里 $\kappa_i$ 是 $\beta_i$ 的倒数，表示结构主相位到该 target LoS 相位的投影系数或逆转换系数；它不是 Ma 论文中的 direction conversion factor 本身。冷启动阶段结构近似静止，用于确定每个 target 的初始相位偏置 $b_i$，并将对应 target 的测量噪声初始化为较大值，使滤波器在初始阶段主要依赖加速度预测模型。该 AoA 初值不要求精确等于真实转换系数，只需为初始微振阶段提供可用的相位分支预测。
 
 由 Kalman 系统模型得到结构主相位先验状态 $\mathbf{x}_k^-$ 后，可先预测第 $i$ 个 target 的 LoS 相位分支：
 
 $$
-\hat{\phi}_{i,k}^-
+\hat{\phi}_{i,k}^{\mathrm{LOS},-}
 =
-\mathbf{h}_{i,k}\mathbf{x}_k^-+b_i.
+\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i
+=
+\hat{\kappa}_{i,k}^{-}\hat{\Theta}_k^-+b_i.
 $$
 
 随后，对原始 wrapped phase 进行预测辅助相位校正：
 
 $$
-z_{i,k}^{\mathrm{corr}}
+\phi_{i,k}^{\mathrm{LOS,corr}}
 =
 \psi_{i,k}
 +
 2\pi
 \operatorname{round}
 \left(
-\frac{\hat{\phi}_{i,k}^- - \psi_{i,k}}{2\pi}
+\frac{\hat{\phi}_{i,k}^{\mathrm{LOS},-} - \psi_{i,k}}{2\pi}
 \right).
 $$
 
-这里的 $z_{i,k}^{\mathrm{corr}}$ 是由 Kalman 预测模型给出的局部连续相位观测。它不是进入 Kalman 前预先完成的全局解缠结果，也不是转换系数模块额外执行的一套独立解缠流程，而是在每个时刻由同一预测模型生成、并被后续模块共同使用的校正相位。
+这里的 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 是由 Kalman 预测模型给出的局部 LoS 连续相位。它不是结构方向主相位 $\Theta_k$，也不是进入 Kalman 前预先完成的全局解缠结果，而是在每个时刻由同一预测模型生成、并被后续模块共同使用的 LoS corrected phase。
 
-因此，本文将相位校正步骤前置到观测更新和转换系数更新之前。得到 $z_{i,k}^{\mathrm{corr}}$ 后，它同时进入两条路径。第一条路径是作为 Kalman 观测更新的连续相位观测；第二条路径是在短窗口 $\mathcal{W}_{\beta}$ 内用于转换系数自举。文档早期版本可写成未中心化的 plain LS；当前暂定主方法采用中心化并带 AoA 先验约束的窗口 LS。令：
+因此，本文将相位校正步骤前置到观测更新和转换系数更新之前。得到 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 后，它同时进入两条路径。第一条路径是乘以当前 $\beta_i$，转成结构方向主相位观测 $y_{i,k}$；第二条路径是在短窗口 $\mathcal{W}_{\beta}$ 内用于转换系数自举。文档早期版本可写成未中心化 plain LS 估计 $\kappa_i$；当前正文主方法改为估计 $\beta_i$ 的中心化窗口 LS。令：
 
 $$
-\tilde{\Theta}_{\tau}
+x_\tau
 =
-\hat{\Theta}_{\tau}-\bar{\Theta},
+\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i,
 \qquad
-\tilde{z}_{i,\tau}
+y_\tau
 =
-z_{i,\tau}^{\mathrm{corr}}-b_i-\bar{z}_i,
+\hat{\Theta}_{\tau}^{+}.
 $$
 
 则：
 
 $$
-\hat{\kappa}_{i,k+1}
+\hat{\beta}_{i,k+1}
 =
 \frac{
 \sum_{\tau\in\mathcal{W}_{\beta}}
-\tilde{\Theta}_{\tau}\tilde{z}_{i,\tau}
+x_{\tau,c}y_{\tau,c}
 +
-\lambda_\kappa \hat{\kappa}_{i,0}
+\lambda_\beta \hat{\beta}_{i,0}
 }{
 \sum_{\tau\in\mathcal{W}_{\beta}}
-\tilde{\Theta}_{\tau}^{2}
+x_{\tau,c}^{2}
 +
-\lambda_\kappa
+\lambda_\beta
 },
 \qquad
-\hat{\beta}_{i,k+1}
+\hat{\kappa}_{i,k+1}
 =
-\frac{1}{\hat{\kappa}_{i,k+1}}.
+\frac{1}{\hat{\beta}_{i,k+1}}.
 $$
 
-该设计避免了“先完整解缠相位才能估计转换系数、而 Kalman 解缠又需要转换系数”的循环依赖。实际运行时，AoA 初值使滤波器能够在冷启动后开始工作；初始微小振动到来时，预测辅助相位校正产生局部连续的 $z_{i,k}^{\mathrm{corr}}$；随着短窗口最小二乘逐步修正 $\hat{\beta}_{i,k}$，观测矩阵 $\mathbf{H}_k$ 和 LoS 相位预测同步改善，进一步增强后续分支选择的稳定性。
+该设计避免了“先完整解缠相位才能估计转换系数、而 Kalman 解缠又需要转换系数”的循环依赖。实际运行时，AoA 初值使滤波器能够在冷启动后开始工作；初始微小振动到来时，预测辅助相位校正产生局部连续的 $\phi_{i,k}^{\mathrm{LOS,corr}}$；随着短窗口最小二乘逐步修正 $\hat{\beta}_{i,k}$，LoS 相位预测和结构方向观测同步改善，进一步增强后续分支选择的稳定性。当前代码中可保留等价的 $\kappa_i=1/\beta_i$ 估计形式，但论文正文应明确 $\kappa_i$ 是逆转换系数。
 
 该步骤继承了 Ma 等人利用预测相位辅助解缠的思想，但预测相位的来源和作用范围发生了变化。Ma 等人使用单目标自身 LoS 相位预测来校正同一目标的 wrapped phase；本文则使用共享结构主相位预测，并通过各目标的转换系数映射到对应 LoS 相位分支，从而分别辅助多个 target 的 wrapped phase 校正。这样，任一 target 的分支选择都受到同一结构运动状态约束，而不依赖某个单一 target 的相位历史。
 
 ## 5. 多目标相位观测更新模型
 
-完成预测辅助相位校正后，当前时刻所有可用 target 的校正相位观测可共同参与 Kalman 更新。设当前时刻通过目标选择、相位质量评价和创新检验的可用目标集合为：
+完成预测辅助相位校正后，当前时刻所有可用 target 的 LoS corrected phase 先转换为结构方向主相位观测，再共同参与 Kalman 更新。设当前时刻通过目标选择、相位质量评价和创新检验的可用目标集合为：
 
 $$
 \mathcal{A}_k=\{i_1,i_2,\ldots,i_{m_k}\},
 $$
 
-其中 $m_k=|\mathcal{A}_k|$ 为可用目标数量。将各目标的校正相位组成观测向量：
+其中 $m_k=|\mathcal{A}_k|$ 为可用目标数量。对每个 target 先构造结构方向观测：
 
 $$
-\mathbf{z}_k^{\mathrm{corr}}
+y_{i,k}
+=
+\hat{\beta}_{i,k}^{-}
+\left(
+\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
+\right).
+$$
+
+将各目标的结构方向观测组成观测向量：
+
+$$
+\mathbf{y}_k
 =
 \begin{bmatrix}
-z_{i_1,k}^{\mathrm{corr}}\\
-z_{i_2,k}^{\mathrm{corr}}\\
+y_{i_1,k}\\
+y_{i_2,k}\\
 \vdots\\
-z_{i_{m_k},k}^{\mathrm{corr}}
+y_{i_{m_k},k}
 \end{bmatrix}.
 $$
 
 对应的线性观测模型为：
 
 $$
-\mathbf{z}_k^{\mathrm{corr}}
+\mathbf{y}_k
 =
-\mathbf{H}_k\mathbf{x}_k
-+
-\mathbf{b}_k
-+
-\mathbf{v}_k,
-$$
-
-其中：
-
-$$
-\mathbf{H}_k
-=
-\begin{bmatrix}
-1/\hat{\beta}_{i_1,k} & 0\\
-1/\hat{\beta}_{i_2,k} & 0\\
-\vdots & \vdots\\
-1/\hat{\beta}_{i_{m_k},k} & 0
-\end{bmatrix},
+\mathbf{H}\mathbf{x}_k+\mathbf{e}_k,
 \qquad
-\mathbf{b}_k
+\mathbf{H}
 =
 \begin{bmatrix}
-b_{i_1}\\
-b_{i_2}\\
-\vdots\\
-b_{i_{m_k}}
+1&0\\
+1&0\\
+\vdots&\vdots\\
+1&0
 \end{bmatrix}.
 $$
 
-若使用相对相位，则 $\mathbf{b}_k$ 可省略。Kalman 更新为：
+也即每个 target 的观测行均为 $H_i=[1,0]$。Kalman 更新为：
 
 $$
 \mathbf{K}_k
 =
 \mathbf{P}_k^-
-\mathbf{H}_k^\mathrm{T}
+\mathbf{H}^\mathrm{T}
 \left(
-\mathbf{H}_k\mathbf{P}_k^-\mathbf{H}_k^\mathrm{T}
+\mathbf{H}\mathbf{P}_k^-\mathbf{H}^\mathrm{T}
 +
-\mathbf{R}_k
+\mathbf{R}_k^{\Theta}
 \right)^{-1},
 $$
 
@@ -330,11 +320,9 @@ $$
 +
 \mathbf{K}_k
 \left(
-\mathbf{z}_k^{\mathrm{corr}}
+\mathbf{y}_k
 -
-\mathbf{H}_k\mathbf{x}_k^-
--
-\mathbf{b}_k
+\mathbf{H}\mathbf{x}_k^-
 \right),
 $$
 
@@ -344,39 +332,51 @@ $$
 \left(
 \mathbf{I}
 -
-\mathbf{K}_k\mathbf{H}_k
+\mathbf{K}_k\mathbf{H}
 \right)
 \mathbf{P}_k^-.
 $$
 
-这一更新模型是本文与 Ma 等人模型的第二个关键差异。Ma 等人的观测矩阵为单行矩阵 $[1,0]$，表示单个 target 的校正 LoS 相位直接观测状态相位；本文的观测矩阵由多个 target 的转换系数组成，每个 target 只观测结构主相位在其 LoS 方向上的投影。由此，多个 target 不再是独立估计位移后再进行平均，而是在相位域内作为同一结构状态的多通道观测共同参与滤波更新。
+这一更新模型是本文与 Ma 等人模型的第二个关键差异。Ma 等人的观测矩阵为单行矩阵 $[1,0]$，表示单个 target 的校正 LoS 相位直接观测其 LoS 相位状态；本文的状态已经定义在结构真实振动方向，因此各 target 的 LoS corrected phase 需先经 $\beta_i$ 转为结构方向主相位观测，随后以相同的 $H_i=[1,0]$ 共同观测同一个 $\Theta_k$。由此，多个 target 不再是独立估计位移后再进行平均，而是在结构方向相位域内作为同一结构状态的多通道观测共同参与滤波更新。
 
-该处理具有三个直接优势。第一，滤波状态不依赖任何单一目标，当某个 target 噪声升高或临时失效时，只需从 $\mathcal{A}_k$ 中移除该观测，状态仍可由其他 target 和加速度维持。第二，不同 target 的方向转换系数被显式保留在观测矩阵中，避免了先将各目标相位转换为位移再平均时对转换误差和相位分支误差的掩盖。第三，多目标观测共同约束同一主相位状态，可在相位解缠阶段利用目标间冗余性抑制单目标误判造成的分支跳变。
+该处理具有三个直接优势。第一，滤波状态不依赖任何单一目标，当某个 target 噪声升高或临时失效时，只需从 $\mathcal{A}_k$ 中移除该观测，状态仍可由其他 target 和加速度维持。第二，不同 target 的方向转换系数通过 $y_{i,k}=\beta_i(\phi_{i,k}^{\mathrm{LOS,corr}}-b_i)$ 显式进入观测构造和噪声传播，避免了先将各目标位移粗略平均时对转换误差和相位分支误差的掩盖。第三，多目标观测共同约束同一主相位状态，可在相位解缠阶段利用目标间冗余性抑制单目标误判造成的分支跳变。
+
+若需要连接当前代码实现，可补充等价的 LoS-space 写法：
+
+$$
+\phi_{i,k}^{\mathrm{LOS}}
+=
+\beta_i^{-1}\Theta_k+b_i
+=
+\kappa_i\Theta_k+b_i.
+$$
+
+该形式对应代码中的 $H_i=[\kappa_i,0]$。它与先构造 $y_{i,k}=\beta_i(\phi_{i,k}^{\mathrm{LOS,corr}}-b_i)$ 再写 $y_{i,k}=\Theta_k$ 在 $\beta_i$ 已知时等价；区别在于观测噪声协方差位于 LoS 相位坐标还是结构主相位坐标。
 
 ## 6. 目标可靠性与观测噪声建模
 
-在多目标融合中，不同 target 的相位质量通常并不相同。目标幅值、信噪比、IQ 轨迹规则性、同 rangeBin 复合散射稳定性、转换系数标定误差和短时遮挡都会影响其观测可信度。因此，本文可将观测噪声协方差写为随时间变化的矩阵：
+在多目标融合中，不同 target 的相位质量通常并不相同。目标幅值、信噪比、IQ 轨迹规则性、同 rangeBin 复合散射稳定性、转换系数标定误差和短时遮挡都会影响其观测可信度。由于本文正文主观测写在结构方向，观测噪声也应写为结构主相位坐标下的协方差：
 
 $$
-\mathbf{R}_k
+\mathbf{R}_k^{\Theta}
 =
-\operatorname{cov}(\mathbf{v}_k).
+\operatorname{cov}(\mathbf{e}_k).
 $$
 
-最简单情形下，可令 $\mathbf{R}_k$ 为对角矩阵：
+最简单情形下，可令 $\mathbf{R}_k^{\Theta}$ 为对角矩阵：
 
 $$
-\mathbf{R}_k
+\mathbf{R}_k^{\Theta}
 =
 \operatorname{diag}
 \left(
-R_{1,k},R_{2,k},\ldots,R_{m_k,k}
+R_{1,k}^{\Theta},R_{2,k}^{\Theta},\ldots,R_{m_k,k}^{\Theta}
 \right),
 $$
 
-其中 $R_{i,k}$ 表示第 $i$ 个 target 当前相位观测的不确定度。
+其中 $R_{i,k}^{\Theta}$ 表示第 $i$ 个 target 转换到结构主相位坐标后的观测不确定度。
 
-本文主方法采用固定/标定 $\mathbf{Q}$ 与 posterior-residual / quality-gated confidence-aware target-wise effective $\mathbf{R}_k$ 的分工。也就是说，$\mathbf{Q}$ 表示结构主相位动力学预测误差，主要由加速度传感器噪声、同步误差和状态模型未建模项决定，属于全局标定参数；$\mathbf{R}_k$ 表示 radar target 相位观测误差与转换系数不确定性共同形成的等效观测噪声，受目标 SNR、遮挡、复合散射、AoA/转换系数误差和短时观测条件影响，更适合作为在线估计对象。桥梁 acceleration+strain displacement estimation 的相关工作也采用类似分工：过程噪声可依据传感器或模型误差预先给定，而测量噪声随观测条件变化进行自适应估计。
+本文主方法采用固定/标定 $\mathbf{Q}$ 与 posterior-residual / quality-gated confidence-aware target-wise effective $\mathbf{R}_k^{\Theta}$ 的分工。也就是说，$\mathbf{Q}$ 表示结构主相位动力学预测误差，主要由加速度传感器噪声、同步误差和状态模型未建模项决定，属于全局标定参数；$\mathbf{R}_k^{\Theta}$ 表示 radar target LoS 相位观测误差与转换系数不确定性传播到结构方向后共同形成的等效观测噪声，受目标 SNR、遮挡、复合散射、AoA/转换系数误差和短时观测条件影响，更适合作为在线估计对象。桥梁 acceleration+strain displacement estimation 的相关工作也采用类似分工：过程噪声可依据传感器或模型误差预先给定，而测量噪声随观测条件变化进行自适应估计。
 
 在当前仿真实现中，$\mathbf{Q}$ 的标定采用候选网格而不是单个硬编码常数。具体地，对候选 $q \in \mathcal{Q}$ 分别运行相同的结构主相位 Kalman 滤波器，并以目标级 prediction innovation energy 作为无真值标定准则：
 
@@ -390,7 +390,7 @@ q^\star
 \mathbf{Q}=q^\star\mathbf{Q}_0.
 $$
 
-该过程只使用算法可见的 wrapped phase、measured acceleration、selected targets、初始 $\hat{\beta}_i$ 和自适应 $\mathbf{R}_k$，不使用真实位移或真值 RMSE。选定 $q^\star$ 后，在线滤波过程中 $\mathbf{Q}$ 保持不变；因此它仍属于固定/标定 $\mathbf{Q}$ 策略，而不是逐时刻 adaptive $\mathbf{Q}_k$。
+该过程只使用算法可见的 wrapped phase、measured acceleration、selected targets、初始 $\hat{\beta}_i$ 和自适应 $\mathbf{R}_k^{\Theta}$，不使用真实位移或真值 RMSE。选定 $q^\star$ 后，在线滤波过程中 $\mathbf{Q}$ 保持不变；因此它仍属于固定/标定 $\mathbf{Q}$ 策略，而不是逐时刻 adaptive $\mathbf{Q}_k$。
 
 为使初始阶段的 AoA 转换系数误差和低 SNR target 不会被滤波器过度信任，本文令每个 target 的测量噪声初值由目标初始质量给出。若可获得初始 SNR 或 range-angle peak quality，可写为：
 
@@ -416,15 +416,13 @@ Kalman 更新后，本文不再直接将预测创新作为第 $i$ 个 target 的
 $$
 e_{i,k}^{-}
 =
-z_{i,k}^{\mathrm{corr}}
+y_{i,k}
 -
-\left(
-\mathbf{h}_{i,k}\mathbf{x}_k^-+b_i
-\right),
+H_i\mathbf{x}_k^-,
 \qquad
-\mathbf{h}_{i,k}=
+H_i=
 \begin{bmatrix}
-1/\hat{\beta}_{i,k}&0
+1&0
 \end{bmatrix}.
 $$
 
@@ -435,11 +433,9 @@ $$
 $$
 \varepsilon_{i,k}
 =
-z_{i,k}^{\mathrm{corr}}
+y_{i,k}
 -
-\left(
-\mathbf{h}_{i,k}\mathbf{x}_k^+ + b_i
-\right).
+H_i\mathbf{x}_k^+.
 $$
 
 参考 residual-based adaptive Kalman filtering，可得到第 $i$ 个 target 的瞬时基础测量噪声估计：
@@ -449,7 +445,7 @@ $$
 =
 \varepsilon_{i,k}^{2}
 +
-\mathbf{h}_{i,k}\mathbf{P}_k^+\mathbf{h}_{i,k}^{\mathrm{T}}.
+H_i\mathbf{P}_k^+H_i^{\mathrm{T}}.
 $$
 
 仅使用后验残差仍可能在复合散射或污染观测被 Kalman 更新吸收时低估测量噪声。为避免测量噪声更新只由单一残差量驱动，本文进一步引入 target quality gate。令
@@ -458,7 +454,7 @@ $$
 \rho_{i,k}\in[0,1]
 $$
 
-表示第 $i$ 个 target 的瞬时观测质量，可由 SNR、presence、range-angle 位置稳定性、IQ 幅值稳定性和 $\kappa_i$ 置信度等算法可见量构造。$\rho_{i,k}$ 越大，说明该 target 当前越可信。定义
+表示第 $i$ 个 target 的瞬时观测质量，可由 SNR、presence、range-angle 位置稳定性、IQ 幅值稳定性和 $\beta_i$ 置信度等算法可见量构造。若连接当前代码实现，可把 $\kappa_i=1/\beta_i$ 的置信度作为等价实现指标，但正文不把 $\kappa_i$ 称为转换系数本身。$\rho_{i,k}$ 越大，说明该 target 当前越可信。定义
 
 $$
 \Delta R_{i,k}
@@ -500,26 +496,22 @@ $$
 
 上述处理的主要参考来源包括 Akhlaghi、Zhou 和 Huang 的 *Adaptive Adjustment of Noise Covariance in Kalman Filter for Dynamic State Estimation*、Mehra 对 adaptive filtering / covariance matching 方法的分类，以及 Li 等人在 INS/GNSS 紧组合中利用多观测通道估计 measurement noise covariance 的工作。已有文献提供的基础思想是：innovation 与 residual 均可用于噪声统计匹配，但 prediction innovation 不能被简单等同于 measurement noise；residual-based 估计更适合更新 $\mathbf{R}$，而多观测通道的 $\mathbf{R}$ 可根据各通道观测质量分别调整。
 
-本文并非直接照搬上述 adaptive Kalman 公式，而是在毫米波雷达-加速度结构位移估计场景中进行了三点改造。第一，已有方法通常面向单一传感器通道或 GNSS/PMU 等固定观测方程，本文将其改写为多 target 相位观测下的 target-wise 标量噪声更新，使每个 radar target 都拥有独立的 $R_{i,k}$；同时使用后验协方差投影 $\mathbf{h}_{i,k}\mathbf{P}_k^+\mathbf{h}_{i,k}^{\mathrm{T}}$ 表征 Kalman 更新后仍未被状态吸收的相位不确定性，避免将先验状态不确定性重复归入测量噪声。第二，本文不把 residual-based 更新单独作为充分条件，而是引入由 SNR、presence、range-angle 稳定性、IQ 稳定性和 $\kappa_i$ 置信度构成的 target quality gate，只允许低质量 target 推动 $R_{i,k}$ 快速上涨，从而避免强结构响应阶段将过程模型误差误判为 radar measurement noise。第三，本文进一步把 AoA cold start 和在线转换系数自举中的 $\kappa_i$ 不确定性传播到有效测量噪声中，使观测权重同时反映相位观测质量和转换系数可信度。也就是说，参考文献支撑的是“innovation/residual 与 Q/R 归因”的统计原则，本文的改进是将该原则嵌入多目标结构主相位 Kalman 框架，并服务于 AoA 冷启动、相位分支校正和在线转换系数自举。
+本文并非直接照搬上述 adaptive Kalman 公式，而是在毫米波雷达-加速度结构位移估计场景中进行了三点改造。第一，已有方法通常面向单一传感器通道或 GNSS/PMU 等固定观测方程，本文将其改写为多 target 相位观测下的 target-wise 标量噪声更新，使每个 radar target 都拥有独立的 $R_{i,k}^{\Theta}$；同时使用后验协方差投影 $H_i\mathbf{P}_k^+H_i^{\mathrm{T}}$ 表征 Kalman 更新后仍未被状态吸收的结构主相位不确定性，避免将先验状态不确定性重复归入测量噪声。第二，本文不把 residual-based 更新单独作为充分条件，而是引入由 SNR、presence、range-angle 稳定性、IQ 稳定性和 $\beta_i$ 置信度构成的 target quality gate，只允许低质量 target 推动 $R_{i,k}^{\Theta}$ 快速上涨，从而避免强结构响应阶段将过程模型误差误判为 radar measurement noise。第三，本文进一步把 AoA cold start 和在线转换系数自举中的 $\beta_i$ 不确定性传播到结构方向有效测量噪声中，使观测权重同时反映相位观测质量和转换系数可信度。也就是说，参考文献支撑的是“innovation/residual 与 Q/R 归因”的统计原则，本文的改进是将该原则嵌入多目标结构主相位 Kalman 框架，并服务于 AoA 冷启动、相位分支校正和在线转换系数自举。
 
-由于本文的完整链路以 AoA 结果作为转换系数初值，冷启动阶段 $\kappa_i$ 尚未完全由相位数据自举收敛。为避免此时过度信任观测模型，主方法将转换系数不确定性传播到等效观测噪声中：
+由于本文的完整链路以 AoA 结果作为转换系数初值，冷启动阶段 $\beta_i$ 尚未完全由相位数据自举收敛。为避免此时过度信任观测模型，主方法将转换系数不确定性传播到结构方向等效观测噪声中：
 
 $$
-R_{i,k}^{\mathrm{eff}}
+R_{i,k}^{\Theta}
 =
-\sigma_{\phi_i,k}^2
+\left(\hat{\beta}_{i,k}^{-}\right)^2R_{i,k}^{\mathrm{LOS}}
 +
-\left[
-(\hat{\Theta}_k^-)^2
-+
-P_{\Theta\Theta,k}^-
-\right]
-\sigma_{\kappa_i,k}^2,
-\qquad
-\kappa_i=\frac{1}{\beta_i}.
+\left(
+\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
+\right)^2
+\sigma_{\beta_i,k}^{2}.
 $$
 
-其中 $\sigma_{\phi_i,k}^2$ 表示由 posterior residual 与 target quality gate 更新得到的基础相位测量噪声，$\sigma_{\kappa_i,k}^2$ 表示转换系数倒数的不确定度，$P_{\Theta\Theta,k}^-$ 为预测主相位方差。该式说明，转换系数误差会随结构主相位幅值及状态不确定度放大，并最终表现为观测模型误差。这一点与本文前述复合 target 等效转换系数稳定性分析一致。额外的 $\kappa_i$ 置信度项只用于描述 AoA cold start 至短窗口自举收敛过程中的观测方程不确定性。该处理是为了支撑本文的 AoA cold start 与在线转换系数自举，并不作为独立创新点展开。
+其中 $R_{i,k}^{\mathrm{LOS}}$ 表示 LoS 相位测量噪声，$\sigma_{\beta_i,k}^{2}$ 表示 LoS 到结构方向转换系数的不确定度。该式说明，LoS 相位噪声会被 $\beta_i^2$ 放大，$\beta_i$ 本身的不确定也会随当前 LoS corrected phase 幅值传播为结构方向观测误差。这一点与本文前述复合 target 等效转换系数稳定性分析一致。若采用当前代码中的 LoS-space 等价实现，可写为 $\phi_{i,k}^{\mathrm{LOS}}=\kappa_i\Theta_k+b_i$，并将 $\kappa_i=1/\beta_i$ 的方差通过 $((\hat{\Theta}_k^-)^2+P_{\Theta\Theta,k}^-)\sigma_{\kappa_i,k}^2$ 加入有效测量噪声。该处理是坐标系不同导致的等价实现，不改变论文中 $\beta_i$ 的转换方向定义。
 
 进一步地，若多个 target 来自同一 rangeBin 或同一分离过程，其相位误差可能存在相关性。此时不宜简单假设所有 target 观测相互独立，否则会因为观测数量增加而使 Kalman 过度自信。可将 $\mathbf{R}_k$ 写成：
 
@@ -540,11 +532,11 @@ $$
 
 本文方法并非脱离 Ma 等人框架重新构造一套滤波器，而是在其 acceleration-aided phase denoising and unwrapping 思想上进行多目标化扩展。二者的共同点在于：均将相位及其变化率作为 Kalman 状态，均利用加速度进行相位预测，均通过预测相位对 wrapped phase 进行分支校正，并通过 Kalman 更新实现相位降噪。
 
-本文的主要改进在于状态相位的物理含义和观测组织方式发生变化。Ma 等人将状态相位定义为单一目标的 LoS 连续相位，因此加速度输入需要根据该目标方向转换系数映射到 LoS 相位域，观测模型也只对应一个 target。本文将状态相位定义为结构振动方向主相位，使加速度可以直接参与状态预测；各 target 的方向转换关系则被移入观测模型，通过 $1/\beta_i$ 连接主相位和目标 LoS 相位。这样，多目标差异不再体现在多个互不兼容的状态定义中，而是体现在同一共享状态下的多行观测矩阵中。
+本文的主要改进在于状态相位的物理含义和观测组织方式发生变化。Ma 等人将状态相位定义为单一目标的 LoS 连续相位，因此加速度输入需要根据该目标方向转换系数映射到 LoS 相位域，观测模型也只对应一个 target。本文将状态相位定义为结构振动方向主相位，使加速度可以直接参与状态预测；各 target 的方向转换关系则用于两处：相位分支选择时用 $1/\beta_i$ 将结构主相位预测投影回 LoS，相位观测更新时用 $\beta_i$ 将 LoS corrected phase 转换为结构方向主相位观测。这样，多目标差异不再体现在多个互不兼容的状态定义中，而是体现在同一共享状态下的 target-wise 观测构造和噪声传播中。
 
-这种改写解决了 Ma 单目标框架在多目标倒挂式监测中的三个问题。第一，不同 target 具有不同转换系数，单一 LoS 相位状态无法同时作为所有 target 的自然状态；本文通过主相位状态避免了该矛盾。第二，单目标状态对目标遮挡和相位噪声敏感；本文允许观测集合 $\mathcal{A}_k$ 随时间动态变化，使可靠 target 进入更新、不可靠 target 被降权或剔除。第三，单目标模型只能利用一个 wrapped phase 进行分支校正；本文利用共享主相位预测分别校正多个 target 的 wrapped phase，并将得到的 $z_{i,k}^{\mathrm{corr}}$ 同时用于 Kalman 观测更新和转换系数最小二乘自举，从而提高解缠、降噪和转换系数收敛的闭环稳定性。
+这种改写解决了 Ma 单目标框架在多目标倒挂式监测中的三个问题。第一，不同 target 具有不同转换系数，单一 LoS 相位状态无法同时作为所有 target 的自然状态；本文通过主相位状态避免了该矛盾。第二，单目标状态对目标遮挡和相位噪声敏感；本文允许观测集合 $\mathcal{A}_k$ 随时间动态变化，使可靠 target 进入更新、不可靠 target 被降权或剔除。第三，单目标模型只能利用一个 wrapped phase 进行分支校正；本文利用共享主相位预测分别校正多个 target 的 wrapped phase，并将得到的 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 同时用于构造结构方向观测和自举 $\beta_i$，从而提高解缠、降噪和转换系数收敛的闭环稳定性。
 
-因此，本文方法可概括为：以结构振动方向主相位为共享状态，以加速度为状态预测输入，利用当前预测状态提前对多 target wrapped phase 进行分支校正，并将统一得到的 $z_{i,k}^{\mathrm{corr}}$ 同时作为 Kalman 观测更新和转换系数自举更新的输入，在相位域内完成多参考目标的闭环融合。最终，滤波得到的主相位可直接转换为结构位移：
+因此，本文方法可概括为：以结构振动方向主相位为共享状态，以加速度为状态预测输入，利用当前预测状态提前对多 target wrapped phase 进行分支校正，得到 LoS corrected phase $\phi_{i,k}^{\mathrm{LOS,corr}}$；随后一方面用 $\beta_i(\phi_{i,k}^{\mathrm{LOS,corr}}-b_i)$ 构造结构方向观测参与 Kalman 更新，另一方面用 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 和 $\Theta_k^+$ 自举 $\beta_i$，在相位域内完成多参考目标的闭环融合。最终，滤波得到的主相位可直接转换为结构位移：
 
 $$
 \hat{q}_k
@@ -589,12 +581,15 @@ J(q),
 \mathbf{Q}(q^\star).
 $$
 
-若存在 LDV、位移台或其他参考位移，可令 $J(q)$ 为估计位移与参考位移之间的 RMSE。若不存在外部参考，则可采用多目标相位一致性、解缠异常次数或 innovation 能量作为选择准则。例如，可将各 target 校正后的 LoS 相位反算为主相位观测：
+若存在 LDV、位移台或其他参考位移，可令 $J(q)$ 为估计位移与参考位移之间的 RMSE。若不存在外部参考，则可采用多目标相位一致性、解缠异常次数或 innovation 能量作为选择准则。例如，可将各 target 的 LoS corrected phase 转换为结构方向主相位观测：
 
 $$
 \tilde{\Theta}_{i,k}
 =
-\beta_i z_{i,k}^{\mathrm{corr}},
+\beta_i
+\left(
+\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
+\right),
 $$
 
 并定义多目标一致性代价：
@@ -642,7 +637,7 @@ $$
 
 在其实验中，候选值可取 $Q_i=10^j$，并在初始数据段上完成选择。选定后，该 $Q_{\mathrm{opt}}$ 在后续连续监测中保持不变。因此，Ma 等人的方法虽然称为噪声参数优化，但其实质是一次性离线标定，而非在线自适应过程噪声估计。
 
-对于本文的多目标结构主相位模型，Ma 的能量最小化思想可作为固定 $q$ 的基线选择方法，但不宜直接作为在线自适应准则。原因在于，本文状态 $\Theta_k$ 表示结构振动方向主相位，其能量大小不仅受解缠错误影响，也受真实结构振动幅值影响。如果在滑动窗口内直接最小化 $\sum \hat{\Theta}_k^2$ 或 $\sum (z_{i,k}^{\mathrm{corr}})^2$，可能会把真实大幅振动误判为不稳定估计，从而倾向于选择过小或过强约束的过程噪声。另一方面，本文已有多个 target 的相位观测，过程噪声选择不应只依赖单通道相位能量，而应利用多目标之间的一致性和 Kalman innovation 统计量。
+对于本文的多目标结构主相位模型，Ma 的能量最小化思想可作为固定 $q$ 的基线选择方法，但不宜直接作为在线自适应准则。原因在于，本文状态 $\Theta_k$ 表示结构振动方向主相位，其能量大小不仅受解缠错误影响，也受真实结构振动幅值影响。如果在滑动窗口内直接最小化 $\sum \hat{\Theta}_k^2$ 或 $\sum (\phi_{i,k}^{\mathrm{LOS,corr}})^2$，可能会把真实大幅振动误判为不稳定估计，从而倾向于选择过小或过强约束的过程噪声。另一方面，本文已有多个 target 的相位观测，过程噪声选择不应只依赖单通道相位能量，而应利用多目标之间的一致性和 Kalman innovation 统计量。
 
 因此，若后续希望在第一版固定 $\mathbf{Q}$ 的基础上进一步提高鲁棒性，可将滑动窗口自适应 $q$ 作为展望研究，而不纳入当前主方法。设滑动窗口为 $\mathcal{W}_t$，在窗口内对候选过程噪声强度 $q_j$ 运行或局部重放滤波递推，构造代价函数：
 
@@ -663,11 +658,9 @@ $$
 $$
 \mathbf{r}_k
 =
-\mathbf{z}_k^{\mathrm{corr}}
+\mathbf{y}_k
 -
-\mathbf{H}_k\mathbf{x}_k^-
--
-\mathbf{b}_k,
+\mathbf{H}\mathbf{x}_k^-,
 $$
 
 其理论协方差为：
@@ -675,9 +668,9 @@ $$
 $$
 \mathbf{S}_k
 =
-\mathbf{H}_k\mathbf{P}_k^-\mathbf{H}_k^\mathrm{T}
+\mathbf{H}\mathbf{P}_k^-\mathbf{H}^\mathrm{T}
 +
-\mathbf{R}_k.
+\mathbf{R}_k^{\Theta}.
 $$
 
 则可定义归一化 innovation 能量：
@@ -691,7 +684,7 @@ J_{\mathrm{innov}}(q_j)
 \mathbf{r}_k.
 $$
 
-若 $\mathbf{R}_k$ 设定合理，则该量可反映预测模型与多目标观测之间的统计一致性。当窗口内归一化 innovation 长期偏大时，说明状态预测误差可能被低估，可适当增大 $q$；当其长期偏小时，则说明过程噪声可能偏大或观测噪声被高估，可适当减小 $q$。实际实现中，应先通过 target gating 剔除明显异常观测，避免将遮挡、错误分支或低质量 target 误解释为过程噪声增大。
+若 $\mathbf{R}_k^{\Theta}$ 设定合理，则该量可反映预测模型与多目标结构方向观测之间的统计一致性。当窗口内归一化 innovation 长期偏大时，说明状态预测误差可能被低估，可适当增大 $q$；当其长期偏小时，则说明过程噪声可能偏大或观测噪声被高估，可适当减小 $q$。实际实现中，应先通过 target gating 剔除明显异常观测，避免将遮挡、错误分支或低质量 target 误解释为过程噪声增大。
 
 多目标一致性项可写为：
 
@@ -702,10 +695,7 @@ J_{\mathrm{cons}}(q_j)
 \sum_{i\in\mathcal{A}_k}
 \rho_{i,k}
 \left(
-\beta_i
-\left(
-z_{i,k}^{\mathrm{corr}}-b_i
-\right)
+y_{i,k}
 -
 \hat{\Theta}_k
 \right)^2.
@@ -721,7 +711,7 @@ n_{i,k}
 \operatorname{round}
 \left(
 \frac{
-\hat{\phi}_{i,k}^- - z_{i,k}
+\hat{\phi}_{i,k}^{\mathrm{LOS},-} - \psi_{i,k}
 }{2\pi}
 \right),
 $$
@@ -766,4 +756,4 @@ $$
 
 其中 $\eta_q\in(0,1]$ 为更新步长。这样，$q_t$ 只随窗口统计特性缓慢变化，而不会在单帧异常观测下突然改变。
 
-综上，本文主算法不采用 $Q$ 与 $R$ 同时在线自适应的表述，而采用 calibrated $\mathbf{Q}$ + SNR-informed initial $R_{i,0}$ + confidence-aware target-wise online $R_{i,k}^{\mathrm{eff}}$ 的分工。固定/标定 $\mathbf{Q}$ 保持结构主相位动力学模型的统计尺度，在线 $R_{i,k}^{\mathrm{eff}}$ 则吸收目标观测质量和 AoA cold start 转换系数不确定性随时间变化带来的影响。滑动窗口自适应 $q$ 仅作为进一步提高方案或展望。与 Ma 的单目标相位能量最小化相比，该扩展若在未来引入，也应利用多目标 innovation、一致性和分支稳定性，而不是仅依赖单一相位序列的能量大小。
+综上，本文主算法不采用 $Q$ 与 $R$ 同时在线自适应的表述，而采用 calibrated $\mathbf{Q}$ + SNR-informed initial $R_{i,0}^{\Theta}$ + confidence-aware target-wise online $R_{i,k}^{\Theta}$ 的分工。固定/标定 $\mathbf{Q}$ 保持结构主相位动力学模型的统计尺度，在线 $R_{i,k}^{\Theta}$ 则吸收目标观测质量和 AoA cold start 转换系数不确定性随时间变化带来的影响。滑动窗口自适应 $q$ 仅作为进一步提高方案或展望。与 Ma 的单目标相位能量最小化相比，该扩展若在未来引入，也应利用多目标 innovation、一致性和分支稳定性，而不是仅依赖单一相位序列的能量大小。

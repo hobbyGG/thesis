@@ -48,7 +48,15 @@ $$
 
 ### 0.2 AoA 冷启动用于打破转换系数与相位校正死锁
 
-对第 $i$ 个 target，用 AoA 给出转换系数倒数的几何初值：
+Ma 论文里的 direction conversion factor 本文统一记为 $\beta_i$，方向是：
+
+$$
+q_k=\beta_i d_{i,k}^{\mathrm{LOS}},
+\qquad
+\Theta_k=\beta_i\phi_{i,k}^{\mathrm{LOS}}.
+$$
+
+对第 $i$ 个 target，用 AoA 给出 $\beta_i$ 倒数的几何初值：
 
 $$
 \hat{\kappa}_{i,0}=\cos\theta_i,
@@ -56,7 +64,7 @@ $$
 \hat{\beta}_{i,0}=1/\hat{\kappa}_{i,0}.
 $$
 
-这里 $\kappa_i=1/\beta_i$ 表示结构主相位到该 target LoS 相位的投影系数。AoA 初值不是最终精确转换系数，只用于启动 Kalman 闭环。冷启动阶段结构近似静止，用于估计相位偏置 $b_i$，并初始化较大的 target-wise 测量噪声 $r_{i,0}$。
+这里 $\kappa_i=1/\beta_i$ 表示结构主相位到该 target LoS 相位的投影系数/逆转换系数，不是 Ma 的 direction conversion factor 本身。AoA 初值不是最终精确转换系数，只用于启动 Kalman 闭环。冷启动阶段结构近似静止，用于估计相位偏置 $b_i$，并初始化较大的 target-wise 测量噪声 $r_{i,0}$。
 
 ### 0.3 Kalman 状态是结构主相位，不是 Ma 的单 target LoS 相位
 
@@ -95,78 +103,75 @@ $$
 
 ### 0.4 预测辅助相位校正同时服务观测更新和转换系数自举
 
-由当前转换系数构造第 $i$ 个 target 的观测行：
+雷达 phase wrapping 发生在 LoS 相位空间，因此分支选择时需要先把结构主相位预测投影回 LoS：
 
 $$
-\mathbf{h}_{i,k}
+\hat{\phi}_{i,k}^{\mathrm{LOS},-}
 =
-\begin{bmatrix}
-1/\hat{\beta}_{i,k} & 0
-\end{bmatrix}
-=
-\begin{bmatrix}
-\hat{\kappa}_{i,k} & 0
-\end{bmatrix}.
+\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i.
 $$
 
-预测模型先给出该 target 的 LoS 相位先验：
+然后对原始 wrapped phase 执行预测辅助相位校正：
 
 $$
-\hat{\phi}_{i,k}^-=
-\mathbf{h}_{i,k}\mathbf{x}_k^-+b_i.
-$$
-
-然后对原始 wrapped phase 执行统一的预测辅助相位校正：
-
-$$
-z_{i,k}^{\mathrm{corr}}
+\phi_{i,k}^{\mathrm{LOS,corr}}
 =
 \psi_{i,k}
 +
 2\pi
 \operatorname{round}
 \left(
-\frac{\hat{\phi}_{i,k}^{-}-\psi_{i,k}}{2\pi}
+\frac{\hat{\phi}_{i,k}^{\mathrm{LOS},-}-\psi_{i,k}}{2\pi}
 \right).
 $$
 
-同一个 $z_{i,k}^{\mathrm{corr}}$ 同时进入两条路径：
+注意：$\phi_{i,k}^{\mathrm{LOS,corr}}$ 仍是第 $i$ 个 target 的 LoS 连续相位，不是结构主相位 $\Theta_k$。
 
-1. 作为 Kalman 观测模型的连续相位观测：
+同一个 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 同时进入两条路径：
+
+1. 乘以 $\beta_i$ 构造结构方向主相位观测：
 
 $$
-\mathbf{z}_{k}^{\mathrm{corr}}
+y_{i,k}
 =
-\mathbf{H}_k\mathbf{x}_k+\mathbf{b}_k+\mathbf{v}_k.
+\hat{\beta}_{i,k}^{-}
+\left(
+\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
+\right).
 $$
 
-2. 作为转换系数短窗口最小二乘自举的数据：
+Kalman 观测模型写在结构方向：
 
 $$
-\hat{\kappa}_{i,k+1}
+y_{i,k}=\Theta_k+e_{i,k},
+\qquad
+H_i=[1,0].
+$$
+
+2. 作为转换系数短窗口最小二乘自举的数据。令 $x_\tau=\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i$，$y_\tau=\hat{\Theta}_{\tau}^{+}$，中心化后：
+
+$$
+\hat{\beta}_{i,k+1}
 =
 \frac{
 \sum_{\tau\in\mathcal{W}_{\beta}}
-\hat{\Theta}_{\tau}
-\left(
-z_{i,\tau}^{\mathrm{corr}}-b_i
-\right)
+x_{\tau,c}y_{\tau,c}
 }{
 \sum_{\tau\in\mathcal{W}_{\beta}}
-\hat{\Theta}_{\tau}^{2}
+x_{\tau,c}^{2}
 },
 \qquad
-\hat{\beta}_{i,k+1}=1/\hat{\kappa}_{i,k+1}.
+\hat{\kappa}_{i,k+1}=1/\hat{\beta}_{i,k+1}.
 $$
 
-因此，本文不是先独立完成一段完整相位解缠再标定 $\beta$，而是在 Kalman 闭环内生成局部连续校正相位，并让该校正相位同时支撑观测更新与转换系数更新。
+因此，本文不是先独立完成一段完整相位解缠再标定 $\beta$，而是在 Kalman 闭环内生成局部 LoS corrected phase，并让该校正相位同时支撑结构方向观测更新与转换系数更新。当前代码可保留 LoS-space 等价实现 $H_i=[\kappa_i,0]$，但文档中必须明确 $\kappa_i=1/\beta_i$。
 
 ### 0.5 当前噪声策略
 
-第一版采用固定 $Q$、自适应 target-wise $R$。更新后可用残差：
+第一版采用固定 $Q$、自适应 target-wise $R^\Theta$。结构方向残差可写为：
 
 $$
-s_{i,k}=z_{i,k}^{\mathrm{corr}}-(\mathbf{h}_{i,k}\mathbf{x}_k+b_i)
+s_{i,k}=y_{i,k}-H_i\mathbf{x}_k
 $$
 
 调节：
@@ -182,7 +187,7 @@ r_{i,k+1}
 \left(
 s_{i,k}^{2}
 +
-\mathbf{h}_{i,k}\mathbf{P}_k\mathbf{h}_{i,k}^{T}
+H_i\mathbf{P}_kH_i^{T}
 \right),
 r_{\min},
 r_{\max}
@@ -714,7 +719,7 @@ $$
 1. 将整体方法整理成 Method 章节结构：系统模型、target 提取、多 target 观测构造、AoA 冷启动、预测辅助相位校正、转换系数自举、固定 $Q$ 与自适应 $R$。
 2. 明确第一版算法的可复现实验参数：滑动窗口长度、角度合并阈值、结构频带阈值、$Q$ 的遍历范围、$R$ 的上下界和遗忘因子。
 3. 设计 ablation study：单 target vs 多 target；无 AoA 冷启动 vs AoA 冷启动；固定转换系数 vs 在线自举；固定 $R$ vs 自适应 $R$；是否使用 Doppler/chirp 间相位变化率作为辅助先验。
-4. 设计闭环有效性验证：初始微振阶段 $\hat{\beta}_{i,k}$ 的收敛曲线、$R_i$ 的自动回落、$z_{i,k}^{\mathrm{corr}}$ 的分支选择错误率、多 target innovation 一致性。
+4. 设计闭环有效性验证：初始微振阶段 $\hat{\beta}_{i,k}$ 的收敛曲线、$R_i$ 的自动回落、$\phi_{i,k}^{\mathrm{LOS,corr}}$ 的分支选择错误率、多 target innovation 一致性。
 5. 继续保留 Ma 等人方法作为 baseline：Ma 式单 target LoS phase Kalman + 离线转换因子；本文作为结构主相位多 target Kalman + AoA 冷启动 + 在线转换系数自举。
 
 请在新对话中不要重新推翻上述共识，除非发现明确数学错误。优先在这些共识上继续推进方法章节写作、公式统一和实验方案设计。
