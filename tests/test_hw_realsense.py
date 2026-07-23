@@ -33,6 +33,8 @@
 
 import pytest
 
+pytest.importorskip("pyrealsense2")
+
 import pathlib
 
 from mmwavecapture.capture.realsense import Realsense

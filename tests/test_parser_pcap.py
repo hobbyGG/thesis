@@ -35,6 +35,8 @@ import pathlib
 
 import pytest
 
+pytest.importorskip("disspcap")
+
 import mmwavecapture.parser.pcap
 from mmwavecapture.parser.pcap import PcapCparser
 from mmwavecapture.parser.pcap import parser

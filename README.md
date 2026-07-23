@@ -83,6 +83,19 @@ See the full documentation:
 [mmwave-capture-std Documentation](https://mmwave-capture-std.readthedocs.io/en/latest/index.html)
 for more information.
 
+Capture-only fork notes
+-----------------------
+
+This checkout keeps the acquisition path independent from offline radar
+processing. The default install contains only the IWR1843/DCA1000 control and
+capture dependencies; the original PCAP parser and RealSense support are not
+required for recording `dca.pcap`.
+
+The acquisition lifecycle has additional failure cleanup and mock coverage for
+DCA command packets, radar UART commands, tcpdump startup, finite-capture
+timeouts, and interrupted sensor startup. Before using the hardware under WSL,
+follow [WSL_CAPTURE.md](WSL_CAPTURE.md) and run `mmwavecapture-preflight`.
+
 Links
 -----
 

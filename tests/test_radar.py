@@ -38,6 +38,8 @@ import pathlib
 
 import mmwavecapture.radar
 
+pytestmark = pytest.mark.manual
+
 
 @pytest.fixture
 def radar_config():

@@ -172,22 +172,33 @@ class Capture:
 
     @logger.catch(reraise=True)
     def capture(self) -> None:
-        logger.info("Preparing capture hardware")
-        for hw in self._cap_hw:
-            hw.prepare_capture()
+        try:
+            logger.info("Preparing capture hardware")
+            for hw in self._cap_hw:
+                hw.prepare_capture()
 
-        logger.info("Starting capture hardware")
-        for hw in self._cap_hw:
-            hw.start_capture()
-        logger.success("Capture started")
+            logger.info("Starting capture hardware")
+            for hw in self._cap_hw:
+                hw.start_capture()
+            logger.success("Capture started")
 
-        for hw in self._cap_hw:
-            hw.stop_capture()
-        logger.info("Capture finished")
+            for hw in self._cap_hw:
+                hw.stop_capture()
+            logger.info("Capture finished")
 
-        logger.info("Dumping capture hardware configurations")
-        for hw in self._cap_hw:
-            hw.dump_config()
+            logger.info("Dumping capture hardware configurations")
+            for hw in self._cap_hw:
+                hw.dump_config()
+        except BaseException:
+            for hw in reversed(self._cap_hw):
+                abort_capture = getattr(hw, "abort_capture", None)
+                if not callable(abort_capture):
+                    continue
+                try:
+                    abort_capture()
+                except Exception:
+                    logger.exception(f"Failed to abort capture hardware `{hw.hw_name}`")
+            raise
 
 
 class CaptureManager:

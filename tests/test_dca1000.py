@@ -37,6 +37,8 @@ import pytest
 
 import mmwavecapture.dca1000 as dca1000
 
+pytestmark = pytest.mark.manual
+
 
 @pytest.fixture
 def dca():

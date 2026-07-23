@@ -73,6 +73,6 @@ class PcapCparser:
         dd = self.dca_data[port]
         return not dd.is_out_of_order and dd.dca_report_tx_bytes == dd.received_rx_bytes
 
-    def get_complex(self, port: int) -> np.ndarray[Any, np.dtype[np.complex64]]:
+    def get_complex(self, port: int) -> Any:
         dd = self.dca_data[port]
         return np.array(dd, copy=False, dtype=np.complex64)

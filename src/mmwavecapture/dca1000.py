@@ -62,6 +62,10 @@ class DCA1000MagicNumber(enum.IntEnum):
     MAGIC_FOOTER = 0xEEAA
 
 
+class DCA1000ProtocolError(RuntimeError):
+    """Raised when the capture card returns a malformed command response."""
+
+
 class DCA1000Command(enum.IntEnum):
     RESET_FPGA = 1
     RESET_AR_DEV_CMD = 2
@@ -113,6 +117,10 @@ class DCA1000Config:
         # This is the IP address of the host computer
         return self._config["ethernetConfigUpdate"]["systemIPAddress"]
 
+    @host_ip.setter
+    def host_ip(self, ip: str) -> None:
+        self._config["ethernetConfigUpdate"]["systemIPAddress"] = ip
+
     @property
     def dca_ip(self) -> str:
         return self._config["ethernetConfig"]["DCA1000IPAddress"]
@@ -132,6 +140,10 @@ class DCA1000Config:
     @property
     def dca_data_port(self) -> int:
         return self._config["ethernetConfig"]["DCA1000DataPort"]
+
+    @dca_data_port.setter
+    def dca_data_port(self, port: int) -> None:
+        self._config["ethernetConfig"]["DCA1000DataPort"] = port
 
     @property
     def data_logging_mode(self) -> int:
@@ -192,9 +204,18 @@ class DCA1000:
 
         return wrapped
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        host_ip: str = "192.168.33.30",
+        dca_ip: str = "192.168.33.180",
+        dca_config_port: int = 4096,
+        dca_data_port: int = 4098,
+    ) -> None:
         self.config = DCA1000Config()
-        self.socks = {}
+        self.config.host_ip = host_ip
+        self.config.dca_ip = dca_ip
+        self.config.dca_config_port = dca_config_port
+        self.config.dca_data_port = dca_data_port
 
         self.socks = self._init_sockets()
 
@@ -214,9 +235,14 @@ class DCA1000:
         # It should have {"data": sock, "config": sock}
         return sockets
 
-    def __del__(self):
-        for sock in self.socks.values():
+    def close(self) -> None:
+        """Close command/data sockets. Safe to call more than once."""
+        for sock in getattr(self, "socks", {}).values():
             sock.close()
+        self.socks = {}
+
+    def __del__(self):
+        self.close()
 
     @overload
     def _send_dca_command(
@@ -266,14 +292,27 @@ class DCA1000:
         )
 
         # Receive the response from the DCA1000
-        resp, addr = self.socks["config"].recvfrom(1024)
+        resp, _addr = self.socks["config"].recvfrom(1024)
 
         # Decode the response
         # Reference: SPRUIJ4A, Table 14, p. 19
+        if len(resp) != 8:
+            raise DCA1000ProtocolError(
+                f"DCA1000 command {cmd_code.name} returned {len(resp)} bytes; expected 8"
+            )
         resp_dec = struct.unpack("<HHHH", resp)
-        assert resp_dec[0] == DCA1000MagicNumber.MAGIC_HEADER
-        assert resp_dec[1] == cmd_code
-        assert resp_dec[3] == DCA1000MagicNumber.MAGIC_FOOTER
+        if resp_dec[0] != DCA1000MagicNumber.MAGIC_HEADER:
+            raise DCA1000ProtocolError(
+                f"DCA1000 command {cmd_code.name} returned an invalid header"
+            )
+        if resp_dec[1] != cmd_code:
+            raise DCA1000ProtocolError(
+                f"DCA1000 response command {resp_dec[1]} does not match {cmd_code}"
+            )
+        if resp_dec[3] != DCA1000MagicNumber.MAGIC_FOOTER:
+            raise DCA1000ProtocolError(
+                f"DCA1000 command {cmd_code.name} returned an invalid footer"
+            )
 
         if return_raw_status:
             return resp_dec[2]
