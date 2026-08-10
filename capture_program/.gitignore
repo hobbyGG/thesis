@@ -1,0 +1,13 @@
+*.*~
+__pycache__/
+*.pyc
+\#*\#
+.\#*
+
+example_dataset/
+dataset/
+docs/build/
+configs/
+/*.pcap
+docs/source/_build/
+docs/source/html/

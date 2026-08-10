@@ -2,6 +2,10 @@
 
 这个文件夹是一个论文工作区，主题是“基于毫米波雷达与 MEMS 加速度计融合的结构位移测量方法研究”。它不是单纯代码仓库，而是同时包含论文正文、理论笔记、文献 PDF、仿真代码、实测数据、验证输出、图表资产和 Obsidian 画图配置。
 
+## 毫米波雷达采集程序
+
+原 GitHub 仓库中的 IWR1843 + DCA1000 采集程序完整保存在 [`capture_program/`](capture_program/)；其中保留了 WSL 采集流程、硬件预检、异常清理、mock 测试、Wireshark dissector 和原项目文档。WSL 实机采集请先阅读 [`capture_program/WSL_CAPTURE.md`](capture_program/WSL_CAPTURE.md)。替换仓库主体前的原始 `main` 历史另存于远端分支 `archive/mmwavecapture-main`。
+
 ## 先看这里：已有做图和报告工具
 
 后续 AI 或人工需要画图、出报告、生成结果图时，先查下面这些位置，避免重复造工具。
@@ -53,6 +57,7 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 
 | 路径 | 内容 |
 |---|---|
+| `capture_program/` | IWR1843 + DCA1000 原始采集程序，包含最新 WSL 适配、测试和文档。 |
 | `simulation/` | Python 仿真和验证代码，核心在 `simulation/phase1/`。 |
 | `tests/` | `unittest` 测试，覆盖仿真、前端、目标选择、Kalman、baseline、报告、半实测场景。 |
 | `reports/` | 已整理的 Phase 1 方法与仿真汇报，以及可直接引用的 SVG/PNG 图表资产。 |
