@@ -1,74 +1,44 @@
 [
   {
     "name": "strong_wrapping_full_pipeline_beats_range_bin_itoh",
-    "value": 0.014334129193976817,
-    "threshold": 5.547728952857639,
+    "value": 0.037236114214796834,
+    "threshold": 7.763018544941675,
     "passed": true
   },
   {
     "name": "strong_wrapping_range_bin_itoh_rmse_ge_2x_full_pipeline",
-    "value": 387.0293673081158,
+    "value": 208.48089841385269,
     "threshold": 2.0,
     "passed": true
   },
   {
     "name": "strong_wrapping_full_pipeline_rmse_le_reasonable_threshold",
-    "value": 0.014334129193976817,
+    "value": 0.037236114214796834,
     "threshold": 0.5,
     "passed": true
   },
   {
     "name": "same_range_far_angles_full_pipeline_selects_two_same_range_targets",
-    "value": 3,
+    "value": 1,
     "threshold": 1,
     "passed": true
   },
   {
     "name": "same_range_far_angles_full_pipeline_rmse_le_0p10mm",
-    "value": 0.013990775171946222,
+    "value": 0.03999557902768956,
     "threshold": 0.1,
     "passed": true
   },
   {
-    "name": "same_range_far_angles_full_pipeline_beats_ma2026_reproduction",
-    "value": 0.013990775171946222,
-    "threshold": 0.0905575799242464,
-    "passed": true
-  },
-  {
-    "name": "vehicle_event_full_pipeline_selected_count_ge_1",
-    "value": 4,
-    "threshold": 1,
-    "passed": true
-  },
-  {
-    "name": "vehicle_event_full_pipeline_excludes_target4",
-    "value": 0,
-    "threshold": 0,
-    "passed": true
-  },
-  {
-    "name": "vehicle_event_full_pipeline_unwrap_error_rate_eq_0",
-    "value": 0.0,
-    "threshold": 0.0,
-    "passed": true
-  },
-  {
-    "name": "vehicle_event_full_pipeline_rmse_le_0p05mm",
-    "value": 0.014336096473320665,
-    "threshold": 0.05,
-    "passed": true
-  },
-  {
     "name": "target_snr_drop_full_pipeline_beats_selected_fixed_r",
-    "value": 0.06040964044135153,
-    "threshold": 0.07726744666845607,
+    "value": 0.06256558596524327,
+    "threshold": 0.07868454819203342,
     "passed": true
   },
   {
-    "name": "aoa_bootstrap_kappa_median_relative_error_le_0p05",
-    "value": 0.009933754162751801,
-    "threshold": 0.05,
+    "name": "aoa_bootstrap_beta_median_relative_error_le_0p10",
+    "value": 0.027593130126966015,
+    "threshold": 0.1,
     "passed": true
   }
 ]

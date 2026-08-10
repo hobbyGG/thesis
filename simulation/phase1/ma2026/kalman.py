@@ -10,7 +10,7 @@ from .config import Ma2026Config, q_grid
 class Ma2026KalmanResult:
     phase_delta_rad: np.ndarray
     phase_rate_radps: np.ndarray
-    corrected_phase_rad: np.ndarray
+    los_corrected_phase_rad: np.ndarray
     displacement_m: np.ndarray
     process_noise_q: float
     measurement_noise_r: float
@@ -82,7 +82,7 @@ def run_ma2026_los_kalman(
     return Ma2026KalmanResult(
         phase_delta_rad=phase_delta,
         phase_rate_radps=phase_rate,
-        corrected_phase_rad=corrected_abs,
+        los_corrected_phase_rad=corrected_abs,
         displacement_m=displacement,
         process_noise_q=float(q_value),
         measurement_noise_r=r,
@@ -102,10 +102,15 @@ def select_q_by_energy(wrapped_phase_rad, acceleration_mps2, beta, phase1_config
             ma_config,
             q_value=float(q_value),
         )
-        corrected = result.corrected_phase_rad
-        valid = np.isfinite(corrected) & np.isfinite(result.phase_delta_rad)
+        corrected = result.los_corrected_phase_rad
+        finite_corrected = np.flatnonzero(np.isfinite(corrected))
+        if finite_corrected.size:
+            corrected_delta = corrected - float(corrected[int(finite_corrected[0])])
+        else:
+            corrected_delta = corrected
+        valid = np.isfinite(corrected_delta)
         if np.count_nonzero(valid):
-            energies[idx] = float(np.mean(result.phase_delta_rad[valid] ** 2))
+            energies[idx] = float(np.mean(corrected_delta[valid] ** 2))
         results.append(result)
     selected_idx = _select_energy_minimizer(candidates, energies, ma_config)
     return float(candidates[selected_idx]), candidates, energies, results[selected_idx]

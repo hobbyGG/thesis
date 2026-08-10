@@ -47,7 +47,7 @@
 - AoA 冷启动：利用目标角度为转换系数提供初始几何先验，使算法可以在线启动。
 - 结构主相位 Kalman 融合：状态变量定义为结构主振动方向位移对应的连续相位，而不是某个 target 的 LoS 相位，该递推估计框架以经典 Kalman 滤波为基础[18]。
 - prediction-aided phase correction：用加速度辅助的状态预测推断各 target 所在的相位分支，校正 wrapped phase[10]。
-- online beta bootstrap：用 LoS corrected phase 和结构主相位估计在线修正 $\beta_i$；代码侧可等价维护 $\kappa_i=1/\beta_i$。
+- online beta bootstrap：用 LoS corrected phase 和结构主相位估计在线修正 $\beta_i$。
 - adaptive R：根据 target 质量动态调整观测噪声，对 SNR drop、dropout 或异常相位 target 降权，其思想与自适应滤波中根据创新或观测质量调节测量噪声统计量的做法一致[19-20]。
 
 ## 2. 本阶段主要贡献与方法依据
@@ -70,7 +70,7 @@ $$
 \phi_i^{\mathrm{LOS}}(t)=\frac{1}{\beta_i}\Theta(t)+b_i.
 $$
 
-其中 $b_i$ 为初始相位偏置。若令 $\kappa_i=1/\beta_i$，则 $\kappa_i$ 表示结构主相位到第 $i$ 个 target LoS 相位的投影系数或逆转换系数，不是 Ma 论文中的 direction conversion factor 本身。该模型说明了倒挂式场景下多目标观测的可能性：多个环境静止 target 观测的是同一个结构主位移，只是各自具有不同 LoS 投影关系。已有倒挂式雷达与加速度融合研究已经验证环境静止 target 可用于结构位移估计[11-14]，本文进一步关注多个自然散射 target 在相位域内如何共同建模和融合。
+其中 $b_i$ 为初始相位偏置。该模型说明了倒挂式场景下多目标观测的可能性：多个环境静止 target 观测的是同一个结构主位移，只是各自具有不同 LoS 投影关系。已有倒挂式雷达与加速度融合研究已经验证环境静止 target 可用于结构位移估计[11-14]，本文进一步关注多个自然散射 target 在相位域内如何共同建模和融合。
 
 这一数学模型也暴露出一个关键问题：如果仍以 range-bin 为基本 target 单元，那么同一个 range-bin 内可能包含多个角度差很大的散射体。此时该 range-bin 的复数回波是多个 phasor 的叠加，其相位不再对应单一 LoS 几何方向。若直接对该混合相位拟合转换系数 beta，拟合得到的 beta 只是一个混合等效量，可能随散射体幅值、相对相位和运动幅值变化而漂移。
 
@@ -120,7 +120,7 @@ $$
 
 该处理成立的前提正是上一节的 angle-bin target 拆分。如果仍在 range-bin 层面对多个角度差很大的散射体做 beta 拟合，输入相位本身就是混合相位，最小二乘也只能拟合出不稳定的等效 beta。因此，本文的转换系数拟合不是孤立改进，而是依赖于前一贡献：先把 target 定义从 range-bin 细化到 angle-bin，再进行 target-wise $\beta_i$ 最小二乘估计。
 
-与迭代式 beta 搜索相比，最小二乘拟合的优点是物理含义更直接、计算更简单，也更适合放入在线闭环。AoA 只用于提供 $\kappa_i=1/\beta_i$ 的冷启动初值，后续正文以 $\beta_i$ 作为 LoS 到结构方向转换系数持续修正。
+与迭代式 beta 搜索相比，最小二乘拟合的优点是物理含义更直接、计算更简单，也更适合放入在线闭环。AoA 只用于提供 $\beta_i$ 的冷启动初值，后续正文以 $\beta_i$ 作为 LoS 到结构方向转换系数持续修正。
 
 ### 2.4 基于相位的闭环 Kalman 融合框架
 
@@ -176,7 +176,7 @@ $$
 \phi_i^{\mathrm{LOS}}(t)=\frac{1}{\beta_i}\Theta(t)+b_i.
 $$
 
-其中 $b_i$ 为 target 的初始相位偏置。$\beta_i$ 表示 LoS 到结构主振动方向的 direction conversion factor，既与 AoA 几何有关，也受安装姿态、阵列误差和实际散射几何影响。若写成 $\kappa_i=1/\beta_i$，则 $\kappa_i$ 只是结构方向到 LoS 的投影系数。既有倒挂式雷达研究已经把方向转换系数作为 LoS 位移到结构振动方向位移换算的关键标定量[11-14]；本文进一步将 $\beta_i$ 作为可在线修正的 target-wise 参数，而不只作为固定常数使用。
+其中 $b_i$ 为 target 的初始相位偏置。$\beta_i$ 表示 LoS 到结构主振动方向的 direction conversion factor，既与 AoA 几何有关，也受安装姿态、阵列误差和实际散射几何影响。既有倒挂式雷达研究已经把方向转换系数作为 LoS 位移到结构振动方向位移换算的关键标定量[11-14]；本文进一步将 $\beta_i$ 作为可在线修正的 target-wise 参数，而不只作为固定常数使用。
 
 ### 3.4 加速度辅助预测原理
 
@@ -359,17 +359,15 @@ $$
 
 多个 target 同时进入滤波时，可将 $y_{i,k}$ 按行堆叠，形成结构方向多通道观测模型。这样，目标数量增加不是简单取平均，而是在同一个结构主相位状态下进行带权融合。该处理吸收了既有多 target 倒挂式雷达研究对目标遮挡和多 good targets 的认识[12-13]，但把多目标关系前移到相位观测模型内部。
 
-若连接当前代码实现，可写成等价 LoS-space 形式：
+当前代码与正文统一采用结构方向观测模型；LoS 相位只在预测辅助相位校正阶段使用
 
 $$
 \phi_{i,k}^{\mathrm{LOS}}
 =
-\kappa_i\Theta_k+b_i,
-\qquad
-\kappa_i=\frac{1}{\beta_i}.
+\frac{\Theta_k}{\beta_i}+b_i.
 $$
 
-该形式对应代码中的 $H_i=[\kappa_i,0]$，但 $\kappa_i$ 是逆转换系数，不是 Ma 的 direction conversion factor。
+进入 Kalman 更新前，LoS corrected phase 先乘以 $\beta_i$ 转为结构方向主相位观测，因此观测行保持 $H_i=[1,0]$。
 
 ### 4.6 预测辅助相位校正
 
@@ -397,21 +395,21 @@ $$
 
 ### 4.7 转换系数在线自举
 
-AoA 可为 $\kappa_i=1/\beta_i$ 提供冷启动初值：
+AoA 可为 $\beta_i$ 提供冷启动初值。若第 $i$ 个 target 的 AoA 与结构振动方向夹角为 $\theta_i$，先计算结构方向到 LoS 的投影初值：
 
 $$
-\kappa_{i,0}=\cos\theta_i
+\hat{p}_{i,0}=|\cos\theta_i|
 $$
 
-若使用位移换算系数，也可写为：
+再取其倒数作为 LoS 到结构方向的转换系数初值：
 
 $$
-\beta_{i,0}=\frac{1}{\kappa_{i,0}}
+\hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}
 $$
 
 但 AoA 只能提供几何先验，不能完全覆盖安装姿态、阵列误差和实际散射点偏差。MIMO 雷达角度估计依赖虚拟阵列孔径、通道幅相一致性和角度处理流程[17]，因此本文只把 AoA 作为冷启动先验，并使用短窗口内的 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 与结构主相位估计 $\hat{\Theta}_k^+$ 做局部最小二乘，在线更新 $\beta_i$。
 
-这一做法解决了一个循环依赖：相位校正需要 $\beta_i$ 或其倒数 $\kappa_i$，$\beta_i$ 自举又需要连续 LoS 相位。AoA 冷启动提供初值，prediction-aided correction 生成局部 LoS corrected phase，online beta bootstrap 再逐步修正 $\beta_i$。
+这一做法解决了一个循环依赖：相位校正需要 $\beta_i$，$\beta_i$ 自举又需要连续 LoS 相位。AoA 冷启动提供初值，prediction-aided correction 生成局部 LoS corrected phase，online beta bootstrap 再逐步修正 $\beta_i$。
 
 ### 4.8 自适应观测噪声调整
 
@@ -432,7 +430,7 @@ $$
 - Range-Angle target 定义是否能缓解同 range-bin 多散射体混合。
 - prediction-aided phase correction 是否能改善强相位缠绕场景。
 - adaptive R 和 target screening 是否能处理目标质量退化和缺失。
-- online beta bootstrap 是否能修正 AoA 初值误差；代码侧诊断为 $\kappa_i=1/\beta_i$ 的收敛情况。
+- online beta bootstrap 是否能修正 AoA 初值误差，并观察 $\beta_i$ 的收敛情况。
 - 实测桥梁位移波形驱动下，完整链路是否仍可运行。
 
 需要强调，当前结果属于合成数值仿真与实测位移驱动的半实测仿真，不等同于真实 IWR1843 ADC 端到端实测验证。
@@ -469,7 +467,7 @@ $$
 \psi_i(t)=\angle IQ_i(t)
 $$
 
-若连接当前代码实现，可令 $\kappa_i=1/\beta_i$，等价写为 $\phi_i^{\mathrm{LOS}}(t)=\kappa_i\Theta(t)+b_i$。这里 $\kappa_i$ 只是结构主相位到 LoS 相位的投影系数，不是 Ma 的 direction conversion factor。
+当前代码与正文采用同一物理相位模型：$\beta_i$ 始终表示 LoS 到结构真实振动方向的转换系数；预测回 LoS 空间时使用 $\Theta(t)/\beta_i$。
 
 普通合成场景由位移真值生成加速度真值，再叠加噪声、偏置、漂移和同步误差得到加速度观测。实测位移驱动半实测场景使用 TDMS 激光位移通道 `卡3激光位移/3-4` 作为真实桥梁响应波形，经事件窗口、滤波和陷波后得到位移真值，再由位移二阶微分得到加速度并叠加 seeded noise。雷达观测仍由上述物理相位模型合成。
 
@@ -480,7 +478,7 @@ $$
 | `nominal_multifrequency` | 20/40/60 Hz 多频，0.08/0.04/0.02 mm | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | 无 | 基准多目标多频振动 |
 | `ma2023_balanced_good_targets` | 0.3/0.5/1.0 Hz，0.5/0.3/0.2 mm | 5 | 5/12/19/26/33 deg | 全 35 dB | 多个高质量 target | 文献友好条件对照 |
 | `strong_wrapping` | 振幅增至 0.45/0.25/0.12 mm | 5 | 10/25/40/55/70 deg | 30/25/20/15/10 dB | 强相位缠绕 | 压测相位分支校正 |
-| `aoa_error_bootstrap` | 默认多频 | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | AoA 初值误差 10 deg | 验证 online beta bootstrap，代码诊断为 kappa 收敛 |
+| `aoa_error_bootstrap` | 默认多频 | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | AoA 初值误差 10 deg | 验证 online beta bootstrap，代码诊断为 beta 收敛 |
 | `target_snr_drop` | 默认多频 | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | target 0/1 在中段降 25 dB | 验证 adaptive R |
 | `target_dropout` | 默认多频 | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | target 0 中段 dropout | 验证目标缺失鲁棒性 |
 | `mixed_scatterer_rangebin` | 默认多频 | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | target 0 内含两散射体 | 验证 range-bin 混合散射风险 |
@@ -496,11 +494,11 @@ $$
 | `itoh_ls`                  | 对多 target 相位做 Itoh unwrap 后进行最小二乘换算             | 传统相位解缠 baseline      |
 | `single_target_ma_style`   | 单 target Ma-style Kalman，相位状态为 target LoS phase | 对比单目标加速度辅助方法         |
 | `ma2026_reproduction`      | 基于公开论文公式与流程实现的 Ma-family baseline               | 文献方法族对照，不是 Ma 官方源码复现 |
-| `selected_aoa_fixed_kappa` | 使用筛选 target 和 AoA 固定 $\kappa=1/\beta$，但不做 online bootstrap | 验证固定几何先验的局限          |
-| `proposed`                 | 多目标结构主相位 Kalman，含相位校正和 $\beta$ 自举；代码等价更新 $\kappa$ | 验证核心融合框架             |
+| `selected_aoa_fixed_beta` | 使用筛选 target 和 AoA 固定 $\beta$，但不做 online bootstrap | 验证固定几何先验的局限          |
+| `proposed`                 | 多目标结构主相位 Kalman，含相位校正和 $\beta$ 自举 | 验证核心融合框架             |
 | `proposed_full_pipeline`   | 在 proposed 基础上加入 Range-Angle 前端、目标筛选和自适应噪声      | 当前主方案                |
 
-主要评价指标包括 RMSE、MAE、最大误差、结构主相位误差、unwrap error、selected target 数量、corrected observation 数量和转换系数相对误差；代码侧当前输出 $\kappa=1/\beta$ 的相对误差诊断。半实测场景还通过激光通道时域、频谱和动态相关性图说明所选桥梁位移波形的有效性。
+主要评价指标包括 RMSE、MAE、最大误差、结构主相位误差、unwrap error、selected target 数量、corrected observation 数量和转换系数相对误差；当前代码输出 $\beta$ 的相对误差诊断。半实测场景还通过激光通道时域、频谱和动态相关性图说明所选桥梁位移波形的有效性。
 
 ## 6. 仿真结果与分析
 
@@ -508,7 +506,7 @@ $$
 
 下表给出各 scenario 下不同方法的 RMSE，对应单位为 mm。表中数值来自重新生成的数值仿真结果。需要注意，结果应理解为不同退化场景下的机制验证，不应写成“所有场景全面最优”。
 
-| 场景 | `itoh_ls` | `single_target_ma_style` | `ma2026_reproduction` | `selected_aoa_fixed_kappa` | `proposed` | `proposed_full_pipeline` |
+| 场景 | `itoh_ls` | `single_target_ma_style` | `ma2026_reproduction` | `selected_aoa_fixed_beta` | `proposed` | `proposed_full_pipeline` |
 |---|---:|---:|---:|---:|---:|---:|
 | `nominal_multifrequency` | 0.013007 | 0.008483 | 0.053692 | 0.022540 | 0.007366 | 0.007265 |
 | `ma2023_balanced_good_targets` | 0.004053 | 0.001460 | 0.037064 | 0.016383 | 0.001109 | 0.001205 |
@@ -526,7 +524,7 @@ $$
 
 ### 6.2 强相位缠绕场景分析
 
-strong wrapping 场景用于检验相位分支校正。该场景中，单 target Ma-family baseline 的 RMSE 为 0.220250 mm，selected AoA fixed kappa 为 0.055089 mm，proposed full pipeline 为 0.038741 mm。
+strong wrapping 场景用于检验相位分支校正。该场景中，单 target Ma-family baseline 的 RMSE 为 0.220250 mm，selected AoA fixed beta 为 0.055089 mm，proposed full pipeline 为 0.038741 mm。
 
 ![[reports/numerical_simulation_assets_png/strong_wrapping_phase_correction.png]]
 
@@ -538,11 +536,11 @@ same range far angles 场景用于验证 Range-Angle target 定义的必要性�
 
 ![[reports/numerical_simulation_assets_png/vehicle_event_nonstationary_range_angle_frame.png]]
 
-该图展示了 Range-Angle 前端能够在二维空间中定位候选散射体。虽然图示来自车辆非平稳事件场景，但其作用是说明当前前端不是只读取单个 range-bin，而是在 range-angle 平面上定义 target。same range far angles 场景的 RMSE 中，ma2026_reproduction 为 0.127338 mm，selected AoA fixed kappa 为 0.036103 mm，proposed full pipeline 为 0.025306 mm，说明同 range 远角度散射体应在 Kalman 前被分离。
+该图展示了 Range-Angle 前端能够在二维空间中定位候选散射体。虽然图示来自车辆非平稳事件场景，但其作用是说明当前前端不是只读取单个 range-bin，而是在 range-angle 平面上定义 target。same range far angles 场景的 RMSE 中，ma2026_reproduction 为 0.127338 mm，selected AoA fixed beta 为 0.036103 mm，proposed full pipeline 为 0.025306 mm，说明同 range 远角度散射体应在 Kalman 前被分离。
 
 ### 6.4 目标退化与缺失场景分析
 
-target SNR drop 和 target dropout 场景用于检验动态降权和目标筛选能力。target SNR drop 中，target 0 和 target 1 在中段发生明显 SNR 下降。该场景下 ma2026_reproduction 为 0.299926 mm，selected AoA fixed kappa 为 0.028316 mm，proposed full pipeline 为 0.009899 mm。
+target SNR drop 和 target dropout 场景用于检验动态降权和目标筛选能力。target SNR drop 中，target 0 和 target 1 在中段发生明显 SNR 下降。该场景下 ma2026_reproduction 为 0.299926 mm，selected AoA fixed beta 为 0.028316 mm，proposed full pipeline 为 0.009899 mm。
 
 ![[reports/numerical_simulation_assets_png/target_snr_drop_adaptive_r.png]]
 
@@ -558,17 +556,17 @@ target selection 时间线展示了候选 target 的在线维护过程。full pi
 
 ### 6.5 AoA 初值误差场景分析
 
-aoa error bootstrap 场景人为引入 AoA 初值误差，用于检验 $\beta_i$ 在线修正能力；代码侧通过 $\kappa_i=1/\beta_i$ 的收敛曲线做诊断。该场景下 ma2026_reproduction 为 0.053692 mm，selected AoA fixed kappa 为 0.022540 mm，proposed full pipeline 为 0.007267 mm。
+aoa error bootstrap 场景人为引入 AoA 初值误差，用于检验 $\beta_i$ 在线修正能力。该场景下 ma2026_reproduction 为 0.053692 mm，selected AoA fixed beta 为 0.022540 mm，proposed full pipeline 为 0.007267 mm。
 
-![[reports/numerical_simulation_assets_png/aoa_error_bootstrap_kappa_bootstrap.png]]
+![[reports/numerical_simulation_assets_png/aoa_error_bootstrap_beta_bootstrap.png]]
 
-图中可以看到，AoA 更适合作为冷启动先验，而不是最终固定转换系数。online beta bootstrap 利用 LoS corrected phase 与结构主相位估计逐步修正 $\beta_i$；图中 $\kappa_i$ 是代码侧的倒数诊断量，从而等价反映 AoA 初值误差和安装误差被逐步修正。
+图中可以看到，AoA 更适合作为冷启动先验，而不是最终固定转换系数。online beta bootstrap 利用 LoS corrected phase 与结构主相位估计逐步修正 $\beta_i$，从而反映 AoA 初值误差和安装误差被逐步修正。
 
 ### 6.6 非平稳车辆事件场景分析
 
-vehicle event nonstationary 场景模拟 quiet start 后出现的非平稳车辆事件。该场景下，ma2026_reproduction 为 0.016125 mm，selected AoA fixed kappa 为 0.019849 mm，proposed full pipeline 为 0.004474 mm。
+vehicle event nonstationary 场景模拟 quiet start 后出现的非平稳车辆事件。该场景下，ma2026_reproduction 为 0.016125 mm，selected AoA fixed beta 为 0.019849 mm，proposed full pipeline 为 0.004474 mm。
 
-非平稳响应对方法提出两个要求：一是冷启动阶段需要建立 target、$\beta_i$（以及代码侧 $\kappa_i=1/\beta_i$）和相位偏置的初始状态；二是事件发生后，目标筛选和 adaptive R 需要持续抑制异常 target。仿真结果说明，当前链路在非平稳车辆事件中可以保持连续位移输出。
+非平稳响应对方法提出两个要求：一是冷启动阶段需要建立 target、$\beta_i$ 和相位偏置的初始状态；二是事件发生后，目标筛选和 adaptive R 需要持续抑制异常 target。仿真结果说明，当前链路在非平稳车辆事件中可以保持连续位移输出。
 
 ### 6.7 实测位移驱动半实测场景分析
 
@@ -586,13 +584,13 @@ measured bridge point4 transverse 场景使用 TDMS 激光位移通道 `卡3激�
 
 该图展示激光通道动态成分相关性，说明所选桥梁响应波形具有一定通道一致性基础。
 
-在该半实测场景中，ma2026_reproduction 为 0.616525 mm，selected AoA fixed kappa 为 0.013626 mm，proposed full pipeline 为 0.003400 mm。该结果说明真实桥梁位移波形下当前算法链路可运行。但必须强调：这里雷达观测仍由物理相位模型合成，不是完整毫米波雷达实测，也不能替代真实雷达 ADC 与参考传感器同步采集后的端到端验证。
+在该半实测场景中，ma2026_reproduction 为 0.616525 mm，selected AoA fixed beta 为 0.013626 mm，proposed full pipeline 为 0.003400 mm。该结果说明真实桥梁位移波形下当前算法链路可运行。但必须强调：这里雷达观测仍由物理相位模型合成，不是完整毫米波雷达实测，也不能替代真实雷达 ADC 与参考传感器同步采集后的端到端验证。
 
 ## 7. 阶段性结论与后续工作
 
 ### 7.1 阶段性结论
 
-本阶段已经建立倒挂式毫米波雷达与 MEMS 加速度计融合的结构位移估计框架。方法上，本文将环境静止散射体视为运动雷达的相对参考 target，并通过 Range-Angle 多目标提取、目标稳定性筛选、结构主相位 Kalman 融合、prediction-aided phase correction、adaptive R 和 online beta bootstrap 形成完整算法闭环；代码实现中保留 $\kappa=1/\beta$ 的等价诊断。
+本阶段已经建立倒挂式毫米波雷达与 MEMS 加速度计融合的结构位移估计框架。方法上，本文将环境静止散射体视为运动雷达的相对参考 target，并通过 Range-Angle 多目标提取、目标稳定性筛选、结构主相位 Kalman 融合、prediction-aided phase correction、adaptive R 和 online beta bootstrap 形成完整算法闭环；代码实现与正文统一采用 $\beta$ 作为 LoS 到结构方向的转换系数。
 
 数值仿真表明，该方法在强相位缠绕、target SNR drop、target dropout、AoA 初值误差、同 range 远角度散射体、低 SNR 多目标和非平稳车辆事件等场景下具有可行性。实测位移驱动半实测仿真进一步说明，在真实桥梁位移波形下，当前链路可以完成相对位移估计。
 

@@ -617,7 +617,7 @@ class TestMeasuredBridgeEndToEnd(unittest.TestCase):
 
         self.assertIn("ma2026_reproduction", methods)
         self.assertIn("proposed_full_pipeline", methods)
-        self.assertIn("selected_aoa_fixed_kappa", methods)
+        self.assertIn("selected_aoa_fixed_beta", methods)
         self.assertEqual(artifacts["truth"].t.size, int(round(scenario.duration_s * scenario.sample_rate_hz)))
 
         proposed = next(row for row in rows if row["method"] == "proposed_full_pipeline")
@@ -704,7 +704,7 @@ for row in rows:
 PY
 ```
 
-Expected: rows for Ma-family baseline, fixed-kappa baselines, all-target proposed, and `proposed_full_pipeline`.
+Expected: rows for Ma-family baseline, fixed-beta baselines, all-target proposed, and `proposed_full_pipeline`.
 
 ---
 

@@ -26,9 +26,9 @@ def main():
         help="Comma-separated random seeds for Monte Carlo runs.",
     )
     parser.add_argument(
-        "--aoa-errors-deg",
-        default="0,3,6,10,15",
-        help="Comma-separated AoA error levels in degrees.",
+        "--angle-bins",
+        default="32,48,64,96,128",
+        help="Comma-separated angle FFT bin counts for frontend zero-padding sensitivity runs.",
     )
     parser.add_argument(
         "--snr-floors-db",
@@ -39,14 +39,14 @@ def main():
 
     summary = run_extended_experiments(
         seeds=_parse_int_list(args.seeds),
-        aoa_errors_deg=_parse_float_list(args.aoa_errors_deg),
+        frontend_angle_bins=_parse_int_list(args.angle_bins),
         snr_floors_db=_parse_float_list(args.snr_floors_db),
     )
     written = write_extended_experiment_report(summary, args.output_dir)
     print(f"monte carlo: {written['monte_carlo_csv']}")
     print(f"monte carlo summary: {written['monte_carlo_summary_csv']}")
     print(f"ablation: {written['ablation_csv']}")
-    print(f"aoa sensitivity: {written['sensitivity_aoa_csv']}")
+    print(f"frontend sensitivity: {written['sensitivity_frontend_csv']}")
     print(f"snr sensitivity: {written['sensitivity_snr_csv']}")
     print(f"summary: {written['summary_md']}")
 

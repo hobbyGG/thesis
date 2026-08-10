@@ -341,8 +341,8 @@
 {"kind":"shape","id":"sh/36hcrmhk","slide":12,"name":"圆角矩形 24","bbox":[158,585,940,54]}
 {"kind":"shape","id":"sh/wra5gbq1","slide":12,"name":"矩形 25","bbox":[158,585,8,54]}
 {"kind":"textbox","id":"sh/lc7u54zi","slide":12,"name":"矩形 26","text":"不是多个 target 各自反算位移后平均，而是在相位状态层统一融合。","textPreview":"不是多个 target 各自反算位移后平均，而是在相位状态层统一融合。","textChars":35,"textLines":1,"bbox":[178,599,908,34]}
-{"kind":"textbox","id":"sh/4vmtwra5","slide":12,"name":"native-equation-12","text":"z_(i,k) = κᵢΘ_(k) + bᵢ + v_(i,k)","textPreview":"z_(i,k) = κᵢΘ_(k) + bᵢ + v_(i,k)","textChars":32,"textLines":1,"bbox":[118,238,440,66]}
-{"kind":"textbox","id":"sh/bat47y1k","slide":12,"name":"native-equation-12","text":"Hᵢ = [κᵢ,0]","textPreview":"Hᵢ = [κᵢ,0]","textChars":11,"textLines":1,"bbox":[185,326,310,50]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":12,"name":"native-equation-12","text":"z_(i,k) = βᵢΘ_(k) + bᵢ + v_(i,k)","textPreview":"z_(i,k) = βᵢΘ_(k) + bᵢ + v_(i,k)","textChars":32,"textLines":1,"bbox":[118,238,440,66]}
+{"kind":"textbox","id":"sh/bat47y1k","slide":12,"name":"native-equation-12","text":"Hᵢ = [βᵢ,0]","textPreview":"Hᵢ = [βᵢ,0]","textChars":11,"textLines":1,"bbox":[185,326,310,50]}
 {"kind":"textbox","id":"sh/mp0bi9s3","slide":12,"name":"native-equation-12","text":"Θ_(k) = (4π / λ)δq_(k)","textPreview":"Θ_(k) = (4π / λ)δq_(k)","textChars":22,"textLines":1,"bbox":[198,390,290,48]}
 {"kind":"notes","id":"nt/4fu18jqh","slide":12,"text":""}
 {"kind":"slide","id":"sl/lwval87e","slide":13,"title":"预测辅助相位校正：解决强 wrapping 下的分支选择","textShapes":9}
@@ -360,7 +360,7 @@
 {"kind":"shape","id":"sh/xczed8v6","slide":13,"name":"圆角矩形 14","bbox":[145,600,990,50]}
 {"kind":"shape","id":"sh/qpg3ex0n","slide":13,"name":"矩形 15","bbox":[145,600,8,50]}
 {"kind":"textbox","id":"sh/fa9w3m94","slide":13,"name":"矩形 16","text":"结果层面：本文方法在 strong wrapping 场景 RMSE 为 0.0143 mm，解缠错误率为 0。","textPreview":"结果层面：本文方法在 strong wrapping 场景 RMSE 为 0.0143 mm，解缠错误率为 0。","textChars":56,"textLines":1,"bbox":[165,614,958,30]}
-{"kind":"textbox","id":"sh/w3m94fu1","slide":13,"name":"native-equation-13","text":"φ_(i,k)⁻ = κᵢΘ_(k)⁻ + bᵢ","textPreview":"φ_(i,k)⁻ = κᵢΘ_(k)⁻ + bᵢ","textChars":24,"textLines":1,"bbox":[105,226,360,62]}
+{"kind":"textbox","id":"sh/w3m94fu1","slide":13,"name":"native-equation-13","text":"φ_(i,k)⁻ = βᵢΘ_(k)⁻ + bᵢ","textPreview":"φ_(i,k)⁻ = βᵢΘ_(k)⁻ + bᵢ","textChars":24,"textLines":1,"bbox":[105,226,360,62]}
 {"kind":"textbox","id":"sh/3itgfmlk","slide":13,"name":"native-equation-13","text":"z_(i,k)^(corr) = ψ_(i,k) + 2πround((φ_(i,k)⁻ - ψ_(i,k)) / (2π))","textPreview":"z_(i,k)^(corr) = ψ_(i,k) + 2πround((φ_(i,k)⁻ - ψ_(i,k)) / (2π))","textChars":63,"textLines":1,"bbox":[96,300,380,110]}
 {"kind":"image","id":"im/re1w7mp0","slide":13,"name":"图片 30","bbox":[580,168.13,570,327.75]}
 {"kind":"notes","id":"nt/lwval87e","slide":13,"text":""}
@@ -385,7 +385,7 @@
 {"kind":"textbox","id":"sh/r65wjudg","slide":14,"name":"矩形 20","text":"在 AoA 初值误差场景，固定转换系数基线 RMSE 为 0.0540 mm；本文方法 RMSE 为 0.0153 mm。","textPreview":"在 AoA 初值误差场景，固定转换系数基线 RMSE 为 0.0540 mm；本文方法 RMSE 为 0.0153 mm。","textChars":61,"textLines":1,"bbox":[145,614,998,30]}
 {"kind":"textbox","id":"sh/9cvixcze","slide":14,"text":"AoA cold start","textPreview":"AoA cold start","textChars":14,"textLines":1,"bbox":[85,169,140,22]}
 {"kind":"textbox","id":"sh/nih4byhg","slide":14,"text":"预测校正相位","textPreview":"预测校正相位","textChars":6,"textLines":1,"bbox":[305,169,140,22]}
-{"kind":"textbox","id":"sh/rmhk3q5o","slide":14,"name":"native-equation-14","text":"κ_(i,0) = cosθᵢ","textPreview":"κ_(i,0) = cosθᵢ","textChars":15,"textLines":1,"bbox":[86,188,138,36]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":14,"name":"native-equation-14","text":"β_(i,0) = cosθᵢ","textPreview":"β_(i,0) = cosθᵢ","textChars":15,"textLines":1,"bbox":[86,188,138,36]}
 {"kind":"textbox","id":"sh/dsji5sne","slide":14,"name":"native-equation-14","text":"z_(i,k)^(corr)","textPreview":"z_(i,k)^(corr)","textChars":14,"textLines":1,"bbox":[307,188,138,36]}
 {"kind":"image","id":"im/nap4r65w","slide":14,"name":"图片 38","bbox":[705,192.81,470,264.38]}
 {"kind":"notes","id":"nt/25kb6xkf","slide":14,"text":""}
@@ -429,7 +429,7 @@
 {"kind":"textbox","id":"sh/32lszqtc","slide":15,"text":"AoA cold start","textPreview":"AoA cold start","textChars":14,"textLines":1,"bbox":[810,154,125,22]}
 {"kind":"textbox","id":"sh/l87ed8ba","slide":15,"text":"Acceleration input","textPreview":"Acceleration input","textChars":18,"textLines":1,"bbox":[310,344,170,22]}
 {"kind":"textbox","id":"sh/3ex0nuxc","slide":15,"text":"Displacement output","textPreview":"Displacement output","textChars":19,"textLines":1,"bbox":[1025,344,150,22]}
-{"kind":"textbox","id":"sh/3itgfmlk","slide":15,"name":"native-equation-15","text":"κ_(i,0)","textPreview":"κ_(i,0)","textChars":7,"textLines":1,"bbox":[812,180,122,28]}
+{"kind":"textbox","id":"sh/3itgfmlk","slide":15,"name":"native-equation-15","text":"β_(i,0)","textPreview":"β_(i,0)","textChars":7,"textLines":1,"bbox":[812,180,122,28]}
 {"kind":"textbox","id":"sh/tovahoza","slide":15,"name":"native-equation-15","text":"x⁻ = Ax + Ba","textPreview":"x⁻ = Ax + Ba","textChars":12,"textLines":1,"bbox":[310,365,170,28]}
 {"kind":"textbox","id":"sh/032lszqt","slide":15,"name":"native-equation-15","text":"δq = (λ / (4π))Θ","textPreview":"δq = (λ / (4π))Θ","textChars":16,"textLines":1,"bbox":[1025,365,150,28]}
 {"kind":"notes","id":"nt/7y1kre1w","slide":15,"text":""}

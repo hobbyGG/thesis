@@ -119,11 +119,11 @@ class Phase1SimulationTest(unittest.TestCase):
                 "same_range_far_angles",
                 "aoa_error_bootstrap",
                 "target_snr_drop",
-                "vehicle_event_nonstationary",
             ],
         )
         self.assertIn("literature_maglev_modal_response", names)
         self.assertNotIn("nominal_multifrequency", names)
+        self.assertNotIn("vehicle_event_nonstationary", names)
         self.assertNotIn("measured_bridge_point4_transverse", names)
 
     def test_literature_maglev_modal_response_uses_reported_main_frequencies(self):
@@ -225,8 +225,8 @@ class Phase1SimulationTest(unittest.TestCase):
         radar = simulate_radar_targets(truth, config)
         theta = 4.0 * math.pi * truth.q_m / config.wavelength_m()
 
-        for target_idx, kappa in enumerate(radar.kappa):
-            physical_phase_without_bias = kappa * theta
+        for target_idx, beta in enumerate(radar.beta):
+            physical_phase_without_bias = theta / beta
             bias = wrap_to_pi(radar.wrapped_phase_rad[target_idx, 0] - physical_phase_without_bias[0])
             expected_wrapped = wrap_to_pi(physical_phase_without_bias + bias)
             phase_error = wrap_to_pi(radar.wrapped_phase_rad[target_idx] - expected_wrapped)
@@ -312,14 +312,14 @@ class Phase1SimulationTest(unittest.TestCase):
         self.assertTrue(np.all(np.isnan(radar.wrapped_phase_rad[1, in_window])))
         self.assertFalse(np.any(np.isnan(radar.wrapped_phase_rad[1, out_window])))
 
-    def test_aoa_error_changes_measured_kappa_but_not_true_kappa(self):
+    def test_aoa_error_changes_measured_beta_but_not_true_beta(self):
         config = Phase1Config(duration_s=1.0, sample_rate_hz=1000.0, seed=43, aoa_error_deg=8.0)
         truth = generate_multifrequency_truth(config)
         radar = simulate_radar_targets(truth, config)
 
-        expected_measured = np.cos(np.deg2rad(radar.target_angles_deg + 8.0))
-        np.testing.assert_allclose(radar.measured_kappa, expected_measured)
-        self.assertGreater(np.max(np.abs(radar.measured_kappa - radar.kappa)), 1e-3)
+        expected_measured = 1.0 / np.abs(np.cos(np.deg2rad(radar.target_angles_deg + 8.0)))
+        np.testing.assert_allclose(radar.measured_beta, expected_measured)
+        self.assertGreater(np.max(np.abs(radar.measured_beta - radar.beta)), 1e-3)
 
     def test_run_phase1_writes_cold_start_relative_reference_fields(self):
         config = Phase1Config(duration_s=0.2, sample_rate_hz=1000.0, seed=44)
@@ -355,16 +355,16 @@ class Phase1ConfigExtensionTest(unittest.TestCase):
         self.assertGreater(config.initial_measurement_variance, config.min_measurement_variance)
         self.assertGreater(config.max_measurement_variance, config.min_measurement_variance)
         self.assertGreater(config.cold_start_duration_s, 0.0)
-        self.assertGreater(config.kappa_window_samples, 2)
-        self.assertGreater(config.kappa_update_start_s, 0.0)
-        self.assertGreater(config.kappa_bootstrap_prior_weight, 0.0)
+        self.assertGreater(config.beta_window_samples, 2)
+        self.assertGreater(config.beta_update_start_s, 0.0)
+        self.assertGreater(config.beta_bootstrap_prior_weight, 0.0)
         self.assertGreater(config.adaptive_r_forgetting, 0.0)
         self.assertLess(config.adaptive_r_forgetting, 1.0)
 
     def test_default_scenario_controls_are_available(self):
         config = Phase1Config()
 
-        self.assertEqual(config.scenario_name, "nominal_multifrequency")
+        self.assertEqual(config.scenario_name, "literature_maglev_modal_response")
         self.assertEqual(config.aoa_error_deg, 0.0)
         self.assertEqual(config.degraded_target_indices, ())
         self.assertEqual(config.dropout_target_indices, ())

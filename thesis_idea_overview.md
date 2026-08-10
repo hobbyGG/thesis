@@ -28,15 +28,15 @@ q_k=\beta_i d_{i,k}^{\mathrm{LOS}},
 \Theta_k=\beta_i\phi_{i,k}^{\mathrm{LOS}}.
 $$
 
-当前代码和若干实现公式中出现的 $\kappa_i$ 不是 Ma 的转换系数本身，而是其倒数，即从结构主相位投影到第 $i$ 个 target LoS 相位的逆转换系数：
+当前代码与正文统一使用 $\beta_i$ 作为 LoS 到结构真实振动方向的转换系数。AoA 冷启动阶段不把角度估计视为最终标定值，而是先由结构方向到 LoS 的几何投影 $p_i=|\cos\theta_i|$ 给出转换系数初值：
 
 $$
-\hat{\kappa}_{i,0}=\cos\theta_i,
+\hat{p}_{i,0}=|\cos\theta_i|,
 \qquad
-\hat{\beta}_{i,0}=1/\hat{\kappa}_{i,0}.
+\hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}.
 $$
 
-其中 $\kappa_i=1/\beta_i$。冷启动阶段结构近似静止，用于确定相位偏置 $b_i$，并根据 target 初始质量给出 target-wise 测量噪声初值。在线运行时，Kalman 预测模型先在结构方向得到主相位先验 $\Theta_k^-$，再投影回 LoS 相位空间辅助 wrapped phase 分支选择，得到第 $i$ 个 target 的 LoS 连续校正相位 $\phi_{i,k}^{\mathrm{LOS,corr}}$。注意，$\phi_{i,k}^{\mathrm{LOS,corr}}$ 仍然是 LoS 相位，不是结构方向主相位。随后将其乘以 $\beta_i$ 构造结构方向主相位观测：
+冷启动阶段结构近似静止，用于确定相位偏置 $b_i$，并根据 target 初始质量给出 target-wise 测量噪声初值。在线运行时，Kalman 预测模型先在结构方向得到主相位先验 $\Theta_k^-$，再用 $\Theta_k^- / \beta_i$ 投影回 LoS 相位空间辅助 wrapped phase 分支选择，得到第 $i$ 个 target 的 LoS 连续校正相位 $\phi_{i,k}^{\mathrm{LOS,corr}}$。注意，$\phi_{i,k}^{\mathrm{LOS,corr}}$ 仍然是 LoS 相位，不是结构方向主相位。随后将其乘以 $\beta_i$ 构造结构方向主相位观测：
 
 $$
 y_{i,k}
@@ -64,9 +64,7 @@ $$
 \sum_{\tau\in\mathcal{W}_{\beta}} x_{\tau,c}y_{\tau,c}
 }{
 \sum_{\tau\in\mathcal{W}_{\beta}} x_{\tau,c}^{2}
-},
-\qquad
-\hat{\kappa}_{i,k+1}=1/\hat{\beta}_{i,k+1}.
+}.
 $$
 
 第三，**结构主相位多 target Kalman 融合**。状态变量不再定义为 Ma 等人单 target 的 LoS 相位，而定义为结构振动方向主相位：
@@ -108,9 +106,7 @@ $$
 $$
 \hat{\phi}_{i,k}^{\mathrm{LOS},-}
 =
-\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i
-=
-\hat{\kappa}_{i,k}^{-}\hat{\Theta}_k^-+b_i.
+\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i.
 $$
 
 再对 wrapped phase 进行统一校正，得到 LoS corrected phase：
@@ -159,7 +155,7 @@ R_{i,k}^{\Theta}
 \sigma_{\beta_i,k}^{2}.
 $$
 
-这说明 LoS 相位噪声会被 $\beta_i^2$ 放大，$\beta_i$ 自身不确定也会进入结构方向观测误差。若连接当前代码实现，可补充等价的 LoS 观测形式：代码令 $\kappa_i=1/\beta_i$，直接使用 $\phi_{i,k}^{\mathrm{LOS}}=\kappa_i\Theta_k+b_i$ 和 $\kappa_i$ 置信度传播项；这与结构方向观测模型在 $\beta_i$ 已知时等价，只是噪声协方差所在坐标系不同。
+这说明 LoS 相位噪声会被 $\beta_i^2$ 放大，$\beta_i$ 自身不确定也会进入结构方向观测误差。当前代码与正文保持同一坐标系：先构造结构方向观测 $y_{i,k}$，再以 $H_i=[1,0]$ 进入 Kalman 更新。
 
 ## 1. 数学模型说明
 
@@ -768,15 +764,15 @@ q(k)=\beta_i d_{\mathrm{LOS},i}(k),
 \Theta_k=\beta_i\phi_{i,k}^{\mathrm{LOS}}.
 $$
 
-当前方案中，AoA 不被视为最终精确转换系数，而是作为 Kalman 闭环启动所需的几何先验。若第 $i$ 个 target 的 AoA 与结构振动方向夹角为 $\theta_i$，则先得到结构主相位到 LoS 相位的投影系数初值：
+当前方案中，AoA 不被视为最终精确转换系数，而是作为 Kalman 闭环启动所需的几何先验。若第 $i$ 个 target 的 AoA 与结构振动方向夹角为 $\theta_i$，则先得到结构主相位到 LoS 相位的几何投影 $p_i$，再取其倒数作为 LoS 到结构方向的转换系数初值：
 
 $$
-\hat{\kappa}_{i,0}=\cos\theta_i,
+\hat{p}_{i,0}=|\cos\theta_i|,
 \qquad
-\hat{\beta}_{i,0}=1/\hat{\kappa}_{i,0}.
+\hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}.
 $$
 
-其中 $\kappa_i=1/\beta_i$，它是逆转换系数或投影系数，不应单独称为 Ma 的 direction conversion factor。进入 Kalman 框架的 target 相位仍是 wrapped phase。由加速度驱动的预测模型先给出结构主相位先验，再通过当前 $\hat{\beta}_{i,k}^{-}$ 投影为各 target 的 LoS 相位先验：
+进入 Kalman 框架的 target 相位仍是 wrapped phase。由加速度驱动的预测模型先给出结构主相位先验，再通过当前 $\hat{\beta}_{i,k}^{-}$ 投影为各 target 的 LoS 相位先验：
 
 $$
 \hat{\phi}_{i,k}^{\mathrm{LOS},-}
@@ -837,13 +833,11 @@ x_{\tau,c}^{2}
 +
 \lambda_\beta
 },
-\qquad
-\hat{\kappa}_{i,k+1}=1/\hat{\beta}_{i,k+1}.
 $$
 
 该更新仅在窗口内结构响应激励足够、target quality 足够好、相位分支稳定时执行；若条件不足，则保持上一时刻 $\beta_i$。转换系数稳定性仍可作为后续质量评价指标：稳定的 $\beta_i$ 说明该 target 更可能是可靠静止参考目标，不稳定则可能意味着多散射混叠、遮挡或动态干扰。但它不作为前端 target selection 的主判据，也不作为 Kalman 启动前的必要条件。
 
-相对于 Ma 等人的离线转换因子标定，本文的处理保留了其“加速度辅助相位预测”的核心思想，但改变了相位状态和参数更新位置。Ma 等人的状态是单 target 的 LoS 相位，转换因子 $\beta_i$ 通常在滤波前通过离线遍历或标定得到；本文的状态是结构振动方向主相位，$\beta_i$ 由 AoA 冷启动，并在 LoS corrected phase $\phi_{i,k}^{\mathrm{LOS,corr}}$ 与结构主相位后验 $\Theta_k^+$ 的支持下随 Kalman 递推在线收敛。当前代码中为了在 LoS measurement space 写观测方程，会等价估计和使用 $\kappa_i=1/\beta_i$；论文正文中应优先使用 $\beta_i$ 表达转换方向，避免把 $\kappa_i$ 与 Ma 的 direction conversion factor 混为一谈。
+相对于 Ma 等人的离线转换因子标定，本文的处理保留了其“加速度辅助相位预测”的核心思想，但改变了相位状态和参数更新位置。Ma 等人的状态是单 target 的 LoS 相位，转换因子 $\beta_i$ 通常在滤波前通过离线遍历或标定得到；本文的状态是结构振动方向主相位，$\beta_i$ 由 AoA 冷启动，并在 LoS corrected phase $\phi_{i,k}^{\mathrm{LOS,corr}}$ 与结构主相位后验 $\Theta_k^+$ 的支持下随 Kalman 递推在线收敛。当前代码与论文正文统一使用 $\beta_i$ 表达 LoS 到结构真实振动方向的转换方向。
 
 ### 4.5 当前硬件约束：TI IWR1843
 

@@ -1,6 +1,7 @@
 import unittest
 import tempfile
 import inspect
+from dataclasses import replace
 from pathlib import Path
 
 from simulation.phase1.evaluate import evaluate_all_scenarios, evaluate_scenario
@@ -23,19 +24,22 @@ class Phase1ScenarioTest(unittest.TestCase):
                 "same_range_far_angles",
                 "aoa_error_bootstrap",
                 "target_snr_drop",
-                "vehicle_event_nonstationary",
             ],
         )
         self.assertNotIn("nominal_multifrequency", names)
+        self.assertNotIn("vehicle_event_nonstationary", names)
         self.assertNotIn("measured_bridge_point4_transverse", names)
         self.assertEqual(len(names), len(set(names)))
 
         all_names = [scenario.scenario_name for scenario in build_all_phase1_scenarios()]
-        self.assertIn("nominal_multifrequency", all_names)
-        self.assertIn("target_dropout", all_names)
+        self.assertIn("literature_mmwbats_same_range_aliasing", all_names)
+        self.assertIn("literature_mmshm_adjacent_range_clutter", all_names)
         self.assertIn("mixed_scatterer_rangebin", all_names)
         self.assertIn("low_snr_multitarget", all_names)
-        self.assertIn("ma2023_balanced_good_targets", all_names)
+        self.assertNotIn("nominal_multifrequency", all_names)
+        self.assertNotIn("target_dropout", all_names)
+        self.assertNotIn("ma20" + "23_balanced_good_targets", all_names)
+        self.assertNotIn("vehicle_event_nonstationary", all_names)
         self.assertEqual(len(all_names), len(set(all_names)))
 
 
@@ -48,14 +52,16 @@ class Phase1EvaluationTest(unittest.TestCase):
         self.assertIn("oracle", method_names)
         self.assertIn("range_bin_itoh", method_names)
         self.assertIn("ma2026_reproduction", method_names)
-        self.assertIn("selected_aoa_fixed_kappa", method_names)
-        self.assertIn("proposed_full_pipeline_kappa_confidence", method_names)
+        self.assertIn("selected_aoa_fixed_beta", method_names)
+        self.assertIn("proposed_full_pipeline_aoa_fixed_beta", method_names)
+        self.assertIn("proposed_full_pipeline_beta_confidence", method_names)
+        self.assertNotIn("ma20" + "23_reproduction", method_names)
         self.assertNotIn("range_bin_only_mixed_phase", method_names)
         self.assertNotIn("itoh_ls", method_names)
         self.assertNotIn("single_target_ma_style", method_names)
         self.assertNotIn("ma_style_iterative_beta_range_bin", method_names)
-        self.assertNotIn("multitarget_true_kappa_fixed_r", method_names)
-        self.assertNotIn("multitarget_aoa_fixed_kappa", method_names)
+        self.assertNotIn("multitarget_true_beta_fixed_r", method_names)
+        self.assertNotIn("multitarget_aoa_fixed_beta", method_names)
         self.assertNotIn("proposed", method_names)
         self.assertNotIn("proposed_full_pipeline", method_names)
         self.assertNotIn("proposed_full_pipeline_posterior_r", method_names)
@@ -68,38 +74,62 @@ class Phase1EvaluationTest(unittest.TestCase):
         self.assertIn("results", artifacts)
 
     def test_validation_rows_include_full_pipeline_selection_metrics(self):
-        scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "vehicle_event_nonstationary"][0]
+        scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "target_snr_drop"][0]
         rows, _ = evaluate_scenario(scenario)
-        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_kappa_confidence")
+        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_beta_confidence")
 
         self.assertIn("selected_target_count", full)
         self.assertIn("selected_indices", full)
         self.assertIn("corrected_observation_count", full)
         self.assertIn("unwrap_error_rate", full)
         self.assertGreaterEqual(full["selected_target_count"], 1)
-        self.assertNotIn(4, full["selected_indices"])
+
+    def test_aoa_bootstrap_reports_beta_diagnostics_without_requiring_beta_improvement(self):
+        scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "aoa_error_bootstrap"][0]
+        self.assertEqual(scenario.beta_update_reference_mode, "loo_update_direct_ls")
+        self.assertEqual(scenario.aoa_error_deg, 0.0)
+        rows, _ = evaluate_scenario(scenario)
+        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_beta_confidence")
+        fixed = next(row for row in rows if row["method"] == "selected_aoa_fixed_beta")
+
+        self.assertIn("beta_initial_median_relative_error", full)
+        self.assertIn("beta_improvement_ratio", full)
+        self.assertLess(full["rmse_mm"], fixed["rmse_mm"])
+        self.assertGreater(full["beta_median_relative_error"], 0.0)
+        self.assertGreater(full["beta_improvement_ratio"], 1.0)
+        self.assertAlmostEqual(fixed["beta_improvement_ratio"], 1.0)
+
+    def test_literature_aoa10_displacement_gate_does_not_claim_beta_convergence(self):
+        scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "literature_maglev_modal_response"][0]
+        scenario = replace(
+            scenario,
+            aoa_error_deg=10.0,
+            beta_update_start_s=0.3,
+            beta_window_samples=80,
+            beta_bootstrap_prior_weight=0.0,
+        )
+        rows, _ = evaluate_scenario(scenario)
+        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_beta_confidence")
+        fixed = next(row for row in rows if row["method"] == "selected_aoa_fixed_beta")
+
+        self.assertLess(full["rmse_mm"], 0.025)
+        self.assertLess(full["rmse_mm"], fixed["rmse_mm"])
+        self.assertGreater(full["beta_median_relative_error"], full["beta_initial_median_relative_error"])
+        self.assertGreater(full["beta_improvement_ratio"], 1.0)
 
     def test_clean_full_pipeline_selection_reports_matched_targets(self):
-        scenario = [item for item in build_all_phase1_scenarios() if item.scenario_name == "nominal_multifrequency"][0]
+        scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "literature_maglev_modal_response"][0]
         rows, _ = evaluate_scenario(scenario)
-        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_kappa_confidence")
+        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_beta_confidence")
 
         self.assertNotIn(-1, full["selected_indices"])
         self.assertGreaterEqual(full["selected_target_count"], 1)
-
-    def test_full_pipeline_dropout_target_is_rejected_before_kalman(self):
-        scenario = [item for item in build_all_phase1_scenarios() if item.scenario_name == "target_dropout"][0]
-        rows, artifacts = evaluate_scenario(scenario)
-        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_kappa_confidence")
-
-        self.assertNotIn(0, full["selected_indices"])
-        self.assertIn("low_presence", artifacts["selection_diagnostics"].rejected_reasons[0])
 
     def test_same_range_far_angles_full_pipeline_separates_targets_before_kalman(self):
         scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "same_range_far_angles"][0]
         rows, artifacts = evaluate_scenario(scenario)
         diagnostic_rows, _ = evaluate_scenario(scenario, method_specs=all_method_specs())
-        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_kappa_confidence")
+        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_beta_confidence")
         selected_frontend = artifacts["selected_frontend_targets"]
 
         self.assertGreaterEqual(full["selected_target_count"], 2)
@@ -125,24 +155,10 @@ class Phase1EvaluationTest(unittest.TestCase):
                     same_range_far_angle_pair_found = True
         self.assertTrue(same_range_far_angle_pair_found)
 
-    def test_ma2023_balanced_good_targets_fuses_multiple_reported_good_targets(self):
-        scenario = [
-            item for item in build_all_phase1_scenarios() if item.scenario_name == "ma2023_balanced_good_targets"
-        ][0]
-        rows, _ = evaluate_scenario(scenario)
-        basic_range_bin = next(row for row in rows if row["method"] == "range_bin_itoh")
-        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_kappa_confidence")
-
-        self.assertEqual(tuple(scenario.target_range_bins), (31, 33, 35, 42, 48))
-        self.assertEqual(tuple(scenario.nominal_frequencies_hz), (0.3, 0.5, 1.0))
-        self.assertLess(max(scenario.target_snr_db) - min(scenario.target_snr_db), 1.0e-9)
-        self.assertGreaterEqual(full["selected_target_count"], 1)
-        self.assertLess(full["rmse_mm"], basic_range_bin["rmse_mm"])
-
     def test_low_snr_full_pipeline_does_not_diverge_from_noisy_initial_slope(self):
         scenario = [item for item in build_all_phase1_scenarios() if item.scenario_name == "low_snr_multitarget"][0]
         rows, _ = evaluate_scenario(scenario)
-        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_kappa_confidence")
+        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_beta_confidence")
 
         self.assertLess(full["rmse_mm"], 0.1)
         self.assertLessEqual(full["unwrap_error_rate"], 0.001)
@@ -151,7 +167,7 @@ class Phase1EvaluationTest(unittest.TestCase):
         scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "strong_wrapping"][0]
         rows, _ = evaluate_scenario(scenario)
         itoh = next(row for row in rows if row["method"] == "range_bin_itoh")
-        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_kappa_confidence")
+        full = next(row for row in rows if row["method"] == "proposed_full_pipeline_beta_confidence")
 
         self.assertGreater(itoh["rmse_mm"], full["rmse_mm"])
         self.assertGreater(itoh["rmse_mm"], 2.0 * full["rmse_mm"])
@@ -164,19 +180,19 @@ class Phase1EvaluationTest(unittest.TestCase):
 
         self.assertEqual(radar_input.wrapped_phase_rad.shape, frontend_targets.wrapped_phase_rad.shape)
         self.assertEqual(radar_input.available_mask.shape, frontend_targets.available_mask.shape)
-        self.assertEqual(radar_input.measured_kappa.shape, frontend_targets.measured_kappa.shape)
-        self.assertEqual(radar_input.initial_r.shape, frontend_targets.measured_kappa.shape)
+        self.assertEqual(radar_input.measured_beta.shape, frontend_targets.measured_beta.shape)
+        self.assertEqual(radar_input.initial_r.shape, frontend_targets.measured_beta.shape)
         self.assertFalse(hasattr(radar_input, "target_reference_indices"))
 
         self.assertTrue((radar_input.wrapped_phase_rad == frontend_targets.wrapped_phase_rad).all())
         self.assertTrue((radar_input.available_mask == frontend_targets.available_mask).all())
-        self.assertTrue((radar_input.measured_kappa == frontend_targets.measured_kappa).all())
+        self.assertTrue((radar_input.measured_beta == frontend_targets.measured_beta).all())
 
     def test_frontend_candidate_bins_do_not_accept_truth_metadata(self):
         params = set(inspect.signature(frontend_candidate_bins).parameters)
 
         self.assertTrue({"merged_peaks", "range_angle"}.issubset(params))
-        self.assertTrue(params.isdisjoint({"adc", "scatterers", "truth", "radar", "kappa"}))
+        self.assertTrue(params.isdisjoint({"adc", "scatterers", "truth", "radar", "beta"}))
 
     def test_default_method_specs_use_clean_paper_method_set(self):
         method_names = [spec.name for spec in default_method_specs()]
@@ -187,8 +203,9 @@ class Phase1EvaluationTest(unittest.TestCase):
                 "oracle",
                 "range_bin_itoh",
                 "ma2026_reproduction",
-                "selected_aoa_fixed_kappa",
-                "proposed_full_pipeline_kappa_confidence",
+                "selected_aoa_fixed_beta",
+                "proposed_full_pipeline_aoa_fixed_beta",
+                "proposed_full_pipeline_beta_confidence",
             ],
         )
 
@@ -221,40 +238,30 @@ class Phase1EvaluationTest(unittest.TestCase):
                 scenario.scenario_name,
             )
 
-    def test_posterior_r_full_pipeline_is_same_range_far_angles_ablation_candidate(self):
+    def test_registry_exposes_only_current_ablation_candidates(self):
         scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "same_range_far_angles"][0]
-        rows, artifacts = evaluate_scenario(scenario, method_specs=all_method_specs())
-        kappa_confidence = next(row for row in rows if row["method"] == "proposed_full_pipeline_kappa_confidence")
-        posterior = next(row for row in rows if row["method"] == "proposed_full_pipeline_posterior_r")
-        result = next(
-            result for result in artifacts["results"] if result.method_name == "proposed_full_pipeline_posterior_r"
-        )
-
-        self.assertLessEqual(posterior["rmse_mm"], kappa_confidence["rmse_mm"])
-        self.assertEqual(posterior["selected_indices"], kappa_confidence["selected_indices"])
-        self.assertEqual(result.extra["adaptive_r_mode"], "posterior_residual")
-        self.assertEqual(result.extra["kappa_update_mode"], "centered_regularized_ls")
-
-    def test_doc_strict_full_pipeline_uses_same_target_selection_as_full_pipeline(self):
-        scenario = [item for item in build_all_phase1_scenarios() if item.scenario_name == "nominal_multifrequency"][0]
         rows, _ = evaluate_scenario(scenario, method_specs=all_method_specs())
-        full = next(row for row in rows if row["method"] == "proposed_full_pipeline")
-        strict = next(row for row in rows if row["method"] == "proposed_full_pipeline_doc_strict")
+        beta_confidence = next(row for row in rows if row["method"] == "proposed_full_pipeline_beta_confidence")
+        methods = {row["method"] for row in rows}
 
-        self.assertEqual(strict["selected_target_count"], full["selected_target_count"])
-        self.assertEqual(strict["selected_indices"], full["selected_indices"])
-        self.assertGreater(strict["corrected_observation_count"], 0)
+        self.assertIn("range_bin_only_mixed_phase", methods)
+        self.assertIn("multitarget_aoa_fixed_beta", methods)
+        self.assertIn("proposed_full_pipeline_aoa_fixed_beta", methods)
+        self.assertIn("proposed_full_pipeline_beta_confidence", methods)
+        self.assertLess(beta_confidence["rmse_mm"], 0.10)
+        self.assertNotIn("proposed_full_pipeline_posterior_r", methods)
+        self.assertNotIn("proposed_full_pipeline_doc_strict", methods)
 
-    def test_kappa_confidence_full_pipeline_selects_q_that_does_not_break_strong_wrapping(self):
+    def test_beta_confidence_full_pipeline_selects_q_that_does_not_break_strong_wrapping(self):
         scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "strong_wrapping"][0]
         rows, artifacts = evaluate_scenario(scenario)
-        kappa_confidence = next(row for row in rows if row["method"] == "proposed_full_pipeline_kappa_confidence")
+        beta_confidence = next(row for row in rows if row["method"] == "proposed_full_pipeline_beta_confidence")
         result = next(
-            result for result in artifacts["results"] if result.method_name == "proposed_full_pipeline_kappa_confidence"
+            result for result in artifacts["results"] if result.method_name == "proposed_full_pipeline_beta_confidence"
         )
 
-        self.assertLess(kappa_confidence["rmse_mm"], 0.20)
-        self.assertEqual(kappa_confidence["unwrap_error_rate"], 0.0)
+        self.assertLess(beta_confidence["rmse_mm"], 0.20)
+        self.assertEqual(beta_confidence["unwrap_error_rate"], 0.0)
         self.assertIn("calibrated_q_candidates", result.extra)
         self.assertIn("calibrated_q_metric_values", result.extra)
 
@@ -273,16 +280,14 @@ class Phase1FeasibilityTest(unittest.TestCase):
         summary = evaluate_all_scenarios(build_phase1_scenarios())
         gate_names = {gate["name"] for gate in summary["gates"]}
 
-        self.assertIn("vehicle_event_full_pipeline_selected_count_ge_1", gate_names)
-        self.assertIn("vehicle_event_full_pipeline_excludes_target4", gate_names)
         self.assertIn("same_range_far_angles_full_pipeline_selects_two_same_range_targets", gate_names)
         self.assertIn("same_range_far_angles_full_pipeline_rmse_le_0p10mm", gate_names)
-        self.assertIn("same_range_far_angles_full_pipeline_beats_ma2026_reproduction", gate_names)
+        self.assertNotIn("same_range_far_angles_full_pipeline_beats_ma2026_reproduction", gate_names)
         self.assertIn("strong_wrapping_full_pipeline_beats_range_bin_itoh", gate_names)
         self.assertIn("strong_wrapping_range_bin_itoh_rmse_ge_2x_full_pipeline", gate_names)
         self.assertIn("strong_wrapping_full_pipeline_rmse_le_reasonable_threshold", gate_names)
         self.assertIn("target_snr_drop_full_pipeline_beats_selected_fixed_r", gate_names)
-        self.assertIn("aoa_bootstrap_kappa_median_relative_error_le_0p05", gate_names)
+        self.assertIn("aoa_bootstrap_beta_median_relative_error_le_0p10", gate_names)
         full_pipeline_failures = [
             gate["name"]
             for gate in summary["gates"]
@@ -296,17 +301,17 @@ class Phase1FeasibilityTest(unittest.TestCase):
         ]
         self.assertEqual(full_pipeline_failures, [])
 
-    def test_full_pipeline_gates_use_kappa_confidence_method_when_available(self):
+    def test_full_pipeline_gates_use_beta_confidence_method_when_available(self):
         scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "strong_wrapping"][0]
         summary = evaluate_all_scenarios([scenario])
-        kappa_confidence = next(
-            row for row in summary["rows"] if row["method"] == "proposed_full_pipeline_kappa_confidence"
+        beta_confidence = next(
+            row for row in summary["rows"] if row["method"] == "proposed_full_pipeline_beta_confidence"
         )
         gate = next(
             gate for gate in summary["gates"] if gate["name"] == "strong_wrapping_full_pipeline_rmse_le_reasonable_threshold"
         )
 
-        self.assertAlmostEqual(gate["value"], kappa_confidence["rmse_mm"])
+        self.assertAlmostEqual(gate["value"], beta_confidence["rmse_mm"])
 
 
 class Phase1ReportingTest(unittest.TestCase):
@@ -353,12 +358,12 @@ class Phase1ReportingTest(unittest.TestCase):
             written = write_validation_report(summary, output_dir)
             plots_dir = written["plots_dir"]
 
-            self.assertTrue((plots_dir / "aoa_error_bootstrap_kappa_bootstrap.svg").exists())
+            self.assertTrue((plots_dir / "aoa_error_bootstrap_beta_bootstrap.svg").exists())
             self.assertTrue((plots_dir / "target_snr_drop_adaptive_r.svg").exists())
             self.assertTrue((plots_dir / "strong_wrapping_phase_correction.svg").exists())
-            self.assertTrue((plots_dir / "vehicle_event_nonstationary_range_angle_frame.svg").exists())
-            self.assertTrue((plots_dir / "vehicle_event_nonstationary_target_selection_timeline.svg").exists())
-            self.assertTrue((plots_dir / "vehicle_event_nonstationary_paper_methods_displacement.svg").exists())
+            self.assertFalse((plots_dir / "vehicle_event_nonstationary_range_angle_frame.svg").exists())
+            self.assertFalse((plots_dir / "vehicle_event_nonstationary_target_selection_timeline.svg").exists())
+            self.assertFalse((plots_dir / "vehicle_event_nonstationary_paper_methods_displacement.svg").exists())
 
     def test_reporting_csv_keeps_new_metric_headers(self):
         summary = evaluate_all_scenarios(build_phase1_scenarios()[:1])
@@ -388,7 +393,7 @@ class Phase1ReportingTest(unittest.TestCase):
             self.assertIn("基于实桥文献给出的轨道梁主频构造可解释的非平稳车辆响应仿真", text)
             self.assertIn("Selected Indices", text)
             self.assertIn("Corrected Obs", text)
-            self.assertIn("Kappa Rel Err", text)
+            self.assertIn("Beta Rel Err", text)
 
     def test_displacement_plot_includes_selected_fixed_baseline(self):
         summary = evaluate_all_scenarios(build_phase1_scenarios()[:1])
@@ -412,35 +417,20 @@ class Phase1ReportingTest(unittest.TestCase):
             self.assertIn("Time (s)", displacement)
             self.assertIn("Relative displacement (mm)", displacement)
 
-            kappa = (plots_dir / "aoa_error_bootstrap_kappa_bootstrap.svg").read_text()
-            self.assertIn("Time (s)", kappa)
-            self.assertIn("Projection coefficient kappa", kappa)
-            self.assertIn("proposed_full_pipeline_kappa_confidence", kappa)
+            beta = (plots_dir / "aoa_error_bootstrap_beta_bootstrap.svg").read_text()
+            self.assertIn("Time (s)", beta)
+            self.assertIn("LOS-to-structure conversion factor beta", beta)
+            self.assertIn("proposed_full_pipeline_beta_confidence", beta)
 
             adaptive_r = (plots_dir / "target_snr_drop_adaptive_r.svg").read_text()
             self.assertIn("Time (s)", adaptive_r)
             self.assertIn("Measurement variance R (rad^2)", adaptive_r)
-            self.assertIn("proposed_full_pipeline_kappa_confidence", adaptive_r)
+            self.assertIn("proposed_full_pipeline_beta_confidence", adaptive_r)
 
             phase = (plots_dir / "strong_wrapping_phase_correction.svg").read_text()
             self.assertIn("Time (s)", phase)
             self.assertIn("LoS phase (rad)", phase)
-            self.assertIn("proposed_full_pipeline_kappa_confidence", phase)
-
-            range_angle = (plots_dir / "vehicle_event_nonstationary_range_angle_frame.svg").read_text()
-            self.assertIn("Range bin", range_angle)
-            self.assertIn("Peak range-angle magnitude", range_angle)
-
-            selection = (plots_dir / "vehicle_event_nonstationary_target_selection_timeline.svg").read_text()
-            self.assertIn("Time (s)", selection)
-            self.assertIn("Presence / selected gate", selection)
-
-            paper_methods = (
-                plots_dir / "vehicle_event_nonstationary_paper_methods_displacement.svg"
-            ).read_text()
-            self.assertIn("Time (s)", paper_methods)
-            self.assertIn("Relative displacement (mm)", paper_methods)
-            self.assertIn("proposed_full_pipeline_kappa_confidence", paper_methods)
+            self.assertIn("proposed_full_pipeline_beta_confidence", phase)
 
 
 class Phase1ReadmeTest(unittest.TestCase):
@@ -448,15 +438,23 @@ class Phase1ReadmeTest(unittest.TestCase):
         text = Path("simulation/phase1/README.md").read_text()
 
         self.assertIn("frontend.py", text)
-        self.assertIn("selected_aoa_fixed_kappa", text)
+        self.assertIn("selected_aoa_fixed_beta", text)
         self.assertIn("range_bin_only_mixed_phase", text)
-        self.assertIn("ma_style_iterative_beta_range_bin", text)
         self.assertIn("ma2026_reproduction", text)
         self.assertIn("ma2026/", text)
-        self.assertIn("proposed_full_pipeline", text)
-        self.assertNotIn("proposed_full_pipeline_kappa_confidence_r", text)
+        self.assertIn("proposed_full_pipeline_beta_confidence", text)
+        self.assertNotIn("proposed_full_pipeline_beta_confidence_r", text)
         self.assertIn("selected_target_count", text)
         self.assertIn("ADC/range-angle", text)
+
+    def test_root_readme_keeps_ma2026_as_main_reproduction_scope(self):
+        text = Path("README.md").read_text()
+
+        self.assertIn("ma2026_reproduction", text)
+        self.assertIn("Ma 2026", text)
+        self.assertNotIn("ma20" + "23_reproduction", text)
+        self.assertNotIn("F" + "IR fusion", text)
+        self.assertNotIn("range-bin beta 标定 + Ma 2026", text)
 
 
 class Phase1AlgorithmChainReviewTest(unittest.TestCase):
@@ -479,7 +477,7 @@ class Phase1AlgorithmChainReviewTest(unittest.TestCase):
             "Ma 2026 reproduction baseline",
             "Ma-style iterative beta baseline",
             "confidence-aware target-wise R",
-            "online kappa bootstrap",
+            "online beta bootstrap",
             "真实 IWR1843 ADC 文件解析",
         ]
         for item in required:

@@ -28,7 +28,7 @@ class TargetTrack:
     presence: float
     snr_est_db: float
     band_energy_ratio: float
-    measured_kappa: float
+    measured_beta: float
     score: float
 
 
@@ -43,6 +43,8 @@ class SelectedTargetSet:
     selected_indices: np.ndarray
     quality_score: np.ndarray
     initial_r: np.ndarray
+    calibration_indices: np.ndarray
+    calibration_initial_r: np.ndarray
     diagnostics: SelectionDiagnostics
 
 
@@ -121,7 +123,7 @@ def select_targets_from_measurements(
     iq,
     wrapped_phase_rad,
     available_mask,
-    measured_kappa,
+    measured_beta,
     measured_acceleration_mps2,
     sample_rate_hz,
     initial_measurement_variance=9.0,
@@ -130,23 +132,24 @@ def select_targets_from_measurements(
     min_presence=0.70,
     min_band_energy_ratio=0.50,
     min_snr_db=8.0,
-    min_abs_kappa=0.45,
+    min_projection_abs=0.45,
     max_targets=None,
     min_score=0.25,
     min_selected_targets=0,
     hard_band_consistency=False,
+    calibration_min_projection_abs=0.35,
 ):
     iq_arr = np.asarray(iq, dtype=complex)
     wrapped = np.asarray(wrapped_phase_rad, dtype=float)
     available = np.asarray(available_mask, dtype=bool)
-    kappa = np.asarray(measured_kappa, dtype=float)
+    beta = np.asarray(measured_beta, dtype=float)
     accel = np.asarray(measured_acceleration_mps2, dtype=float)
     if iq_arr.ndim != 2:
         raise ValueError("iq must have shape (num_targets, num_samples)")
     if wrapped.shape != iq_arr.shape or available.shape != iq_arr.shape:
         raise ValueError("wrapped_phase_rad and available_mask must match iq shape")
-    if kappa.shape != (iq_arr.shape[0],):
-        raise ValueError("measured_kappa must have one value per target")
+    if beta.shape != (iq_arr.shape[0],):
+        raise ValueError("measured_beta must have one value per target")
 
     tracks = []
     reasons_by_target = {}
@@ -154,7 +157,15 @@ def select_targets_from_measurements(
         valid = available[target_idx] & np.isfinite(wrapped[target_idx]) & np.isfinite(iq_arr[target_idx].real)
         presence = float(np.count_nonzero(valid) / max(1, iq_arr.shape[1]))
         snr_est, band_ratio = _best_window_quality(iq_arr[target_idx], valid, accel, float(sample_rate_hz))
-        score = _selection_score(presence, band_ratio, snr_est, abs(float(kappa[target_idx])), min_snr_db, min_abs_kappa)
+        projection_abs = _projection_abs_from_beta(beta[target_idx])
+        score = _selection_score(
+            presence,
+            band_ratio,
+            snr_est,
+            projection_abs,
+            min_snr_db,
+            min_projection_abs,
+        )
         reasons = []
         if presence < float(min_presence):
             reasons.append("low_presence")
@@ -162,7 +173,7 @@ def select_targets_from_measurements(
             reasons.append("low_band_consistency")
         if snr_est < float(min_snr_db):
             reasons.append("low_snr")
-        if abs(float(kappa[target_idx])) < float(min_abs_kappa):
+        if projection_abs < float(min_projection_abs):
             reasons.append("low_geometry_projection")
         tracks.append(
             TargetTrack(
@@ -170,7 +181,7 @@ def select_targets_from_measurements(
                 presence=presence,
                 snr_est_db=snr_est,
                 band_energy_ratio=band_ratio,
-                measured_kappa=float(kappa[target_idx]),
+                measured_beta=float(beta[target_idx]),
                 score=score,
             )
         )
@@ -199,7 +210,9 @@ def select_targets_from_measurements(
             if track.target_index not in accepted_ids
             and not hard_reasons.intersection(reasons_by_target[track.target_index])
         ]
-        soft_candidates.sort(key=lambda track: (-track.snr_est_db, -abs(track.measured_kappa), track.target_index))
+        soft_candidates.sort(
+            key=lambda track: (-track.snr_est_db, -_projection_abs_from_beta(track.measured_beta), track.target_index)
+        )
         for track in soft_candidates:
             accepted.append(track)
             accepted_ids.add(track.target_index)
@@ -215,23 +228,42 @@ def select_targets_from_measurements(
     selected_indices = np.asarray([track.target_index for track in accepted], dtype=int)
     quality_score = np.asarray([track.score for track in accepted], dtype=float)
     initial_r = np.full(iq_arr.shape[0], float(max_measurement_variance), dtype=float)
-    for track in accepted:
-        initial_r[track.target_index] = float(
+    track_initial_r = np.full(iq_arr.shape[0], float(max_measurement_variance), dtype=float)
+    for track in tracks:
+        track_initial_r[track.target_index] = float(
             _initial_r_from_snr_quality(
                 snr_db=track.snr_est_db,
                 presence=track.presence,
                 band_ratio=track.band_energy_ratio,
-                abs_kappa=abs(track.measured_kappa),
+                projection_abs=_projection_abs_from_beta(track.measured_beta),
                 min_band_energy_ratio=min_band_energy_ratio,
-                min_abs_kappa=min_abs_kappa,
+                min_projection_abs=min_projection_abs,
                 min_measurement_variance=min_measurement_variance,
                 max_measurement_variance=max_measurement_variance,
             )
         )
+    for track in accepted:
+        initial_r[track.target_index] = track_initial_r[track.target_index]
+
+    calibration_candidates = [
+        track
+        for track in tracks
+        if "low_presence" not in reasons_by_target[track.target_index]
+        and "low_snr" not in reasons_by_target[track.target_index]
+        and _projection_abs_from_beta(track.measured_beta) >= float(calibration_min_projection_abs)
+        and (not hard_band_consistency or "low_band_consistency" not in reasons_by_target[track.target_index])
+    ]
+    calibration_candidates.sort(key=lambda track: (-track.score, track.target_index))
+    calibration_indices = np.asarray([track.target_index for track in calibration_candidates], dtype=int)
+    calibration_initial_r = np.full(iq_arr.shape[0], float(max_measurement_variance), dtype=float)
+    for track in calibration_candidates:
+        calibration_initial_r[track.target_index] = track_initial_r[track.target_index]
     return SelectedTargetSet(
         selected_indices=selected_indices,
         quality_score=quality_score,
         initial_r=initial_r,
+        calibration_indices=calibration_indices,
+        calibration_initial_r=calibration_initial_r,
         diagnostics=SelectionDiagnostics(tracks=tuple(tracks), rejected_reasons=rejected),
     )
 
@@ -319,20 +351,27 @@ def _band_energy_ratio(series, valid, accel, sample_rate_hz):
     return float(np.sqrt(np.clip(raw_ratio, 0.0, 1.0)))
 
 
-def _selection_score(presence, band_ratio, snr_db, abs_kappa, min_snr_db, min_abs_kappa):
+def _projection_abs_from_beta(beta) -> float:
+    beta_abs = abs(float(beta))
+    if not np.isfinite(beta_abs) or beta_abs <= 1.0e-12:
+        return 0.0
+    return float(1.0 / beta_abs)
+
+
+def _selection_score(presence, band_ratio, snr_db, projection_abs, min_snr_db, min_projection_abs):
     band_score = np.clip((float(band_ratio) - 0.5) / 0.4, 0.0, 1.0)
     snr_score = np.clip((float(snr_db) - float(min_snr_db)) / 10.0, 0.0, 1.0)
-    kappa_score = np.clip((float(abs_kappa) - float(min_abs_kappa)) / 0.35, 0.0, 1.0)
-    return float(float(presence) * band_score * snr_score * kappa_score)
+    projection_score = np.clip((float(projection_abs) - float(min_projection_abs)) / 0.35, 0.0, 1.0)
+    return float(float(presence) * band_score * snr_score * projection_score)
 
 
 def _initial_r_from_snr_quality(
     snr_db,
     presence,
     band_ratio,
-    abs_kappa,
+    projection_abs,
     min_band_energy_ratio,
-    min_abs_kappa,
+    min_projection_abs,
     min_measurement_variance,
     max_measurement_variance,
 ):
@@ -342,8 +381,8 @@ def _initial_r_from_snr_quality(
 
     r_snr = 1.0 / (2.0 * snr_linear)
     presence_factor = 1.0 / max(float(presence), 1.0e-3)
-    geometry_floor = max(float(min_abs_kappa), 1.0e-3)
-    geometry_factor = max(1.0, 1.0 / max(float(abs_kappa), geometry_floor) ** 2)
+    geometry_floor = max(float(min_projection_abs), 1.0e-3)
+    geometry_factor = max(1.0, 1.0 / max(float(projection_abs), geometry_floor) ** 2)
     band_reference = max(float(min_band_energy_ratio), 1.0e-3)
     band_deficit = max(0.0, band_reference - float(band_ratio))
     band_factor = 1.0 + band_deficit / band_reference

@@ -68,7 +68,7 @@ flowchart TD
 flowchart TD
     AB("选定 angle bin<br/>复数 slow-time 序列")
     MT("多目标选取模块<br/>输出 $m$ 个可用 target<br/>$\{\psi_{i,k},\theta_i,b_i\}_{i=1}^{m}$")
-    AOA("AoA 冷启动<br/>$\hat{\kappa}_{i,0}=\cos\theta_i$<br/>$\hat{\beta}_{i,0}=1/\hat{\kappa}_{i,0}$<br/>$\kappa_i=1/\beta_i$")
+    AOA("AoA 冷启动<br/>$\hat{p}_{i,0}=|\cos\theta_i|$<br/>$\hat{\beta}_{i,0}=1/\max(\hat{p}_{i,0},\epsilon_p)$")
     BETA("转换系数预测<br/>$\hat{\beta}_{i,k}^{-}=\hat{\beta}_{i,k-1}^{+}$")
 
     ACC("加速度传感器<br/>$a_{k-1}$")
@@ -84,7 +84,7 @@ flowchart TD
     OUT("结构主相位与位移输出<br/>$\mathbf{x}_{k}=[\hat{\Theta}_{k},\dot{\hat{\Theta}}_{k}]^T$<br/>$\hat{q}_{k}=\frac{\lambda}{4\pi}\hat{\Theta}_{k}$")
 
     subgraph UPD["在线参数更新"]
-        LS("转换系数中心化 LS 更新<br/>$x_\tau=\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i,\ y_\tau=\hat{\Theta}_{\tau}^{+}$<br/>$\hat{\beta}_{i,k+1}=\frac{\sum x_{\tau,c}y_{\tau,c}+\lambda_{\beta}\hat{\beta}_{i,0}}{\sum x_{\tau,c}^{2}+\lambda_{\beta}}$<br/>$\hat{\kappa}_{i,k+1}=1/\hat{\beta}_{i,k+1}$")
+        LS("转换系数中心化 LS 更新<br/>$x_\tau=\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i,\ y_\tau=\hat{\Theta}_{\tau}^{+}$<br/>$\hat{\beta}_{i,k+1}=\frac{\sum x_{\tau,c}y_{\tau,c}+\lambda_{\beta}\hat{\beta}_{i,0}}{\sum x_{\tau,c}^{2}+\lambda_{\beta}}$")
         RUP("target-wise adaptive $R^\Theta$<br/>$R_{i,k}^{\Theta}\approx(\hat{\beta}_{i,k}^{-})^2R_{i,k}^{\mathrm{LOS}}+(\phi_{i,k}^{\mathrm{LOS,corr}}-b_i)^2\sigma_{\beta_i,k}^2$")
     end
 
@@ -135,18 +135,16 @@ flowchart LR
 
 上述详细图组将数据流处理过程拆分为 target 提取筛选和 Kalman 融合闭环两个子过程，简图则突出各模块之间的主线关系。Kalman 后半段的核心是：系统模型先由加速度给出结构主相位先验 $\mathbf{x}_k^-$，再通过各 target 当前转换系数 $\beta_i$ 投影回 target-wise LoS 相位预测 $\hat{\phi}_{i,k}^{\mathrm{LOS},-}$，用于选择 wrapped phase 的 $2\pi$ 分支。得到的 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 是第 $i$ 个 target 的 LoS 连续校正相位；它先乘以 $\beta_i$ 转为结构方向主相位观测 $y_{i,k}$，再进入多目标 Kalman 更新。与此同时，$\phi_{i,k}^{\mathrm{LOS,corr}}$ 与后验主相位 $\hat{\Theta}_k^+$ 一起进入短窗口 $\mathcal{W}_{\beta}$，递推修正每个 target 的转换系数 $\beta_i$。因此，转换系数计算所需的局部连续相位并不是预先独立完成的全时程解缠结果，而是 Kalman 预测辅助分支校正后的在线 LoS 局部相位。
 
-这一点也使本文方法相对于 Doppler-based phase unwrapping 形成更进一步的状态空间化表达。后者主要利用同一帧内多个 chirp 估计 LoS 相位变化率，并以该相位变化率预测下一时刻相位分支；本文则在 Ma 等人的 acceleration-aided Kalman 框架上，将状态定义为结构振动方向主相位，使滤波器在每个时刻同时具有 $\hat{\Theta}_k^-$、$\dot{\hat{\Theta}}_k^-$ 以及加速度输入带来的动力学约束。通过 $\beta_i$ 的倒数投影后，这一共享状态可分别给出多个 target 的 LoS 相位和相位变化趋势预测：
+这一点也使本文方法相对于 Doppler-based phase unwrapping 形成更进一步的状态空间化表达。后者主要利用同一帧内多个 chirp 估计 LoS 相位变化率，并以该相位变化率预测下一时刻相位分支；本文则在 Ma 等人的 acceleration-aided Kalman 框架上，将状态定义为结构振动方向主相位，使滤波器在每个时刻同时具有 $\hat{\Theta}_k^-$、$\dot{\hat{\Theta}}_k^-$ 以及加速度输入带来的动力学约束。通过除以 $\beta_i$ 投影后，这一共享状态可分别给出多个 target 的 LoS 相位和相位变化趋势预测：
 
 $$
 \hat{\phi}_{i,k}^{\mathrm{LOS},-}
 =
-\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i
-=
-\hat{\kappa}_{i,k}^{-}\hat{\Theta}_k^-+b_i,
+\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i,
 \qquad
 \dot{\hat{\phi}}_{i,k}^{\mathrm{LOS},-}
 =
-\hat{\kappa}_{i,k}^{-}\dot{\hat{\Theta}}_k^-.
+\frac{\dot{\hat{\Theta}}_k^-}{\hat{\beta}_{i,k}^{-}}.
 $$
 
 因而，本文不是单纯依赖 chirp 间相位差估计分支，而是利用更丰富的结构主相位状态先验约束多 target 的相位分支校正；最终精度提升仍需通过实验验证，但从模型信息来源看，其分支选择约束比单一 Doppler 预测更完整。
@@ -309,15 +307,15 @@ $$
 
 该转换系数用于将 LoS corrected phase 转换为结构方向主相位观测。传统处理通常需要先获得一段连续雷达相位，再与加速度参考位移拟合 $\beta_i$。这会带来潜在循环依赖：Kalman 相位解缠需要 $\beta_i$，而 $\beta_i$ 标定又可能需要解缠后的相位。本文采用 AoA 几何初始化与自举更新的方式避免该问题。
 
-若第 $i$ 个 target 的 AoA 与结构振动方向之间的夹角为 $\theta_i$，则其 LoS 投影系数可由几何关系给出初值：
+若第 $i$ 个 target 的 AoA 与结构振动方向之间的夹角为 $\theta_i$，则先由几何关系得到结构方向到 LoS 的投影初值 $p_i$，再取其倒数作为 LoS 到结构方向的转换系数初值：
 
 $$
-\kappa_i^{(0)}=\cos\theta_i,
+\hat{p}_{i,0}=|\cos\theta_i|,
 \qquad
-\beta_i^{(0)}=\frac{1}{\kappa_i^{(0)}}.
+\hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}.
 $$
 
-其中 $\kappa_i=1/\beta_i$。$\kappa_i$ 是结构主相位到该 target LoS 相位的投影系数或逆转换系数，不是 Ma 论文中 LoS 到结构方向的 direction conversion factor 本身。当本文只选取或合并角度较小的 target 时，AoA 初值通常不会偏离真实转换关系过远。冷启动阶段假设结构近似静止，用于确定每个 target 的初始相位偏置 $b_i$，并将滤波状态初始化为：
+当本文只选取或合并角度较小的 target 时，AoA 初值通常不会偏离真实转换关系过远。冷启动阶段假设结构近似静止，用于确定每个 target 的初始相位偏置 $b_i$，并将滤波状态初始化为：
 
 $$
 \mathbf{x}_0\approx
@@ -340,9 +338,7 @@ $$
 $$
 \hat{\phi}_{i,k}^{\mathrm{LOS},-}
 =
-\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i
-=
-\hat{\kappa}_{i,k}^{-}\hat{\Theta}_k^-+b_i.
+\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i.
 $$
 
 利用该预测值对原始 wrapped phase 进行分支校正：
@@ -361,7 +357,7 @@ $$
 \right).
 $$
 
-这里的 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 仍然是 LoS 连续相位。在短窗口 $\mathcal{W}_{\beta}$ 内，可用校正后的 LoS 连续相位与结构主相位估计递推修正 $\beta_i$。文档早期版本采用未中心化 plain LS 估计 $\kappa_i$；当前正文应优先表述为估计 $\beta_i$ 的斜率，并可在实现说明中补充代码等价更新 $\kappa_i=1/\beta_i$。令：
+这里的 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 仍然是 LoS 连续相位。在短窗口 $\mathcal{W}_{\beta}$ 内，可用校正后的 LoS 连续相位与结构主相位估计递推修正 $\beta_i$。文档早期版本采用未中心化 plain LS；当前正文统一表述为估计 LoS corrected phase 到结构主相位的斜率。令：
 
 $$
 x_k
@@ -388,9 +384,7 @@ x_{k,c}y_{k,c}
 x_{k,c}^2
 +
 \lambda_\beta
-},
-\qquad
-\hat{\kappa}_i=\frac{1}{\hat{\beta}_i}.
+}.
 $$
 
 该估计只在窗口内结构响应激励足够、target quality 足够好且相位分支稳定时更新；若振动过弱或观测质量不足，则保持 AoA 初值或上一时刻估计值。随着前几次分支校正成功，$\hat{\beta}_i$ 会在短时间内从几何初值收敛到该 target 的等效转换系数。该过程不是先验完整解缠，而是由 AoA 初值、加速度预测和自适应测量噪声共同支撑的在线自举。
@@ -689,7 +683,7 @@ R_{i,k}^{\Theta}
 \sigma_{\beta_i,k}^{2}.
 $$
 
-这使“转换系数越不确定，越降低观测权重”与在线 bootstrap 收敛过程对应起来。当前代码中使用 LoS-space 等价实现时，会将 $\kappa_i=1/\beta_i$ 的方差通过 $((\hat{\Theta}_k^-)^2+P_{\Theta\Theta,k}^-)\sigma_{\kappa_i,k}^2$ 加入有效测量噪声；该写法是坐标系不同导致的实现形式，不应解释为 $\kappa_i$ 是 Ma 的 conversion factor。
+这使“转换系数越不确定，越降低观测权重”与在线 bootstrap 收敛过程对应起来。当前代码与正文统一在结构方向观测空间表达有效噪声，$\beta_i$ 不确定性直接进入 $R_{i,k}^{\Theta}$，不会再把结构主相位到 LoS 相位的投影参数作为主符号。
 
 该设计参考 Akhlaghi、Zhou 和 Huang 的 *Adaptive Adjustment of Noise Covariance in Kalman Filter for Dynamic State Estimation* 中“prediction innovation 更适合反映过程模型误差、posterior residual 更适合估计 measurement noise”的 Q/R 归因思想，同时参考 Mehra 的 covariance matching 框架和 Li 等人在 INS/GNSS 多观测通道中的 measurement noise covariance estimation。本文的改进不在于重复已有 adaptive Kalman 公式，而在于把该思想改造为 radar target-wise 观测权重模型：每个 target 拥有独立 $R_{i,k}^{\Theta}$，基础噪声估计使用后验协方差投影 $\mathbf{H}_{i}\mathbf{P}_k^+\mathbf{H}_{i}^{\mathrm{T}}$，$R$ 的上涨受 target quality gate 约束，并额外叠加 AoA cold start 下的 $\beta_i$ 置信度传播项。由此，已有文献提供统计依据，本文解决的是倒挂毫米波雷达多 target 相位融合中的观测质量归因问题。
 

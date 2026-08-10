@@ -18,7 +18,7 @@ def build(base):
         accel_noise_std_mps2=0.03,
         num_targets=5,
         target_angles_deg=(8.0, 18.0, 28.0, 38.0, 50.0),
-        target_snr_db=(26.0, 24.0, 22.0, 20.0, 18.0),
+        target_snr_db=(20.0, 17.0, 14.0, 11.0, 8.0),
         target_amplitudes=(1.0, 0.95, 0.9, 0.85, 0.8),
         target_range_bins=(12, 24, 36, 48, 60),
     )

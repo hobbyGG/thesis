@@ -56,15 +56,15 @@ q_k=\beta_i d_{i,k}^{\mathrm{LOS}},
 \Theta_k=\beta_i\phi_{i,k}^{\mathrm{LOS}}.
 $$
 
-对第 $i$ 个 target，用 AoA 给出 $\beta_i$ 倒数的几何初值：
+对第 $i$ 个 target，用 AoA 先给出结构方向到 LoS 的几何投影初值，再取其倒数作为 $\beta_i$ 初值：
 
 $$
-\hat{\kappa}_{i,0}=\cos\theta_i,
+\hat{p}_{i,0}=|\cos\theta_i|,
 \qquad
-\hat{\beta}_{i,0}=1/\hat{\kappa}_{i,0}.
+\hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}.
 $$
 
-这里 $\kappa_i=1/\beta_i$ 表示结构主相位到该 target LoS 相位的投影系数/逆转换系数，不是 Ma 的 direction conversion factor 本身。AoA 初值不是最终精确转换系数，只用于启动 Kalman 闭环。冷启动阶段结构近似静止，用于估计相位偏置 $b_i$，并初始化较大的 target-wise 测量噪声 $r_{i,0}$。
+AoA 初值不是最终精确转换系数，只用于启动 Kalman 闭环。冷启动阶段结构近似静止，用于估计相位偏置 $b_i$，并初始化较大的 target-wise 测量噪声 $r_{i,0}$。
 
 ### 0.3 Kalman 状态是结构主相位，不是 Ma 的单 target LoS 相位
 
@@ -148,7 +148,7 @@ y_{i,k}=\Theta_k+e_{i,k},
 H_i=[1,0].
 $$
 
-2. 作为转换系数短窗口最小二乘自举的数据。令 $x_\tau=\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i$，$y_\tau=\hat{\Theta}_{\tau}^{+}$，中心化后：
+2. 作为转换系数短窗口最小二乘自举的 LoS 侧数据。不能把同一 target 参与生成的后验结构相位直接作为该 target 的 $\beta_i$ 收敛证据；为避免自反馈，$\beta_i$ 的在线更新应使用第 $i$ 个 target 的 LoS corrected phase 与不含 target $i$ 的结构方向参考状态进行最小二乘拟合，并用加速度参考或可靠几何 target 做尺度锚定。令 $x_\tau=\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i$，$y_\tau=\Theta_{\tau}^{\mathrm{ref},-i}$，中心化后：
 
 $$
 \hat{\beta}_{i,k+1}
@@ -159,12 +159,10 @@ x_{\tau,c}y_{\tau,c}
 }{
 \sum_{\tau\in\mathcal{W}_{\beta}}
 x_{\tau,c}^{2}
-},
-\qquad
-\hat{\kappa}_{i,k+1}=1/\hat{\beta}_{i,k+1}.
+}.
 $$
 
-因此，本文不是先独立完成一段完整相位解缠再标定 $\beta$，而是在 Kalman 闭环内生成局部 LoS corrected phase，并让该校正相位同时支撑结构方向观测更新与转换系数更新。当前代码可保留 LoS-space 等价实现 $H_i=[\kappa_i,0]$，但文档中必须明确 $\kappa_i=1/\beta_i$。
+因此，本文不是先独立完成一段完整相位解缠再标定 $\beta$，而是在 Kalman 闭环内生成局部 LoS corrected phase，并让该校正相位支撑结构方向观测更新；转换系数更新必须另接不含当前 target 的结构方向参考状态。当前代码与正文统一采用结构方向观测模型 $H_i=[1,0]$。
 
 ### 0.5 当前噪声策略
 
@@ -194,7 +192,7 @@ r_{\max}
 \right].
 $$
 
-这样在冷启动和初始微振阶段，若某些 target 或转换系数尚未稳定，其测量噪声会保持较大，滤波器更依赖加速度预测；随着短窗口自举使 $\hat{\beta}_{i,k}$ 收敛，$R$ 自动回落，多 target 观测权重恢复。
+这样在冷启动和初始微振阶段，若某些 target 或转换系数尚未稳定，其测量噪声会保持较大，滤波器更依赖加速度预测；只有在 target-wise beta error、last-window median error 和更新 gate 共同支持时，才能说短窗口自举使 $\hat{\beta}_{i,k}$ 进入可信范围，随后 $R$ 才应回落并恢复多 target 观测权重。
 
 ## 已形成的关键理论结论
 
@@ -719,7 +717,7 @@ $$
 1. 将整体方法整理成 Method 章节结构：系统模型、target 提取、多 target 观测构造、AoA 冷启动、预测辅助相位校正、转换系数自举、固定 $Q$ 与自适应 $R$。
 2. 明确第一版算法的可复现实验参数：滑动窗口长度、角度合并阈值、结构频带阈值、$Q$ 的遍历范围、$R$ 的上下界和遗忘因子。
 3. 设计 ablation study：单 target vs 多 target；无 AoA 冷启动 vs AoA 冷启动；固定转换系数 vs 在线自举；固定 $R$ vs 自适应 $R$；是否使用 Doppler/chirp 间相位变化率作为辅助先验。
-4. 设计闭环有效性验证：初始微振阶段 $\hat{\beta}_{i,k}$ 的收敛曲线、$R_i$ 的自动回落、$\phi_{i,k}^{\mathrm{LOS,corr}}$ 的分支选择错误率、多 target innovation 一致性。
+4. 设计闭环有效性验证：初始微振阶段 target-wise beta error、last-window median error、更新 gate、$R_i$ 的自动回落、$\phi_{i,k}^{\mathrm{LOS,corr}}$ 的分支选择错误率、多 target innovation 一致性。车辆事件等短时非平稳激励只能说明 AoA 初值误差对位移估计影响被降低，不能证明所有 target-wise beta 均收敛到真值。
 5. 继续保留 Ma 等人方法作为 baseline：Ma 式单 target LoS phase Kalman + 离线转换因子；本文作为结构主相位多 target Kalman + AoA 冷启动 + 在线转换系数自举。
 
 请在新对话中不要重新推翻上述共识，除非发现明确数学错误。优先在这些共识上继续推进方法章节写作、公式统一和实验方案设计。

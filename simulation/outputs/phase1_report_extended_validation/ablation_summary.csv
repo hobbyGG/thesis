@@ -1,33 +1,22 @@
-seed,scenario,method,rmse_mm,mae_mm,max_error_mm,unwrap_error_rate,selected_target_count,selected_indices,kappa_median_relative_error
-2026,ma2023_balanced_good_targets,single_target_ma_style,0.0014603957897170962,0.0011596656073141651,0.004549326365302581,0.0,5,0;1;2;3;4,
-2026,ma2023_balanced_good_targets,ma2026_reproduction,0.03706446882773193,0.029207573432526276,0.08329318609116994,0.0,1,-1,
-2026,ma2023_balanced_good_targets,multitarget_aoa_fixed_kappa,0.019298191620757018,0.01532480536694355,0.043733256557547166,0.0,5,0;1;2;3;4,0.0
-2026,ma2023_balanced_good_targets,selected_aoa_fixed_kappa,0.016382918585807944,0.012803003620151418,0.036943889124571805,0.0,4,0;1;2;3,0.0015103759618858826
-2026,ma2023_balanced_good_targets,proposed,0.0011092684142418015,0.0008457316765646336,0.0040301058500611655,0.0,5,0;1;2;3;4,0.0020002238443140013
-2026,ma2023_balanced_good_targets,proposed_full_pipeline,0.0012047745422583604,0.0009029511141400491,0.005356340667763944,0.0,4,0;1;2;3,0.004530029002198396
-2026,same_range_far_angles,single_target_ma_style,0.031874405725297636,0.01879711003553268,0.2918767343324703,0.0,4,0;1;2;3,
-2026,same_range_far_angles,range_bin_only_mixed_phase,0.03285340574854646,0.020738812494773544,0.2984486590966229,0.0,1,-1,
-2026,same_range_far_angles,ma_style_iterative_beta_range_bin,0.03379597782955503,0.019361916165787592,0.3045855684409098,0.0,1,-1,
-2026,same_range_far_angles,ma2026_reproduction,0.12733827271309525,0.10344064896404634,0.4900337711176646,0.0,1,-1,
-2026,same_range_far_angles,multitarget_aoa_fixed_kappa,0.04432311191668962,0.02923282867785332,0.32825212692825506,0.0,4,0;1;2;3,0.0
-2026,same_range_far_angles,selected_aoa_fixed_kappa,0.036103124344340445,0.02512913232196176,0.26067036117756887,0.0,4,0;2;3;1,0.008577688312102393
-2026,same_range_far_angles,proposed,0.026567828351344986,0.019149072004878174,0.19697009702751384,0.0,4,0;1;2;3,0.0277536676707969
-2026,same_range_far_angles,proposed_full_pipeline,0.025305856861013772,0.018961076733393485,0.1859122310517578,0.0,4,0;2;3;1,0.029810532645521092
-2026,target_snr_drop,single_target_ma_style,0.018043489875095783,0.011493268084293727,0.10368186676953034,0.0002,5,0;1;2;3;4,
-2026,target_snr_drop,ma2026_reproduction,0.2999263632196496,0.1460404017866179,1.3108165089336767,0.0,1,-1,
-2026,target_snr_drop,multitarget_aoa_fixed_kappa,0.025974203467639033,0.021066016488769483,0.08420581072132163,0.00044,5,0;1;2;3;4,0.0
-2026,target_snr_drop,selected_aoa_fixed_kappa,0.02831560571049853,0.022344845711082906,0.0779323909706512,0.0011,4,0;1;2;3,0.011417819111612416
-2026,target_snr_drop,proposed,0.008539005136169951,0.006366843540263594,0.055687928438636514,0.0002,5,0;1;2;3;4,0.016162217043807072
-2026,target_snr_drop,proposed_full_pipeline,0.009898995794590618,0.007530186201920223,0.04837277190911491,0.00085,4,0;1;2;3,0.022888443779122206
-2026,low_snr_multitarget,single_target_ma_style,0.01693925410433618,0.013913769421790954,0.08599490741198151,0.0,5,0;1;2;3;4,
-2026,low_snr_multitarget,ma2026_reproduction,0.047152592514851335,0.042716608438699386,0.1435175837485842,0.0,1,-1,
-2026,low_snr_multitarget,multitarget_aoa_fixed_kappa,0.022874270501808982,0.018298050506587966,0.08858145946720444,0.0,5,0;1;2;3;4,0.0
-2026,low_snr_multitarget,selected_aoa_fixed_kappa,0.03159247414880569,0.025262087750748854,0.1035877004746371,5e-05,4,0;1;2;3,0.011417819111612416
-2026,low_snr_multitarget,proposed,0.011295719880949236,0.008816975230287271,0.06251844117893653,0.0,5,0;1;2;3;4,0.054508762415928474
-2026,low_snr_multitarget,proposed_full_pipeline,0.013589748559616378,0.010964043596781199,0.06115199838352021,0.0,4,0;1;2;3,0.06125642803258538
-2026,vehicle_event_nonstationary,single_target_ma_style,0.004709895030023077,0.0036296881231951744,0.022197096859972006,0.0,5,0;1;2;3;4,
-2026,vehicle_event_nonstationary,ma2026_reproduction,0.01612469131791879,0.011482027935143682,0.07259901097441278,0.0,1,-1,
-2026,vehicle_event_nonstationary,multitarget_aoa_fixed_kappa,0.021629069363893364,0.01738536840184564,0.046453999522521904,0.0,5,0;1;2;3;4,0.0
-2026,vehicle_event_nonstationary,selected_aoa_fixed_kappa,0.019849283802857037,0.01550304922368881,0.04411273728728588,0.0,4,0;1;2;3,0.011417819111612416
-2026,vehicle_event_nonstationary,proposed,0.004721152079245945,0.0036419027499098922,0.031519576779753804,0.0,5,0;1;2;3;4,0.0006129975178260783
-2026,vehicle_event_nonstationary,proposed_full_pipeline,0.0044738717444606745,0.0033161118238243963,0.01917788443510127,0.0,4,0;1;2;3,0.00723815040939711
+seed,scenario,scenario_label_zh,validation_purpose_zh,validation_focus_zh,paper_section_zh,method,rmse_mm,mae_mm,max_error_mm,unwrap_error_rate,selected_target_count,selected_indices,beta_median_relative_error
+2026,same_range_far_angles,同 rangeBin 远角度多目标,验证 angle-bin 分离能解决同距离单元内不同角度目标被 range-bin 方法混合的问题,同 rangeBin、多角度分离、Ma-style range-bin baseline 对比,主实验,range_bin_only_mixed_phase,0.1541313373865163,0.11495418579193775,0.46139179936701186,0.0,1,-1,
+2026,same_range_far_angles,同 rangeBin 远角度多目标,验证 angle-bin 分离能解决同距离单元内不同角度目标被 range-bin 方法混合的问题,同 rangeBin、多角度分离、Ma-style range-bin baseline 对比,主实验,ma2026_reproduction,0.2953795697161967,0.24358346545412685,0.6931062280978646,0.0,1,-1,
+2026,same_range_far_angles,同 rangeBin 远角度多目标,验证 angle-bin 分离能解决同距离单元内不同角度目标被 range-bin 方法混合的问题,同 rangeBin、多角度分离、Ma-style range-bin baseline 对比,主实验,multitarget_aoa_fixed_beta,0.21271322199196546,0.17460113828758755,0.5081623815133655,0.0,4,0;1;2;3,0.0
+2026,same_range_far_angles,同 rangeBin 远角度多目标,验证 angle-bin 分离能解决同距离单元内不同角度目标被 range-bin 方法混合的问题,同 rangeBin、多角度分离、Ma-style range-bin baseline 对比,主实验,selected_aoa_fixed_beta,0.05881160406535106,0.04702495157761934,0.14447720598337457,0.0,2,0;1,0.014730978665648766
+2026,same_range_far_angles,同 rangeBin 远角度多目标,验证 angle-bin 分离能解决同距离单元内不同角度目标被 range-bin 方法混合的问题,同 rangeBin、多角度分离、Ma-style range-bin baseline 对比,主实验,proposed_full_pipeline_beta_confidence,0.03999557902768956,0.031072234781529786,0.14926234078466616,0.0,2,0;1,0.026395163240557958
+2026,literature_mmwbats_same_range_aliasing,mmWBat 同 rangeBin 角度混叠复刻,复刻 mmWBat/mmSHM 中两个目标位于同一 rangeBin、依靠第二次 Angle FFT 分离的机制场景,同 rangeBin、约一个角分辨单元、range-angle component 相位提取,文献机制复刻/附录,ma2026_reproduction,0.29071654470393427,0.24042054387059164,0.6699413438411516,0.0,1,-1,
+2026,literature_mmwbats_same_range_aliasing,mmWBat 同 rangeBin 角度混叠复刻,复刻 mmWBat/mmSHM 中两个目标位于同一 rangeBin、依靠第二次 Angle FFT 分离的机制场景,同 rangeBin、约一个角分辨单元、range-angle component 相位提取,文献机制复刻/附录,multitarget_aoa_fixed_beta,0.2747926444084112,0.22334336628460988,0.6264876638381116,0.0,2,0;1,0.0
+2026,literature_mmwbats_same_range_aliasing,mmWBat 同 rangeBin 角度混叠复刻,复刻 mmWBat/mmSHM 中两个目标位于同一 rangeBin、依靠第二次 Angle FFT 分离的机制场景,同 rangeBin、约一个角分辨单元、range-angle component 相位提取,文献机制复刻/附录,selected_aoa_fixed_beta,0.06633708079150717,0.05138189746630384,0.18639652363226616,0.0,2,0;1,0.032039828220364136
+2026,literature_mmwbats_same_range_aliasing,mmWBat 同 rangeBin 角度混叠复刻,复刻 mmWBat/mmSHM 中两个目标位于同一 rangeBin、依靠第二次 Angle FFT 分离的机制场景,同 rangeBin、约一个角分辨单元、range-angle component 相位提取,文献机制复刻/附录,proposed_full_pipeline_beta_confidence,0.030984343677960158,0.02404561532537265,0.1019466969720583,0.0,2,0;1,0.028190023936794463
+2026,literature_mmshm_adjacent_range_clutter,mmSHM 相邻 rangeBin 干扰复刻,复刻 mmSHM 中相邻距离单元目标互扰、需要 range-angle 联合定位后提取相位的机制场景,相邻 rangeBin、角度分离、clutter/coupling 机制,文献机制复刻/附录,ma2026_reproduction,0.2820112000314607,0.23239027933926298,0.6592233613439412,0.0,1,-1,
+2026,literature_mmshm_adjacent_range_clutter,mmSHM 相邻 rangeBin 干扰复刻,复刻 mmSHM 中相邻距离单元目标互扰、需要 range-angle 联合定位后提取相位的机制场景,相邻 rangeBin、角度分离、clutter/coupling 机制,文献机制复刻/附录,multitarget_aoa_fixed_beta,0.27479264440841117,0.22334336628460982,0.6264876638381116,0.0,2,0;1,0.0
+2026,literature_mmshm_adjacent_range_clutter,mmSHM 相邻 rangeBin 干扰复刻,复刻 mmSHM 中相邻距离单元目标互扰、需要 range-angle 联合定位后提取相位的机制场景,相邻 rangeBin、角度分离、clutter/coupling 机制,文献机制复刻/附录,selected_aoa_fixed_beta,0.05611029463745663,0.0431327943830824,0.15287858237979052,0.0,2,0;1,0.0011980481481067055
+2026,literature_mmshm_adjacent_range_clutter,mmSHM 相邻 rangeBin 干扰复刻,复刻 mmSHM 中相邻距离单元目标互扰、需要 range-angle 联合定位后提取相位的机制场景,相邻 rangeBin、角度分离、clutter/coupling 机制,文献机制复刻/附录,proposed_full_pipeline_beta_confidence,0.022272196373828403,0.017641302807031925,0.07530306367452191,0.0,2,0;1,0.01844969239979856
+2026,target_snr_drop,目标 SNR 退化,验证 confidence-aware target-wise R 能否降低退化目标对融合状态的污染,SNR 下降、目标级有效 R、坏目标降权,主实验,ma2026_reproduction,0.2710809330243668,0.22391200588455884,0.6337915766048196,0.0,1,-1,
+2026,target_snr_drop,目标 SNR 退化,验证 confidence-aware target-wise R 能否降低退化目标对融合状态的污染,SNR 下降、目标级有效 R、坏目标降权,主实验,multitarget_aoa_fixed_beta,0.18478537875313214,0.14829965175225107,0.4437099443307826,0.0016,5,0;1;2;3;4,0.0
+2026,target_snr_drop,目标 SNR 退化,验证 confidence-aware target-wise R 能否降低退化目标对融合状态的污染,SNR 下降、目标级有效 R、坏目标降权,主实验,selected_aoa_fixed_beta,0.07868454819203342,0.06412287020903307,0.2124194267944428,0.0005,4,0;1;2;3,0.01156307274909013
+2026,target_snr_drop,目标 SNR 退化,验证 confidence-aware target-wise R 能否降低退化目标对融合状态的污染,SNR 下降、目标级有效 R、坏目标降权,主实验,proposed_full_pipeline_beta_confidence,0.06256558596524327,0.04706182750634966,0.2689306355594012,0.0005,4,0;1;2;3,0.014199305903867778
+2026,aoa_error_bootstrap,FFT AoA 初值误差与 beta 收敛,验证 angle FFT 前端 AoA 量化/分辨率误差存在时，在线 beta bootstrap 能否收敛,FFT 前端 AoA 初值误差、beta/bootstrap 收敛、多目标结构方向融合,消融实验,ma2026_reproduction,0.7838535770999387,0.652180276009638,1.4504266871455118,0.0,1,-1,
+2026,aoa_error_bootstrap,FFT AoA 初值误差与 beta 收敛,验证 angle FFT 前端 AoA 量化/分辨率误差存在时，在线 beta bootstrap 能否收敛,FFT 前端 AoA 初值误差、beta/bootstrap 收敛、多目标结构方向融合,消融实验,multitarget_aoa_fixed_beta,0.18101914419754414,0.14534313464844387,0.4596736962290604,0.0,5,0;1;2;3;4,0.0
+2026,aoa_error_bootstrap,FFT AoA 初值误差与 beta 收敛,验证 angle FFT 前端 AoA 量化/分辨率误差存在时，在线 beta bootstrap 能否收敛,FFT 前端 AoA 初值误差、beta/bootstrap 收敛、多目标结构方向融合,消融实验,selected_aoa_fixed_beta,0.057941033465653186,0.044798848709585955,0.15450655458017118,0.0,4,0;1;2;3,0.01156307274909013
+2026,aoa_error_bootstrap,FFT AoA 初值误差与 beta 收敛,验证 angle FFT 前端 AoA 量化/分辨率误差存在时，在线 beta bootstrap 能否收敛,FFT 前端 AoA 初值误差、beta/bootstrap 收敛、多目标结构方向融合,消融实验,proposed_full_pipeline_beta_confidence,0.02608583000406376,0.021135211731883898,0.07529524995619177,0.0,4,0;1;2;3,0.027593130126966015

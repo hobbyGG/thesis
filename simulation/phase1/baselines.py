@@ -28,9 +28,9 @@ def estimate_oracle(truth, radar, config):
         q_hat_m=truth.q_m.copy() - cold_start_reference_mean(truth.q_m, config),
         theta_hat_rad=theta,
         theta_dot_hat_radps=theta_dot,
-        corrected_phase_rad=radar.true_los_phase_rad.copy(),
-        kappa_hat=radar.kappa.copy(),
-        r_history=empty_targets.copy(),
+        los_corrected_phase_rad=radar.true_los_phase_rad.copy(),
+        beta_hat=radar.beta.copy(),
+        r_theta_history=empty_targets.copy(),
         innovation_rad=empty_targets.copy(),
         extra={},
     )
@@ -46,8 +46,8 @@ def estimate_itoh_ls(truth, radar, config, target_index=0):
         target_bias = cold_start_reference_mean(corrected, config)
         corrected[valid] -= corrected[valid][0] - prediction_correct_wrapped_phase(wrapped[valid][0], target_bias)
     target_phase_ref = cold_start_reference_mean(corrected, config)
-    kappa = float(radar.kappa[idx])
-    theta = (corrected - target_phase_ref) / max(abs(kappa), 1e-12)
+    beta = float(radar.beta[idx])
+    theta = beta * (corrected - target_phase_ref)
     dt = 1.0 / config.sample_rate_hz
     theta_dot = np.gradient(np.nan_to_num(theta, nan=0.0), dt)
     corrected_all = np.full_like(radar.wrapped_phase_rad, np.nan, dtype=float)
@@ -57,9 +57,9 @@ def estimate_itoh_ls(truth, radar, config, target_index=0):
         q_hat_m=_phase_to_displacement(theta, config),
         theta_hat_rad=theta,
         theta_dot_hat_radps=theta_dot,
-        corrected_phase_rad=corrected_all,
-        kappa_hat=np.full(radar.kappa.shape, np.nan, dtype=float),
-        r_history=np.full_like(radar.wrapped_phase_rad, np.nan, dtype=float),
+        los_corrected_phase_rad=corrected_all,
+        beta_hat=np.full(radar.beta.shape, np.nan, dtype=float),
+        r_theta_history=np.full_like(radar.wrapped_phase_rad, np.nan, dtype=float),
         innovation_rad=np.full_like(radar.wrapped_phase_rad, np.nan, dtype=float),
         extra={"target_index": idx},
     )
@@ -74,13 +74,13 @@ def estimate_range_bin_itoh(radar_input, config):
         target_bias = cold_start_reference_mean(corrected, config)
         corrected[available] -= corrected[available][0] - prediction_correct_wrapped_phase(wrapped[available][0], target_bias)
     phase_ref = cold_start_reference_mean(corrected, config)
-    kappa = float(np.asarray(radar_input.measured_kappa, dtype=float)[0])
-    theta = (corrected - phase_ref) / max(abs(kappa), 1e-12)
+    beta = float(np.asarray(radar_input.measured_beta, dtype=float)[0])
+    theta = beta * (corrected - phase_ref)
     dt = 1.0 / config.sample_rate_hz
     theta_dot = np.gradient(np.nan_to_num(theta, nan=0.0), dt)
     corrected_all = np.full_like(radar_input.wrapped_phase_rad, np.nan, dtype=float)
     corrected_all[0] = corrected
-    extra = {"input_view": "range_fft_range_bin", "measured_kappa": kappa}
+    extra = {"input_view": "range_fft_range_bin", "measured_beta": beta}
     if radar_input.extra:
         extra.update(radar_input.extra)
     return MethodResult(
@@ -88,47 +88,50 @@ def estimate_range_bin_itoh(radar_input, config):
         q_hat_m=_phase_to_displacement(theta, config),
         theta_hat_rad=theta,
         theta_dot_hat_radps=theta_dot,
-        corrected_phase_rad=corrected_all,
-        kappa_hat=np.array([kappa], dtype=float),
-        r_history=np.full_like(radar_input.wrapped_phase_rad, np.nan, dtype=float),
+        los_corrected_phase_rad=corrected_all,
+        beta_hat=np.array([beta], dtype=float),
+        r_theta_history=np.full_like(radar_input.wrapped_phase_rad, np.nan, dtype=float),
         innovation_rad=np.full_like(radar_input.wrapped_phase_rad, np.nan, dtype=float),
         extra=extra,
     )
 
 
-def estimate_multitarget_true_kappa_fixed_r(truth, radar, accel, config):
+def estimate_multitarget_true_beta_fixed_r(truth, radar, accel, config):
     return run_structural_phase_kalman(
-        method_name="multitarget_true_kappa_fixed_r",
+        method_name="multitarget_true_beta_fixed_r",
         radar=radar,
         accel=accel,
         config=config,
-        initial_kappa=radar.kappa.copy(),
-        update_kappa=False,
+        initial_beta=radar.beta.copy(),
+        update_beta=False,
         adaptive_r=False,
+        adaptive_r_mode="posterior_residual",
     )
 
 
-def estimate_multitarget_aoa_fixed_kappa(radar_input, accel, config):
+def estimate_multitarget_aoa_fixed_beta(radar_input, accel, config):
     return run_structural_phase_kalman(
-        method_name="multitarget_aoa_fixed_kappa",
+        method_name="multitarget_aoa_fixed_beta",
         radar=radar_input,
         accel=accel,
         config=config,
-        initial_kappa=radar_input.measured_kappa.copy(),
-        update_kappa=False,
+        initial_beta=radar_input.measured_beta.copy(),
+        update_beta=False,
         adaptive_r=False,
+        adaptive_r_mode="posterior_residual",
     )
 
 
-def estimate_selected_aoa_fixed_kappa(radar_input, accel, config):
+def estimate_selected_aoa_fixed_beta(radar_input, accel, config):
     return run_structural_phase_kalman(
-        method_name="selected_aoa_fixed_kappa",
+        method_name="selected_aoa_fixed_beta",
         radar=radar_input,
         accel=accel,
         config=config,
-        initial_kappa=radar_input.measured_kappa.copy(),
-        update_kappa=False,
+        initial_beta=radar_input.measured_beta.copy(),
+        update_beta=False,
         adaptive_r=False,
+        adaptive_r_mode="posterior_residual",
         selected_indices=radar_input.selected_indices,
         initial_r=radar_input.initial_r,
     )
@@ -140,8 +143,8 @@ def estimate_range_bin_only_mixed_phase(radar_input, accel, config):
         radar=radar_input,
         accel=accel,
         config=config,
-        initial_kappa=radar_input.measured_kappa.copy(),
-        update_kappa=False,
+        initial_beta=radar_input.measured_beta.copy(),
+        update_beta=False,
         adaptive_r=True,
         selected_indices=radar_input.selected_indices,
         initial_r=radar_input.initial_r,
@@ -159,8 +162,8 @@ def estimate_ma_style_iterative_beta_range_bin(radar_input, accel, config):
         radar=radar_input,
         accel=accel,
         config=config,
-        initial_kappa=np.array([beta_hat], dtype=float),
-        update_kappa=False,
+        initial_beta=np.array([beta_hat], dtype=float),
+        update_beta=False,
         adaptive_r=True,
         selected_indices=radar_input.selected_indices,
         initial_r=radar_input.initial_r,
@@ -184,8 +187,8 @@ def _fit_iterative_beta_from_mixed_phase(radar_input, accel, config, max_iterati
 
     theta_ref = _acceleration_reference_phase(accel, config, wrapped.size)
     valid = available & np.isfinite(theta_ref)
-    beta = float(np.asarray(radar_input.measured_kappa, dtype=float)[0])
-    beta = float(np.clip(abs(beta), config.kappa_min_abs, config.kappa_max_abs))
+    beta = float(np.asarray(radar_input.measured_beta, dtype=float)[0])
+    beta = float(np.clip(abs(beta), config.beta_min_abs, config.beta_max_abs))
     bias = _circular_mean(wrapped[: cold_start_sample_count(config, wrapped.size)])
     history = [beta]
     residual = float("nan")
@@ -193,18 +196,25 @@ def _fit_iterative_beta_from_mixed_phase(radar_input, accel, config, max_iterati
         return beta, history + [beta], bias, residual
 
     for _ in range(int(max_iterations)):
-        prediction = beta * theta_ref + bias
+        prediction = theta_ref / max(abs(beta), 1e-12) + bias
         corrected = np.full_like(wrapped, np.nan, dtype=float)
         corrected[valid] = wrapped[valid] + 2.0 * np.pi * np.round(
             (prediction[valid] - wrapped[valid]) / (2.0 * np.pi)
         )
-        x = theta_ref[valid]
-        y = corrected[valid]
-        design = np.column_stack([x, np.ones_like(x)])
-        fitted, _, _, _ = np.linalg.lstsq(design, y, rcond=None)
-        new_beta = float(np.clip(abs(fitted[0]), config.kappa_min_abs, config.kappa_max_abs))
-        new_bias = float(fitted[1])
-        residual = float(np.sqrt(np.mean((y - (new_beta * x + new_bias)) ** 2)))
+        theta = theta_ref[valid]
+        los_minus_bias = corrected[valid] - bias
+        theta_centered = theta - float(np.mean(theta))
+        los_centered = los_minus_bias - float(np.mean(los_minus_bias))
+        denom = float(np.dot(theta_centered, theta_centered))
+        if denom <= 1e-12:
+            break
+        projection = float(np.dot(theta_centered, los_centered) / denom)
+        projection_abs = abs(projection)
+        if projection_abs <= 1e-12:
+            break
+        new_beta = float(np.clip(1.0 / projection_abs, config.beta_min_abs, config.beta_max_abs))
+        new_bias = float(np.mean(corrected[valid] - projection * theta))
+        residual = float(np.sqrt(np.mean((los_centered - projection * theta_centered) ** 2)))
         history.append(new_beta)
         beta_delta = abs(new_beta - beta)
         bias_delta = abs(new_bias - bias)
@@ -244,7 +254,7 @@ def estimate_multitarget_fixed(truth, radar, config, accel=None):
         from .accelerometer import simulate_accelerometer
 
         accel = simulate_accelerometer(truth, config)
-    return estimate_multitarget_true_kappa_fixed_r(truth, radar, accel, config)
+    return estimate_multitarget_true_beta_fixed_r(truth, radar, accel, config)
 
 
 def estimate_single_target_ma_style(truth, radar, accel, config, target_index=0):
@@ -255,24 +265,24 @@ def estimate_single_target_ma_style(truth, radar, accel, config, target_index=0)
         radar=single_radar,
         accel=accel,
         config=config,
-        initial_kappa=np.array([radar.kappa[idx]], dtype=float),
-        update_kappa=False,
+        initial_beta=np.array([radar.beta[idx]], dtype=float),
+        update_beta=False,
         adaptive_r=True,
     )
     corrected = np.full_like(radar.wrapped_phase_rad, np.nan, dtype=float)
     innovation = np.full_like(radar.wrapped_phase_rad, np.nan, dtype=float)
     r_history = np.full_like(radar.wrapped_phase_rad, np.nan, dtype=float)
-    corrected[idx] = single_result.corrected_phase_rad[0]
+    corrected[idx] = single_result.los_corrected_phase_rad[0]
     innovation[idx] = single_result.innovation_rad[0]
-    r_history[idx] = single_result.r_history[0]
+    r_history[idx] = single_result.r_theta_history[0]
     return MethodResult(
         method_name="single_target_ma_style",
         q_hat_m=single_result.q_hat_m,
         theta_hat_rad=single_result.theta_hat_rad,
         theta_dot_hat_radps=single_result.theta_dot_hat_radps,
-        corrected_phase_rad=corrected,
-        kappa_hat=np.full(radar.kappa.shape, np.nan, dtype=float),
-        r_history=r_history,
+        los_corrected_phase_rad=corrected,
+        beta_hat=np.full(radar.beta.shape, np.nan, dtype=float),
+        r_theta_history=r_history,
         innovation_rad=innovation,
         extra={"target_index": idx},
     )
@@ -282,8 +292,8 @@ def _single_target_view(radar, idx):
     target_slice = slice(idx, idx + 1)
     return replace(
         radar,
-        kappa=radar.kappa[target_slice],
-        measured_kappa=radar.measured_kappa[target_slice],
+        beta=radar.beta[target_slice],
+        measured_beta=radar.measured_beta[target_slice],
         target_angles_deg=radar.target_angles_deg[target_slice],
         snr_db=radar.snr_db[target_slice],
         true_los_phase_rad=radar.true_los_phase_rad[target_slice],

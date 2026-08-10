@@ -76,7 +76,7 @@ class Phase1TargetSelectionTest(unittest.TestCase):
             iq=iq,
             wrapped_phase_rad=wrapped_phase,
             available_mask=available,
-            measured_kappa=np.array([0.9, 0.9, 0.9]),
+            measured_beta=1.0 / np.array([0.9, 0.9, 0.9]),
             measured_acceleration_mps2=measured_accel,
             sample_rate_hz=sample_rate_hz,
         )
@@ -98,7 +98,7 @@ class Phase1TargetSelectionTest(unittest.TestCase):
             iq=iq,
             wrapped_phase_rad=wrapped_phase,
             available_mask=available,
-            measured_kappa=np.array([0.85, 0.85]),
+            measured_beta=1.0 / np.array([0.85, 0.85]),
             measured_acceleration_mps2=measured_accel,
             sample_rate_hz=sample_rate_hz,
             hard_band_consistency=True,
@@ -123,7 +123,7 @@ class Phase1TargetSelectionTest(unittest.TestCase):
             iq=iq,
             wrapped_phase_rad=wrapped_phase,
             available_mask=available,
-            measured_kappa=np.array([0.2, 0.3]),
+            measured_beta=1.0 / np.array([0.2, 0.3]),
             measured_acceleration_mps2=measured_accel,
             sample_rate_hz=sample_rate_hz,
         )
@@ -131,6 +131,35 @@ class Phase1TargetSelectionTest(unittest.TestCase):
         self.assertEqual(selected.selected_indices.size, 0)
         self.assertIn("low_geometry_projection", selected.diagnostics.rejected_reasons[0])
         self.assertIn("low_geometry_projection", selected.diagnostics.rejected_reasons[1])
+
+    def test_selection_geometry_uses_projection_not_beta_magnitude(self):
+        n_targets = 3
+        n_samples = 320
+        sample_rate_hz = 100.0
+        t = np.arange(n_samples, dtype=float) / sample_rate_hz
+        iq = np.exp(1j * 2.0 * np.pi * 4.0 * t)[np.newaxis, :].repeat(n_targets, axis=0)
+        wrapped = np.angle(iq)
+        available = np.ones((n_targets, n_samples), dtype=bool)
+        measured_accel = np.sin(2.0 * np.pi * 4.0 * t)
+        projection = np.array([0.9, 0.6, 0.2], dtype=float)
+        beta = 1.0 / projection
+
+        selected = select_targets_from_measurements(
+            iq=iq,
+            wrapped_phase_rad=wrapped,
+            available_mask=available,
+            measured_beta=beta,
+            measured_acceleration_mps2=measured_accel,
+            sample_rate_hz=sample_rate_hz,
+            min_projection_abs=0.45,
+            min_snr_db=0.0,
+            min_band_energy_ratio=0.0,
+        )
+
+        selected_indices = selected.selected_indices.tolist()
+        self.assertIn(0, selected_indices)
+        self.assertIn(1, selected_indices)
+        self.assertNotIn(2, selected_indices)
 
     def test_initial_r_uses_snr_even_when_band_consistency_is_low(self):
         sample_rate_hz = 500.0
@@ -145,7 +174,7 @@ class Phase1TargetSelectionTest(unittest.TestCase):
             iq=iq,
             wrapped_phase_rad=wrapped_phase,
             available_mask=available,
-            measured_kappa=np.array([0.9]),
+            measured_beta=1.0 / np.array([0.9]),
             measured_acceleration_mps2=measured_accel,
             sample_rate_hz=sample_rate_hz,
             min_score=0.0,
@@ -176,7 +205,7 @@ class Phase1TargetSelectionTest(unittest.TestCase):
             iq=iq,
             wrapped_phase_rad=wrapped_phase,
             available_mask=available,
-            measured_kappa=np.array([0.9, 0.9]),
+            measured_beta=1.0 / np.array([0.9, 0.9]),
             measured_acceleration_mps2=measured_accel,
             sample_rate_hz=sample_rate_hz,
             min_score=0.0,
@@ -207,7 +236,7 @@ class Phase1TargetSelectionTest(unittest.TestCase):
             iq=iq,
             wrapped_phase_rad=wrapped_phase,
             available_mask=available,
-            measured_kappa=np.array([0.9, 0.9, 0.5]),
+            measured_beta=1.0 / np.array([0.9, 0.9, 0.5]),
             measured_acceleration_mps2=measured_accel,
             sample_rate_hz=sample_rate_hz,
             min_score=0.0,
@@ -217,21 +246,29 @@ class Phase1TargetSelectionTest(unittest.TestCase):
         self.assertLess(selected.initial_r[0], selected.initial_r[1])
         self.assertLess(selected.initial_r[0], selected.initial_r[2])
 
-    def test_vehicle_event_selection_rejects_70deg_5db_before_kalman(self):
-        scenario = next(
-            item for item in build_phase1_scenarios() if item.scenario_name == "vehicle_event_nonstationary"
+    def test_selection_rejects_low_projection_low_snr_target_before_kalman(self):
+        n_targets = 5
+        n_samples = 320
+        sample_rate_hz = 100.0
+        t = np.arange(n_samples, dtype=float) / sample_rate_hz
+        measured_accel = np.sin(2.0 * np.pi * 4.0 * t)
+        phase = 0.8 * np.sin(2.0 * np.pi * 4.0 * t)
+        iq = np.exp(1j * phase)[np.newaxis, :].repeat(n_targets, axis=0)
+        iq[4] += 0.8 * (
+            np.sin(2.0 * np.pi * 17.0 * t)
+            + 1j * np.cos(2.0 * np.pi * 19.0 * t)
         )
-        truth = generate_multifrequency_truth(scenario)
-        radar = simulate_radar_targets(truth, scenario)
-        accel = simulate_accelerometer(truth, scenario)
+        wrapped = np.angle(iq)
+        available = np.ones((n_targets, n_samples), dtype=bool)
+        measured_beta = 1.0 / np.array([0.92, 0.85, 0.72, 0.55, 0.18], dtype=float)
 
         selected = select_targets_from_measurements(
-            iq=radar.iq,
-            wrapped_phase_rad=radar.wrapped_phase_rad,
-            available_mask=radar.available_mask,
-            measured_kappa=radar.measured_kappa,
-            measured_acceleration_mps2=accel.measured_mps2,
-            sample_rate_hz=scenario.sample_rate_hz,
+            iq=iq,
+            wrapped_phase_rad=wrapped,
+            available_mask=available,
+            measured_beta=measured_beta,
+            measured_acceleration_mps2=measured_accel,
+            sample_rate_hz=sample_rate_hz,
         )
 
         self.assertLessEqual(selected.selected_indices.size, 4)
@@ -244,6 +281,38 @@ class Phase1TargetSelectionTest(unittest.TestCase):
             }.intersection(selected.diagnostics.rejected_reasons[4])
         )
 
+    def test_calibration_indices_keep_soft_geometry_peer_outside_fusion_set(self):
+        n_targets = 5
+        n_samples = 320
+        sample_rate_hz = 100.0
+        t = np.arange(n_samples, dtype=float) / sample_rate_hz
+        phase = 0.7 * np.sin(2.0 * np.pi * 4.0 * t)
+        iq = np.exp(1j * phase)[np.newaxis, :].repeat(n_targets, axis=0)
+        wrapped = np.angle(iq)
+        available = np.ones((n_targets, n_samples), dtype=bool)
+        measured_accel = np.sin(2.0 * np.pi * 4.0 * t)
+        projection = np.array([0.9, 0.8, 0.6, 0.43, 0.18], dtype=float)
+        beta = 1.0 / projection
+
+        selected = select_targets_from_measurements(
+            iq=iq,
+            wrapped_phase_rad=wrapped,
+            available_mask=available,
+            measured_beta=beta,
+            measured_acceleration_mps2=measured_accel,
+            sample_rate_hz=sample_rate_hz,
+            min_snr_db=0.0,
+            min_band_energy_ratio=0.0,
+            min_projection_abs=0.45,
+            calibration_min_projection_abs=0.35,
+        )
+
+        self.assertNotIn(3, selected.selected_indices.tolist())
+        self.assertIn(3, selected.calibration_indices.tolist())
+        self.assertNotIn(4, selected.calibration_indices.tolist())
+        self.assertLess(selected.calibration_initial_r[3], 25.0)
+        self.assertEqual(selected.calibration_initial_r[4], 25.0)
+
     def test_selection_input_has_no_truth_or_kalman_fields(self):
         params = set(inspect.signature(select_targets_from_measurements).parameters)
 
@@ -252,7 +321,7 @@ class Phase1TargetSelectionTest(unittest.TestCase):
                 "iq",
                 "wrapped_phase_rad",
                 "available_mask",
-                "measured_kappa",
+                "measured_beta",
                 "measured_acceleration_mps2",
             }.issubset(params)
         )
@@ -260,7 +329,7 @@ class Phase1TargetSelectionTest(unittest.TestCase):
             "truth",
             "q_m",
             "radar",
-            "radar_kappa",
+            "radar_beta",
             "true_los_phase_rad",
             "true_main_phase_rad",
             "corrected_phase_rad",

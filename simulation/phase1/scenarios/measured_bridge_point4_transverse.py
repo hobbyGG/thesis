@@ -26,7 +26,7 @@ def build(base):
         measured_bridge_time_shift_s=-0.01,
         num_targets=5,
         target_angles_deg=(5.0, 15.0, 25.0, 35.0, 45.0),
-        target_snr_db=(26.0, 24.0, 22.0, 20.0, 18.0),
+        target_snr_db=(20.0, 17.0, 14.0, 11.0, 8.0),
         target_amplitudes=(1.0, 0.95, 0.9, 0.85, 0.8),
         target_range_bins=(8, 24, 40, 56, 72),
     )

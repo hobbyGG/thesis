@@ -34,16 +34,16 @@ flowchart TD
     U2("Target 2 预测辅助相位校正<br/>$\hat{\phi}_{2,k}^{-}=\mathbf{h}_{2,k}\mathbf{x}_{k}^{-}+b_2$<br/>$z_{2,k}^{\mathrm{corr}}=\psi_{2,k}+2\pi\operatorname{round}((\hat{\phi}_{2,k}^{-}-\psi_{2,k})/2\pi)$")
     Um("Target m 预测辅助相位校正<br/>$\hat{\phi}_{m,k}^{-}=\mathbf{h}_{m,k}\mathbf{x}_{k}^{-}+b_m$<br/>$z_{m,k}^{\mathrm{corr}}=\psi_{m,k}+2\pi\operatorname{round}((\hat{\phi}_{m,k}^{-}-\psi_{m,k})/2\pi)$")
 
-    OBS("多目标观测模型<br/>$\mathbf{z}_{k}^{\mathrm{corr}}=\mathbf{H}_{k}\mathbf{x}_{k}+\mathbf{b}_{k}+\mathbf{v}_{k}$<br/>$\mathbf{h}_{i,k}=[1/\hat{\beta}_{i,k},0]$")
+    OBS("结构方向多目标观测模型<br/>$y_{i,k}=\hat{\beta}_{i,k}(z_{i,k}^{\mathrm{corr}}-b_i)$<br/>$y_{i,k}=\Theta_k+e_{i,k},\ H_i=[1,0]$")
 
-    KF("Kalman 更新<br/>$\mathbf{x}_{k}=\mathbf{x}_{k}^{-}+\mathbf{K}_{k}(\mathbf{z}_{k}^{\mathrm{corr}}-\mathbf{H}_{k}\mathbf{x}_{k}^{-}-\mathbf{b}_{k})$")
+    KF("Kalman 更新<br/>$\mathbf{x}_{k}=\mathbf{x}_{k}^{-}+\mathbf{K}_{k}(\mathbf{y}_{k}-\mathbf{H}_{k}\mathbf{x}_{k}^{-})$")
 
     XEST("结构主相位后验估计<br/>$\hat{\Theta}_{k},\ \dot{\hat{\Theta}}_{k}$")
     DISP("结构振动方向位移<br/>$\hat{q}_{k}=\frac{\lambda}{4\pi}\hat{\Theta}_{k}$")
 
-    BETA("转换系数短窗口自举<br/>$\hat{\kappa}_{i}=\frac{\sum \hat{\Theta}_{k}(z_{i,k}^{\mathrm{corr}}-b_i)}{\sum \hat{\Theta}_{k}^{2}}$<br/>$\hat{\beta}_{i}=1/\hat{\kappa}_{i}$")
+    BETA("转换系数短窗口自举<br/>$x_k=z_{i,k}^{\mathrm{corr}}-b_i,\ y_k=\hat{\Theta}_k^+$<br/>$\hat{\beta}_{i}=\frac{\sum x_{k,c}y_{k,c}}{\sum x_{k,c}^{2}}$")
 
-    RADAPT("target-wise adaptive $R$<br/>$\varepsilon_{i,k}=z_{i,k}^{\mathrm{corr}}-(\mathbf{h}_{i,k}\mathbf{x}_{k}^{+}+b_i)$<br/>posterior residual + quality gate")
+    RADAPT("target-wise adaptive $R^\Theta$<br/>$\varepsilon_{i,k}=y_{i,k}-\Theta_k^+$<br/>posterior residual + quality gate")
 
     ACC --> PRED
     XPREV --> PRED

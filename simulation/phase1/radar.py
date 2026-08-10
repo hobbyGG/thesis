@@ -9,8 +9,8 @@ from .truth import TruthSignal
 
 @dataclass(frozen=True)
 class RadarObservation:
-    kappa: np.ndarray
-    measured_kappa: np.ndarray
+    beta: np.ndarray
+    measured_beta: np.ndarray
     target_angles_deg: np.ndarray
     snr_db: np.ndarray
     true_main_phase_rad: np.ndarray
@@ -22,10 +22,11 @@ class RadarObservation:
 
 @dataclass(frozen=True)
 class RadarAlgorithmInput:
-    measured_kappa: np.ndarray
+    measured_beta: np.ndarray
     wrapped_phase_rad: np.ndarray
     available_mask: np.ndarray
     selected_indices: Optional[np.ndarray] = None
+    calibration_indices: Optional[np.ndarray] = None
     initial_r: Optional[np.ndarray] = None
     selection_scores: Optional[np.ndarray] = None
     extra: Optional[dict] = None
@@ -33,7 +34,7 @@ class RadarAlgorithmInput:
 
 def to_algorithm_radar_input(radar: RadarObservation) -> RadarAlgorithmInput:
     return RadarAlgorithmInput(
-        measured_kappa=radar.measured_kappa.copy(),
+        measured_beta=radar.measured_beta.copy(),
         wrapped_phase_rad=radar.wrapped_phase_rad.copy(),
         available_mask=radar.available_mask.copy(),
     )
@@ -53,27 +54,29 @@ def simulate_radar_targets(truth: TruthSignal, config: Phase1Config) -> RadarObs
     snr_db = _fit_sequence(config.target_snr_db, config.num_targets, "target_snr_db")
     amplitudes = _fit_sequence(config.target_amplitudes, config.num_targets, "target_amplitudes")
 
-    kappa = np.cos(np.deg2rad(angles_deg))
+    projection = np.cos(np.deg2rad(angles_deg))
+    beta = 1.0 / np.abs(projection)
     measured_angles_deg = angles_deg + float(config.aoa_error_deg)
-    measured_kappa = np.cos(np.deg2rad(measured_angles_deg))
+    measured_projection = np.cos(np.deg2rad(measured_angles_deg))
+    measured_beta = 1.0 / np.abs(measured_projection)
     wavelength_m = config.wavelength_m()
     true_main_phase_rad = 4.0 * np.pi * truth.q_m / wavelength_m
 
     bias_rng = np.random.default_rng(config.seed + 2)
     target_bias = bias_rng.uniform(-np.pi, np.pi, size=config.num_targets)
-    true_los_phase_rad = kappa[:, None] * true_main_phase_rad[None, :] + target_bias[:, None]
+    true_los_phase_rad = true_main_phase_rad[None, :] / beta[:, None] + target_bias[:, None]
 
     clean_iq = amplitudes[:, None] * np.exp(1j * true_los_phase_rad)
     if config.enable_mixed_scatterer_target:
         idx = int(config.mixed_target_index)
-        kappas = np.asarray(config.mixed_scatterer_kappas, dtype=float)
+        betas = np.asarray(config.mixed_scatterer_betas, dtype=float)
         amps = np.asarray(config.mixed_scatterer_amplitudes, dtype=float)
         biases = np.asarray(config.mixed_scatterer_biases_rad, dtype=float)
-        if kappas.size != amps.size or kappas.size != biases.size:
-            raise ValueError("mixed scatterer kappas, amplitudes, and biases must have the same length")
+        if betas.size != amps.size or betas.size != biases.size:
+            raise ValueError("mixed scatterer betas, amplitudes, and biases must have the same length")
         mixed = np.zeros_like(clean_iq[idx])
-        for scatter_kappa, scatter_amp, scatter_bias in zip(kappas, amps, biases):
-            mixed += scatter_amp * np.exp(1j * (scatter_kappa * true_main_phase_rad + scatter_bias))
+        for scatter_beta, scatter_amp, scatter_bias in zip(betas, amps, biases):
+            mixed += scatter_amp * np.exp(1j * (true_main_phase_rad / scatter_beta + scatter_bias))
         clean_iq[idx] = mixed
 
     snr_linear = 10.0 ** (snr_db / 10.0)
@@ -102,8 +105,8 @@ def simulate_radar_targets(truth: TruthSignal, config: Phase1Config) -> RadarObs
     iq[~available_mask] = np.nan + 1j * np.nan
 
     return RadarObservation(
-        kappa=kappa,
-        measured_kappa=measured_kappa,
+        beta=beta,
+        measured_beta=measured_beta,
         target_angles_deg=angles_deg,
         snr_db=snr_db,
         true_main_phase_rad=true_main_phase_rad,

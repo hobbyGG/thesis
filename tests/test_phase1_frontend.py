@@ -7,7 +7,7 @@ from simulation.phase1.config import Phase1Config
 from simulation.phase1.frontend import (
     FrontendConfig,
     ScattererTruth,
-    angle_deg_to_measured_kappa,
+    angle_deg_to_measured_beta,
     extract_frontend_target_observation,
     range_angle_process,
     simulate_adc_cube,
@@ -39,11 +39,16 @@ class Phase1FrontendTest(unittest.TestCase):
         config = Phase1Config()
         frontend_config = FrontendConfig()
 
+        self.assertEqual(frontend_config.num_tx, 3)
+        self.assertEqual(frontend_config.num_rx, 4)
+        self.assertEqual(frontend_config.num_virtual_rx, 8)
+        self.assertLess(frontend_config.num_virtual_rx, frontend_config.num_tx * frontend_config.num_rx)
         self.assertEqual(frontend_config.num_adc_samples, 256)
         self.assertEqual(frontend_config.adc_sample_rate_hz, 6.0e6)
         self.assertEqual(frontend_config.chirp_duration_s, 60.0e-6)
         self.assertEqual(frontend_config.chirps_per_frame, 4)
         self.assertEqual(frontend_config.num_adc_samples, config.adc_samples_per_chirp)
+        self.assertEqual(frontend_config.num_virtual_rx, config.frontend_num_virtual_rx)
 
     def test_adc_cube_shape_axes_and_reproducibility(self):
         config = Phase1Config(
@@ -250,7 +255,7 @@ class Phase1FrontendTest(unittest.TestCase):
         self.assertGreater(phase_noise_std, 0.02)
         self.assertLess(phase_noise_std, 0.08)
 
-    def test_scenario_aoa_error_changes_frontend_measured_kappa(self):
+    def test_frontend_measured_beta_comes_from_angle_fft_not_manual_aoa_error(self):
         config = Phase1Config(
             duration_s=0.08,
             sample_rate_hz=1000.0,
@@ -265,14 +270,93 @@ class Phase1FrontendTest(unittest.TestCase):
         accelerometer = build_accelerometer_observation(truth, config)
 
         frontend = build_frontend_views(truth, accelerometer, config)
-        measured_angle_deg = frontend.frontend_targets.angle_deg + config.aoa_error_deg
-        expected = angle_deg_to_measured_kappa(measured_angle_deg)
-        unperturbed = angle_deg_to_measured_kappa(frontend.frontend_targets.angle_deg)
+        expected = angle_deg_to_measured_beta(frontend.frontend_targets.angle_deg)
 
-        np.testing.assert_allclose(frontend.frontend_targets.measured_kappa, expected)
-        self.assertGreater(
-            float(np.max(np.abs(frontend.frontend_targets.measured_kappa - unperturbed))),
-            1.0e-3,
+        np.testing.assert_allclose(frontend.frontend_targets.measured_beta, expected)
+
+    def test_phase1_frontend_config_controls_angle_fft_grid(self):
+        coarse = Phase1Config(
+            duration_s=0.08,
+            sample_rate_hz=1000.0,
+            seed=514,
+            num_targets=1,
+            target_angles_deg=(37.0,),
+            target_snr_db=(120.0,),
+            target_amplitudes=(1.0,),
+            frontend_num_tx=3,
+            frontend_num_rx=4,
+            frontend_num_virtual_rx=8,
+            frontend_num_angle_bins=32,
+            frontend_angle_window="rect",
+        )
+        fine = Phase1Config(
+            duration_s=0.08,
+            sample_rate_hz=1000.0,
+            seed=514,
+            num_targets=1,
+            target_angles_deg=(37.0,),
+            target_snr_db=(120.0,),
+            target_amplitudes=(1.0,),
+            frontend_num_tx=3,
+            frontend_num_rx=4,
+            frontend_num_virtual_rx=8,
+            frontend_num_angle_bins=128,
+            frontend_angle_window="rect",
+        )
+        coarse_truth = generate_multifrequency_truth(coarse)
+        fine_truth = generate_multifrequency_truth(fine)
+
+        coarse_frontend = build_frontend_views(
+            coarse_truth,
+            build_accelerometer_observation(coarse_truth, coarse),
+            coarse,
+        )
+        fine_frontend = build_frontend_views(
+            fine_truth,
+            build_accelerometer_observation(fine_truth, fine),
+            fine,
+        )
+
+        self.assertEqual(coarse_frontend.frontend_config.num_tx, 3)
+        self.assertEqual(coarse_frontend.frontend_config.num_rx, 4)
+        self.assertEqual(coarse_frontend.frontend_config.num_virtual_rx, 8)
+        self.assertEqual(coarse_frontend.adc_cube.adc_cube.shape[1], 8)
+        self.assertEqual(coarse_frontend.frontend_config.num_angle_bins, 32)
+        self.assertEqual(fine_frontend.frontend_config.num_angle_bins, 128)
+        self.assertEqual(coarse_frontend.range_angle_maps.range_angle_cube.shape[2], 32)
+        self.assertEqual(fine_frontend.range_angle_maps.range_angle_cube.shape[2], 128)
+        self.assertNotAlmostEqual(
+            float(coarse_frontend.frontend_targets.angle_deg[0]),
+            float(fine_frontend.frontend_targets.angle_deg[0]),
+        )
+
+    def test_angle_fft_peak_produces_target_wise_aoa_errors(self):
+        config = Phase1Config(
+            duration_s=0.08,
+            sample_rate_hz=1000.0,
+            seed=513,
+            num_targets=3,
+            target_angles_deg=(13.0, 37.0, 68.0),
+            target_snr_db=(120.0, 120.0, 120.0),
+            target_amplitudes=(1.0, 1.0, 1.0),
+            target_range_bins=(8, 16, 24),
+            aoa_error_deg=0.0,
+        )
+        truth = generate_multifrequency_truth(config)
+        accelerometer = build_accelerometer_observation(truth, config)
+
+        frontend = build_frontend_views(truth, accelerometer, config)
+        references = frontend.target_reference_indices
+        measured_angles = np.asarray(frontend.frontend_targets.angle_deg, dtype=float)
+        true_angles = np.asarray(config.target_angles_deg, dtype=float)[references]
+        angle_errors = measured_angles - true_angles
+
+        self.assertGreaterEqual(measured_angles.size, 3)
+        self.assertGreater(float(np.max(np.abs(angle_errors))), 0.05)
+        self.assertGreater(float(np.std(np.round(angle_errors, decimals=3))), 0.0)
+        np.testing.assert_allclose(
+            frontend.frontend_targets.measured_beta,
+            angle_deg_to_measured_beta(measured_angles),
         )
 
     def test_frontend_dropout_removes_target_power_inside_window(self):
@@ -368,12 +452,12 @@ class Phase1FrontendTest(unittest.TestCase):
 
         self.assertIsInstance(radar_input, RadarAlgorithmInput)
         self.assertFalse(hasattr(radar_input, "truth"))
-        self.assertFalse(hasattr(radar_input, "kappa"))
-        self.assertFalse(hasattr(radar_input, "true_kappa"))
+        self.assertFalse(hasattr(radar_input, "beta"))
+        self.assertFalse(hasattr(radar_input, "true_beta"))
         self.assertFalse(hasattr(radar_input, "true_los_phase_rad"))
         self.assertFalse(hasattr(radar_input, "q_m"))
         self.assertFalse(hasattr(radar_input, "slow_time"))
-        np.testing.assert_allclose(radar_input.measured_kappa, target.measured_kappa)
+        np.testing.assert_allclose(radar_input.measured_beta, target.measured_beta)
         np.testing.assert_allclose(radar_input.wrapped_phase_rad, target.wrapped_phase_rad)
         np.testing.assert_array_equal(radar_input.available_mask, target.available_mask)
 

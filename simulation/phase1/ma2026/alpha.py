@@ -40,14 +40,14 @@ def bandpass_rows(values, sample_rate_hz, band_hz):
 
 
 def calibrate_alpha_linear_fit(
-    corrected_phase_rad,
+    los_corrected_phase_rad,
     acceleration_mps2,
     sample_rate_hz,
     wavelength_m,
     band_hz=(0.5, 3.0),
     highpass_cutoff_hz=0.5,
 ):
-    corrected = np.asarray(corrected_phase_rad, dtype=float)
+    corrected = np.asarray(los_corrected_phase_rad, dtype=float)
     phase_acc = acceleration_to_phase(
         acceleration_mps2,
         sample_rate_hz,
@@ -55,7 +55,7 @@ def calibrate_alpha_linear_fit(
         highpass_cutoff_hz,
     )
     if corrected.shape != phase_acc.shape:
-        raise ValueError("corrected_phase_rad and acceleration_mps2 must have matching shapes")
+        raise ValueError("los_corrected_phase_rad and acceleration_mps2 must have matching shapes")
 
     phase_acc_band = bandpass_rows(phase_acc, sample_rate_hz, band_hz)
     corrected_band = bandpass_rows(corrected, sample_rate_hz, band_hz)

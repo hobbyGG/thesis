@@ -175,6 +175,194 @@ def _fit_beta_via_projection(theta_values, los_values, beta_prior, prior_weight,
     return beta, beta_var
 
 
+def _fit_beta_direct(theta_values, los_values, beta_prior, prior_weight, config):
+    theta = np.asarray(theta_values, dtype=float)
+    los = np.asarray(los_values, dtype=float)
+    valid = np.isfinite(theta) & np.isfinite(los)
+    if np.count_nonzero(valid) < 3:
+        return None
+
+    theta_valid = theta[valid]
+    los_valid = los[valid]
+    theta_fit = theta_valid - float(np.mean(theta_valid))
+    los_fit = los_valid - float(np.mean(los_valid))
+    denom = float(np.dot(los_fit, los_fit))
+    if denom <= 1.0e-12:
+        return None
+
+    numerator = float(np.dot(los_fit, theta_fit))
+    if prior_weight > 0.0:
+        beta = (numerator + prior_weight * float(beta_prior)) / (denom + prior_weight)
+    else:
+        beta = numerator / denom
+
+    beta = float(np.clip(beta, config.beta_min_abs, config.beta_max_abs))
+    residual = theta_fit - beta * los_fit
+    dof = max(int(np.count_nonzero(valid)) - 1, 1)
+    residual_var = float(np.dot(residual, residual) / dof)
+    beta_var = residual_var / max(denom, 1.0e-12)
+    beta_var = float(
+        np.clip(
+            beta_var,
+            config.beta_confidence_min_variance,
+            config.beta_confidence_max_variance,
+        )
+    )
+    return beta, beta_var
+
+
+def _beta_from_common_aoa_bias(measured_beta, aoa_bias_deg, config):
+    measured = np.asarray(measured_beta, dtype=float)
+    projection = np.clip(1.0 / np.maximum(np.abs(measured), config.beta_min_abs), -1.0, 1.0)
+    measured_angle_deg = np.rad2deg(np.arccos(projection))
+    bias = np.asarray(aoa_bias_deg, dtype=float)
+    if bias.ndim == 0:
+        corrected_angle_deg = measured_angle_deg - float(bias)
+    else:
+        corrected_angle_deg = measured_angle_deg[None, :] - bias[:, None]
+    corrected_projection = np.abs(np.cos(np.deg2rad(corrected_angle_deg)))
+    beta = 1.0 / np.maximum(corrected_projection, 1.0e-6)
+    return _clip_beta(beta, config)
+
+
+def _fit_common_aoa_bias_beta(
+    theta_values,
+    los_values_by_target,
+    measured_beta,
+    selected_indices,
+    prior_bias_deg,
+    config,
+):
+    theta = np.asarray(theta_values, dtype=float)
+    los = np.asarray(los_values_by_target, dtype=float)
+    measured = np.asarray(measured_beta, dtype=float)
+    selected = np.asarray(selected_indices, dtype=int)
+    diagnostics = {
+        "valid_count": 0.0,
+        "theta_energy": np.nan,
+        "los_energy": np.nan,
+        "abs_corr": np.nan,
+        "residual_ratio": np.nan,
+    }
+    if theta.ndim != 1 or los.ndim != 2 or los.shape[1] != theta.size or measured.shape[0] != los.shape[0]:
+        return None
+    selected = selected[(selected >= 0) & (selected < los.shape[0])]
+    if selected.size == 0:
+        return None
+
+    step = max(float(getattr(config, "beta_common_aoa_bias_step_deg", 0.05)), 1.0e-6)
+    search = max(float(getattr(config, "beta_common_aoa_bias_search_deg", 15.0)), 0.0)
+    offsets = np.arange(-search, search + 0.5 * step, step, dtype=float)
+    if offsets.size == 0:
+        offsets = np.array([0.0], dtype=float)
+
+    prepared = []
+    total_theta_energy = 0.0
+    total_los_energy = 0.0
+    total_cross = 0.0
+    valid_count = 0
+    for target_idx in selected:
+        valid = np.isfinite(theta) & np.isfinite(los[target_idx])
+        count = int(np.count_nonzero(valid))
+        if count < int(config.beta_identifiability_min_samples):
+            continue
+        theta_fit = theta[valid] - float(np.mean(theta[valid]))
+        los_fit = los[target_idx, valid] - float(np.mean(los[target_idx, valid]))
+        theta_energy = float(np.dot(theta_fit, theta_fit))
+        los_energy = float(np.dot(los_fit, los_fit))
+        if (
+            theta_energy < float(config.beta_identifiability_min_theta_energy)
+            or los_energy < float(config.beta_identifiability_min_los_energy)
+        ):
+            continue
+        cross = float(np.dot(theta_fit, los_fit))
+        prepared.append((int(target_idx), theta_energy, los_energy, cross))
+        total_theta_energy += theta_energy
+        total_los_energy += los_energy
+        total_cross += cross
+        valid_count += count
+
+    diagnostics["valid_count"] = float(valid_count)
+    diagnostics["theta_energy"] = float(total_theta_energy) if prepared else np.nan
+    diagnostics["los_energy"] = float(total_los_energy) if prepared else np.nan
+    if not prepared:
+        return None
+
+    diagnostics["abs_corr"] = abs(total_cross) / np.sqrt(max(total_theta_energy * total_los_energy, 1.0e-24))
+    candidate_biases = float(prior_bias_deg) + offsets
+    candidate_betas = _beta_from_common_aoa_bias(measured, candidate_biases, config)
+    residual_sums = np.zeros(candidate_biases.size, dtype=float)
+    for target_idx, theta_energy, los_energy, cross in prepared:
+        beta_values = candidate_betas[:, target_idx]
+        residual_sums += theta_energy - 2.0 * beta_values * cross + beta_values * beta_values * los_energy
+
+    best_idx = int(np.nanargmin(residual_sums))
+    residual_ratio = float(residual_sums[best_idx] / max(total_theta_energy, 1.0e-12))
+    best_bias = float(candidate_biases[best_idx])
+    best_beta = candidate_betas[best_idx]
+    diagnostics["residual_ratio"] = float(residual_ratio)
+    return best_beta, float(best_bias), diagnostics
+
+
+def _scale_theta_reference_to_anchor(theta_values, anchor_values):
+    class _DefaultAnchorConfig:
+        beta_anchor_min_abs_corr = 0.0
+        beta_anchor_min_theta_energy = 1.0e-12
+        beta_anchor_min_anchor_energy = 1.0e-12
+        beta_anchor_min_scale = 0.0
+        beta_anchor_max_scale = np.inf
+
+    scaled, _, _ = _scale_theta_reference_to_anchor_with_gate(
+        theta_values,
+        anchor_values,
+        _DefaultAnchorConfig(),
+    )
+    return scaled
+
+
+def _scale_theta_reference_to_anchor_with_gate(theta_values, anchor_values, config):
+    theta = np.asarray(theta_values, dtype=float)
+    anchor = np.asarray(anchor_values, dtype=float)
+    diagnostics = {
+        "anchor_abs_corr": np.nan,
+        "anchor_scale": np.nan,
+        "anchor_theta_energy": np.nan,
+        "anchor_energy": np.nan,
+    }
+    valid = np.isfinite(theta) & np.isfinite(anchor)
+    if np.count_nonzero(valid) < 3:
+        return theta, False, diagnostics
+
+    theta_valid = theta[valid]
+    anchor_valid = anchor[valid]
+    theta_fit = theta_valid - float(np.mean(theta_valid))
+    anchor_fit = anchor_valid - float(np.mean(anchor_valid))
+    theta_energy = float(np.dot(theta_fit, theta_fit))
+    anchor_energy = float(np.dot(anchor_fit, anchor_fit))
+    diagnostics["anchor_theta_energy"] = theta_energy
+    diagnostics["anchor_energy"] = anchor_energy
+    if (
+        theta_energy < float(getattr(config, "beta_anchor_min_theta_energy", 1.0e-12))
+        or anchor_energy < float(getattr(config, "beta_anchor_min_anchor_energy", 1.0e-12))
+    ):
+        return theta, False, diagnostics
+
+    cross = float(np.dot(theta_fit, anchor_fit))
+    abs_corr = abs(cross) / np.sqrt(max(theta_energy * anchor_energy, 1.0e-24))
+    scale = cross / max(theta_energy, 1.0e-12)
+    diagnostics["anchor_abs_corr"] = float(abs_corr)
+    diagnostics["anchor_scale"] = float(scale)
+    if (
+        not np.isfinite(scale)
+        or scale <= 0.0
+        or abs_corr < float(getattr(config, "beta_anchor_min_abs_corr", 0.0))
+        or scale < float(getattr(config, "beta_anchor_min_scale", 0.0))
+        or scale > float(getattr(config, "beta_anchor_max_scale", np.inf))
+    ):
+        return theta, False, diagnostics
+    return theta * scale, True, diagnostics
+
+
 def _beta_update_diagnostics(theta_values, los_values, config):
     theta = np.asarray(theta_values, dtype=float)
     los = np.asarray(los_values, dtype=float)
@@ -280,6 +468,27 @@ def estimate_proposed_full_pipeline_beta_confidence(radar_input, accel, config):
     )
 
 
+def estimate_proposed_full_pipeline_aoa_fixed_beta(radar_input, accel, config):
+    selected = _select_aoa_fixed_q_result(radar_input, accel, config)
+    result = selected["result"]
+    process_noise_intensity = float(selected["q"])
+    extra = {
+        **result.extra,
+        "process_noise_intensity": process_noise_intensity,
+        "calibrated_q": process_noise_intensity,
+        "calibrated_q_candidates": selected["candidates"],
+        "calibrated_q_metric": "innovation_energy",
+        "calibrated_q_metric_values": selected["metric_values"],
+        "calibrated_q_selection_index": int(selected["index"]),
+        "beta_update_enabled": False,
+    }
+    return replace(
+        result,
+        method_name="proposed_full_pipeline_aoa_fixed_beta",
+        extra=extra,
+    )
+
+
 def estimate_proposed_full_pipeline_calibrated(radar_input, accel, config):
     result = estimate_proposed_full_pipeline_beta_confidence(radar_input, accel, config)
     return replace(
@@ -374,6 +583,36 @@ def _select_calibrated_q_result(radar_input, accel, config):
     }
 
 
+def _select_aoa_fixed_q_result(radar_input, accel, config):
+    explicit_q = getattr(config, "calibrated_process_noise_intensity", None)
+    if explicit_q is not None:
+        q_value = float(explicit_q)
+        result = _run_aoa_fixed_candidate(radar_input, accel, config, q_value)
+        return {
+            "q": q_value,
+            "candidates": np.asarray([q_value], dtype=float),
+            "metric_values": np.asarray([_innovation_energy(result)], dtype=float),
+            "index": 0,
+            "result": result,
+        }
+
+    candidates = _calibrated_q_candidates(config)
+    metric_values = np.full(candidates.shape, np.inf, dtype=float)
+    results = []
+    for idx, q_value in enumerate(candidates):
+        result = _run_aoa_fixed_candidate(radar_input, accel, config, float(q_value))
+        metric_values[idx] = _innovation_energy(result)
+        results.append(result)
+    selected_idx = _select_calibrated_q_index(candidates, metric_values, config)
+    return {
+        "q": float(candidates[selected_idx]),
+        "candidates": candidates,
+        "metric_values": metric_values,
+        "index": int(selected_idx),
+        "result": results[selected_idx],
+    }
+
+
 def _select_posterior_r_q_result(radar_input, accel, config):
     explicit_q = getattr(config, "calibrated_process_noise_intensity", None)
     if explicit_q is not None:
@@ -443,6 +682,24 @@ def _run_full_pipeline_candidate(radar_input, accel, config, process_noise_inten
         config=calibrated_config,
         initial_beta=_initial_beta_from_radar(radar_input),
         update_beta=True,
+        adaptive_r=True,
+        selected_indices=radar_input.selected_indices,
+        initial_r=radar_input.initial_r,
+        beta_update_mode="centered_regularized_ls",
+        adaptive_r_mode="beta_confidence",
+        initial_r_policy="provided_or_config",
+    )
+
+
+def _run_aoa_fixed_candidate(radar_input, accel, config, process_noise_intensity):
+    calibrated_config = replace(config, process_noise_intensity=float(process_noise_intensity))
+    return run_structural_phase_kalman(
+        method_name="proposed_full_pipeline_aoa_fixed_beta_candidate",
+        radar=radar_input,
+        accel=accel,
+        config=calibrated_config,
+        initial_beta=_initial_beta_from_radar(radar_input),
+        update_beta=False,
         adaptive_r=True,
         selected_indices=radar_input.selected_indices,
         initial_r=radar_input.initial_r,
@@ -540,6 +797,16 @@ def _target_quality_scores(radar, n_targets, selected_indices_arr):
     return np.clip(quality, 0.0, 1.0)
 
 
+def _target_index_mask(indices, n_targets, default_all=False):
+    if indices is None:
+        return np.ones(n_targets, dtype=bool) if default_all else np.zeros(n_targets, dtype=bool)
+    arr = np.asarray(indices, dtype=int).reshape(-1)
+    mask = np.zeros(n_targets, dtype=bool)
+    valid = arr[(arr >= 0) & (arr < n_targets)]
+    mask[valid] = True
+    return mask
+
+
 def run_structural_phase_kalman(
     method_name,
     radar,
@@ -562,7 +829,9 @@ def run_structural_phase_kalman(
 
     theta_hat = np.zeros(n_samples, dtype=float)
     theta_dot_hat = np.zeros(n_samples, dtype=float)
+    beta_prediction_theta = np.zeros(n_samples, dtype=float)
     beta_reference_theta = np.zeros(n_samples, dtype=float)
+    beta_loo_theta = np.full((n_targets, n_samples), np.nan, dtype=float)
     los_corrected_phase = np.full((n_targets, n_samples), np.nan, dtype=float)
     innovations = np.full((n_targets, n_samples), np.nan, dtype=float)
     if initial_r is None:
@@ -584,6 +853,12 @@ def run_structural_phase_kalman(
     beta_update_residual_ratio_history = np.full((n_targets, n_samples), np.nan, dtype=float)
     beta_update_los_energy_history = np.full((n_targets, n_samples), np.nan, dtype=float)
     beta_update_theta_energy_history = np.full((n_targets, n_samples), np.nan, dtype=float)
+    beta_anchor_gate_history = np.full((n_targets, n_samples), np.nan, dtype=float)
+    beta_anchor_abs_corr_history = np.full((n_targets, n_samples), np.nan, dtype=float)
+    beta_anchor_scale_history = np.full((n_targets, n_samples), np.nan, dtype=float)
+    beta_anchor_theta_energy_history = np.full((n_targets, n_samples), np.nan, dtype=float)
+    beta_anchor_energy_history = np.full((n_targets, n_samples), np.nan, dtype=float)
+    beta_common_aoa_bias_history_deg = np.full(n_samples, np.nan, dtype=float)
     use_beta_confidence_r = adaptive_r_mode == "beta_confidence"
     use_quality_gated_r = adaptive_r_mode == "beta_confidence"
     beta_variance = np.full(
@@ -602,6 +877,13 @@ def run_structural_phase_kalman(
         selected_indices_arr = np.asarray(selected_indices, dtype=int)
     selected_mask = np.zeros(n_targets, dtype=bool)
     selected_mask[selected_indices_arr] = True
+    calibration_indices = getattr(radar, "calibration_indices", None)
+    if calibration_indices is None:
+        extra = getattr(radar, "extra", None)
+        if isinstance(extra, dict):
+            calibration_indices = extra.get("calibration_indices")
+    calibration_mask = _target_index_mask(calibration_indices, n_targets, default_all=True)
+    calibration_indices_arr = np.flatnonzero(calibration_mask)
     target_quality = _target_quality_scores(radar, n_targets, selected_indices_arr)
     target_quality_history = np.full((n_targets, n_samples), np.nan, dtype=float)
     base_r_update_gate_history = np.full((n_targets, n_samples), np.nan, dtype=float)
@@ -613,6 +895,8 @@ def run_structural_phase_kalman(
     warmup_index = int(round(config.beta_update_start_s * config.sample_rate_hz))
     beta_prior_weight = max(0.0, float(config.beta_bootstrap_prior_weight))
     measured_accel = np.asarray(accel.measured_mps2, dtype=float)
+    beta_reference_mode = getattr(config, "beta_update_reference_mode", "accel_fft_reference")
+    beta_common_aoa_bias_deg = 0.0
 
     for sample_idx in range(n_samples):
         accel_idx = max(sample_idx - 1, 0)
@@ -625,21 +909,29 @@ def run_structural_phase_kalman(
             x_pred = x
             p_pred = p
 
+        beta_prediction_theta[sample_idx] = x_pred[0]
         beta_reference_theta[sample_idx] = x_beta_reference[0]
 
         available = np.isfinite(radar.wrapped_phase_rad[:, sample_idx])
         if hasattr(radar, "available_mask"):
             available = available & np.asarray(radar.available_mask[:, sample_idx], dtype=bool)
-        available = available & selected_mask
-        active_indices = np.flatnonzero(available)
+        active_indices = np.flatnonzero(available & selected_mask)
+        use_loo_reference = beta_reference_mode in (
+            "loo_update_direct_ls",
+            "loo_accel_scaled_direct_ls",
+            "independent_auto",
+        )
+        correction_indices = np.flatnonzero(available & (selected_mask | calibration_mask)) if use_loo_reference else active_indices
         base_r_used_values = r_theta_values.copy()
         effective_r_values = r_theta_values.copy()
         beta_uncertainty_r_values = np.zeros(n_targets, dtype=float)
-        if active_indices.size:
+        y_obs_by_target = np.full(n_targets, np.nan, dtype=float)
+        if correction_indices.size:
             h_rows = []
             y_rows = []
             r_rows = []
-            for target_idx in active_indices:
+            row_target_indices = []
+            for target_idx in correction_indices:
                 los_prediction = x_pred[0] / beta[target_idx] + target_bias[target_idx]
                 los_corrected = prediction_correct_wrapped_phase(
                     radar.wrapped_phase_rad[target_idx, sample_idx],
@@ -648,6 +940,7 @@ def run_structural_phase_kalman(
                 los_corrected_phase[target_idx, sample_idx] = los_corrected
                 los_without_bias = los_corrected - target_bias[target_idx]
                 y_obs = beta[target_idx] * los_without_bias
+                y_obs_by_target[target_idx] = y_obs
                 if use_beta_confidence_r:
                     beta_uncertainty_r_values[target_idx] = float(los_without_bias**2 * beta_variance[target_idx])
                     effective_r_values[target_idx] = float(
@@ -657,18 +950,45 @@ def run_structural_phase_kalman(
                             config.max_measurement_variance,
                         )
                     )
-                h_rows.append([1.0, 0.0])
-                y_rows.append(y_obs)
-                r_rows.append(effective_r_values[target_idx])
+                if selected_mask[target_idx]:
+                    h_rows.append([1.0, 0.0])
+                    y_rows.append(y_obs)
+                    r_rows.append(effective_r_values[target_idx])
+                    row_target_indices.append(target_idx)
 
             h = np.asarray(h_rows, dtype=float)
             y = np.asarray(y_rows, dtype=float)
-            r_mat = np.diag(np.asarray(r_rows, dtype=float))
+            r_values = np.asarray(r_rows, dtype=float)
+            active_indices = np.asarray(row_target_indices, dtype=int)
+        if active_indices.size:
+            r_mat = np.diag(r_values)
             innovation = y - (h @ x_pred)
             s_mat = h @ p_pred @ h.T + r_mat
             k_gain = p_pred @ h.T @ _safe_inverse(s_mat)
             x = x_pred + k_gain @ innovation
             p = (np.eye(2) - k_gain @ h) @ p_pred
+
+            for local_idx, target_idx in enumerate(active_indices):
+                peer_indices = np.asarray(
+                    [
+                        peer_idx
+                        for peer_idx in correction_indices
+                        if peer_idx != target_idx
+                        and calibration_mask[peer_idx]
+                        and np.isfinite(y_obs_by_target[peer_idx])
+                    ],
+                    dtype=int,
+                )
+                if peer_indices.size == 0:
+                    continue
+                h_peer = np.tile(np.array([[1.0, 0.0]], dtype=float), (peer_indices.size, 1))
+                y_peer = y_obs_by_target[peer_indices]
+                r_peer = np.diag(effective_r_values[peer_indices])
+                innovation_peer = y_peer - (h_peer @ x_pred)
+                s_peer = h_peer @ p_pred @ h_peer.T + r_peer
+                k_peer = p_pred @ h_peer.T @ _safe_inverse(s_peer)
+                x_peer = x_pred + k_peer @ innovation_peer
+                beta_loo_theta[target_idx, sample_idx] = float(x_peer[0])
 
             for local_idx, target_idx in enumerate(active_indices):
                 prediction_residual = float(innovation[local_idx])
@@ -719,14 +1039,80 @@ def run_structural_phase_kalman(
 
         if update_beta and sample_idx >= warmup_index:
             start = max(0, sample_idx - int(config.beta_window_samples) + 1)
-            reference_mode = getattr(config, "beta_update_reference_mode", "accel_fft_reference")
-            if reference_mode == "accel_prediction":
-                theta_window = beta_reference_theta[start : sample_idx + 1]
-            elif reference_mode == "accel_fft_reference":
-                theta_window = beta_fft_reference_theta[start : sample_idx + 1]
+            if beta_reference_mode == "accel_prediction":
+                common_theta_window = beta_reference_theta[start : sample_idx + 1]
+            elif beta_reference_mode == "accel_fft_reference":
+                common_theta_window = beta_fft_reference_theta[start : sample_idx + 1]
+            elif beta_reference_mode == "prediction_direct_ls":
+                common_theta_window = beta_prediction_theta[start : sample_idx + 1]
             else:
-                theta_window = theta_hat[start : sample_idx + 1]
+                common_theta_window = theta_hat[start : sample_idx + 1]
+            if beta_reference_mode == "common_aoa_bias_direct_ls":
+                los_window_by_target = los_corrected_phase[:, start : sample_idx + 1] - target_bias[:, None]
+                fitted = _fit_common_aoa_bias_beta(
+                    theta_values=common_theta_window,
+                    los_values_by_target=los_window_by_target,
+                    measured_beta=beta_prior,
+                    selected_indices=selected_indices_arr,
+                    prior_bias_deg=0.0,
+                    config=config,
+                )
+                if fitted is None:
+                    beta_update_gate_history[selected_indices_arr, sample_idx] = 0.0
+                    beta_update_gain_history[selected_indices_arr, sample_idx] = 0.0
+                    beta_common_aoa_bias_history_deg[sample_idx] = beta_common_aoa_bias_deg
+                    beta_history[:, sample_idx] = beta
+                    beta_variance_history[:, sample_idx] = beta_variance
+                    continue
+                candidate_beta, candidate_bias_deg, diagnostics = fitted
+                residual_ratio = float(diagnostics["residual_ratio"])
+                abs_corr = float(diagnostics["abs_corr"])
+                can_update = (
+                    np.isfinite(residual_ratio)
+                    and np.isfinite(abs_corr)
+                    and residual_ratio <= float(config.beta_identifiability_max_residual_ratio)
+                    and abs_corr >= float(config.beta_identifiability_min_abs_corr)
+                )
+                residual_score = max(
+                    0.0,
+                    1.0
+                    - residual_ratio
+                    / max(float(config.beta_identifiability_max_residual_ratio), 1.0e-12),
+                )
+                update_gain = float(config.beta_update_gain) * min(1.0, abs_corr) * residual_score if can_update else 0.0
+                for target_idx in selected_indices_arr:
+                    beta_update_gate_history[target_idx, sample_idx] = 1.0 if can_update else 0.0
+                    beta_update_gain_history[target_idx, sample_idx] = update_gain
+                    beta_update_abs_corr_history[target_idx, sample_idx] = diagnostics["abs_corr"]
+                    beta_update_residual_ratio_history[target_idx, sample_idx] = diagnostics["residual_ratio"]
+                    beta_update_los_energy_history[target_idx, sample_idx] = diagnostics["los_energy"]
+                    beta_update_theta_energy_history[target_idx, sample_idx] = diagnostics["theta_energy"]
+                if can_update and update_gain > 0.0:
+                    for target_idx in selected_indices_arr:
+                        new_beta = float(candidate_beta[target_idx])
+                        delta = float(update_gain) * (new_beta - float(beta[target_idx]))
+                        max_delta = float(config.beta_update_max_relative_step) * max(
+                            abs(float(beta[target_idx])),
+                            config.beta_min_abs,
+                        )
+                        delta = float(np.clip(delta, -max_delta, max_delta))
+                        beta[target_idx] = float(
+                            np.clip(beta[target_idx] + delta, config.beta_min_abs, config.beta_max_abs)
+                        )
+                    beta_common_aoa_bias_deg = float(candidate_bias_deg)
+                beta_common_aoa_bias_history_deg[sample_idx] = beta_common_aoa_bias_deg
+                beta_history[:, sample_idx] = beta
+                beta_variance_history[:, sample_idx] = beta_variance
+                continue
             for target_idx in selected_indices_arr:
+                if beta_reference_mode in (
+                    "loo_update_direct_ls",
+                    "loo_accel_scaled_direct_ls",
+                    "independent_auto",
+                ):
+                    theta_window = beta_loo_theta[target_idx, start : sample_idx + 1]
+                else:
+                    theta_window = common_theta_window
                 los_window = los_corrected_phase[target_idx, start : sample_idx + 1]
                 valid = np.isfinite(los_window) & np.isfinite(theta_window)
                 if np.count_nonzero(valid) < 3:
@@ -735,6 +1121,29 @@ def run_structural_phase_kalman(
                     continue
                 los_without_bias = los_window[valid] - target_bias[target_idx]
                 theta_valid = theta_window[valid]
+                if beta_reference_mode == "loo_accel_scaled_direct_ls":
+                    anchor_window = beta_fft_reference_theta[start : sample_idx + 1]
+                    theta_valid = _scale_theta_reference_to_anchor(theta_valid, anchor_window[valid])
+                elif beta_reference_mode == "independent_auto":
+                    anchor_window = beta_fft_reference_theta[start : sample_idx + 1]
+                    theta_valid, anchor_accepted, anchor_diagnostics = (
+                        _scale_theta_reference_to_anchor_with_gate(
+                            theta_valid,
+                            anchor_window[valid],
+                            config,
+                        )
+                    )
+                    beta_anchor_gate_history[target_idx, sample_idx] = 1.0 if anchor_accepted else 0.0
+                    beta_anchor_abs_corr_history[target_idx, sample_idx] = anchor_diagnostics["anchor_abs_corr"]
+                    beta_anchor_scale_history[target_idx, sample_idx] = anchor_diagnostics["anchor_scale"]
+                    beta_anchor_theta_energy_history[target_idx, sample_idx] = anchor_diagnostics[
+                        "anchor_theta_energy"
+                    ]
+                    beta_anchor_energy_history[target_idx, sample_idx] = anchor_diagnostics["anchor_energy"]
+                    if not anchor_accepted:
+                        beta_update_gate_history[target_idx, sample_idx] = 0.0
+                        beta_update_gain_history[target_idx, sample_idx] = 0.0
+                        continue
                 can_update, update_gain, diagnostics = _beta_update_diagnostics(
                     theta_values=theta_valid,
                     los_values=los_without_bias,
@@ -748,7 +1157,23 @@ def run_structural_phase_kalman(
                 beta_update_theta_energy_history[target_idx, sample_idx] = diagnostics["theta_energy"]
                 if not can_update or update_gain <= 0.0:
                     continue
-                if beta_update_mode == "plain_window_ls":
+                if beta_reference_mode in (
+                    "prediction_direct_ls",
+                    "loo_update_direct_ls",
+                    "loo_accel_scaled_direct_ls",
+                    "independent_auto",
+                ):
+                    fitted = _fit_beta_direct(
+                        theta_values=theta_valid,
+                        los_values=los_without_bias,
+                        beta_prior=beta_prior[target_idx],
+                        prior_weight=beta_prior_weight,
+                        config=config,
+                    )
+                    if fitted is None:
+                        continue
+                    new_beta, beta_var_estimate = fitted
+                elif beta_update_mode == "plain_window_ls":
                     denom_valid = float(np.dot(los_without_bias, los_without_bias))
                     if denom_valid <= 1.0e-12:
                         continue
@@ -803,6 +1228,8 @@ def run_structural_phase_kalman(
             "selected_target_count": int(selected_indices_arr.size),
             "initial_r": initial_r_snapshot,
             "beta_update_mode": beta_update_mode,
+            "beta_update_reference_mode": beta_reference_mode,
+            "calibration_indices": calibration_indices_arr.copy(),
             "adaptive_r_mode": adaptive_r_mode,
             "initial_r_policy": initial_r_policy,
             "base_r_theta_history": base_r_theta_history,
@@ -814,7 +1241,15 @@ def run_structural_phase_kalman(
             "beta_update_residual_ratio_history": beta_update_residual_ratio_history,
             "beta_update_los_energy_history": beta_update_los_energy_history,
             "beta_update_theta_energy_history": beta_update_theta_energy_history,
+            "beta_anchor_gate_history": beta_anchor_gate_history,
+            "beta_anchor_abs_corr_history": beta_anchor_abs_corr_history,
+            "beta_anchor_scale_history": beta_anchor_scale_history,
+            "beta_anchor_theta_energy_history": beta_anchor_theta_energy_history,
+            "beta_anchor_energy_history": beta_anchor_energy_history,
+            "beta_common_aoa_bias_history_deg": beta_common_aoa_bias_history_deg,
+            "beta_prediction_theta_rad": beta_prediction_theta,
             "beta_reference_theta_rad": beta_reference_theta,
+            "beta_loo_theta_rad": beta_loo_theta,
             "beta_fft_reference_theta_rad": beta_fft_reference_theta,
             "target_quality_history": target_quality_history,
             "base_r_update_gate_history": base_r_update_gate_history,

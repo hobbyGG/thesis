@@ -49,8 +49,11 @@ def scenario_parameter_rows(scenarios):
             "chirp_duration_s": float(scenario.chirp_duration_s),
             "chirps_per_frame": int(scenario.chirps_per_frame),
             "aoa_error_deg": float(scenario.aoa_error_deg),
-            "frontend_aoa_error_bias_deg": _optional_float(scenario.frontend_aoa_error_bias_deg),
-            "frontend_aoa_error_std_deg": float(scenario.frontend_aoa_error_std_deg),
+            "frontend_num_tx": int(scenario.frontend_num_tx),
+            "frontend_num_rx": int(scenario.frontend_num_rx),
+            "frontend_num_virtual_rx": int(scenario.frontend_num_virtual_rx),
+            "frontend_num_angle_bins": int(scenario.frontend_num_angle_bins),
+            "frontend_angle_window": str(scenario.frontend_angle_window),
             "degraded_target_indices": _join_numbers(scenario.degraded_target_indices),
             "dropout_target_indices": _join_numbers(scenario.dropout_target_indices),
         }
@@ -175,7 +178,7 @@ def _write_parameter_csv(path, rows):
         return
     fieldnames = list(rows[0].keys())
     with path.open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow(row)

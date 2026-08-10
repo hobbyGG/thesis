@@ -1,9 +1,22 @@
 import importlib
 import inspect
+from pathlib import Path
 import unittest
 
 
 class Phase1ArchitectureTest(unittest.TestCase):
+    def test_core_estimator_and_config_no_longer_use_legacy_conversion_symbol(self):
+        old_symbol = "kap" + "pa"
+        old_upper = "Kap" + "pa"
+        old_greek = "\u03ba"
+        offenders = []
+        for path in (Path("simulation/phase1/algorithm.py"), Path("simulation/phase1/config.py")):
+            text = path.read_text()
+            if old_symbol in text or old_upper in text or old_greek in text:
+                offenders.append(str(path))
+
+        self.assertEqual(offenders, [])
+
     def test_algorithm_and_baseline_modules_export_expected_public_api(self):
         algorithm = importlib.import_module("simulation.phase1.algorithm")
         baselines = importlib.import_module("simulation.phase1.baselines")
@@ -14,9 +27,10 @@ class Phase1ArchitectureTest(unittest.TestCase):
             "cold_start_reference_mean",
             "estimate_proposed",
             "estimate_proposed_full_pipeline",
-            "estimate_proposed_full_pipeline_kappa_confidence",
+            "estimate_proposed_full_pipeline_aoa_fixed_beta",
+            "estimate_proposed_full_pipeline_beta_confidence",
             "estimate_proposed_full_pipeline_calibrated",
-            "estimate_proposed_full_pipeline_kappa_confidence_r",
+            "estimate_proposed_full_pipeline_beta_confidence_r",
             "estimate_proposed_full_pipeline_posterior_r",
             "estimate_proposed_full_pipeline_doc_strict",
             "run_structural_phase_kalman",
@@ -28,9 +42,9 @@ class Phase1ArchitectureTest(unittest.TestCase):
             "estimate_itoh_ls",
             "estimate_range_bin_itoh",
             "estimate_single_target_ma_style",
-            "estimate_multitarget_true_kappa_fixed_r",
-            "estimate_multitarget_aoa_fixed_kappa",
-            "estimate_selected_aoa_fixed_kappa",
+            "estimate_multitarget_true_beta_fixed_r",
+            "estimate_multitarget_aoa_fixed_beta",
+            "estimate_selected_aoa_fixed_beta",
             "estimate_range_bin_only_mixed_phase",
             "estimate_ma_style_iterative_beta_range_bin",
         ):
@@ -39,15 +53,20 @@ class Phase1ArchitectureTest(unittest.TestCase):
         for name in (
             "Ma2026Config",
             "Ma2026RangeBinInput",
-            "beta_grid",
-            "calibrate_best_target",
             "estimate_ma2026_reproduction",
             "estimate_ma2026_target",
-            "rangebin_input_from_range_angle",
+            "rangebin_input_from_range_fft",
             "run_ma2026_los_kalman",
             "select_q_by_energy",
         ):
             self.assertTrue(hasattr(ma2026, name), name)
+        self.assertFalse(hasattr(ma2026, "rangebin_input_from_range_angle"))
+        old_paper = "ma20" + "23"
+        self.assertFalse(hasattr(ma2026, f"estimate_{old_paper}_reproduction"))
+        self.assertFalse(hasattr(ma2026, f"{old_paper}_fir_fusion"))
+        self.assertFalse(hasattr(ma2026, "calibrate_best_target"))
+
+        self.assertIsNone(importlib.util.find_spec(f"simulation.phase1.{old_paper}"))
 
     def test_methods_keeps_backward_compatible_exports(self):
         methods = importlib.import_module("simulation.phase1.methods")
@@ -59,18 +78,19 @@ class Phase1ArchitectureTest(unittest.TestCase):
             "estimate_itoh_ls",
             "estimate_range_bin_itoh",
             "estimate_single_target_ma_style",
-            "estimate_multitarget_true_kappa_fixed_r",
-            "estimate_multitarget_aoa_fixed_kappa",
-            "estimate_selected_aoa_fixed_kappa",
+            "estimate_multitarget_true_beta_fixed_r",
+            "estimate_multitarget_aoa_fixed_beta",
+            "estimate_selected_aoa_fixed_beta",
             "estimate_range_bin_only_mixed_phase",
             "estimate_ma_style_iterative_beta_range_bin",
             "estimate_ma2026_reproduction",
             "estimate_ma2026_target",
             "estimate_proposed",
             "estimate_proposed_full_pipeline",
-            "estimate_proposed_full_pipeline_kappa_confidence",
+            "estimate_proposed_full_pipeline_aoa_fixed_beta",
+            "estimate_proposed_full_pipeline_beta_confidence",
             "estimate_proposed_full_pipeline_calibrated",
-            "estimate_proposed_full_pipeline_kappa_confidence_r",
+            "estimate_proposed_full_pipeline_beta_confidence_r",
             "estimate_proposed_full_pipeline_posterior_r",
             "estimate_proposed_full_pipeline_doc_strict",
         ):
@@ -81,17 +101,15 @@ class Phase1ArchitectureTest(unittest.TestCase):
 
         self.assertTrue(hasattr(scenarios, "__path__"))
         expected_modules = (
-            "nominal_multifrequency",
             "literature_maglev_modal_response",
-            "ma2023_balanced_good_targets",
             "strong_wrapping",
             "aoa_error_bootstrap",
             "target_snr_drop",
-            "target_dropout",
-            "mixed_scatterer_rangebin",
             "same_range_far_angles",
+            "literature_mmwbats_same_range_aliasing",
+            "literature_mmshm_adjacent_range_clutter",
+            "mixed_scatterer_rangebin",
             "low_snr_multitarget",
-            "vehicle_event_nonstationary",
         )
         for module_name in expected_modules:
             module = importlib.import_module(f"simulation.phase1.scenarios.{module_name}")
@@ -106,7 +124,6 @@ class Phase1ArchitectureTest(unittest.TestCase):
                 "same_range_far_angles",
                 "aoa_error_bootstrap",
                 "target_snr_drop",
-                "vehicle_event_nonstationary",
             ],
         )
 
@@ -202,7 +219,7 @@ class Phase1ArchitectureTest(unittest.TestCase):
         )
         self.assertEqual(
             scenario_inputs.frontend.target_reference_indices.shape[0],
-            scenario_inputs.frontend.frontend_targets.measured_kappa.shape[0],
+            scenario_inputs.frontend.frontend_targets.measured_beta.shape[0],
         )
 
     def test_method_registry_separates_paper_and_diagnostic_methods(self):
@@ -216,24 +233,28 @@ class Phase1ArchitectureTest(unittest.TestCase):
                 "oracle",
                 "range_bin_itoh",
                 "ma2026_reproduction",
-                "selected_aoa_fixed_kappa",
-                "proposed_full_pipeline_kappa_confidence",
+                "selected_aoa_fixed_beta",
+                "proposed_full_pipeline_aoa_fixed_beta",
+                "proposed_full_pipeline_beta_confidence",
             ],
         )
         self.assertTrue(all(spec.role in {"reference", "paper"} for spec in registry.default_method_specs()))
         self.assertTrue(all(spec.status == "active" for spec in registry.default_method_specs()))
 
         all_method_names = [spec.name for spec in registry.all_method_specs()]
-        self.assertIn("single_target_ma_style", all_method_names)
-        self.assertIn("ma_style_iterative_beta_range_bin", all_method_names)
-        self.assertIn("proposed_full_pipeline_posterior_r", all_method_names)
-        self.assertIn("proposed_full_pipeline_doc_strict", all_method_names)
+        self.assertIn("range_bin_only_mixed_phase", all_method_names)
+        self.assertIn("multitarget_aoa_fixed_beta", all_method_names)
+        self.assertNotIn("single_target_ma_style", all_method_names)
+        self.assertNotIn("ma_style_iterative_beta_range_bin", all_method_names)
+        self.assertNotIn("proposed", all_method_names)
+        self.assertNotIn("proposed_full_pipeline", all_method_names)
+        self.assertNotIn("proposed_full_pipeline_posterior_r", all_method_names)
+        self.assertNotIn("proposed_full_pipeline_doc_strict", all_method_names)
 
         spec_by_name = {spec.name: spec for spec in registry.all_method_specs()}
-        self.assertEqual(spec_by_name["single_target_ma_style"].status, "deprecated")
-        self.assertEqual(spec_by_name["proposed_full_pipeline"].status, "deprecated")
-        self.assertEqual(spec_by_name["proposed_full_pipeline_posterior_r"].role, "ablation")
-        self.assertEqual(spec_by_name["ma_style_iterative_beta_range_bin"].role, "diagnostic")
+        self.assertNotIn("ma20" + "23_reproduction", spec_by_name)
+        self.assertEqual(spec_by_name["range_bin_only_mixed_phase"].role, "ablation")
+        self.assertEqual(spec_by_name["multitarget_aoa_fixed_beta"].role, "ablation")
 
 
 if __name__ == "__main__":

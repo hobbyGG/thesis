@@ -26,7 +26,7 @@ Start in `/Users/umep/thesis`. This repository is mostly thesis notes plus an ea
 
 Current implementation status:
 
-- The simulation can generate `q_m`, `v_mps`, `a_true_mps2`, `a_meas_mps2`, target-wise `kappa`, target-wise noisy complex `iq`, target-wise `wrapped_phase_rad`, target-wise true unwrapped `los_phase_rad`, and true structural `main_phase_rad`.
+- The simulation can generate `q_m`, `v_mps`, `a_true_mps2`, `a_meas_mps2`, target-wise `beta`, target-wise noisy complex `iq`, target-wise `wrapped_phase_rad`, target-wise true unwrapped `los_phase_rad`, and true structural `main_phase_rad`.
 - Existing tests only verify data generator behavior. They do not verify the algorithm innovations.
 - Default generated component frequencies are seeded near nominal 20, 40, and 60 Hz, with each value within +/-10 Hz and rounded to two decimals.
 - Current environment has NumPy but may not have SciPy, matplotlib, pandas, or pytest. Use `python3 -m unittest`.
@@ -38,16 +38,16 @@ The proposed thesis method to validate:
 - Acceleration predicts structural main phase:
   `x_k^- = A x_{k-1} + B * (4*pi/lambda) * a_{k-1}`.
 - Each radar target observes a projected LoS phase:
-  `phi_i,k = kappa_i * Theta_k + b_i`.
+  `phi_i,k = Theta_k / beta_i + b_i`.
 - Target selection outputs wrapped phase only:
   `psi_i,k = angle(iq_i,k)`.
 - AoA cold-start initializes:
-  `kappa_hat_i,0 = cos(theta_i_measured)`.
+  `p_hat_i,0 = abs(cos(theta_i_measured))`, `beta_hat_i,0 = 1 / max(p_hat_i,0, epsilon)`.
 - Prediction-assisted correction chooses the phase branch:
   `z_corr_i,k = psi_i,k + 2*pi*round((phi_hat_i,k^- - psi_i,k)/(2*pi))`.
-- The same `z_corr_i,k` enters both Kalman measurement update and online kappa bootstrap.
-- Online kappa bootstrap uses a sliding window:
-  `kappa_hat_i = sum(Theta_hat * (z_corr_i - b_i)) / sum(Theta_hat^2)`.
+- The same `z_corr_i,k` enters both Kalman measurement update and online beta bootstrap.
+- Online beta bootstrap uses a sliding window:
+  `beta_hat_i = sum(Theta_hat * (z_corr_i - b_i)) / sum(Theta_hat^2)`.
 - First implementation uses fixed process noise `Q` and target-wise adaptive measurement noise `R_i,k`.
 
 Validation must answer two questions:
@@ -59,7 +59,7 @@ Use these feasibility gates for the phase-1 synthetic study:
 
 - Nominal multi-frequency case: displacement RMSE <= 0.03 mm.
 - Strong wrapping case: proposed unwrap error count <= 10% of Itoh unwrap error count, and proposed RMSE <= 0.08 mm.
-- AoA error case: AoA cold start + bootstrap reaches median relative `kappa` error <= 5% after the configured warmup window.
+- AoA error case: AoA cold start + bootstrap reaches median relative `beta` error <= 5% after the configured warmup window.
 - Target degradation case: adaptive-R proposed method has lower RMSE than fixed-R multi-target Kalman during the degradation interval.
 - Multi-target case: proposed method outperforms single best target in at least 4 of 5 predefined scenarios.
 
@@ -73,7 +73,7 @@ Create and modify these files:
 - Modify `simulation/phase1/radar.py`: add optional target degradation masks, AoA measurement error, and mixed-scatterer equivalent target generation.
 - Create `simulation/phase1/phase_utils.py`: wrapping, Itoh unwrap, prediction-assisted correction, branch-error counting helpers.
 - Create `simulation/phase1/metrics.py`: displacement, phase, unwrap, convergence, target degradation, and feasibility metrics.
-- Create `simulation/phase1/methods.py`: method result dataclass and implementations for oracle, Itoh+LS, single-target Ma-style Kalman, multi-target fixed-kappa fixed-R Kalman, and proposed method.
+- Create `simulation/phase1/methods.py`: method result dataclass and implementations for oracle, Itoh+LS, single-target Ma-style Kalman, multi-target fixed-beta fixed-R Kalman, and proposed method.
 - Create `simulation/phase1/scenarios.py`: deterministic scenario factory functions.
 - Create `simulation/phase1/evaluate.py`: run methods on scenarios and compute metrics.
 - Create `simulation/phase1/reporting.py`: write CSV, JSON summary, Markdown summary, and simple SVG line plots without matplotlib.
@@ -163,8 +163,8 @@ class Phase1ConfigExtensionTest(unittest.TestCase):
         self.assertGreater(config.initial_rate_variance, 0.0)
         self.assertGreater(config.initial_measurement_variance, config.min_measurement_variance)
         self.assertGreater(config.max_measurement_variance, config.min_measurement_variance)
-        self.assertGreater(config.kappa_window_samples, 2)
-        self.assertGreater(config.kappa_update_start_s, 0.0)
+        self.assertGreater(config.beta_window_samples, 2)
+        self.assertGreater(config.beta_update_start_s, 0.0)
         self.assertGreater(config.adaptive_r_forgetting, 0.0)
         self.assertLess(config.adaptive_r_forgetting, 1.0)
 
@@ -203,10 +203,10 @@ Modify `simulation/phase1/config.py` so `Phase1Config` includes these fields:
     max_measurement_variance: float = 25.0
     adaptive_r_forgetting: float = 0.95
 
-    kappa_window_samples: int = 80
-    kappa_update_start_s: float = 0.25
-    kappa_min_abs: float = 0.05
-    kappa_max_abs: float = 1.2
+    beta_window_samples: int = 80
+    beta_update_start_s: float = 0.25
+    beta_min_abs: float = 0.05
+    beta_max_abs: float = 1.2
 
     aoa_error_deg: float = 0.0
 
@@ -221,7 +221,7 @@ Modify `simulation/phase1/config.py` so `Phase1Config` includes these fields:
 
     enable_mixed_scatterer_target: bool = False
     mixed_target_index: int = 0
-    mixed_scatterer_kappas: Sequence[float] = (0.95, 0.35)
+    mixed_scatterer_betas: Sequence[float] = (0.95, 0.35)
     mixed_scatterer_amplitudes: Sequence[float] = (0.7, 0.6)
     mixed_scatterer_biases_rad: Sequence[float] = (0.0, 1.2)
 ```
@@ -286,14 +286,14 @@ Append these tests to `Phase1SimulationTest` in `tests/test_phase1_simulation.py
         self.assertTrue(np.all(np.isnan(radar.wrapped_phase_rad[1, in_window])))
         self.assertFalse(np.any(np.isnan(radar.wrapped_phase_rad[1, out_window])))
 
-    def test_aoa_error_changes_measured_kappa_but_not_true_kappa(self):
+    def test_aoa_error_changes_measured_beta_but_not_true_beta(self):
         config = Phase1Config(duration_s=1.0, sample_rate_hz=1000.0, seed=43, aoa_error_deg=8.0)
         truth = generate_multifrequency_truth(config)
         radar = simulate_radar_targets(truth, config)
 
         expected_measured = np.cos(np.deg2rad(radar.target_angles_deg + 8.0))
-        np.testing.assert_allclose(radar.measured_kappa, expected_measured)
-        self.assertGreater(np.max(np.abs(radar.measured_kappa - radar.kappa)), 1e-3)
+        np.testing.assert_allclose(radar.measured_beta, expected_measured)
+        self.assertGreater(np.max(np.abs(radar.measured_beta - radar.beta)), 1e-3)
 ```
 
 - [ ] **Step 2: Run tests and verify failure**
@@ -304,27 +304,27 @@ Run:
 python3 -m unittest tests/test_phase1_simulation.py -v
 ```
 
-Expected: fails because degradation/dropout/measured_kappa behavior is not implemented.
+Expected: fails because degradation/dropout/measured_beta behavior is not implemented.
 
 - [ ] **Step 3: Modify `RadarObservation`**
 
 Add these fields to the dataclass in `simulation/phase1/radar.py`:
 
 ```python
-    measured_kappa: np.ndarray
+    measured_beta: np.ndarray
     available_mask: np.ndarray
 ```
 
-- [ ] **Step 4: Implement measured AoA kappa**
+- [ ] **Step 4: Implement measured AoA beta**
 
-In `simulate_radar_targets`, after true `kappa` is computed, add:
+In `simulate_radar_targets`, after true `beta` is computed, add:
 
 ```python
     measured_angles_deg = angles_deg + float(config.aoa_error_deg)
-    measured_kappa = np.cos(np.deg2rad(measured_angles_deg))
+    measured_beta = np.cos(np.deg2rad(measured_angles_deg))
 ```
 
-Return `measured_kappa=measured_kappa`.
+Return `measured_beta=measured_beta`.
 
 - [ ] **Step 5: Implement mixed-scatterer equivalent target**
 
@@ -333,14 +333,14 @@ After `clean_iq` is created and before adding noise, add:
 ```python
     if config.enable_mixed_scatterer_target:
         idx = int(config.mixed_target_index)
-        kappas = np.asarray(config.mixed_scatterer_kappas, dtype=float)
+        betas = np.asarray(config.mixed_scatterer_betas, dtype=float)
         amps = np.asarray(config.mixed_scatterer_amplitudes, dtype=float)
         biases = np.asarray(config.mixed_scatterer_biases_rad, dtype=float)
-        if kappas.size != amps.size or kappas.size != biases.size:
-            raise ValueError("mixed scatterer kappas, amplitudes, and biases must have the same length")
+        if betas.size != amps.size or betas.size != biases.size:
+            raise ValueError("mixed scatterer betas, amplitudes, and biases must have the same length")
         mixed = np.zeros_like(clean_iq[idx])
-        for scatter_kappa, scatter_amp, scatter_bias in zip(kappas, amps, biases):
-            mixed += scatter_amp * np.exp(1j * (scatter_kappa * true_main_phase_rad + scatter_bias))
+        for scatter_beta, scatter_amp, scatter_bias in zip(betas, amps, biases):
+            mixed += scatter_amp * np.exp(1j * (scatter_beta * true_main_phase_rad + scatter_bias))
         clean_iq[idx] = mixed
 ```
 
@@ -727,7 +727,7 @@ class MethodResult:
     theta_hat_rad: np.ndarray
     theta_dot_hat_radps: np.ndarray
     corrected_phase_rad: np.ndarray
-    kappa_hat: np.ndarray
+    beta_hat: np.ndarray
     r_history: np.ndarray
     innovation_rad: np.ndarray
     extra: dict = field(default_factory=dict)
@@ -748,7 +748,7 @@ def estimate_oracle(truth, radar, config):
         theta_hat_rad=theta,
         theta_dot_hat_radps=theta_dot,
         corrected_phase_rad=radar.true_los_phase_rad.copy(),
-        kappa_hat=radar.kappa.copy(),
+        beta_hat=radar.beta.copy(),
         r_history=empty_targets.copy(),
         innovation_rad=empty_targets.copy(),
         extra={},
@@ -763,8 +763,8 @@ def estimate_itoh_ls(truth, radar, config, target_index=0):
     corrected[valid] = itoh_unwrap(wrapped[valid])
     if np.any(valid):
         corrected[valid] -= corrected[valid][0] - radar.true_los_phase_rad[idx, valid][0]
-    kappa = float(radar.kappa[idx])
-    theta = (corrected - radar.true_los_phase_rad[idx, 0] + kappa * radar.true_main_phase_rad[0]) / max(abs(kappa), 1e-12)
+    beta = float(radar.beta[idx])
+    theta = (corrected - radar.true_los_phase_rad[idx, 0] + beta * radar.true_main_phase_rad[0]) / max(abs(beta), 1e-12)
     dt = 1.0 / config.sample_rate_hz
     theta_dot = np.gradient(np.nan_to_num(theta, nan=0.0), dt)
     corrected_all = np.full_like(radar.wrapped_phase_rad, np.nan, dtype=float)
@@ -775,7 +775,7 @@ def estimate_itoh_ls(truth, radar, config, target_index=0):
         theta_hat_rad=theta,
         theta_dot_hat_radps=theta_dot,
         corrected_phase_rad=corrected_all,
-        kappa_hat=np.full(radar.kappa.shape, np.nan, dtype=float),
+        beta_hat=np.full(radar.beta.shape, np.nan, dtype=float),
         r_history=np.full_like(radar.wrapped_phase_rad, np.nan, dtype=float),
         innovation_rad=np.full_like(radar.wrapped_phase_rad, np.nan, dtype=float),
         extra={"target_index": idx},
@@ -798,7 +798,7 @@ Expected: oracle and Itoh tests pass.
 - Modify: `simulation/phase1/methods.py`
 - Modify: `tests/test_phase1_methods.py`
 
-- [ ] **Step 1: Add failing tests for fixed-kappa multi-target Kalman and proposed method**
+- [ ] **Step 1: Add failing tests for fixed-beta multi-target Kalman and proposed method**
 
 Append to `tests/test_phase1_methods.py`:
 
@@ -807,7 +807,7 @@ from simulation.phase1.methods import estimate_multitarget_fixed, estimate_propo
 
 
 class Phase1KalmanMethodsTest(unittest.TestCase):
-    def test_multitarget_fixed_kappa_recovers_clean_multitarget_case(self):
+    def test_multitarget_fixed_beta_recovers_clean_multitarget_case(self):
         config = Phase1Config(
             duration_s=1.0,
             sample_rate_hz=1000.0,
@@ -824,7 +824,7 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
 
         self.assertLess(rmse_mm, 0.01)
 
-    def test_proposed_updates_kappa_from_aoa_initial_values(self):
+    def test_proposed_updates_beta_from_aoa_initial_values(self):
         config = Phase1Config(
             duration_s=2.0,
             sample_rate_hz=1000.0,
@@ -832,15 +832,15 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
             aoa_error_deg=8.0,
             target_snr_db=(40.0, 40.0, 40.0, 40.0, 40.0),
             accel_noise_std_mps2=0.0,
-            kappa_update_start_s=0.1,
-            kappa_window_samples=40,
+            beta_update_start_s=0.1,
+            beta_window_samples=40,
         )
         truth = generate_multifrequency_truth(config)
         radar = simulate_radar_targets(truth, config)
 
         result = estimate_proposed(truth, radar, config)
-        initial_error = np.median(np.abs(radar.measured_kappa - radar.kappa))
-        final_error = np.median(np.abs(result.kappa_hat - radar.kappa))
+        initial_error = np.median(np.abs(radar.measured_beta - radar.beta))
+        final_error = np.median(np.abs(result.beta_hat - radar.beta))
 
         self.assertLess(final_error, initial_error)
 ```
@@ -882,7 +882,7 @@ def _safe_inverse(matrix):
     return np.linalg.pinv(matrix)
 ```
 
-- [ ] **Step 4: Implement fixed-kappa multi-target Kalman**
+- [ ] **Step 4: Implement fixed-beta multi-target Kalman**
 
 Add `estimate_multitarget_fixed`:
 
@@ -893,8 +893,8 @@ def estimate_multitarget_fixed(truth, radar, config):
         truth=truth,
         radar=radar,
         config=config,
-        initial_kappa=radar.kappa.copy(),
-        update_kappa=False,
+        initial_beta=radar.beta.copy(),
+        update_beta=False,
         adaptive_r=False,
     )
 ```
@@ -910,8 +910,8 @@ def estimate_proposed(truth, radar, config):
         truth=truth,
         radar=radar,
         config=config,
-        initial_kappa=radar.measured_kappa.copy(),
-        update_kappa=True,
+        initial_beta=radar.measured_beta.copy(),
+        update_beta=True,
         adaptive_r=True,
     )
 ```
@@ -921,15 +921,15 @@ def estimate_proposed(truth, radar, config):
 Add this function to `methods.py`:
 
 ```python
-def _run_structural_phase_kalman(method_name, truth, radar, config, initial_kappa, update_kappa, adaptive_r):
+def _run_structural_phase_kalman(method_name, truth, radar, config, initial_beta, update_beta, adaptive_r):
     n_targets, n_samples = radar.wrapped_phase_rad.shape
     a_mat, b_vec, q_mat = _state_matrices(config)
     x = _initial_state(truth, radar, config)
     p = np.diag([config.initial_state_variance, config.initial_rate_variance])
-    kappa = np.asarray(initial_kappa, dtype=float).copy()
-    kappa = np.clip(kappa, -config.kappa_max_abs, config.kappa_max_abs)
-    small = np.abs(kappa) < config.kappa_min_abs
-    kappa[small] = np.sign(kappa[small] + 1e-12) * config.kappa_min_abs
+    beta = np.asarray(initial_beta, dtype=float).copy()
+    beta = np.clip(beta, -config.beta_max_abs, config.beta_max_abs)
+    small = np.abs(beta) < config.beta_min_abs
+    beta[small] = np.sign(beta[small] + 1e-12) * config.beta_min_abs
 
     theta_hat = np.zeros(n_samples, dtype=float)
     theta_dot_hat = np.zeros(n_samples, dtype=float)
@@ -937,10 +937,10 @@ def _run_structural_phase_kalman(method_name, truth, radar, config, initial_kapp
     innovations = np.full((n_targets, n_samples), np.nan, dtype=float)
     r_values = np.full(n_targets, float(config.initial_measurement_variance), dtype=float)
     r_history = np.full((n_targets, n_samples), np.nan, dtype=float)
-    kappa_history = np.full((n_targets, n_samples), np.nan, dtype=float)
+    beta_history = np.full((n_targets, n_samples), np.nan, dtype=float)
 
-    target_bias = radar.true_los_phase_rad[:, 0] - radar.kappa * radar.true_main_phase_rad[0]
-    warmup_index = int(round(config.kappa_update_start_s * config.sample_rate_hz))
+    target_bias = radar.true_los_phase_rad[:, 0] - radar.beta * radar.true_main_phase_rad[0]
+    warmup_index = int(round(config.beta_update_start_s * config.sample_rate_hz))
 
     for sample_idx in range(n_samples):
         accel_idx = max(sample_idx - 1, 0)
@@ -960,10 +960,10 @@ def _run_structural_phase_kalman(method_name, truth, radar, config, initial_kapp
             bias_rows = []
             r_rows = []
             for target_idx in active_indices:
-                prediction = kappa[target_idx] * x_pred[0] + target_bias[target_idx]
+                prediction = beta[target_idx] * x_pred[0] + target_bias[target_idx]
                 z_corr = prediction_correct_wrapped_phase(radar.wrapped_phase_rad[target_idx, sample_idx], prediction)
                 corrected[target_idx, sample_idx] = z_corr
-                h_rows.append([kappa[target_idx], 0.0])
+                h_rows.append([beta[target_idx], 0.0])
                 z_rows.append(z_corr)
                 bias_rows.append(target_bias[target_idx])
                 r_rows.append(r_values[target_idx])
@@ -994,8 +994,8 @@ def _run_structural_phase_kalman(method_name, truth, radar, config, initial_kapp
         theta_dot_hat[sample_idx] = x[1]
         r_history[:, sample_idx] = r_values
 
-        if update_kappa and sample_idx >= warmup_index:
-            start = max(0, sample_idx - int(config.kappa_window_samples) + 1)
+        if update_beta and sample_idx >= warmup_index:
+            start = max(0, sample_idx - int(config.beta_window_samples) + 1)
             theta_window = theta_hat[start : sample_idx + 1]
             denom = float(np.sum(theta_window**2))
             if denom > 1e-12:
@@ -1004,10 +1004,10 @@ def _run_structural_phase_kalman(method_name, truth, radar, config, initial_kapp
                     valid = np.isfinite(z_window)
                     if np.count_nonzero(valid) >= 3:
                         numerator = float(np.sum(theta_window[valid] * (z_window[valid] - target_bias[target_idx])))
-                        new_kappa = numerator / denom
-                        if abs(new_kappa) >= config.kappa_min_abs:
-                            kappa[target_idx] = float(np.clip(new_kappa, -config.kappa_max_abs, config.kappa_max_abs))
-        kappa_history[:, sample_idx] = kappa
+                        new_beta = numerator / denom
+                        if abs(new_beta) >= config.beta_min_abs:
+                            beta[target_idx] = float(np.clip(new_beta, -config.beta_max_abs, config.beta_max_abs))
+        beta_history[:, sample_idx] = beta
 
     return MethodResult(
         method_name=method_name,
@@ -1015,10 +1015,10 @@ def _run_structural_phase_kalman(method_name, truth, radar, config, initial_kapp
         theta_hat_rad=theta_hat,
         theta_dot_hat_radps=theta_dot_hat,
         corrected_phase_rad=corrected,
-        kappa_hat=kappa.copy(),
+        beta_hat=beta.copy(),
         r_history=r_history,
         innovation_rad=innovations,
-        extra={"kappa_history": kappa_history},
+        extra={"beta_history": beta_history},
     )
 ```
 
@@ -1088,8 +1088,8 @@ def estimate_single_target_ma_style(truth, radar, config, target_index=0):
         truth=truth,
         radar=single_radar,
         config=config,
-        initial_kappa=np.array([radar.kappa[idx]], dtype=float),
-        update_kappa=False,
+        initial_beta=np.array([radar.beta[idx]], dtype=float),
+        update_beta=False,
         adaptive_r=True,
     )
     corrected = np.full_like(radar.wrapped_phase_rad, np.nan, dtype=float)
@@ -1104,7 +1104,7 @@ def estimate_single_target_ma_style(truth, radar, config, target_index=0):
         theta_hat_rad=single_result.theta_hat_rad,
         theta_dot_hat_radps=single_result.theta_dot_hat_radps,
         corrected_phase_rad=corrected,
-        kappa_hat=np.full(radar.kappa.shape, np.nan, dtype=float),
+        beta_hat=np.full(radar.beta.shape, np.nan, dtype=float),
         r_history=r_history,
         innovation_rad=innovation,
         extra={"target_index": idx},
@@ -1120,8 +1120,8 @@ def _single_target_view(radar, idx):
     target_slice = slice(idx, idx + 1)
     return replace(
         radar,
-        kappa=radar.kappa[target_slice],
-        measured_kappa=radar.measured_kappa[target_slice],
+        beta=radar.beta[target_slice],
+        measured_beta=radar.measured_beta[target_slice],
         target_angles_deg=radar.target_angles_deg[target_slice],
         snr_db=radar.snr_db[target_slice],
         true_los_phase_rad=radar.true_los_phase_rad[target_slice],
@@ -1210,8 +1210,8 @@ def build_phase1_scenarios():
             base,
             scenario_name="aoa_error_bootstrap",
             aoa_error_deg=10.0,
-            kappa_update_start_s=0.2,
-            kappa_window_samples=80,
+            beta_update_start_s=0.2,
+            beta_window_samples=80,
         ),
         replace(
             base,
@@ -1233,7 +1233,7 @@ def build_phase1_scenarios():
             scenario_name="mixed_scatterer_rangebin",
             enable_mixed_scatterer_target=True,
             mixed_target_index=0,
-            mixed_scatterer_kappas=(0.95, 0.35),
+            mixed_scatterer_betas=(0.95, 0.35),
             mixed_scatterer_amplitudes=(0.7, 0.6),
             mixed_scatterer_biases_rad=(0.0, 1.2),
         ),
@@ -1756,7 +1756,7 @@ Rewrite `simulation/phase1/README.md` with:
 This package implements the first-stage synthetic validation for the thesis method:
 
 - Structural truth is a multi-frequency displacement signal with components near 20 Hz, 40 Hz, and 60 Hz.
-- Radar observations are target-wise complex IQ signals whose phases are generated from `phi_i = kappa_i * Theta + b_i`.
+- Radar observations are target-wise complex IQ signals whose phases are generated from `phi_i = Theta / beta_i + b_i`.
 - The algorithm receives only wrapped phase and measured acceleration.
 - Validation compares baselines and the proposed multi-target structural-main-phase Kalman method.
 
@@ -1772,10 +1772,10 @@ Theta_k = 4*pi*q_k/lambda
 Each target contributes:
 
 ```text
-z_corr_i,k = psi_i,k + 2*pi*round((kappa_hat_i*Theta_pred + b_i - psi_i,k)/(2*pi))
+z_corr_i,k = psi_i,k + 2*pi*round((beta_hat_i*Theta_pred + b_i - psi_i,k)/(2*pi))
 ```
 
-The same corrected phase is used for Kalman update and online `kappa_i` bootstrap.
+The same corrected phase is used for Kalman update and online `beta_i` bootstrap.
 
 ## Run Tests
 
@@ -1900,7 +1900,7 @@ Gate result:
 State clearly:
 
 ```text
-This validates the phase-1 synthetic innovation claims: structural-main-phase multi-target fusion, AoA cold start with kappa bootstrap, prediction-assisted wrapped phase correction, and target-wise adaptive R under degradation/dropout/mixed-scatterer scenarios.
+This validates the phase-1 synthetic innovation claims: structural-main-phase multi-target fusion, AoA cold start with beta bootstrap, prediction-assisted wrapped phase correction, and target-wise adaptive R under degradation/dropout/mixed-scatterer scenarios.
 ```
 
 - [ ] **Step 3: Explain what remains outside phase 1**

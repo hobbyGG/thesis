@@ -31,7 +31,7 @@ def run(output_path: Path, config: Phase1Config) -> None:
         frequencies_hz=np.asarray(truth.frequencies_hz),
         amplitudes_m=np.asarray(truth.amplitudes_m),
         phases_rad=np.asarray(truth.phases_rad),
-        kappa=radar.kappa,
+        beta=radar.beta,
         target_angles_deg=radar.target_angles_deg,
         target_snr_db=radar.snr_db,
         main_phase_rad=radar.true_main_phase_rad,
@@ -45,7 +45,7 @@ def run(output_path: Path, config: Phase1Config) -> None:
     print("component frequencies (Hz):", ", ".join(f"{f:.2f}" for f in truth.frequencies_hz))
     print(f"q peak-to-peak: {(truth.q_m.max() - truth.q_m.min()) * 1e3:.4f} mm")
     print(f"wrapped phase shape: {radar.wrapped_phase_rad.shape}")
-    print("target kappa:", ", ".join(f"{v:.4f}" for v in radar.kappa))
+    print("target beta:", ", ".join(f"{v:.4f}" for v in radar.beta))
 
 
 def main() -> None:

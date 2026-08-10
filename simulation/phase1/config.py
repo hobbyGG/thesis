@@ -28,9 +28,16 @@ class Phase1Config:
     chirp_duration_s: float = 60.0e-6
     chirps_per_frame: int = 4
     adc_samples_per_chirp: int = 256
+    frontend_num_tx: int = 3
+    frontend_num_rx: int = 4
+    # IWR1843-like azimuth frontend: 3TX/4RX hardware, 8 virtual azimuth
+    # channels used for the 1-D azimuth Angle FFT in Phase 1.
+    frontend_num_virtual_rx: int = 8
+    frontend_num_angle_bins: int = 64
+    frontend_angle_window: str = "hann"
     num_targets: int = 5
     target_angles_deg: Sequence[float] = (10.0, 25.0, 40.0, 55.0, 70.0)
-    target_snr_db: Sequence[float] = (25.0, 20.0, 15.0, 10.0, 5.0)
+    target_snr_db: Sequence[float] = (20.0, 15.0, 12.0, 9.0, 6.0)
     target_amplitudes: Sequence[float] = field(default_factory=lambda: (1.0, 0.9, 0.8, 0.7, 0.6))
     target_range_bins: Sequence[int] = ()
 
@@ -58,7 +65,7 @@ class Phase1Config:
     measured_bridge_accel_sign: float = -1.0
     measured_bridge_time_shift_s: float = -0.01
 
-    scenario_name: str = "nominal_multifrequency"
+    scenario_name: str = "literature_maglev_modal_response"
     cold_start_duration_s: float = 0.05
 
     process_noise_intensity: float = 5.0
@@ -105,12 +112,17 @@ class Phase1Config:
     beta_update_reference_mode: str = "accel_fft_reference"
     beta_accel_reference_low_hz: float = 1.0
     beta_accel_reference_high_hz: float = 120.0
+    beta_anchor_min_abs_corr: float = 0.70
+    beta_anchor_min_theta_energy: float = 1.0e-3
+    beta_anchor_min_anchor_energy: float = 1.0e-3
+    beta_anchor_min_scale: float = 0.75
+    beta_anchor_max_scale: float = 1.35
+    beta_common_aoa_bias_search_deg: float = 15.0
+    beta_common_aoa_bias_step_deg: float = 0.05
     beta_min_abs: float = 1.0 / 1.2
     beta_max_abs: float = 1.0 / 0.05
 
     aoa_error_deg: float = 0.0
-    frontend_aoa_error_bias_deg: Optional[float] = None
-    frontend_aoa_error_std_deg: float = 0.0
 
     degraded_target_indices: Sequence[int] = ()
     degradation_start_s: float = 2.0

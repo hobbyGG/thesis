@@ -1,32 +1,28 @@
 from . import (
     aoa_error_bootstrap,
     literature_maglev_modal_response,
+    literature_mmshm_adjacent_range_clutter,
+    literature_mmwbats_same_range_aliasing,
     low_snr_multitarget,
-    ma2023_balanced_good_targets,
     mixed_scatterer_rangebin,
     measured_bridge_point4_transverse,
-    nominal_multifrequency,
     same_range_far_angles,
     strong_wrapping,
-    target_dropout,
     target_snr_drop,
-    vehicle_event_nonstationary,
 )
 from ..config import Phase1Config
 
 
 _ALL_SYNTHETIC_BUILDERS = (
-    nominal_multifrequency.build,
     literature_maglev_modal_response.build,
-    ma2023_balanced_good_targets.build,
     strong_wrapping.build,
     aoa_error_bootstrap.build,
     target_snr_drop.build,
-    target_dropout.build,
-    mixed_scatterer_rangebin.build,
     same_range_far_angles.build,
+    literature_mmwbats_same_range_aliasing.build,
+    literature_mmshm_adjacent_range_clutter.build,
+    mixed_scatterer_rangebin.build,
     low_snr_multitarget.build,
-    vehicle_event_nonstationary.build,
 )
 
 _PAPER_SYNTHETIC_BUILDERS = (
@@ -35,7 +31,6 @@ _PAPER_SYNTHETIC_BUILDERS = (
     same_range_far_angles.build,
     aoa_error_bootstrap.build,
     target_snr_drop.build,
-    vehicle_event_nonstationary.build,
 )
 
 

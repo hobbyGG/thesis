@@ -60,7 +60,7 @@ $$
 \frac{4\pi}{\lambda}q_k.
 $$
 
-在倒挂式布置中，LoS 距离变化与结构振动方向之间可能存在符号差异。为使后续表达简洁，本文可将该符号并入 $\beta_i$ 或其倒数 $1/\beta_i$ 中。因此，下文重点关注不同 target 之间转换比例的差异，而不单独展开符号约定。
+在倒挂式布置中，LoS 距离变化与结构振动方向之间可能存在符号差异。为使后续表达简洁，本文将符号约定并入 $\beta_i$ 或相位偏置 $b_i$ 的定义中。因此，下文重点关注不同 target 之间转换比例的差异，而不单独展开符号约定。
 
 因此，若状态变量定义为某一目标的 LoS 相位，则加速度 $a_k=\ddot{q}_k$ 必须先通过该目标的转换系数映射到对应的 LoS 相位加速度：
 
@@ -174,26 +174,22 @@ q_k=\beta_i d_{\mathrm{LOS},i,k},
 \Theta_k=\beta_i\phi_{i,k}^{\mathrm{LOS}}.
 $$
 
-本文首先利用 range-angle bin 的 AoA 几何关系给出可启动初值：
+本文首先利用 range-angle bin 的 AoA 几何关系给出可启动初值。若第 $i$ 个 target 的 AoA 与结构振动方向夹角为 $\theta_i$，先计算结构方向到 LoS 的投影初值 $p_i$，再取其倒数作为 LoS 到结构方向的转换系数初值：
 
 $$
-\hat{\kappa}_{i,0}=\cos\theta_i,
+\hat{p}_{i,0}=|\cos\theta_i|,
 \qquad
-\hat{\beta}_{i,0}=\frac{1}{\hat{\kappa}_{i,0}},
-\qquad
-\kappa_i=\frac{1}{\beta_i}.
+\hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}.
 $$
 
-这里 $\kappa_i$ 是 $\beta_i$ 的倒数，表示结构主相位到该 target LoS 相位的投影系数或逆转换系数；它不是 Ma 论文中的 direction conversion factor 本身。冷启动阶段结构近似静止，用于确定每个 target 的初始相位偏置 $b_i$，并将对应 target 的测量噪声初始化为较大值，使滤波器在初始阶段主要依赖加速度预测模型。该 AoA 初值不要求精确等于真实转换系数，只需为初始微振阶段提供可用的相位分支预测。
+冷启动阶段结构近似静止，用于确定每个 target 的初始相位偏置 $b_i$，并将对应 target 的测量噪声初始化为较大值，使滤波器在初始阶段主要依赖加速度预测模型。该 AoA 初值不要求精确等于真实转换系数，只需为初始微振阶段提供可用的相位分支预测。
 
 由 Kalman 系统模型得到结构主相位先验状态 $\mathbf{x}_k^-$ 后，可先预测第 $i$ 个 target 的 LoS 相位分支：
 
 $$
 \hat{\phi}_{i,k}^{\mathrm{LOS},-}
 =
-\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i
-=
-\hat{\kappa}_{i,k}^{-}\hat{\Theta}_k^-+b_i.
+\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i.
 $$
 
 随后，对原始 wrapped phase 进行预测辅助相位校正：
@@ -212,7 +208,7 @@ $$
 
 这里的 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 是由 Kalman 预测模型给出的局部 LoS 连续相位。它不是结构方向主相位 $\Theta_k$，也不是进入 Kalman 前预先完成的全局解缠结果，而是在每个时刻由同一预测模型生成、并被后续模块共同使用的 LoS corrected phase。
 
-因此，本文将相位校正步骤前置到观测更新和转换系数更新之前。得到 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 后，它同时进入两条路径。第一条路径是乘以当前 $\beta_i$，转成结构方向主相位观测 $y_{i,k}$；第二条路径是在短窗口 $\mathcal{W}_{\beta}$ 内用于转换系数自举。文档早期版本可写成未中心化 plain LS 估计 $\kappa_i$；当前正文主方法改为估计 $\beta_i$ 的中心化窗口 LS。令：
+因此，本文将相位校正步骤前置到观测更新和转换系数更新之前。得到 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 后，它同时进入两条路径。第一条路径是乘以当前 $\beta_i$，转成结构方向主相位观测 $y_{i,k}$；第二条路径是在短窗口 $\mathcal{W}_{\beta}$ 内用于转换系数自举。文档早期版本可写成未中心化 plain LS 估计 $\beta_i$；当前正文主方法改为估计 $\beta_i$ 的中心化窗口 LS。令：
 
 $$
 x_\tau
@@ -239,14 +235,10 @@ x_{\tau,c}y_{\tau,c}
 x_{\tau,c}^{2}
 +
 \lambda_\beta
-},
-\qquad
-\hat{\kappa}_{i,k+1}
-=
-\frac{1}{\hat{\beta}_{i,k+1}}.
+}.
 $$
 
-该设计避免了“先完整解缠相位才能估计转换系数、而 Kalman 解缠又需要转换系数”的循环依赖。实际运行时，AoA 初值使滤波器能够在冷启动后开始工作；初始微小振动到来时，预测辅助相位校正产生局部连续的 $\phi_{i,k}^{\mathrm{LOS,corr}}$；随着短窗口最小二乘逐步修正 $\hat{\beta}_{i,k}$，LoS 相位预测和结构方向观测同步改善，进一步增强后续分支选择的稳定性。当前代码中可保留等价的 $\kappa_i=1/\beta_i$ 估计形式，但论文正文应明确 $\kappa_i$ 是逆转换系数。
+该设计避免了“先完整解缠相位才能估计转换系数、而 Kalman 解缠又需要转换系数”的循环依赖。实际运行时，AoA 初值使滤波器能够在冷启动后开始工作；初始微小振动到来时，预测辅助相位校正产生局部连续的 $\phi_{i,k}^{\mathrm{LOS,corr}}$；随着短窗口最小二乘逐步修正 $\hat{\beta}_{i,k}$，LoS 相位预测和结构方向观测同步改善，进一步增强后续分支选择的稳定性。当前代码与论文正文统一直接估计 $\beta_i$。
 
 该步骤继承了 Ma 等人利用预测相位辅助解缠的思想，但预测相位的来源和作用范围发生了变化。Ma 等人使用单目标自身 LoS 相位预测来校正同一目标的 wrapped phase；本文则使用共享结构主相位预测，并通过各目标的转换系数映射到对应 LoS 相位分支，从而分别辅助多个 target 的 wrapped phase 校正。这样，任一 target 的分支选择都受到同一结构运动状态约束，而不依赖某个单一 target 的相位历史。
 
@@ -341,17 +333,15 @@ $$
 
 该处理具有三个直接优势。第一，滤波状态不依赖任何单一目标，当某个 target 噪声升高或临时失效时，只需从 $\mathcal{A}_k$ 中移除该观测，状态仍可由其他 target 和加速度维持。第二，不同 target 的方向转换系数通过 $y_{i,k}=\beta_i(\phi_{i,k}^{\mathrm{LOS,corr}}-b_i)$ 显式进入观测构造和噪声传播，避免了先将各目标位移粗略平均时对转换误差和相位分支误差的掩盖。第三，多目标观测共同约束同一主相位状态，可在相位解缠阶段利用目标间冗余性抑制单目标误判造成的分支跳变。
 
-若需要连接当前代码实现，可补充等价的 LoS-space 写法：
+同一物理关系在相位校正阶段只用于预测 LoS 分支：
 
 $$
 \phi_{i,k}^{\mathrm{LOS}}
 =
-\beta_i^{-1}\Theta_k+b_i
-=
-\kappa_i\Theta_k+b_i.
+\frac{\Theta_k}{\beta_i}+b_i.
 $$
 
-该形式对应代码中的 $H_i=[\kappa_i,0]$。它与先构造 $y_{i,k}=\beta_i(\phi_{i,k}^{\mathrm{LOS,corr}}-b_i)$ 再写 $y_{i,k}=\Theta_k$ 在 $\beta_i$ 已知时等价；区别在于观测噪声协方差位于 LoS 相位坐标还是结构主相位坐标。
+当前代码与论文正文统一采用结构方向观测模型：先构造 $y_{i,k}=\beta_i(\phi_{i,k}^{\mathrm{LOS,corr}}-b_i)$，再写 $y_{i,k}=\Theta_k+e_{i,k}$，对应 $H_i=[1,0]$。
 
 ## 6. 目标可靠性与观测噪声建模
 
@@ -454,7 +444,7 @@ $$
 \rho_{i,k}\in[0,1]
 $$
 
-表示第 $i$ 个 target 的瞬时观测质量，可由 SNR、presence、range-angle 位置稳定性、IQ 幅值稳定性和 $\beta_i$ 置信度等算法可见量构造。若连接当前代码实现，可把 $\kappa_i=1/\beta_i$ 的置信度作为等价实现指标，但正文不把 $\kappa_i$ 称为转换系数本身。$\rho_{i,k}$ 越大，说明该 target 当前越可信。定义
+表示第 $i$ 个 target 的瞬时观测质量，可由 SNR、presence、range-angle 位置稳定性、IQ 幅值稳定性和 $\beta_i$ 置信度等算法可见量构造。$\rho_{i,k}$ 越大，说明该 target 当前越可信。定义
 
 $$
 \Delta R_{i,k}
@@ -511,7 +501,7 @@ R_{i,k}^{\Theta}
 \sigma_{\beta_i,k}^{2}.
 $$
 
-其中 $R_{i,k}^{\mathrm{LOS}}$ 表示 LoS 相位测量噪声，$\sigma_{\beta_i,k}^{2}$ 表示 LoS 到结构方向转换系数的不确定度。该式说明，LoS 相位噪声会被 $\beta_i^2$ 放大，$\beta_i$ 本身的不确定也会随当前 LoS corrected phase 幅值传播为结构方向观测误差。这一点与本文前述复合 target 等效转换系数稳定性分析一致。若采用当前代码中的 LoS-space 等价实现，可写为 $\phi_{i,k}^{\mathrm{LOS}}=\kappa_i\Theta_k+b_i$，并将 $\kappa_i=1/\beta_i$ 的方差通过 $((\hat{\Theta}_k^-)^2+P_{\Theta\Theta,k}^-)\sigma_{\kappa_i,k}^2$ 加入有效测量噪声。该处理是坐标系不同导致的等价实现，不改变论文中 $\beta_i$ 的转换方向定义。
+其中 $R_{i,k}^{\mathrm{LOS}}$ 表示 LoS 相位测量噪声，$\sigma_{\beta_i,k}^{2}$ 表示 LoS 到结构方向转换系数的不确定度。该式说明，LoS 相位噪声会被 $\beta_i^2$ 放大，$\beta_i$ 本身的不确定也会随当前 LoS corrected phase 幅值传播为结构方向观测误差。这一点与本文前述复合 target 等效转换系数稳定性分析一致。当前代码与正文统一在结构方向观测空间表达 $R_{i,k}^{\Theta}$。
 
 进一步地，若多个 target 来自同一 rangeBin 或同一分离过程，其相位误差可能存在相关性。此时不宜简单假设所有 target 观测相互独立，否则会因为观测数量增加而使 Kalman 过度自信。可将 $\mathbf{R}_k$ 写成：
 

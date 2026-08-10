@@ -16,7 +16,13 @@ class FrontendConfig:
     Phase1Config.sample_rate_hz describes the slow-time frame/Kalman rate.
     """
 
+    num_tx: int = 3
+    num_rx: int = 4
+    # IWR1843-like azimuth processing uses 8 virtual azimuth channels; the
+    # remaining virtual channels belong to elevation and are not used in this
+    # Phase-1 azimuth range-angle frontend.
     num_virtual_rx: int = 8
+    virtual_array_positions_wavelengths: Sequence[float] = ()
     num_adc_samples: int = 256
     adc_sample_rate_hz: float = 6.0e6
     chirp_duration_s: float = 60.0e-6
@@ -25,6 +31,7 @@ class FrontendConfig:
     num_angle_bins: int = 64
     range_resolution_m: float = 0.15
     antenna_spacing_wavelengths: float = 0.5
+    angle_window: str = "hann"
     radar_mount: str = "downward"
     noise_power: float = 0.0
     use_phase1_snr: bool = True
@@ -37,8 +44,8 @@ class ScattererTruth:
     angle_deg: float
     amplitude: float = 1.0
     phase_bias_rad: float = 0.0
-    kappa: Optional[float] = None
-    measured_kappa: Optional[float] = None
+    beta: Optional[float] = None
+    measured_beta: Optional[float] = None
     snr_db: float = np.inf
     target_index: int = 0
     range_bin_index: Optional[int] = None
@@ -63,7 +70,7 @@ class RangeAngleObservation:
 
 @dataclass(frozen=True)
 class FrontendTargetObservation:
-    measured_kappa: np.ndarray
+    measured_beta: np.ndarray
     slow_time: np.ndarray
     wrapped_phase_rad: np.ndarray
     available_mask: np.ndarray
@@ -74,17 +81,18 @@ class FrontendTargetObservation:
     target_reference_indices: Optional[np.ndarray] = None
 
 
-def angle_deg_to_measured_kappa(angle_deg, radar_mount: str = "downward"):
-    """Map an angle estimate into the kappa used by Phase-1 estimators."""
+def angle_deg_to_measured_beta(angle_deg, radar_mount: str = "downward"):
+    """Map an angle estimate into the beta used by Phase-1 estimators."""
 
     if radar_mount != "downward":
         raise ValueError(f"unsupported radar_mount: {radar_mount}")
 
     angle_arr = np.asarray(angle_deg, dtype=float)
-    kappa = np.cos(np.deg2rad(angle_arr))
+    projection = np.cos(np.deg2rad(angle_arr))
+    beta = 1.0 / np.abs(projection)
     if np.isscalar(angle_deg):
-        return float(kappa)
-    return kappa
+        return float(beta)
+    return beta
 
 
 def range_axis_m(frontend_config: FrontendConfig) -> np.ndarray:
@@ -134,12 +142,9 @@ def build_default_scatterers(
                 angle_deg=angle_deg,
                 amplitude=float(amplitudes[idx]),
                 phase_bias_rad=float(biases[idx]),
-                kappa=float(angle_deg_to_measured_kappa(angle_deg, frontend_config.radar_mount)),
-                measured_kappa=float(
-                    angle_deg_to_measured_kappa(
-                        angle_deg + float(phase1_config.aoa_error_deg),
-                        frontend_config.radar_mount,
-                    )
+                beta=float(angle_deg_to_measured_beta(angle_deg, frontend_config.radar_mount)),
+                measured_beta=float(
+                    angle_deg_to_measured_beta(angle_deg, frontend_config.radar_mount)
                 ),
                 snr_db=float(snr_db[idx]),
                 target_index=idx,
@@ -181,7 +186,7 @@ def simulate_adc_cube(
         )
 
     theta = 4.0 * np.pi * np.asarray(truth.q_m, dtype=float) / phase1_config.wavelength_m()
-    rx_index = np.arange(frontend_config.num_virtual_rx, dtype=float)
+    virtual_positions = virtual_array_positions_wavelengths(frontend_config)
     adc_index = np.arange(frontend_config.num_adc_samples, dtype=float)
     target_noise_rng = np.random.default_rng(phase1_config.seed + 37)
     degraded_targets = {int(idx) for idx in phase1_config.degraded_target_indices}
@@ -194,12 +199,9 @@ def simulate_adc_cube(
         range_bin = float(scatterer.range_m) / float(frontend_config.range_resolution_m)
         range_tone = np.exp(2j * np.pi * range_bin * adc_index / float(frontend_config.num_range_bins))
 
-        spatial_frequency = float(frontend_config.antenna_spacing_wavelengths) * np.sin(
-            np.deg2rad(float(scatterer.angle_deg))
-        )
-        angle_tone = np.exp(2j * np.pi * spatial_frequency * rx_index)
+        angle_tone = np.exp(2j * np.pi * virtual_positions * np.sin(np.deg2rad(float(scatterer.angle_deg))))
 
-        los_phase = float(scatterer.kappa) * theta + float(scatterer.phase_bias_rad)
+        los_phase = theta / float(scatterer.beta) + float(scatterer.phase_bias_rad)
         slow_time = float(scatterer.amplitude) * np.exp(1j * los_phase)
         if frontend_config.use_phase1_snr and np.isfinite(scatterer.snr_db):
             snr_linear = 10.0 ** (float(scatterer.snr_db) / 10.0)
@@ -249,9 +251,11 @@ def range_angle_process(
 
     range_fft = np.fft.fft(adc_cube, n=frontend_config.num_range_bins, axis=2)
     range_by_rx = np.transpose(range_fft, (0, 2, 1))
-    angle_fft = np.fft.fft(range_by_rx, n=frontend_config.num_angle_bins, axis=2)
+    angle_window = angle_window_values(frontend_config)
+    angle_fft = np.fft.fft(range_by_rx * angle_window[None, None, :], n=frontend_config.num_angle_bins, axis=2)
     range_angle_cube = np.fft.fftshift(angle_fft, axes=2)
-    range_angle_cube = range_angle_cube / float(frontend_config.num_adc_samples * frontend_config.num_virtual_rx)
+    angle_gain = max(float(np.sum(angle_window)), 1.0e-12)
+    range_angle_cube = range_angle_cube / float(frontend_config.num_adc_samples * angle_gain)
 
     return RangeAngleObservation(
         range_angle_cube=range_angle_cube.astype(complex),
@@ -260,6 +264,29 @@ def range_angle_process(
         spatial_frequency_axis=spatial_frequency_axis(frontend_config),
         frame_times_s=adc.frame_times_s.copy(),
     )
+
+
+def virtual_array_positions_wavelengths(frontend_config: FrontendConfig) -> np.ndarray:
+    """Return azimuth virtual array positions in wavelength units."""
+
+    configured = np.asarray(frontend_config.virtual_array_positions_wavelengths, dtype=float)
+    if configured.size:
+        if configured.shape != (int(frontend_config.num_virtual_rx),):
+            raise ValueError("virtual_array_positions_wavelengths must have one value per virtual RX")
+        return configured.copy()
+    return np.arange(int(frontend_config.num_virtual_rx), dtype=float) * float(
+        frontend_config.antenna_spacing_wavelengths
+    )
+
+
+def angle_window_values(frontend_config: FrontendConfig) -> np.ndarray:
+    name = str(frontend_config.angle_window).lower()
+    count = int(frontend_config.num_virtual_rx)
+    if name in ("", "none", "rect", "rectangular", "boxcar"):
+        return np.ones(count, dtype=float)
+    if name in ("hann", "hanning"):
+        return np.hanning(count).astype(float)
+    raise ValueError(f"unsupported angle_window: {frontend_config.angle_window}")
 
 
 def extract_frontend_target_observation(
@@ -300,7 +327,7 @@ def extract_frontend_target_observation(
 
     target_angles_deg = range_angle.angle_axis_deg[angle_bin_arr]
     return FrontendTargetObservation(
-        measured_kappa=np.asarray(angle_deg_to_measured_kappa(target_angles_deg, radar_mount), dtype=float),
+        measured_beta=np.asarray(angle_deg_to_measured_beta(target_angles_deg, radar_mount), dtype=float),
         slow_time=slow_time,
         wrapped_phase_rad=wrapped_phase_rad,
         available_mask=available_mask,
@@ -316,7 +343,7 @@ def to_algorithm_radar_input(frontend_target: FrontendTargetObservation) -> Rada
     """Adapt frontend target observations to the algorithm-visible radar input."""
 
     return RadarAlgorithmInput(
-        measured_kappa=np.asarray(frontend_target.measured_kappa, dtype=float).copy(),
+        measured_beta=np.asarray(frontend_target.measured_beta, dtype=float).copy(),
         wrapped_phase_rad=np.asarray(frontend_target.wrapped_phase_rad, dtype=float).copy(),
         available_mask=np.asarray(frontend_target.available_mask, dtype=bool).copy(),
     )
@@ -326,6 +353,10 @@ frontend_target_to_algorithm_input = to_algorithm_radar_input
 
 
 def _validate_frontend_config(frontend_config: FrontendConfig) -> None:
+    if frontend_config.num_tx <= 0:
+        raise ValueError("num_tx must be positive")
+    if frontend_config.num_rx <= 0:
+        raise ValueError("num_rx must be positive")
     if frontend_config.num_virtual_rx <= 0:
         raise ValueError("num_virtual_rx must be positive")
     if frontend_config.num_adc_samples <= 0:
@@ -346,6 +377,7 @@ def _validate_frontend_config(frontend_config: FrontendConfig) -> None:
         raise ValueError("antenna_spacing_wavelengths must be positive")
     if frontend_config.noise_power < 0.0:
         raise ValueError("noise_power must be non-negative")
+    angle_window_values(frontend_config)
 
 
 def _fit_sequence(values, count: int, name: str) -> np.ndarray:
@@ -373,13 +405,13 @@ def _normalize_scatterers(
 ) -> Tuple[ScattererTruth, ...]:
     normalized = []
     for idx, scatterer in enumerate(scatterers):
-        kappa = scatterer.kappa
-        if kappa is None:
-            kappa = float(angle_deg_to_measured_kappa(scatterer.angle_deg, frontend_config.radar_mount))
+        beta = scatterer.beta
+        if beta is None:
+            beta = float(angle_deg_to_measured_beta(scatterer.angle_deg, frontend_config.radar_mount))
 
-        measured_kappa = scatterer.measured_kappa
-        if measured_kappa is None:
-            measured_kappa = float(angle_deg_to_measured_kappa(scatterer.angle_deg, frontend_config.radar_mount))
+        measured_beta = scatterer.measured_beta
+        if measured_beta is None:
+            measured_beta = float(angle_deg_to_measured_beta(scatterer.angle_deg, frontend_config.radar_mount))
 
         range_bin_index = scatterer.range_bin_index
         if range_bin_index is None:
@@ -388,8 +420,8 @@ def _normalize_scatterers(
         normalized.append(
             replace(
                 scatterer,
-                kappa=float(kappa),
-                measured_kappa=float(measured_kappa),
+                beta=float(beta),
+                measured_beta=float(measured_beta),
                 target_index=int(scatterer.target_index if scatterer.target_index is not None else idx),
                 range_bin_index=int(range_bin_index),
             )
@@ -418,24 +450,25 @@ def _with_mixed_scatterer_target(
     if idx < 0 or idx >= len(scatterers):
         raise ValueError("mixed_target_index out of range")
 
-    kappas = np.asarray(phase1_config.mixed_scatterer_kappas, dtype=float)
+    betas = np.asarray(phase1_config.mixed_scatterer_betas, dtype=float)
     amps = np.asarray(phase1_config.mixed_scatterer_amplitudes, dtype=float)
     biases = np.asarray(phase1_config.mixed_scatterer_biases_rad, dtype=float)
-    if kappas.size != amps.size or kappas.size != biases.size:
-        raise ValueError("mixed scatterer kappas, amplitudes, and biases must have the same length")
+    if betas.size != amps.size or betas.size != biases.size:
+        raise ValueError("mixed scatterer betas, amplitudes, and biases must have the same length")
 
     result = [scatterer for scatterer in scatterers if scatterer.target_index != idx]
     base = scatterers[idx]
-    for kappa, amplitude, bias in zip(kappas, amps, biases):
-        angle_deg = float(np.rad2deg(np.arccos(np.clip(kappa, -1.0, 1.0))))
+    for beta, amplitude, bias in zip(betas, amps, biases):
+        projection = 1.0 / abs(float(beta))
+        angle_deg = float(np.rad2deg(np.arccos(np.clip(projection, -1.0, 1.0))))
         result.append(
             ScattererTruth(
                 range_m=base.range_m,
                 angle_deg=angle_deg,
                 amplitude=float(amplitude),
                 phase_bias_rad=float(bias),
-                kappa=float(kappa),
-                measured_kappa=float(angle_deg_to_measured_kappa(angle_deg, frontend_config.radar_mount)),
+                beta=float(beta),
+                measured_beta=float(angle_deg_to_measured_beta(angle_deg, frontend_config.radar_mount)),
                 snr_db=base.snr_db,
                 target_index=idx,
                 range_bin_index=base.range_bin_index,

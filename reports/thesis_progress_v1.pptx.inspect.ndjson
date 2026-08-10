@@ -43,7 +43,7 @@
 {"kind":"textbox","id":"sh/bm58z25k","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[666,205,78,36]}
 {"kind":"shape","id":"sh/m1cfa9w3","slide":2,"bbox":[766,210,78,34]}
 {"kind":"textbox","id":"sh/q5o7qpg3","slide":2,"text":"本文方法与关键创新","textPreview":"本文方法与关键创新","textChars":9,"textLines":1,"bbox":[628,305,154,56]}
-{"kind":"textbox","id":"sh/jqh0fepk","slide":2,"text":"多目标参考点、结构主相位 Kalman、kappa 自举","textPreview":"多目标参考点、结构主相位 Kalman、kappa 自举","textChars":28,"textLines":1,"bbox":[612,382,186,90]}
+{"kind":"textbox","id":"sh/jqh0fepk","slide":2,"text":"多目标参考点、结构主相位 Kalman、beta 自举","textPreview":"多目标参考点、结构主相位 Kalman、beta 自举","textChars":28,"textLines":1,"bbox":[612,382,186,90]}
 {"kind":"shape","id":"sh/8bat47y1","slide":2,"bbox":[958,185,78,78]}
 {"kind":"textbox","id":"sh/1w7mp0bi","slide":2,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[958,205,78,36]}
 {"kind":"textbox","id":"sh/qh0fepkz","slide":2,"text":"Phase 1 仿真验证","textPreview":"Phase 1 仿真验证","textChars":12,"textLines":1,"bbox":[920,305,154,56]}
@@ -167,7 +167,7 @@
 {"kind":"shape","id":"sh/dsji5sne","slide":5,"bbox":[80,490,405,68]}
 {"kind":"textbox","id":"sh/6tovahoz","slide":5,"text":"AoA/几何转换系数初值存在偏差","textPreview":"AoA/几何转换系数初值存在偏差","textChars":16,"textLines":1,"bbox":[88,498,389,56]}
 {"kind":"shape","id":"sh/vahoza1g","slide":5,"bbox":[485,490,395,68]}
-{"kind":"textbox","id":"sh/fepkzupw","slide":5,"text":"AoA cold start + online kappa bootstrap","textPreview":"AoA cold start + online kappa bootstrap","textChars":39,"textLines":1,"bbox":[493,498,379,56]}
+{"kind":"textbox","id":"sh/fepkzupw","slide":5,"text":"AoA cold start + online beta bootstrap","textPreview":"AoA cold start + online beta bootstrap","textChars":39,"textLines":1,"bbox":[493,498,379,56]}
 {"kind":"shape","id":"sh/mtwra5gb","slide":5,"bbox":[880,490,245,68]}
 {"kind":"textbox","id":"sh/xkf6dcbu","slide":5,"text":"创新点 3","textPreview":"创新点 3","textChars":5,"textLines":1,"bbox":[888,498,229,56]}
 {"kind":"shape","id":"sh/4zidonyd","slide":5,"bbox":[145,610,940,52]}
@@ -245,7 +245,7 @@
 {"kind":"shape","id":"sh/3m94fu18","slide":8,"bbox":[378,318,22,68]}
 {"kind":"textbox","id":"sh/vixczed8","slide":8,"text":"单 bin 复数相位 = 多个 LoS 投影相位的叠加结果","textPreview":"单 bin 复数相位 = 多个 LoS 投影相位的叠加结果","textChars":29,"textLines":1,"bbox":[125,465,370,35]}
 {"kind":"textbox","id":"sh/2x4nap4r","slide":8,"text":"带来的后果","textPreview":"带来的后果","textChars":5,"textLines":1,"bbox":[650,150,260,36]}
-{"kind":"textbox","id":"sh/donyd0z6","slide":8,"text":"最强 range bin 不一定对应稳定物理 target\n同距离不同角度目标会形成 pseudo target\n等效 kappa 随散射体幅值变化而漂移\n强 wrapping 或 target 退化时误差被放大","textPreview":"最强 range bin 不一定对应稳定物理 target | 同距离不同角度目标会形成 pseudo target | 等效 kappa 随散射体幅值变化而漂移 | 强 wrapping 或 target 退化时误差被放大","textChars":106,"textLines":4,"bbox":[660,212,455,220]}
+{"kind":"textbox","id":"sh/donyd0z6","slide":8,"text":"最强 range bin 不一定对应稳定物理 target\n同距离不同角度目标会形成 pseudo target\n等效 beta 随散射体幅值变化而漂移\n强 wrapping 或 target 退化时误差被放大","textPreview":"最强 range bin 不一定对应稳定物理 target | 同距离不同角度目标会形成 pseudo target | 等效 beta 随散射体幅值变化而漂移 | 强 wrapping 或 target 退化时误差被放大","textChars":106,"textLines":4,"bbox":[660,212,455,220]}
 {"kind":"shape","id":"sh/k3q5o7qp","slide":8,"bbox":[650,505,455,70]}
 {"kind":"shape","id":"sh/val87ed8","slide":8,"bbox":[650,505,8,70]}
 {"kind":"textbox","id":"sh/6psfil0r","slide":8,"text":"因此本文先在 Range-Angle 维度分离 target，再进入结构主相位融合。","textPreview":"因此本文先在 Range-Angle 维度分离 target，再进入结构主相位融合。","textChars":42,"textLines":1,"bbox":[670,519,423,50]}
@@ -309,8 +309,8 @@
 {"kind":"shape","id":"sh/ahoza1gv","slide":11,"bbox":[58,95,1140,1.2]}
 {"kind":"textbox","id":"sh/32lszqtc","slide":11,"text":"多个 target 是同一结构状态的多通道观测","textPreview":"多个 target 是同一结构状态的多通道观测","textChars":23,"textLines":1,"bbox":[90,135,650,34]}
 {"kind":"shape","id":"sh/wb2hwfyx","slide":11,"bbox":[90,200,495,260]}
-{"kind":"textbox","id":"sh/lwval87e","slide":11,"text":"zᵢ,k = κᵢ Θₖ + bᵢ + vᵢ,k","textPreview":"zᵢ,k = κᵢ Θₖ + bᵢ + vᵢ,k","textChars":24,"textLines":1,"bbox":[120,248,435,50]}
-{"kind":"textbox","id":"sh/hoza1gvy","slide":11,"text":"Hᵢ = [ κᵢ, 0 ]","textPreview":"Hᵢ = [ κᵢ, 0 ]","textChars":14,"textLines":1,"bbox":[120,330,435,44]}
+{"kind":"textbox","id":"sh/lwval87e","slide":11,"text":"zᵢ,k = βᵢ Θₖ + bᵢ + vᵢ,k","textPreview":"zᵢ,k = βᵢ Θₖ + bᵢ + vᵢ,k","textChars":24,"textLines":1,"bbox":[120,248,435,50]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":11,"text":"Hᵢ = [ βᵢ, 0 ]","textPreview":"Hᵢ = [ βᵢ, 0 ]","textChars":14,"textLines":1,"bbox":[120,330,435,44]}
 {"kind":"textbox","id":"sh/s36hcrmh","slide":11,"text":"Θₖ = 4π·δqₖ / λ","textPreview":"Θₖ = 4π·δqₖ / λ","textChars":15,"textLines":1,"bbox":[120,397,435,34]}
 {"kind":"shape","id":"sh/zidonyd0","slide":11,"bbox":[720,190,70,70]}
 {"kind":"textbox","id":"sh/a1gvy90j","slide":11,"text":"T1","textPreview":"T1","textChars":2,"textLines":1,"bbox":[720,212,70,26]}
@@ -337,7 +337,7 @@
 {"kind":"shape","id":"sh/bi9s36hc","slide":12,"bbox":[58,95,1140,1.2]}
 {"kind":"shape","id":"sh/ixczed8v","slide":12,"bbox":[72,138,440,390]}
 {"kind":"textbox","id":"sh/tcj6tova","slide":12,"text":"校正思想","textPreview":"校正思想","textChars":4,"textLines":1,"bbox":[105,168,360,34]}
-{"kind":"textbox","id":"sh/0rqd4vmt","slide":12,"text":"φᵢ,k⁻ = κᵢ Θₖ⁻ + bᵢ","textPreview":"φᵢ,k⁻ = κᵢ Θₖ⁻ + bᵢ","textChars":19,"textLines":1,"bbox":[105,235,360,42]}
+{"kind":"textbox","id":"sh/0rqd4vmt","slide":12,"text":"φᵢ,k⁻ = βᵢ Θₖ⁻ + bᵢ","textPreview":"φᵢ,k⁻ = βᵢ Θₖ⁻ + bᵢ","textChars":19,"textLines":1,"bbox":[105,235,360,42]}
 {"kind":"textbox","id":"sh/i9s36hcr","slide":12,"text":"zᶜᵒʳʳᵢ,k = ψᵢ,k + 2π round((φᵢ,k⁻ - ψᵢ,k)/2π)","textPreview":"zᶜᵒʳʳᵢ,k = ψᵢ,k + 2π round((φᵢ,k⁻ - ψᵢ,k)/2π)","textChars":45,"textLines":1,"bbox":[100,315,370,84]}
 {"kind":"textbox","id":"sh/bulwval8","slide":12,"text":"加速度驱动的结构主相位预测先映射到每个 target 的 LoS 相位，再选择 wrapped phase 的最近分支。","textPreview":"加速度驱动的结构主相位预测先映射到每个 target 的 LoS 相位，再选择 wrapped phase 的最近分支。","textChars":60,"textLines":1,"bbox":[112,430,345,62]}
 {"kind":"shape","id":"sh/0fepkzup","slide":12,"bbox":[565,138,600,390]}
@@ -347,28 +347,28 @@
 {"kind":"textbox","id":"sh/tovahoza","slide":12,"text":"结果层面：本文方法在 strong_wrapping 场景 RMSE = 0.0143 mm，unwrap error rate = 0。","textPreview":"结果层面：本文方法在 strong_wrapping 场景 RMSE = 0.0143 mm，unwrap error rate = 0。","textChars":69,"textLines":1,"bbox":[165,614,958,30]}
 {"kind":"image","id":"im/q5o7qpg3","slide":12,"name":"","alt":"强缠绕相位校正","bbox":[580,152,570,360]}
 {"kind":"notes","id":"nt/dvb2g1","slide":12,"text":""}
-{"kind":"slide","id":"sl/7l5057","slide":13,"title":"创新点 3：AoA 冷启动与 online kappa bootstrap","textShapes":9}
+{"kind":"slide","id":"sl/7l5057","slide":13,"title":"创新点 3：AoA 冷启动与 online beta bootstrap","textShapes":9}
 {"kind":"shape","id":"sh/sji5snel","slide":13,"bbox":[0,0,1280,12]}
 {"kind":"shape","id":"sh/3ylc7u54","slide":13,"bbox":[0,12,1280,5]}
-{"kind":"textbox","id":"sh/adsji5sn","slide":13,"text":"创新点 3：AoA 冷启动与 online kappa bootstrap","textPreview":"创新点 3：AoA 冷启动与 online kappa bootstrap","textChars":37,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/adsji5sn","slide":13,"text":"创新点 3：AoA 冷启动与 online beta bootstrap","textPreview":"创新点 3：AoA 冷启动与 online beta bootstrap","textChars":37,"textLines":1,"bbox":[58,36,880,54]}
 {"kind":"textbox","id":"sh/lszqtcj6","slide":13,"text":"本文方法","textPreview":"本文方法","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
 {"kind":"textbox","id":"sh/s72x4nap","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
 {"kind":"shape","id":"sh/3m94fu18","slide":13,"bbox":[58,95,1140,1.2]}
 {"kind":"shape","id":"sh/a5gbq1or","slide":13,"bbox":[75,155,160,74]}
-{"kind":"textbox","id":"sh/hoza1gvy","slide":13,"text":"AoA cold start\nκᵢ,0 = cos θᵢ","textPreview":"AoA cold start | κᵢ,0 = cos θᵢ","textChars":28,"textLines":2,"bbox":[85,165,140,58]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":13,"text":"AoA cold start\nβᵢ,0 = cos θᵢ","textPreview":"AoA cold start | βᵢ,0 = cos θᵢ","textChars":28,"textLines":2,"bbox":[85,165,140,58]}
 {"kind":"shape","id":"sh/s36hcrmh","slide":13,"bbox":[243,178,48,28]}
 {"kind":"shape","id":"sh/q1orytsv","slide":13,"bbox":[295,155,160,74]}
 {"kind":"textbox","id":"sh/fmlkjm1c","slide":13,"text":"预测校正相位\nzᶜᵒʳʳᵢ,k","textPreview":"预测校正相位 | zᶜᵒʳʳᵢ,k","textChars":15,"textLines":2,"bbox":[305,165,140,58]}
 {"kind":"shape","id":"sh/87ed8bat","slide":13,"bbox":[463,178,48,28]}
 {"kind":"shape","id":"sh/xs72x4na","slide":13,"bbox":[515,155,160,74]}
-{"kind":"textbox","id":"sh/qtcj6tov","slide":13,"text":"短窗口 LS\n更新 κᵢ,k","textPreview":"短窗口 LS | 更新 κᵢ,k","textChars":14,"textLines":2,"bbox":[525,165,140,58]}
-{"kind":"textbox","id":"sh/je9cvixc","slide":13,"text":"AoA 只提供可启动的几何初值，不作为最终固定转换系数\n同一个 z_corr 同时用于 Kalman update 和 kappa bootstrap\nkappa 不确定时通过有效 R 降低对应 target 的观测权重","textPreview":"AoA 只提供可启动的几何初值，不作为最终固定转换系数 | 同一个 z_corr 同时用于 Kalman update 和 kappa bootstrap | kappa 不确定时通过有效 R 降低对应 target 的观测权重","textChars":110,"textLines":3,"bbox":[80,270,560,150]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":13,"text":"短窗口 LS\n更新 βᵢ,k","textPreview":"短窗口 LS | 更新 βᵢ,k","textChars":14,"textLines":2,"bbox":[525,165,140,58]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":13,"text":"AoA 只提供可启动的几何初值，不作为最终固定转换系数\n同一个 z_corr 同时用于 Kalman update 和 beta bootstrap\nbeta 不确定时通过有效 R 降低对应 target 的观测权重","textPreview":"AoA 只提供可启动的几何初值，不作为最终固定转换系数 | 同一个 z_corr 同时用于 Kalman update 和 beta bootstrap | beta 不确定时通过有效 R 降低对应 target 的观测权重","textChars":110,"textLines":3,"bbox":[80,270,560,150]}
 {"kind":"shape","id":"sh/8z25kb6x","slide":13,"bbox":[690,135,500,380]}
-{"kind":"textbox","id":"sh/qpg3ex0n","slide":13,"text":"AoA 初值误差场景：κ 在线估计逐步收敛","textPreview":"AoA 初值误差场景：κ 在线估计逐步收敛","textChars":21,"textLines":1,"bbox":[710,530,460,28]}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":13,"text":"AoA 初值误差场景：β 在线估计逐步收敛","textPreview":"AoA 初值误差场景：β 在线估计逐步收敛","textChars":21,"textLines":1,"bbox":[710,530,460,28]}
 {"kind":"shape","id":"sh/fa9w3m94","slide":13,"bbox":[125,600,1030,50]}
 {"kind":"shape","id":"sh/re1w7mp0","slide":13,"bbox":[125,600,8,50]}
-{"kind":"textbox","id":"sh/2t83itgf","slide":13,"text":"在 AoA error bootstrap 场景，固定 kappa baseline RMSE = 0.0540 mm；本文方法 RMSE = 0.0153 mm。","textPreview":"在 AoA error bootstrap 场景，固定 kappa baseline RMSE = 0.0540 mm；本文方法 RMSE = 0.0153 mm。","textChars":82,"textLines":1,"bbox":[145,614,998,30]}
-{"kind":"image","id":"im/udg7adsj","slide":13,"name":"","alt":"AoA error kappa bootstrap","bbox":[705,150,470,350]}
+{"kind":"textbox","id":"sh/2t83itgf","slide":13,"text":"在 AoA error bootstrap 场景，固定 beta baseline RMSE = 0.0540 mm；本文方法 RMSE = 0.0153 mm。","textPreview":"在 AoA error bootstrap 场景，固定 beta baseline RMSE = 0.0540 mm；本文方法 RMSE = 0.0153 mm。","textChars":82,"textLines":1,"bbox":[145,614,998,30]}
+{"kind":"image","id":"im/udg7adsj","slide":13,"name":"","alt":"AoA error beta bootstrap","bbox":[705,150,470,350]}
 {"kind":"notes","id":"nt/7l5057","slide":13,"text":""}
 {"kind":"slide","id":"sl/2ti2hi","slide":14,"title":"完整算法流程框图","textShapes":15}
 {"kind":"shape","id":"sh/87ed8bat","slide":14,"bbox":[0,0,1280,12]}
@@ -390,7 +390,7 @@
 {"kind":"textbox","id":"sh/5wjudg7a","slide":14,"text":"Target selection\npresence / SNR / band","textPreview":"Target selection | presence / SNR / band","textChars":38,"textLines":2,"bbox":[625,150,125,59]}
 {"kind":"shape","id":"sh/u54zidon","slide":14,"bbox":[766,164,34,25]}
 {"kind":"shape","id":"sh/nqxs72x4","slide":14,"bbox":[800,140,145,75]}
-{"kind":"textbox","id":"sh/je9cvixc","slide":14,"text":"AoA cold start\nκᵢ,0","textPreview":"AoA cold start | κᵢ,0","textChars":19,"textLines":2,"bbox":[810,150,125,59]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":14,"text":"AoA cold start\nβᵢ,0","textPreview":"AoA cold start | βᵢ,0","textChars":19,"textLines":2,"bbox":[810,150,125,59]}
 {"kind":"shape","id":"sh/qtcj6tov","slide":14,"bbox":[951,164,34,25]}
 {"kind":"shape","id":"sh/1gvy90je","slide":14,"bbox":[985,140,145,75]}
 {"kind":"textbox","id":"sh/8z25kb6x","slide":14,"text":"Structural-main-phase\nKalman","textPreview":"Structural-main-phase | Kalman","textChars":28,"textLines":2,"bbox":[995,150,125,59]}
@@ -399,7 +399,7 @@
 {"kind":"shape","id":"sh/xs72x4na","slide":14,"bbox":[550,330,190,70]}
 {"kind":"textbox","id":"sh/87ed8bat","slide":14,"text":"Prediction-aided\nphase correction","textPreview":"Prediction-aided | phase correction","textChars":33,"textLines":2,"bbox":[560,340,170,54]}
 {"kind":"shape","id":"sh/fyxobm58","slide":14,"bbox":[800,330,190,70]}
-{"kind":"textbox","id":"sh/qd4vmtwr","slide":14,"text":"online κ bootstrap\n+ target-wise R","textPreview":"online κ bootstrap | + target-wise R","textChars":34,"textLines":2,"bbox":[810,340,170,54]}
+{"kind":"textbox","id":"sh/qd4vmtwr","slide":14,"text":"online β bootstrap\n+ target-wise R","textPreview":"online β bootstrap | + target-wise R","textChars":34,"textLines":2,"bbox":[810,340,170,54]}
 {"kind":"shape","id":"sh/wjudg7ad","slide":14,"bbox":[1015,330,170,70]}
 {"kind":"textbox","id":"sh/p4r65wju","slide":14,"text":"Displacement output\nδq = λΘ / 4π","textPreview":"Displacement output | δq = λΘ / 4π","textChars":32,"textLines":2,"bbox":[1025,340,150,54]}
 {"kind":"shape","id":"sh/ed8v6psf","slide":14,"bbox":[488,350,55,28]}
@@ -407,7 +407,7 @@
 {"kind":"shape","id":"sh/0bi9s36h","slide":14,"bbox":[992,350,30,28]}
 {"kind":"shape","id":"sh/pwb2hwfy","slide":14,"bbox":[1070,215,2,112]}
 {"kind":"shape","id":"sh/i5sneloj","slide":14,"bbox":[645,215,2,112]}
-{"kind":"textbox","id":"sh/7qpg3ex0","slide":14,"text":"Kalman 闭环：预测 -> 分支校正 -> 更新 -> κ/R 权重更新","textPreview":"Kalman 闭环：预测 -> 分支校正 -> 更新 -> κ/R 权重更新","textChars":38,"textLines":1,"bbox":[322,450,710,34]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":14,"text":"Kalman 闭环：预测 -> 分支校正 -> 更新 -> β/R 权重更新","textPreview":"Kalman 闭环：预测 -> 分支校正 -> 更新 -> β/R 权重更新","textChars":38,"textLines":1,"bbox":[322,450,710,34]}
 {"kind":"shape","id":"sh/0z61032l","slide":14,"bbox":[182,520,910,70]}
 {"kind":"textbox","id":"sh/pkzupwb2","slide":14,"text":"Phase 1 验证重点：synthetic ADC / Range-Angle 前端 + selected targets + 结构主相位融合的完整算法闭环","textPreview":"Phase 1 验证重点：synthetic ADC / Range-Angle 前端 + selected targets + 结构主相位融合的完整算法闭环","textChars":79,"textLines":1,"bbox":[220,540,840,30]}
 {"kind":"notes","id":"nt/2ti2hi","slide":14,"text":""}
@@ -430,7 +430,7 @@
 {"kind":"textbox","id":"sh/vy90je9c","slide":15,"text":"验证 angle-bin 分离","textPreview":"验证 angle-bin 分离","textChars":15,"textLines":1,"bbox":[96,333,218,22]}
 {"kind":"shape","id":"sh/6dcbulwv","slide":15,"bbox":[365,290,250,78]}
 {"kind":"textbox","id":"sh/d8v6psfi","slide":15,"text":"AoA 初值误差","textPreview":"AoA 初值误差","textChars":8,"textLines":1,"bbox":[381,304,218,24]}
-{"kind":"textbox","id":"sh/onyd0z61","slide":15,"text":"验证 κ bootstrap","textPreview":"验证 κ bootstrap","textChars":14,"textLines":1,"bbox":[381,333,218,22]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":15,"text":"验证 β bootstrap","textPreview":"验证 β bootstrap","textChars":14,"textLines":1,"bbox":[381,333,218,22]}
 {"kind":"shape","id":"sh/kre1w7mp","slide":15,"bbox":[80,395,250,78]}
 {"kind":"textbox","id":"sh/dcbulwva","slide":15,"text":"target SNR drop","textPreview":"target SNR drop","textChars":15,"textLines":1,"bbox":[96,409,218,24]}
 {"kind":"textbox","id":"sh/6psfil0r","slide":15,"text":"验证坏目标降权","textPreview":"验证坏目标降权","textChars":7,"textLines":1,"bbox":[96,438,218,22]}
@@ -445,10 +445,10 @@
 {"kind":"textbox","id":"sh/adsji5sn","slide":15,"text":"ma2026_reproduction","textPreview":"ma2026_reproduction","textChars":19,"textLines":1,"bbox":[744,281,380,20]}
 {"kind":"textbox","id":"sh/h4byhgn2","slide":15,"text":"正式 Ma-family staged baseline","textPreview":"正式 Ma-family staged baseline","textChars":28,"textLines":1,"bbox":[744,305,380,20]}
 {"kind":"shape","id":"sh/sji5snel","slide":15,"bbox":[725,354,415,58]}
-{"kind":"textbox","id":"sh/3m94fu18","slide":15,"text":"selected_aoa_fixed_kappa","textPreview":"selected_aoa_fixed_kappa","textChars":24,"textLines":1,"bbox":[744,364,380,20]}
-{"kind":"textbox","id":"sh/a5gbq1or","slide":15,"text":"筛选 target + 固定 AoA kappa","textPreview":"筛选 target + 固定 AoA kappa","textChars":24,"textLines":1,"bbox":[744,388,380,20]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":15,"text":"selected_aoa_fixed_beta","textPreview":"selected_aoa_fixed_beta","textChars":24,"textLines":1,"bbox":[744,364,380,20]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":15,"text":"筛选 target + 固定 AoA beta","textPreview":"筛选 target + 固定 AoA beta","textChars":24,"textLines":1,"bbox":[744,388,380,20]}
 {"kind":"shape","id":"sh/lszqtcj6","slide":15,"bbox":[725,437,415,58]}
-{"kind":"textbox","id":"sh/s72x4nap","slide":15,"text":"proposed_full_pipeline_kappa_confidence","textPreview":"proposed_full_pipeline_kappa_confidence","textChars":39,"textLines":1,"bbox":[744,447,380,20]}
+{"kind":"textbox","id":"sh/s72x4nap","slide":15,"text":"proposed_full_pipeline_beta_confidence","textPreview":"proposed_full_pipeline_beta_confidence","textChars":39,"textLines":1,"bbox":[744,447,380,20]}
 {"kind":"textbox","id":"sh/zidonyd0","slide":15,"text":"本文完整链路","textPreview":"本文完整链路","textChars":6,"textLines":1,"bbox":[744,471,380,20]}
 {"kind":"shape","id":"sh/a1gvy90j","slide":15,"bbox":[155,600,970,50]}
 {"kind":"shape","id":"sh/uxc3ylc7","slide":15,"bbox":[155,600,8,50]}
@@ -468,7 +468,7 @@
 {"kind":"shape","id":"sh/3itgfmlk","slide":16,"bbox":[548,145,160,61]}
 {"kind":"textbox","id":"sh/w3m94fu1","slide":16,"text":"Ma2026","textPreview":"Ma2026","textChars":6,"textLines":1,"bbox":[556,153,144,49]}
 {"kind":"shape","id":"sh/loj2t83i","slide":16,"bbox":[708,145,160,61]}
-{"kind":"textbox","id":"sh/e9cvixcz","slide":16,"text":"fixed κ","textPreview":"fixed κ","textChars":7,"textLines":1,"bbox":[716,153,144,49]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":16,"text":"fixed β","textPreview":"fixed β","textChars":7,"textLines":1,"bbox":[716,153,144,49]}
 {"kind":"shape","id":"sh/3q5o7qpg","slide":16,"bbox":[868,145,180,61]}
 {"kind":"textbox","id":"sh/wb2hwfyx","slide":16,"text":"本文方法","textPreview":"本文方法","textChars":4,"textLines":1,"bbox":[876,153,164,49]}
 {"kind":"shape","id":"sh/lwval87e","slide":16,"bbox":[78,206,310,61]}
@@ -567,12 +567,12 @@
 {"kind":"shape","id":"sh/je9cvixc","slide":18,"bbox":[75,390,515,205]}
 {"kind":"shape","id":"sh/nih4byhg","slide":18,"bbox":[645,390,515,205]}
 {"kind":"textbox","id":"sh/ylc7u54z","slide":18,"text":"强 wrapping：预测辅助相位校正","textPreview":"强 wrapping：预测辅助相位校正","textChars":19,"textLines":1,"bbox":[75,340,515,25]}
-{"kind":"textbox","id":"sh/9cvixcze","slide":18,"text":"AoA 误差：κ bootstrap 收敛","textPreview":"AoA 误差：κ bootstrap 收敛","textChars":21,"textLines":1,"bbox":[645,340,515,25]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":18,"text":"AoA 误差：β bootstrap 收敛","textPreview":"AoA 误差：β bootstrap 收敛","textChars":21,"textLines":1,"bbox":[645,340,515,25]}
 {"kind":"textbox","id":"sh/gr2p8nqx","slide":18,"text":"target SNR drop：观测权重调整","textPreview":"target SNR drop：观测权重调整","textChars":22,"textLines":1,"bbox":[75,600,515,25]}
 {"kind":"textbox","id":"sh/rytsvu9k","slide":18,"text":"车辆事件：位移估计对比","textPreview":"车辆事件：位移估计对比","textChars":11,"textLines":1,"bbox":[645,600,515,25]}
 {"kind":"textbox","id":"sh/yd0z6103","slide":18,"text":"第一版先保留核心诊断图，后续可按老师反馈替换为更论文风格的统一制图。","textPreview":"第一版先保留核心诊断图，后续可按老师反馈替换为更论文风格的统一制图。","textChars":34,"textLines":1,"bbox":[180,672,920,20]}
 {"kind":"image","id":"im/dg7adsji","slide":18,"name":"","alt":"强 wrapping：预测辅助相位校正","bbox":[90,145,485,176]}
-{"kind":"image","id":"im/6tovahoz","slide":18,"name":"","alt":"AoA 误差：κ bootstrap 收敛","bbox":[660,145,485,176]}
+{"kind":"image","id":"im/6tovahoz","slide":18,"name":"","alt":"AoA 误差：β bootstrap 收敛","bbox":[660,145,485,176]}
 {"kind":"image","id":"im/vahoza1g","slide":18,"name":"","alt":"target SNR drop：观测权重调整","bbox":[90,405,485,176]}
 {"kind":"image","id":"im/onyd0z61","slide":18,"name":"","alt":"车辆事件：位移估计对比","bbox":[660,405,485,176]}
 {"kind":"notes","id":"nt/mvlsor","slide":18,"text":""}
@@ -584,7 +584,7 @@
 {"kind":"textbox","id":"sh/l87ed8ba","slide":19,"text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
 {"kind":"shape","id":"sh/ahoza1gv","slide":19,"bbox":[58,95,1140,1.2]}
 {"kind":"textbox","id":"sh/32lszqtc","slide":19,"text":"当前已完成","textPreview":"当前已完成","textChars":5,"textLines":1,"bbox":[92,140,430,34]}
-{"kind":"textbox","id":"sh/wb2hwfyx","slide":19,"text":"synthetic ADC / Range-Angle frontend 完整接入\nRange-Angle target selection 与同 range 远角度分离已实现\n结构主相位 Kalman、预测辅助解缠、online κ bootstrap 已形成闭环\n默认 validation feasibility gates：12/12 passed","textPreview":"synthetic ADC / Range-Angle frontend 完整接入 | Range-Angle target selection 与同 range 远角度分离已实现 | 结构主相位 Kalman、预测辅助解缠、online κ bootstrap 已形成闭环...","textChars":178,"textLines":4,"bbox":[100,198,500,250]}
+{"kind":"textbox","id":"sh/wb2hwfyx","slide":19,"text":"synthetic ADC / Range-Angle frontend 完整接入\nRange-Angle target selection 与同 range 远角度分离已实现\n结构主相位 Kalman、预测辅助解缠、online β bootstrap 已形成闭环\n默认 validation feasibility gates：12/12 passed","textPreview":"synthetic ADC / Range-Angle frontend 完整接入 | Range-Angle target selection 与同 range 远角度分离已实现 | 结构主相位 Kalman、预测辅助解缠、online β bootstrap 已形成闭环...","textChars":178,"textLines":4,"bbox":[100,198,500,250]}
 {"kind":"textbox","id":"sh/lwval87e","slide":19,"text":"后续工作","textPreview":"后续工作","textChars":4,"textLines":1,"bbox":[715,140,430,34]}
 {"kind":"textbox","id":"sh/hoza1gvy","slide":19,"text":"接入真实 IWR1843 raw ADC 文件解析\n开展天线幅相标定与 TDM-MIMO 相位补偿\n建立雷达、加速度、激光参考的时间同步流程\n推进实桥/磁浮轨道梁场景下的同步实测验证","textPreview":"接入真实 IWR1843 raw ADC 文件解析 | 开展天线幅相标定与 TDM-MIMO 相位补偿 | 建立雷达、加速度、激光参考的时间同步流程 | 推进实桥/磁浮轨道梁场景下的同步实测验证","textChars":91,"textLines":4,"bbox":[725,198,500,250]}
 {"kind":"shape","id":"sh/s36hcrmh","slide":19,"bbox":[190,520,900,88]}

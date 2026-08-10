@@ -10,5 +10,5 @@ def build(base):
         nominal_frequencies_hz=(2.0, 5.0, 12.0),
         frequency_jitter_hz=0.0,
         component_amplitudes_mm=(0.25, 0.55, 0.35),
-        target_snr_db=(30.0, 25.0, 20.0, 15.0, 10.0),
+        target_snr_db=(22.0, 18.0, 14.0, 10.0, 6.0),
     )

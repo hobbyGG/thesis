@@ -33,7 +33,7 @@
 - 噪声/缠绕：核心问题就是 phase wrapping + high phase noise；摘要报告高噪声条件下旧方法失败，本文方法完成解缠和降噪。
 - 指标：phase RMSE，文摘和本地速读记录显示实验中相位误差约 2.1 rad 和 0.2 rad 量级；位移误差可由相位换算。
 - 可借鉴：你的后端公式几乎可以把这篇作为 single-target Ma baseline；仿真中应复现其“预测相位 -> 2pi round 校正 -> Kalman 更新”的闭环，并构造高相位噪声导致 Itoh/先解缠再滤波失败的场景。
-- 差异：该文状态是单 target LoS 相位；你的状态是结构主相位 Theta，多 target 观测矩阵含 kappa_i，且 target selection 阶段不做完整解缠。
+- 差异：该文状态是单 target LoS 相位；你的状态是结构主相位 Theta，多 target 先把 LoS corrected phase 乘以 beta_i 构造结构方向观测，统一用 `H_i=[1,0]` 融合，且 target selection 阶段不做完整解缠。
 - 推荐程度：高。虽然不是纯数值仿真论文，但它是你的核心 baseline 和后端验证模板。
 
 ### 2. Guerzoni et al. 2025 - Doppler-assisted phase unwrapping
@@ -62,7 +62,7 @@
 - 加速度：不涉及。
 - 指标：实验给出 RMSE，如 90 um、0.9 mm、4 cm 位移场景下传统方法与 proposed method 对比。
 - 可借鉴：你的雷达信号级仿真可以从这里抽象：先生成 complex target return，再取 range bin phase；设不同初始距离、不同位移幅值，专门展示 wrapped phase 如何破坏传统相位恢复。
-- 差异：它解决单通道 FMCW 等效 I/Q 和线性相位解调，不处理 AoA/kappa、多 target Kalman、加速度辅助。
+- 差异：它解决单通道 FMCW 等效 I/Q 和线性相位解调，不处理 AoA/beta、多 target Kalman、加速度辅助。
 - 推荐程度：高。它是“wrapped phase 怎么模拟”的直接模板。
 
 ### 4. Li et al. 2015 - noncontact FMCW radar SHM
@@ -91,7 +91,7 @@
 - 噪声/多 target：明确指出传统 range-only 方法无法分离同一 range bin 的多个目标，会造成 coupling/aliasing；range-angle 方法可以隔离 target。
 - 加速度：不涉及。
 - 指标：位移时程、频率识别、模态结果与仿真/参考传感器对比。
-- 可借鉴：你的前端仿真应至少包含“同 rangeBin 两个 target、不同角度、不同 kappa_i”的场景，用来证明 range-angle target 比 rangeBin 总相位更合理。
+- 可借鉴：你的前端仿真应至少包含“同 rangeBin 两个 target、不同角度、不同 beta_i”的场景，用来证明 range-angle target 比 rangeBin 总相位更合理。
 - 差异：雷达固定，目标/结构运动；你的雷达随结构运动，环境散射 target 近似静止。
 - 推荐程度：高。它支撑 multi target/range-angle 这条实验线。
 
@@ -106,7 +106,7 @@
 - 噪声/多 target：多 target 主要用于 best target selection，不是多 target 同时 Kalman 观测；相位解缠由加速度辅助。
 - 指标：公开记录显示 RMSE 可达 0.1 mm 量级；具体工况指标需回看全文。
 - 可借鉴：它是你的 baseline 0：single best target + conversion factor + accelerometer fusion。你的仿真应复现其局限：如果 best target SNR 下降或 target 失效，单 target 方法会退化。
-- 差异：该文以单 best target 为主，转换系数多在初始校准得到；你的方法要处理多 target wrapped phase、不预先完整解缠、AoA 冷启动和在线 kappa 自举。
+- 差异：该文以单 best target 为主，转换系数多在初始校准得到；你的方法要处理多 target wrapped phase、不预先完整解缠、AoA 冷启动和在线 beta 自举。
 - 推荐程度：高。它不是最佳“数值仿真模板”，但必须作为前序方法和 baseline。
 
 ### 7. Ma et al. 2025 - intermittent radar target occlusion
@@ -121,7 +121,7 @@
 - 加速度：作为 phase unwrapping / reconstruction 辅助。
 - 指标：公开摘要报告实验和现场验证；具体 RMSE 表格需看全文。
 - 可借鉴：你的仿真可以设置 target mask_i(k)：某 target 在若干秒内不可用，或 R_i(k) 突增；比较单 target、简单平均、自适应 R、多 target Kalman 的鲁棒性。
-- 差异：该文仍依赖多个 good targets 和已有 DCF 标定；你的方法强调 wrapped phase 进入后端、kappa 在线自举和 target-wise R。
+- 差异：该文仍依赖多个 good targets 和已有 DCF 标定；你的方法强调 wrapped phase 进入后端、beta 在线自举和 target-wise R。
 - 推荐程度：中高。它是 target 失效/遮挡仿真的核心参考。
 
 ### 8. Ma et al. 2026 - multi-chirp adaptive phase unwrapping
@@ -136,7 +136,7 @@
 - 加速度：不需要额外加速度，适合作为 radar-only baseline。
 - 指标：实验 RMSE；四层建筑模型中 proposed algorithm 在多个工况 RMSE < 0.6 mm，双 linear stage 多 target 测试 RMSE < 0.1 mm，footbridge 约 0.04-0.05 mm。
 - 可借鉴：你的 baseline 可加入“radar-only adaptive phase unwrapping”；强响应场景下比较加速度辅助和 radar-only 的解缠边界。
-- 差异：它使用同一 time step 多 chirp 预测，不处理多环境 target 的 kappa_i 自举，也不利用加速度。
+- 差异：它使用同一 time step 多 chirp 预测，不处理多环境 target 的 beta_i 自举，也不利用加速度。
 - 推荐程度：中高。用于“大位移 wrapped phase”场景很合适。
 
 ### 9. Zhu et al. 2023 - multi-rate Kalman structural response reconstruction
@@ -150,7 +150,7 @@
 - 噪声：measurement noise 标准差取真实响应标准差的 5%；R_k 用 sigma^2；system noise 也显式设置；还做 noise level/system noise parametric analysis。
 - 指标：RMSE、NRMSE、频域对比、不同 scheme 的表格比较。
 - 可借鉴：你的结构真值可以采用 SDOF/MDOF 状态空间生成，而不是只用正弦；加速度噪声、位移观测噪声和 Q/R 可学习其比例设定。
-- 差异：它融合的是直接位移传感器和加速度，不涉及 radar phase/wrapping/kappa/multi target。
+- 差异：它融合的是直接位移传感器和加速度，不涉及 radar phase/wrapping/beta/multi target。
 - 推荐程度：中。适合“结构真值 + 加速度噪声 + Kalman 指标”部分。
 
 ### 10. Smyth and Wu 2007 - classical multi-rate Kalman fusion
@@ -178,7 +178,7 @@
 - 噪声/漂移：加速度 time-varying bias 是核心；位移 intermittent observation 可类比 radar target 短时失效。
 - 指标：动态位移估计误差；具体 RMSE/NRMSE 需全文确认。
 - 可借鉴：你的仿真可设置 acceleration bias + low-frequency drift，并模拟 radar target 缺测；用它支撑“间歇位移观测 + 高频加速度”的建模合理性。
-- 差异：没有 radar phase 和 kappa_i；位移观测通常是物理位移，不是 wrapped phase。
+- 差异：没有 radar phase 和 beta_i；位移观测通常是物理位移，不是 wrapped phase。
 - 推荐程度：中。适合加速度 bias 和 target 丢失场景，不是核心 radar-phase 文献。
 
 ## 三、建议的仿真实验框架
@@ -204,9 +204,9 @@
 
 每个 target i 设定：
 
-- kappa_i = cos(theta_i)，例如 [0.25, 0.45, 0.65, 0.85, 0.95]，同时设置 AoA 初值误差 theta_i + epsilon_theta。
+- beta_i 表示 LoS 到结构真实振动方向的转换系数，可由几何投影初值 `p_i=|cos(theta_i)|` 得到 `beta_i=1/max(p_i, epsilon)`，例如 [1.05, 1.18, 1.54, 2.22, 4.0]，同时设置 AoA 初值误差 theta_i + epsilon_theta。
 - LoS phase 真值：
-  phi_i(k) = kappa_i * Theta(k) + b_i，Theta(k) = 4 pi q(k) / lambda。
+  phi_i(k) = Theta(k) / beta_i + b_i，Theta(k) = 4 pi q(k) / lambda。
 - complex observation：
   y_i(k) = A_i(k) exp(j phi_i(k)) + n_i(k)，n_i 为 complex Gaussian noise。
 - wrapped phase：
@@ -214,12 +214,12 @@
 
 建议四个 target 难度层级：
 
-1. 单 target clean：固定 kappa、固定 SNR、无遮挡。
-2. 多 target 不同几何：不同 kappa_i、不同 b_i、不同 SNR_i。
+1. 单 target clean：固定 beta、固定 SNR、无遮挡。
+2. 多 target 不同几何：不同 beta_i、不同 b_i、不同 SNR_i。
 3. target 质量变化：某些 target 在 [t1, t2] 内 SNR 降低 10-20 dB，或 A_i(k) 突然衰减。
 4. 同 rangeBin 多散射体等效 target：
-   - y_i(k) = sum_l A_il exp(j(kappa_il Theta(k) + b_il)) + n_i(k)。
-   - 当 kappa_il 接近时等效 beta 稳定；当强散射体 kappa 差异大且幅值接近时，等效相位会非线性漂移。
+   - y_i(k) = sum_l A_il exp(j(Theta(k)/beta_il + b_il)) + n_i(k)。
+   - 当 beta_il 接近时等效 beta 稳定；当强散射体 beta 差异大且幅值接近时，等效相位会非线性漂移。
 
 ### 3. Wrapped phase 生成
 
@@ -227,7 +227,7 @@
 
 ```text
 Theta_k = 4*pi*q_k/lambda
-phi_i,k = kappa_i*Theta_k + b_i
+phi_i,k = Theta_k/beta_i + b_i
 y_i,k = A_i,k*exp(j*phi_i,k) + sigma_i*(randn + j*randn)/sqrt(2)
 psi_i,k = angle(y_i,k)
 ```
@@ -259,10 +259,10 @@ psi_i,k = wrapToPi(phi_i,k + eta_i,k), eta_i,k ~ N(0, sigma_phi_i^2)
    - 选择 SNR 最高或初始相关性最高的 target；
    - 固定 conversion factor。
 2. 离线固定转换系数：
-   - 用前 T_cal 秒 unwrap 后最小二乘估计 kappa_i；
+   - 用前 T_cal 秒 unwrap 后最小二乘估计 beta_i；
    - 后续不再更新。
 3. 无 AoA 冷启动：
-   - kappa_i 初值统一设 1 或随机；
+   - beta_i 初值统一设 1 或随机；
    - 用来展示 AoA 初值减少收敛时间。
 4. 固定 R：
    - 所有 target 同一 R；
@@ -272,7 +272,7 @@ psi_i,k = wrapToPi(phi_i,k + eta_i,k), eta_i,k ~ N(0, sigma_phi_i^2)
 6. 本文方法：
    - 结构主相位 multi-target Kalman；
    - AoA 冷启动；
-   - kappa_i/beta_i 滑动窗口自举；
+   - beta_i/beta_i 滑动窗口自举；
    - target-wise adaptive R；
    - target 缺测和低质量降权。
 
@@ -284,7 +284,7 @@ psi_i,k = wrapToPi(phi_i,k + eta_i,k), eta_i,k ~ N(0, sigma_phi_i^2)
 - phase RMSE；
 - unwrapping error count：|z_corr - phi_true| > pi 或 2pi branch 选择错误次数；
 - jump count：估计位移中非物理跳变次数；
-- kappa_i convergence time：|kappa_hat_i - kappa_i| / |kappa_i| < 5% 所需时间；
+- beta_i convergence time：|beta_hat_i - beta_i| / |beta_i| < 5% 所需时间；
 - innovation statistics：target-wise innovation RMS、NIS 或残差方差；
 - frequency error：主频识别误差、PSD 峰值误差；
 - robustness score：target 失效期间和恢复后的 RMSE。
@@ -293,22 +293,22 @@ psi_i,k = wrapToPi(phi_i,k + eta_i,k), eta_i,k ~ N(0, sigma_phi_i^2)
 
 - q_true 与各方法 q_hat 时程对比；
 - psi_i wrapped phase 与 z_i,corr corrected phase；
-- 每个 target 的 kappa_hat_i 或 beta_hat_i 收敛曲线；
+- 每个 target 的 beta_hat_i 或 beta_hat_i 收敛曲线；
 - target-wise R_i(k) 自适应变化，叠加 target SNR/遮挡区间；
 - innovation/residual heatmap，横轴 time，纵轴 target；
 - SNR sweep：RMSE vs SNR；
 - target number sweep：RMSE vs m；
 - phase wrapping intensity sweep：RMSE / unwrap error count vs max |Delta phi|;
-- 同 rangeBin 多散射体：等效 phase bias vs kappa spread / amplitude ratio。
+- 同 rangeBin 多散射体：等效 phase bias vs beta spread / amplitude ratio。
 
 ### 8. 推荐表格
 
 - 不同方法的 RMSE / MAE / max error；
 - unwrapping error count 和 jump count；
-- kappa convergence time；
+- beta convergence time；
 - target failure 场景下失效前、失效中、恢复后的 RMSE；
-- 不同 SNR、不同 target 数量、不同 kappa 分布下的鲁棒性表；
-- 消融实验表：AoA 冷启动、kappa 自举、自适应 R、多 target Kalman 分别去掉后的误差。
+- 不同 SNR、不同 target 数量、不同 beta 分布下的鲁棒性表；
+- 消融实验表：AoA 冷启动、beta 自举、自适应 R、多 target Kalman 分别去掉后的误差。
 
 ## 四、可直接写进论文的仿真叙述骨架
 
@@ -320,10 +320,10 @@ psi_i,k = wrapToPi(phi_i,k + eta_i,k), eta_i,k ~ N(0, sigma_phi_i^2)
    - 验证公式正确性和 Kalman 收敛。
 3. Case 2：单 target 强响应有缠绕：
    - 对比 Itoh、Ma single-target Kalman、本文方法。
-4. Case 3：多 target 不同 kappa/SNR：
+4. Case 3：多 target 不同 beta/SNR：
    - 验证 multi-target Kalman 优于 single best target 和 simple average。
-5. Case 4：AoA 初值误差和 kappa 自举：
-   - 展示 kappa_hat 收敛和无 AoA 冷启动的慢收敛/误收敛。
+5. Case 4：AoA 初值误差和 beta 自举：
+   - 展示 beta_hat 收敛和无 AoA 冷启动的慢收敛/误收敛。
 6. Case 5：target 短时失效/SNR 突降：
    - 展示 adaptive R 和缺测处理的鲁棒性。
 7. Case 6：同 rangeBin 多散射体：

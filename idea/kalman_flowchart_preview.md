@@ -38,9 +38,9 @@ flowchart TD
     F2 --> U2
     Fm --> Um
 
-    U1 -- "观测行 + 校正相位" --> OBS["多目标观测模型<br/>校正相位 / 观测矩阵 / 测量噪声"]
-    U2 -- "观测行 + 校正相位" --> OBS
-    Um -- "观测行 + 校正相位" --> OBS
+    U1 -- "LOS 校正相位" --> OBS["结构方向多目标观测模型<br/>结构相位观测 / 观测矩阵 / 测量噪声"]
+    U2 -- "LOS 校正相位" --> OBS
+    Um -- "LOS 校正相位" --> OBS
 
     OBS --> KF["Kalman 更新<br/>phase estimation / denoise"]
     KF --> XEST["结构主相位后验估计<br/>相位 + 相位变化率"]
@@ -50,7 +50,7 @@ flowchart TD
     U2 -- "校正相位" --> BETA
     Um -- "校正相位" --> BETA
     XEST -- "结构主相位" --> BETA
-    BETA -- "更新 H 与下一步解缠预测" --> OBS
+    BETA -- "更新结构方向观测与下一步解缠预测" --> OBS
     BETA --> U1
     BETA --> U2
     BETA --> Um
@@ -99,24 +99,18 @@ T
 \end{bmatrix}.
 $$
 
-第 $i$ 个 target 的观测行和 LoS 相位预测为：
+第 $i$ 个 target 的 LoS 相位预测为：
 
 $$
-\mathbf{h}_{i,k}
-=
-\begin{bmatrix}
-1/\hat{\beta}_{i,k}&0
-\end{bmatrix},
-\qquad
 \hat{\phi}_{i,k}^-
 =
-\mathbf{h}_{i,k}\mathbf{x}_k^-+b_i.
+\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}}+b_i.
 $$
 
 利用预测 LoS 相位对 wrapped phase 进行分支校正：
 
 $$
-z_{i,k}^{\mathrm{corr}}
+\phi_{i,k}^{\mathrm{LOS,corr}}
 =
 \psi_{i,k}
 +
@@ -129,36 +123,36 @@ z_{i,k}^{\mathrm{corr}}
 \right).
 $$
 
-多目标校正相位堆叠为观测向量：
+LoS 校正相位先转换为结构方向主相位观测，再按行堆叠：
 
 $$
-\mathbf{z}_k^{\mathrm{corr}}
+\mathbf{y}_k
 =
 \begin{bmatrix}
-z_{1,k}^{\mathrm{corr}}\\
-z_{2,k}^{\mathrm{corr}}\\
+y_{1,k}\\
+y_{2,k}\\
 \vdots\\
-z_{m,k}^{\mathrm{corr}}
+y_{m,k}
 \end{bmatrix},
+\qquad
+y_{i,k}=\hat{\beta}_{i,k}\left(\phi_{i,k}^{\mathrm{LOS,corr}}-b_i\right),
 \qquad
 \mathbf{H}_k
 =
 \begin{bmatrix}
-1/\hat{\beta}_{1,k}&0\\
-1/\hat{\beta}_{2,k}&0\\
+1&0\\
+1&0\\
 \vdots&\vdots\\
-1/\hat{\beta}_{m,k}&0
+1&0
 \end{bmatrix}.
 $$
 
 因此观测模型为：
 
 $$
-\mathbf{z}_k^{\mathrm{corr}}
+\mathbf{y}_k
 =
 \mathbf{H}_k\mathbf{x}_k
-+
-\mathbf{b}_k
 +
 \mathbf{v}_k.
 $$
@@ -166,20 +160,17 @@ $$
 校正相位同时用于转换系数短窗口自举：
 
 $$
-\hat{\kappa}_{i}
+\hat{\beta}_{i}
 =
 \frac{
-\sum_{k\in\mathcal{W}_{\beta}}
-\hat{\Theta}_k
-\left(
-z_{i,k}^{\mathrm{corr}}-b_i
-\right)
+\sum_{k\in\mathcal{W}_{\beta}}x_{k,c}y_{k,c}
 }{
-\sum_{k\in\mathcal{W}_{\beta}}
-\hat{\Theta}_k^2
+\sum_{k\in\mathcal{W}_{\beta}}x_{k,c}^{2}
 },
 \qquad
-\hat{\beta}_i=\frac{1}{\hat{\kappa}_i}.
+x_k=\phi_{i,k}^{\mathrm{LOS,corr}}-b_i,
+\qquad
+y_k=\hat{\Theta}_k^+.
 $$
 
 target-wise 测量噪声由后验残差和 target quality gate 自适应更新：
@@ -187,11 +178,7 @@ target-wise 测量噪声由后验残差和 target quality gate 自适应更新�
 $$
 s_{i,k}
 =
-z_{i,k}^{\mathrm{corr}}
--
-\left(
-\mathbf{h}_{i,k}\mathbf{x}_k+b_i
-\right),
+y_{i,k}-\hat{\Theta}_k^+,
 $$
 
 $$
@@ -200,7 +187,7 @@ $$
 \left(
 s_{i,k}^2
 +
-\mathbf{h}_{i,k}\mathbf{P}_k^+\mathbf{h}_{i,k}^{\mathrm{T}}
+\mathbf{H}_{i}\mathbf{P}_k^+\mathbf{H}_{i}^{\mathrm{T}}
 \right)
 -
 r_{i,k},

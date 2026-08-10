@@ -51,13 +51,15 @@ class Phase1ScenarioDiagnosticsTest(unittest.TestCase):
                     self.assertTrue(svg.exists())
                     self.assertIn("<polyline", svg.read_text())
 
-            time_svg = (written["plots_dir"] / "nominal_multifrequency_time_displacement.svg").read_text()
+            time_svg = (
+                written["plots_dir"] / "literature_maglev_modal_response_time_displacement.svg"
+            ).read_text()
             self.assertIn("Time (s)", time_svg)
             self.assertIn("Relative displacement (mm)", time_svg)
             self.assertIn("legend", time_svg)
 
             frequency_svg = (
-                written["plots_dir"] / "nominal_multifrequency_frequency_displacement.svg"
+                written["plots_dir"] / "literature_maglev_modal_response_frequency_displacement.svg"
             ).read_text()
             self.assertIn("Frequency (Hz)", frequency_svg)
             self.assertIn("Amplitude (mm)", frequency_svg)
@@ -72,10 +74,9 @@ class Phase1ScenarioDiagnosticsTest(unittest.TestCase):
 
             summary = written["summary_md"].read_text()
             self.assertIn("Scenario Diagnostics", summary)
-            self.assertIn("标准多频振动", summary)
             self.assertIn("文献主频驱动磁浮轨道梁响应", summary)
-            self.assertIn("验证基础多目标结构主相位融合在常规多频响应下的位移恢复精度", summary)
-            self.assertIn("nominal_multifrequency_time_displacement.svg", summary)
+            self.assertIn("基于实桥文献给出的轨道梁主频构造可解释的非平稳车辆响应仿真", summary)
+            self.assertIn("literature_maglev_modal_response_time_displacement.svg", summary)
 
 
 if __name__ == "__main__":

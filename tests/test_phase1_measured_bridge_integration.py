@@ -73,11 +73,11 @@ class TestMeasuredBridgeIntegration(unittest.TestCase):
         methods = {row["method"] for row in rows}
 
         self.assertIn("ma2026_reproduction", methods)
-        self.assertIn("proposed_full_pipeline", methods)
-        self.assertIn("selected_aoa_fixed_kappa", methods)
+        self.assertIn("proposed_full_pipeline_beta_confidence", methods)
+        self.assertIn("selected_aoa_fixed_beta", methods)
         self.assertEqual(artifacts["truth"].t.size, int(round(scenario.duration_s * scenario.sample_rate_hz)))
 
-        proposed = next(row for row in rows if row["method"] == "proposed_full_pipeline")
+        proposed = next(row for row in rows if row["method"] == "proposed_full_pipeline_beta_confidence")
         self.assertGreaterEqual(proposed["selected_target_count"], 1)
         self.assertNotIn(-1, proposed["selected_indices"])
         self.assertLess(proposed["unwrap_error_rate"], 0.05)

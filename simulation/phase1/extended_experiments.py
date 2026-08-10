@@ -19,63 +19,50 @@ SCENARIO_METADATA_FIELDS = [
 ]
 
 PAPER_METHODS = (
-    "single_target_ma_style",
     "range_bin_only_mixed_phase",
     "ma2026_reproduction",
-    "selected_aoa_fixed_kappa",
-    "proposed",
-    "proposed_full_pipeline",
-    "proposed_full_pipeline_kappa_confidence",
+    "selected_aoa_fixed_beta",
+    "proposed_full_pipeline_beta_confidence",
 )
 
 ABLATION_METHODS = (
-    "single_target_ma_style",
     "range_bin_only_mixed_phase",
-    "ma_style_iterative_beta_range_bin",
     "ma2026_reproduction",
-    "multitarget_aoa_fixed_kappa",
-    "selected_aoa_fixed_kappa",
-    "proposed",
-    "proposed_full_pipeline",
-    "proposed_full_pipeline_kappa_confidence",
+    "multitarget_aoa_fixed_beta",
+    "selected_aoa_fixed_beta",
+    "proposed_full_pipeline_beta_confidence",
 )
 
-AOA_SENSITIVITY_METHODS = (
-    "multitarget_aoa_fixed_kappa",
-    "selected_aoa_fixed_kappa",
-    "proposed",
-    "proposed_full_pipeline",
-    "proposed_full_pipeline_kappa_confidence",
+FRONTEND_SENSITIVITY_METHODS = (
+    "selected_aoa_fixed_beta",
+    "proposed_full_pipeline_beta_confidence",
 )
 
 SNR_SENSITIVITY_METHODS = (
-    "single_target_ma_style",
+    "range_bin_itoh",
     "ma2026_reproduction",
-    "selected_aoa_fixed_kappa",
-    "proposed",
-    "proposed_full_pipeline",
-    "proposed_full_pipeline_kappa_confidence",
+    "selected_aoa_fixed_beta",
+    "proposed_full_pipeline_beta_confidence",
 )
 
 
 def run_extended_experiments(
     seeds=(2026, 2027, 2028, 2029, 2030),
     monte_carlo_scenarios=(
-        "nominal_multifrequency",
-        "ma2023_balanced_good_targets",
+        "literature_maglev_modal_response",
+        "strong_wrapping",
         "same_range_far_angles",
+        "aoa_error_bootstrap",
         "target_snr_drop",
-        "low_snr_multitarget",
-        "vehicle_event_nonstationary",
     ),
     ablation_scenarios=(
-        "ma2023_balanced_good_targets",
         "same_range_far_angles",
+        "literature_mmwbats_same_range_aliasing",
+        "literature_mmshm_adjacent_range_clutter",
         "target_snr_drop",
-        "low_snr_multitarget",
-        "vehicle_event_nonstationary",
+        "aoa_error_bootstrap",
     ),
-    aoa_errors_deg=(0.0, 3.0, 6.0, 10.0, 15.0),
+    frontend_angle_bins=(32, 48, 64, 96, 128),
     snr_floors_db=(4.0, 6.0, 8.0, 10.0, 12.0),
 ):
     """Run paper-oriented Phase-1 extended experiments."""
@@ -105,18 +92,26 @@ def run_extended_experiments(
         for row in _filter_methods(rows, _ablation_methods_for_scenario(scenario_name)):
             ablation_rows.append(_prefixed_row(row, seed=reference_seed))
 
-    sensitivity_aoa_rows = []
-    aoa_base = scenario_by_name["aoa_error_bootstrap"]
-    for aoa_error in aoa_errors_deg:
-        scenario = replace(aoa_base, seed=reference_seed, aoa_error_deg=float(aoa_error))
+    sensitivity_frontend_rows = []
+    frontend_base = scenario_by_name["aoa_error_bootstrap"]
+    for angle_bins in frontend_angle_bins:
+        scenario = replace(
+            frontend_base,
+            seed=reference_seed,
+            aoa_error_deg=0.0,
+            frontend_num_angle_bins=int(angle_bins),
+        )
         rows, _ = evaluate_scenario(scenario, method_specs=method_specs)
-        for row in _filter_methods(rows, AOA_SENSITIVITY_METHODS):
+        for row in _filter_methods(rows, FRONTEND_SENSITIVITY_METHODS):
             enriched = _prefixed_row(row, seed=reference_seed)
-            enriched["aoa_error_deg"] = float(aoa_error)
-            sensitivity_aoa_rows.append(enriched)
+            enriched["frontend_num_virtual_rx"] = int(scenario.frontend_num_virtual_rx)
+            enriched["frontend_num_angle_bins"] = int(scenario.frontend_num_angle_bins)
+            enriched["frontend_angle_window"] = str(scenario.frontend_angle_window)
+            enriched["aoa_error_deg"] = float(scenario.aoa_error_deg)
+            sensitivity_frontend_rows.append(enriched)
 
     sensitivity_snr_rows = []
-    snr_base = scenario_by_name["low_snr_multitarget"]
+    snr_base = scenario_by_name["target_snr_drop"]
     for snr_floor in snr_floors_db:
         target_snr_db = tuple(float(snr_floor) + offset for offset in (8.0, 6.0, 4.0, 2.0, 0.0))
         scenario = replace(snr_base, seed=reference_seed, target_snr_db=target_snr_db)
@@ -131,13 +126,13 @@ def run_extended_experiments(
         "monte_carlo_rows": monte_carlo_rows,
         "monte_carlo_summary_rows": monte_carlo_summary_rows,
         "ablation_rows": ablation_rows,
-        "sensitivity_aoa_rows": sensitivity_aoa_rows,
+        "sensitivity_frontend_rows": sensitivity_frontend_rows,
         "sensitivity_snr_rows": sensitivity_snr_rows,
         "metadata": {
             "seeds": list(seed_values),
             "monte_carlo_scenarios": list(monte_carlo_scenarios),
             "ablation_scenarios": list(ablation_scenarios),
-            "aoa_errors_deg": [float(item) for item in aoa_errors_deg],
+            "frontend_angle_bins": [int(item) for item in frontend_angle_bins],
             "snr_floors_db": [float(item) for item in snr_floors_db],
         },
     }
@@ -151,7 +146,7 @@ def write_extended_experiment_report(summary, output_dir):
         "monte_carlo_csv": output / "monte_carlo_metrics.csv",
         "monte_carlo_summary_csv": output / "monte_carlo_summary.csv",
         "ablation_csv": output / "ablation_summary.csv",
-        "sensitivity_aoa_csv": output / "sensitivity_aoa.csv",
+        "sensitivity_frontend_csv": output / "sensitivity_frontend.csv",
         "sensitivity_snr_csv": output / "sensitivity_snr.csv",
         "summary_md": output / "extended_summary.md",
     }
@@ -167,7 +162,7 @@ def write_extended_experiment_report(summary, output_dir):
         "unwrap_error_rate",
         "selected_target_count",
         "selected_indices",
-        "kappa_median_relative_error",
+        "beta_median_relative_error",
     ]
     _write_csv(paths["monte_carlo_csv"], summary["monte_carlo_rows"], metric_fields)
     _write_csv(
@@ -187,7 +182,11 @@ def write_extended_experiment_report(summary, output_dir):
         ],
     )
     _write_csv(paths["ablation_csv"], summary["ablation_rows"], metric_fields)
-    _write_csv(paths["sensitivity_aoa_csv"], summary["sensitivity_aoa_rows"], ["aoa_error_deg"] + metric_fields)
+    _write_csv(
+        paths["sensitivity_frontend_csv"],
+        summary["sensitivity_frontend_rows"],
+        ["frontend_num_virtual_rx", "frontend_num_angle_bins", "frontend_angle_window", "aoa_error_deg"] + metric_fields,
+    )
     _write_csv(
         paths["sensitivity_snr_csv"],
         summary["sensitivity_snr_rows"],
@@ -223,7 +222,7 @@ def _ablation_methods_for_scenario(scenario_name):
     return tuple(
         method
         for method in ABLATION_METHODS
-        if method not in ("range_bin_only_mixed_phase", "ma_style_iterative_beta_range_bin")
+        if method != "range_bin_only_mixed_phase"
     )
 
 
@@ -243,7 +242,7 @@ def _prefixed_row(row, seed):
         "unwrap_error_rate": float(row.get("unwrap_error_rate", 0.0)),
         "selected_target_count": int(row.get("selected_target_count", 0)),
         "selected_indices": row.get("selected_indices", []),
-        "kappa_median_relative_error": row.get("kappa_median_relative_error", float("nan")),
+        "beta_median_relative_error": row.get("beta_median_relative_error", float("nan")),
     }
     return result
 
@@ -278,7 +277,7 @@ def _aggregate_monte_carlo(rows):
 
 def _write_csv(path, rows, fieldnames):
     with Path(path).open("w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer = csv.DictWriter(f, fieldnames=fieldnames, lineterminator="\n")
         writer.writeheader()
         for row in rows:
             writer.writerow({field: _csv_value(row.get(field, "")) for field in fieldnames})
@@ -299,7 +298,7 @@ def _write_extended_summary_markdown(path, summary):
         f.write("## Metadata\n\n")
         f.write(f"- Seeds: {metadata.get('seeds', [])}\n")
         f.write(f"- Monte Carlo scenarios: {metadata.get('monte_carlo_scenarios', [])}\n")
-        f.write(f"- AoA sensitivity levels: {metadata.get('aoa_errors_deg', [])}\n")
+        f.write(f"- Frontend angle FFT bins: {metadata.get('frontend_angle_bins', [])}\n")
         f.write(f"- SNR floor levels: {metadata.get('snr_floors_db', [])}\n\n")
 
         f.write("## Monte Carlo Summary\n\n")
@@ -318,11 +317,18 @@ def _write_extended_summary_markdown(path, summary):
             max_rows=40,
         )
 
-        f.write("\n## AoA Sensitivity\n\n")
+        f.write("\n## Frontend Angle FFT Sensitivity\n\n")
         _write_markdown_table(
             f,
-            summary["sensitivity_aoa_rows"],
-            ["scenario_label_zh", "aoa_error_deg", "method", "rmse_mm", "kappa_median_relative_error"],
+            summary["sensitivity_frontend_rows"],
+            [
+                "scenario_label_zh",
+                "frontend_num_virtual_rx",
+                "frontend_num_angle_bins",
+                "method",
+                "rmse_mm",
+                "beta_median_relative_error",
+            ],
             max_rows=40,
         )
 

@@ -5,7 +5,7 @@ registered methods. It is the orchestration boundary between simulation data
 generation, frontend target selection, and estimator execution.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Optional
 
 import numpy as np
@@ -17,12 +17,12 @@ from .frontend import (
     FrontendConfig,
     FrontendTargetObservation,
     RangeAngleObservation,
-    angle_deg_to_measured_kappa,
+    angle_deg_to_measured_beta,
     extract_frontend_target_observation,
     range_angle_process,
     simulate_adc_cube,
 )
-from .ma2026 import Ma2026Config, Ma2026RangeBinInput, rangebin_input_from_range_angle
+from .ma2026 import Ma2026Config, Ma2026RangeBinInput, rangebin_input_from_range_fft
 from .radar import RadarAlgorithmInput, RadarObservation, simulate_radar_targets, to_algorithm_radar_input
 from .selection import (
     DetectedPeak,
@@ -69,6 +69,11 @@ class FrontendViews:
             "selected_frontend_targets": self.selected_frontend_targets,
             "selection_diagnostics": self.selection_diagnostics,
             "target_reference_indices": self.target_reference_indices,
+            "frontend_aoa_diagnostics": frontend_aoa_diagnostic_rows(
+                self.frontend_targets,
+                self.target_reference_indices,
+                self.adc_cube.scatterers,
+            ),
         }
 
 
@@ -111,8 +116,13 @@ def build_scenario_inputs(scenario: Phase1Config, ma2026_config: Optional[Ma2026
     target_algorithm = to_algorithm_radar_input(target_radar)
     accelerometer = build_accelerometer_observation(truth, scenario)
     frontend = build_frontend_views(truth, accelerometer, scenario)
-    ma_config = ma2026_config or Ma2026Config()
-    ma2026_rangebin = rangebin_input_from_range_angle(frontend.range_angle_maps, ma_config)
+    ma_config = ma2026_config or ma2026_config_for_scenario(scenario)
+    ma2026_rangebin = rangebin_input_from_range_fft(range_fft_by_rx(frontend), ma_config)
+    ma2026_rangebin = _with_ma2026_oracle_calibration_phase(
+        ma2026_rangebin,
+        target_radar,
+        frontend.adc_cube.scatterers,
+    )
     radar = RadarViews(
         target_level=target_radar,
         target_algorithm=target_algorithm,
@@ -131,16 +141,57 @@ def build_scenario_inputs(scenario: Phase1Config, ma2026_config: Optional[Ma2026
     )
 
 
+def ma2026_config_for_scenario(scenario: Phase1Config) -> Ma2026Config:
+    config = Ma2026Config()
+    frequencies = np.asarray(tuple(scenario.nominal_frequencies_hz), dtype=float)
+    finite = frequencies[np.isfinite(frequencies)]
+    if finite.size == 0:
+        return config
+    nyquist = 0.5 * float(scenario.sample_rate_hz)
+    upper = min(nyquist, max(float(config.alpha_band_high_hz), float(np.max(finite))))
+    if upper <= float(config.alpha_band_low_hz):
+        return config
+    return replace(config, alpha_band_high_hz=upper)
+
+
+def _with_ma2026_oracle_calibration_phase(ma2026_rangebin, target_radar, scatterers):
+    if ma2026_rangebin.wrapped_phase_rad.size == 0:
+        return ma2026_rangebin
+
+    phase = np.full_like(ma2026_rangebin.wrapped_phase_rad, np.nan, dtype=float)
+    assigned = False
+    for row_idx, range_bin in enumerate(np.asarray(ma2026_rangebin.range_bins, dtype=int)):
+        matches = [
+            scatterer
+            for scatterer in scatterers
+            if scatterer.range_bin_index is not None and int(scatterer.range_bin_index) == int(range_bin)
+        ]
+        if len(matches) != 1:
+            continue
+        reference_idx = int(matches[0].target_index)
+        if 0 <= reference_idx < target_radar.true_los_phase_rad.shape[0]:
+            phase[row_idx] = target_radar.true_los_phase_rad[reference_idx]
+            assigned = True
+    if not assigned:
+        return ma2026_rangebin
+    return replace(ma2026_rangebin, calibration_los_corrected_phase_rad=phase)
+
+
 def build_frontend_views(
     truth: TruthSignal,
     accelerometer: AccelerometerObservation,
     scenario: Phase1Config,
 ) -> FrontendViews:
     frontend_config = FrontendConfig(
+        num_tx=int(scenario.frontend_num_tx),
+        num_rx=int(scenario.frontend_num_rx),
+        num_virtual_rx=int(scenario.frontend_num_virtual_rx),
         num_adc_samples=int(scenario.adc_samples_per_chirp),
         adc_sample_rate_hz=float(scenario.adc_sample_rate_hz),
         chirp_duration_s=float(scenario.chirp_duration_s),
         chirps_per_frame=int(scenario.chirps_per_frame),
+        num_angle_bins=int(scenario.frontend_num_angle_bins),
+        angle_window=str(scenario.frontend_angle_window),
     )
     adc = simulate_adc_cube(truth, scenario, frontend_config)
     range_angle = range_angle_process(adc, frontend_config)
@@ -159,12 +210,11 @@ def build_frontend_views(
         if scenario.dropout_target_indices
         else 0.0,
     )
-    frontend_targets = apply_frontend_aoa_uncertainty(frontend_targets, scenario)
     selected = select_targets_from_measurements(
         iq=frontend_targets.slow_time,
         wrapped_phase_rad=frontend_targets.wrapped_phase_rad,
         available_mask=frontend_targets.available_mask,
-        measured_kappa=frontend_targets.measured_kappa,
+        measured_beta=frontend_targets.measured_beta,
         measured_acceleration_mps2=accelerometer.measured_mps2,
         sample_rate_hz=scenario.sample_rate_hz,
         initial_measurement_variance=scenario.initial_measurement_variance,
@@ -200,45 +250,45 @@ def selected_frontend_algorithm_input(
     selected: SelectedTargetSet,
 ) -> RadarAlgorithmInput:
     return RadarAlgorithmInput(
-        measured_kappa=frontend_targets.measured_kappa.copy(),
+        measured_beta=frontend_targets.measured_beta.copy(),
         wrapped_phase_rad=frontend_targets.wrapped_phase_rad.copy(),
         available_mask=frontend_targets.available_mask.copy(),
         selected_indices=selected.selected_indices.copy(),
-        initial_r=selected.initial_r.copy(),
+        calibration_indices=selected.calibration_indices.copy(),
+        initial_r=selected.calibration_initial_r.copy(),
         selection_scores=selected.quality_score.copy(),
     )
 
 
-def apply_frontend_aoa_uncertainty(
-    frontend_targets: FrontendTargetObservation,
-    scenario: Phase1Config,
-) -> FrontendTargetObservation:
-    """Apply the algorithm-visible AoA error used to initialize conversion coefficients."""
-
-    bias_deg = scenario.frontend_aoa_error_bias_deg
-    if bias_deg is None:
-        bias_deg = scenario.aoa_error_deg
-    bias_deg = float(bias_deg)
-    std_deg = float(scenario.frontend_aoa_error_std_deg)
-    if bias_deg == 0.0 and std_deg == 0.0:
-        return frontend_targets
-
-    detected_angle_deg = np.asarray(frontend_targets.angle_deg, dtype=float)
-    aoa_error_deg = frontend_aoa_error_samples(detected_angle_deg.shape, scenario)
-    measured_angle_deg = np.clip(detected_angle_deg + aoa_error_deg, -89.0, 89.0)
-    return type(frontend_targets)(
-        measured_kappa=np.asarray(angle_deg_to_measured_kappa(measured_angle_deg), dtype=float),
-        slow_time=frontend_targets.slow_time.copy(),
-        wrapped_phase_rad=frontend_targets.wrapped_phase_rad.copy(),
-        available_mask=frontend_targets.available_mask.copy(),
-        range_bins=frontend_targets.range_bins.copy(),
-        angle_bins=frontend_targets.angle_bins.copy(),
-        range_m=frontend_targets.range_m.copy(),
-        angle_deg=frontend_targets.angle_deg.copy(),
-        target_reference_indices=None
-        if frontend_targets.target_reference_indices is None
-        else frontend_targets.target_reference_indices.copy(),
-    )
+def frontend_aoa_diagnostic_rows(frontend_targets: FrontendTargetObservation, target_reference_indices, scatterers=()):
+    references = np.asarray(target_reference_indices, dtype=int)
+    rows = []
+    measured_angles = np.asarray(frontend_targets.angle_deg, dtype=float)
+    measured_beta = np.asarray(frontend_targets.measured_beta, dtype=float)
+    for target_idx in range(measured_angles.size):
+        reference_idx = int(references[target_idx]) if target_idx < references.size else -1
+        measured_angle = float(measured_angles[target_idx])
+        true_angle = float("nan")
+        true_beta = float("nan")
+        if 0 <= reference_idx < len(scatterers):
+            true_angle = float(scatterers[reference_idx].angle_deg)
+            true_beta = float(scatterers[reference_idx].beta)
+        measured_beta_value = float(measured_beta[target_idx])
+        rows.append(
+            {
+                "target_idx": int(target_idx),
+                "reference_idx": reference_idx,
+                "range_bin": int(frontend_targets.range_bins[target_idx]),
+                "angle_bin": int(frontend_targets.angle_bins[target_idx]),
+                "true_angle_deg": true_angle,
+                "measured_angle_deg": measured_angle,
+                "angle_error_deg": measured_angle - true_angle,
+                "true_beta": true_beta,
+                "measured_beta": measured_beta_value,
+                "beta_initial_relative_error": abs(measured_beta_value - true_beta) / max(abs(true_beta), 1.0e-12),
+            }
+        )
+    return rows
 
 
 def best_target_index(radar: RadarObservation) -> int:
@@ -318,7 +368,7 @@ def slice_frontend_targets(frontend_targets, indices):
     if frontend_targets.target_reference_indices is not None:
         references = frontend_targets.target_reference_indices[indices]
     return type(frontend_targets)(
-        measured_kappa=frontend_targets.measured_kappa[indices].copy(),
+        measured_beta=frontend_targets.measured_beta[indices].copy(),
         slow_time=frontend_targets.slow_time[indices].copy(),
         wrapped_phase_rad=frontend_targets.wrapped_phase_rad[indices].copy(),
         available_mask=frontend_targets.available_mask[indices].copy(),
@@ -336,7 +386,7 @@ def range_bin_only_mixed_input(frontend: FrontendViews, scenario: Phase1Config) 
     range_bin = range_bin_only_reference_bin(frontend)
     if range_bin < 0 or range_bin >= range_fft.shape[2]:
         slow_time = np.full(range_fft.shape[0], np.nan + 1j * np.nan, dtype=complex)
-        measured_kappa = np.array([1.0], dtype=float)
+        measured_beta = np.array([1.0], dtype=float)
         angle_bin = -1
         rx_index = -1
     else:
@@ -346,44 +396,31 @@ def range_bin_only_mixed_input(frontend: FrontendViews, scenario: Phase1Config) 
         cube = np.asarray(range_angle.range_angle_cube, dtype=complex)
         power_by_angle = np.nanmedian(np.abs(cube[:, range_bin, :]) ** 2, axis=0)
         angle_bin = int(np.nanargmax(power_by_angle)) if power_by_angle.size else 0
-        measured_kappa = measured_kappa_from_frontend_angle(range_angle.angle_axis_deg[angle_bin], scenario)
+        measured_beta = measured_beta_from_frontend_angle(range_angle.angle_axis_deg[angle_bin], scenario)
     available = np.isfinite(slow_time.real) & np.isfinite(slow_time.imag) & (np.abs(slow_time) > 0.0)
     wrapped = np.angle(slow_time).astype(float)[None, :]
     wrapped[:, ~available] = np.nan
     return RadarAlgorithmInput(
-        measured_kappa=measured_kappa,
+        measured_beta=measured_beta,
         wrapped_phase_rad=wrapped,
         available_mask=available[None, :],
         selected_indices=np.array([0], dtype=int),
+        calibration_indices=np.array([0], dtype=int),
         initial_r=np.array([scenario.initial_measurement_variance], dtype=float),
         selection_scores=np.array([1.0], dtype=float),
         extra={
             "range_bin": int(range_bin),
             "rx_index": int(rx_index),
-            "angle_bin_for_kappa": int(angle_bin),
+            "angle_bin_for_beta": int(angle_bin),
             "input_view": "range_fft_range_bin",
         },
     )
 
 
-def measured_kappa_from_frontend_angle(angle_deg, scenario: Phase1Config) -> np.ndarray:
+def measured_beta_from_frontend_angle(angle_deg, scenario: Phase1Config) -> np.ndarray:
+    del scenario
     angle_arr = np.atleast_1d(np.asarray(angle_deg, dtype=float))
-    aoa_error_deg = frontend_aoa_error_samples(angle_arr.shape, scenario)
-    measured_angle_deg = np.clip(angle_arr + aoa_error_deg, -89.0, 89.0)
-    return np.asarray(angle_deg_to_measured_kappa(measured_angle_deg), dtype=float)
-
-
-def frontend_aoa_error_samples(shape, scenario: Phase1Config) -> np.ndarray:
-    bias_deg = scenario.frontend_aoa_error_bias_deg
-    if bias_deg is None:
-        bias_deg = scenario.aoa_error_deg
-    bias_deg = float(bias_deg)
-    std_deg = float(scenario.frontend_aoa_error_std_deg)
-    aoa_error_deg = np.full(shape, bias_deg, dtype=float)
-    if std_deg > 0.0:
-        rng = np.random.default_rng(int(scenario.seed) + 91)
-        aoa_error_deg = aoa_error_deg + rng.normal(0.0, std_deg, size=shape)
-    return aoa_error_deg
+    return np.asarray(angle_deg_to_measured_beta(angle_arr), dtype=float)
 
 
 def range_fft_by_rx(frontend: FrontendViews):
