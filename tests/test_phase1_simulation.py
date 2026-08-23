@@ -327,14 +327,13 @@ class Phase1SimulationTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir:
             output = Path(tmpdir) / "phase1.npz"
             run(output, config)
-            data = np.load(output)
-
-            q_ref = cold_start_reference_mean(data["q_m"], config)
-            self.assertIn("q_ref_m", data)
-            self.assertIn("delta_q_m", data)
-            self.assertIn("delta_main_phase_rad", data)
-            self.assertAlmostEqual(float(data["q_ref_m"]), q_ref)
-            np.testing.assert_allclose(data["delta_q_m"], data["q_m"] - q_ref)
+            with np.load(output) as data:
+                q_ref = cold_start_reference_mean(data["q_m"], config)
+                self.assertIn("q_ref_m", data)
+                self.assertIn("delta_q_m", data)
+                self.assertIn("delta_main_phase_rad", data)
+                self.assertAlmostEqual(float(data["q_ref_m"]), q_ref)
+                np.testing.assert_allclose(data["delta_q_m"], data["q_m"] - q_ref)
 
 
 class Phase1ConfigExtensionTest(unittest.TestCase):

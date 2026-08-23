@@ -2,9 +2,6 @@ import socket
 import struct
 import threading
 
-import netifaces
-import pytest
-
 import mmwavecapture.dca1000 as dca1000
 
 
@@ -17,18 +14,12 @@ def unused_udp_port(host):
         sock.close()
 
 
-def non_loopback_ipv4():
-    for interface in netifaces.interfaces():
-        for address in netifaces.ifaddresses(interface).get(netifaces.AF_INET, []):
-            ip = address.get("addr")
-            if ip and not ip.startswith("127."):
-                return ip
-    pytest.skip("no non-loopback IPv4 address is available for UDP integration test")
-
-
 def test_dca_command_round_trip_over_real_loopback_udp():
     host_ip = "127.0.0.1"
-    dca_ip = non_loopback_ipv4()
+    # Use a second address in 127/8 so the test remains local even when WSL uses
+    # mirrored networking. Sending from loopback to an interface address is not
+    # reliably routed back into the same WSL instance.
+    dca_ip = "127.0.0.2"
     config_port = unused_udp_port(dca_ip)
     data_port = unused_udp_port(host_ip)
     ready = threading.Event()

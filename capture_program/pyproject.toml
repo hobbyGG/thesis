@@ -3,10 +3,12 @@ name = "mmwave-capture-std"
 version = "0.1.0"
 description = "**mmwave-capture-std** is a *fast*, *reliable*, and *replicable* Texas Instruments millimeter-wave capture toolkit."
 authors = [{ name = "Louie Lu", email = "git@louie.lu" }]
-requires-python = "~=3.8"
+requires-python = ">=3.8,<4"
 readme = "README.md"
 license = "BSD-3-Clause-Clear"
 dependencies = [
+    "numpy>=1.24,<3; python_version < '3.12'",
+    "numpy>=1.26.4,<3; python_version >= '3.12'",
     "pyserial~=3.5",
     "loguru>=0.7.0,<0.8",
     "netifaces==0.11.0",
@@ -24,6 +26,7 @@ realsense = [
 [project.scripts]
 mmwavecapture-std = "mmwavecapture.cli:cli"
 mmwavecapture-preflight = "mmwavecapture.preflight:cli"
+mmwavecapture-export = "mmwavecapture.export_cli:cli"
 
 [tool.hatch.build.targets.sdist]
 include = ["src/mmwavecapture"]

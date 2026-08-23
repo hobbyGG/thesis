@@ -27,7 +27,7 @@ Capture Millimeter-wave Raw Data is Easy
 ----------------------------------------
 
 Here is an example of using `mmwave-capture-std` to capture mmwave data
-from IWR1483BOOST and DCA1000EVM:
+from IWR1843BOOST and DCA1000EVM:
 
 ```bash
 $ uv run mmwavecapture-std examples/capture_iwr1843.toml
@@ -52,7 +52,13 @@ example_dataset
 └── capture_00000
     ├── capture.log
     ├── config.toml
+    ├── status.json
     └── iwr1843
+        ├── algorithm_input
+        │   ├── adc_cube.npy
+        │   ├── chirp_cube.npy
+        │   ├── frame_times_s.npy
+        │   └── manifest.json
         ├── dca.json
         ├── dca.pcap
         └── radar.cfg
@@ -83,18 +89,58 @@ See the full documentation:
 [mmwave-capture-std Documentation](https://mmwave-capture-std.readthedocs.io/en/latest/index.html)
 for more information.
 
-Capture-only fork notes
------------------------
+Algorithm input contract
+------------------------
 
-This checkout keeps the acquisition path independent from offline radar
-processing. The default install contains only the IWR1843/DCA1000 control and
-capture dependencies; the original PCAP parser and RealSense support are not
-required for recording `dca.pcap`.
+A successful radar capture publishes a versioned `algorithm_input/` package.
+The acquisition program owns all DCA1000 packet ordering/integrity checks,
+two-lane LVDS decoding, `Q0,Q1,I0,I1` to `I+jQ` conversion, and radar-config
+reshaping. Downstream code never needs to parse PCAP, LVDS, or `radar.cfg`.
+
+- `chirp_cube.npy` is the lossless standardized `complex64` cube with axes
+  `(frame, chirp_loop, virtual_antenna, adc_sample)`.
+- `adc_cube.npy` is the frame-level `complex64` cube with axes
+  `(frame, virtual_antenna, adc_sample)`. By default it is the coherent mean
+  over chirp loops and matches the current algorithm frontend directly.
+- `frame_times_s.npy` is the nominal relative frame-start time axis.
+- `manifest.json` records the schema version, exact axes, radar dimensions,
+  TX/RX mapping, timing, transform, and DCA packet-integrity result.
+
+Read the stable package through the provided reader:
+
+```python
+from mmwavecapture import load_algorithm_input
+
+capture = load_algorithm_input("example_dataset/capture_00000/iwr1843")
+print(capture.adc_cube.shape)
+print(capture.frame_times_s)
+```
+
+To convert an older capture that already contains `dca.pcap` and `radar.cfg`:
+
+```bash
+uv run mmwavecapture-export example_dataset/capture_00000/iwr1843
+```
+
+The export fails closed on packet loss, byte-counter gaps, sequence gaps,
+unsupported ADC layouts, or a sample count that disagrees with `radar.cfg`.
+Set `export_algorithm_data = false` only when intentionally recording raw PCAP
+without publishing algorithm-ready data.
+
+Acquisition reliability notes
+-----------------------------
+
+This checkout keeps hardware-specific adaptation at the acquisition boundary.
+The default install does not require the optional legacy `disspcap` extension;
+the stable exporter is implemented in the core package.
 
 The acquisition lifecycle has additional failure cleanup and mock coverage for
 DCA command packets, radar UART commands, tcpdump startup, finite-capture
-timeouts, and interrupted sensor startup. Before using the hardware under WSL,
-follow [WSL_CAPTURE.md](WSL_CAPTURE.md) and run `mmwavecapture-preflight`.
+timeouts, asynchronous DCA1000 status packets, and interrupted sensor startup.
+Each attempt writes `config.toml` and `status.json` before hardware access; a
+failed capture therefore retains its configuration, phase, and error message.
+Before using the hardware under WSL, follow [WSL_CAPTURE.md](WSL_CAPTURE.md) and
+run `mmwavecapture-preflight`.
 
 Links
 -----

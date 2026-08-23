@@ -4,7 +4,7 @@
 
 ## 毫米波雷达采集程序
 
-原 GitHub 仓库中的 IWR1843 + DCA1000 采集程序完整保存在 [`capture_program/`](capture_program/)；其中保留了 WSL 采集流程、硬件预检、异常清理、mock 测试、Wireshark dissector 和原项目文档。WSL 实机采集请先阅读 [`capture_program/WSL_CAPTURE.md`](capture_program/WSL_CAPTURE.md)。替换仓库主体前的原始 `main` 历史另存于远端分支 `archive/mmwavecapture-main`。
+原 GitHub 仓库中的 IWR1843 + DCA1000 采集程序完整保存在 [`capture_program/`](capture_program/)；其中包含 WSL 采集流程、硬件预检、异常清理、mock 测试、PCAP/LVDS 解析、算法输入标准化和统一读取模块。成功采集会同时保留原始 `dca.pcap`，并生成带版本清单的 `algorithm_input/`。WSL 实机采集请先阅读 [`capture_program/WSL_CAPTURE.md`](capture_program/WSL_CAPTURE.md)。替换仓库主体前的原始 `main` 历史另存于远端分支 `archive/mmwavecapture-main`。
 
 ## 先看这里：已有做图和报告工具
 
@@ -33,9 +33,9 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 
 ## 一句话概览
 
-当前已实现的是 Phase 1 算法级验证链路：生成结构位移真值，合成毫米波雷达多目标 wrapped phase 和 synthetic ADC/range-angle frontend，生成加速度观测，执行 target selection、结构主相位 Kalman 融合、Ma-family baseline 对比、指标/gate 评估，并输出 CSV/Markdown/SVG 报告。
+当前已实现 Phase 1 算法级验证链路，以及真实 IWR1843/DCA1000 原始 ADC 的采集侧标准化链路：PCAP 连续性检查、两通道 LVDS/IQ 解码、四维 chirp cube、帧级 ADC cube、时间轴、版本化 manifest 和算法侧薄读取器。
 
-当前未实现的是完整真实毫米波雷达实测链路：真实 IWR1843 ADC 文件解析、真实天线幅相标定、真实 TDM-MIMO 相位补偿、真实雷达与 TDMS 同步采集验证、现场多径长期稳定性验证。
+当前仍未完成的是完整真实毫米波算法闭环：真实天线幅相标定、运动目标所需的 TDM-MIMO 多普勒相位补偿、实测目标检测/选择参数标定、真实雷达与加速度计/TDMS 同步融合验证，以及现场多径长期稳定性验证。
 
 ## 重要入口
 
@@ -45,6 +45,7 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 | 理解最终阶段性论文正文 | `基于毫米波雷达与 MEMS 加速度计融合的结构位移测量方法研究.md` |
 | 理解方法和代码对应关系 | `docs/algorithm_chain_review.md` |
 | 理解 Phase 1 仿真包 | `simulation/phase1/README.md` |
+| 把真实雷达采集交给算法 | `capture_program/README.md` 的 Algorithm input contract，以及 `simulation/phase1/capture_reader.py` |
 | 运行完整单元测试 | `python3 -m unittest discover tests -v` |
 | 运行 Phase 1 标准验证 | `python3 -m simulation.phase1.run_validation --output-dir simulation/outputs/phase1_validation` |
 | 运行含 TDMS 半实测桥梁场景的验证 | `python3 -m simulation.phase1.run_validation --output-dir simulation/outputs/phase1_validation`，当前默认包含半实测场景 |
@@ -57,7 +58,7 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 
 | 路径 | 内容 |
 |---|---|
-| `capture_program/` | IWR1843 + DCA1000 原始采集程序，包含最新 WSL 适配、测试和文档。 |
+| `capture_program/` | IWR1843 + DCA1000 采集程序，包含 WSL 适配、原始 PCAP 留档、算法输入标准化、读取器、测试和文档。 |
 | `simulation/` | Python 仿真和验证代码，核心在 `simulation/phase1/`。 |
 | `tests/` | `unittest` 测试，覆盖仿真、前端、目标选择、Kalman、baseline、报告、半实测场景。 |
 | `reports/` | 已整理的 Phase 1 方法与仿真汇报，以及可直接引用的 SVG/PNG 图表资产。 |

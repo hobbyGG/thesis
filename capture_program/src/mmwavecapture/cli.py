@@ -39,7 +39,15 @@ import mmwavecapture.capture
 
 
 @click.command()
-@click.argument("config_file", type=pathlib.Path)
+@click.argument(
+    "config_file",
+    type=click.Path(
+        path_type=pathlib.Path,
+        exists=True,
+        dir_okay=False,
+        readable=True,
+    ),
+)
 def cli(config_file: pathlib.Path):
     """This is a command line interface for mmwavecapture-std. It takes a
     configuration file as input and runs the capture.

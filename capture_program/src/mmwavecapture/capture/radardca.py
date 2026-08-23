@@ -45,6 +45,10 @@ from loguru import logger
 
 import mmwavecapture.dca1000
 import mmwavecapture.radar
+from mmwavecapture.algorithm_input import (
+    DEFAULT_OUTPUT_DIRECTORY,
+    export_algorithm_input,
+)
 from mmwavecapture.capture.capture import CaptureHardware
 
 
@@ -52,6 +56,7 @@ class RadarDCA(CaptureHardware):
     PCAP_OUTPUT_FILENAME = "dca.pcap"
     RADAR_CONFIG_FILENAME = "radar.cfg"
     DCA_CONFIG_FILENAME = "dca.json"
+    ALGORITHM_INPUT_DIRECTORY = DEFAULT_OUTPUT_DIRECTORY
 
     @logger.catch(reraise=True)
     def __init__(
@@ -63,8 +68,12 @@ class RadarDCA(CaptureHardware):
         radar_data_port: str = "/dev/ttyACM1",
         dca_ip: str = "192.168.33.180",
         dca_config_port: int = 4096,
+        dca_data_port: int = 4098,
         host_ip: str = "192.168.33.30",
         capture_frames: int = 100,
+        export_algorithm_data: bool = True,
+        algorithm_chirp_aggregation: str = "coherent_mean",
+        save_chirp_cube: bool = True,
         init_capture_hw: bool = True,
         tcpdump_path: Optional[str] = None,
         capture_timeout_s: Optional[float] = None,
@@ -78,10 +87,21 @@ class RadarDCA(CaptureHardware):
         self._dca_eth_interface = dca_eth_interface
         self._dca_ip = dca_ip
         self._dca_config_port = dca_config_port
+        self._dca_data_port = dca_data_port
         self._host_ip = host_ip
         self._capture_frames = capture_frames
+        self._export_algorithm_data = export_algorithm_data
+        self._algorithm_chirp_aggregation = algorithm_chirp_aggregation
+        self._save_chirp_cube = save_chirp_cube
         self._initialized = False
         self._tcpdump_startup_delay_s = tcpdump_startup_delay_s
+
+        if capture_frames < 0:
+            raise ValueError("capture_frames must be zero or positive")
+        if algorithm_chirp_aggregation not in ("coherent_mean", "first"):
+            raise ValueError(
+                "algorithm_chirp_aggregation must be `coherent_mean` or `first`"
+            )
 
         resolved_tcpdump = tcpdump_path or shutil.which("tcpdump")
         if not resolved_tcpdump:
@@ -124,21 +144,33 @@ class RadarDCA(CaptureHardware):
             host_ip=self._host_ip,
             dca_ip=self._dca_ip,
             dca_config_port=self._dca_config_port,
+            dca_data_port=self._dca_data_port,
         )
 
         # Radar
-        self.radar = mmwavecapture.radar.Radar(
-            config_port=self._radar_config_port,
-            config_baudrate=115200,
-            data_port=self._radar_data_port,
-            data_baudrate=921600,
-            config_filename=self._radar_config_filename,
-            initialize_connection_and_radar=False,
-            capture_frames=self._capture_frames,
-        )
+        try:
+            self.radar = mmwavecapture.radar.Radar(
+                config_port=self._radar_config_port,
+                config_baudrate=115200,
+                data_port=self._radar_data_port,
+                data_baudrate=921600,
+                config_filename=self._radar_config_filename,
+                initialize_connection_and_radar=False,
+                capture_frames=self._capture_frames,
+            )
+        except BaseException:
+            self.dca.close()
+            raise
 
         if init_capture_hw:
-            self.init_capture_hw()
+            try:
+                self.init_capture_hw()
+            except BaseException:
+                try:
+                    self.close()
+                except Exception:
+                    logger.exception("Failed to close RadarDCA after initialization error")
+                raise
 
     @staticmethod
     def _require_success(ok: bool, action: str) -> None:
@@ -277,6 +309,33 @@ class RadarDCA(CaptureHardware):
         """Stop all active resources without waiting for a finite capture."""
         self._shutdown_capture()
 
+    def close(self) -> None:
+        """Stop active work and release serial ports and UDP sockets."""
+        errors = []
+        try:
+            self._shutdown_capture()
+        except Exception as exc:
+            errors.append(f"capture shutdown failed: {exc}")
+
+        close_radar = getattr(self.radar, "close", None)
+        if not callable(close_radar):
+            close_radar = getattr(self.radar, "close_serials", None)
+        if callable(close_radar):
+            try:
+                close_radar()
+            except Exception as exc:
+                errors.append(f"radar close failed: {exc}")
+
+        close_dca = getattr(self.dca, "close", None)
+        if callable(close_dca):
+            try:
+                close_dca()
+            except Exception as exc:
+                errors.append(f"DCA1000 close failed: {exc}")
+
+        if errors:
+            raise RuntimeError("; ".join(errors))
+
     def _abort_safely(self) -> None:
         try:
             self.abort_capture()
@@ -311,6 +370,20 @@ class RadarDCA(CaptureHardware):
                     "1",
                     "-q",
                     "-n",
+                    "udp",
+                    "and",
+                    "src",
+                    "host",
+                    self._dca_ip,
+                    "and",
+                    "dst",
+                    "host",
+                    self._host_ip,
+                    "and",
+                    "dst",
+                    "port",
+                    str(self._dca_config_port),
+                    "and",
                     "udp[10:4] == 0x0a000001",
                 ],
                 stdout=subprocess.DEVNULL,
@@ -374,3 +447,20 @@ class RadarDCA(CaptureHardware):
             raise ValueError("Base path is not set")
         self.radar.dump_config(self.base_path / self.RADAR_CONFIG_FILENAME)
         self.dca.dump_config(self.base_path / self.DCA_CONFIG_FILENAME)
+
+    def finalize_capture(self) -> None:
+        """Publish packet-checked arrays in the stable algorithm-input schema."""
+
+        if not self._export_algorithm_data:
+            return
+        if not self.base_path:
+            raise ValueError("Base path is not set")
+        manifest = export_algorithm_input(
+            self.base_path / self.PCAP_OUTPUT_FILENAME,
+            self.base_path / self.RADAR_CONFIG_FILENAME,
+            self.base_path / self.ALGORITHM_INPUT_DIRECTORY,
+            data_port=self._dca_data_port,
+            chirp_aggregation=self._algorithm_chirp_aggregation,
+            save_chirp_cube=self._save_chirp_cube,
+        )
+        logger.success(f"Algorithm input exported to `{manifest}`")

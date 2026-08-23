@@ -34,8 +34,8 @@
 from __future__ import annotations
 
 import enum
-import re
 import pathlib
+import re
 import time
 from typing import Optional
 
@@ -62,15 +62,19 @@ class RadarCoreConfig:
     def __init__(self, filename: Optional[pathlib.Path] = None):
         #: The radar config
         self._config: dict[str, list[str]] = {}
+        self._command_args: dict[str, list[list[str]]] = {}
 
         # XXX: only support reading from file at this moment
         if filename is not None:
-            with open(filename) as f:
-                for n in f.readlines():
-                    if n.startswith("%") or " " not in n:
+            with open(filename, encoding="utf-8") as config_file:
+                for line in config_file:
+                    stripped = line.strip()
+                    if not stripped or stripped.startswith("%"):
                         continue
-                    cmd, args = n.strip().split(" ", 1)
-                    self._config[cmd] = args.split(" ")
+                    fields = stripped.split()
+                    cmd, args = fields[0], fields[1:]
+                    self._config[cmd] = args
+                    self._command_args.setdefault(cmd, []).append(args)
 
         #: Total number of frames to capture, 0 means infinite
         self.frames: int = int(self._config["frameCfg"][3])
@@ -113,6 +117,11 @@ class RadarCoreConfig:
             self.virtual_antennas,
             self.samples,
         )
+
+    def command_args(self, command: str) -> tuple[tuple[str, ...], ...]:
+        """Return every occurrence of a radar command without losing duplicates."""
+
+        return tuple(tuple(args) for args in self._command_args.get(command, ()))
 
 
 class Radar:
@@ -164,11 +173,12 @@ class Radar:
         self._data_baudrate = data_baudrate
         self._timeout = timeout
         self._config_filename = config_filename
-        self._config = [
-            n.strip()
-            for n in open(self._config_filename).readlines()
-            if not n.startswith("%")
-        ]  # skip comments in config file
+        with open(self._config_filename, encoding="utf-8") as config_file:
+            self._config = [
+                line.strip()
+                for line in config_file
+                if line.strip() and not line.lstrip().startswith("%")
+            ]
         self.capture_frames = capture_frames
 
         self._config_serial = serial.Serial()
@@ -191,13 +201,15 @@ class Radar:
     @capture_frames.setter
     @logger.catch(reraise=True)
     def capture_frames(self, capture_frames: int) -> None:
+        if capture_frames < 0:
+            raise ValueError("capture_frames must be zero or positive")
         self._capture_frames = capture_frames
 
         # We need to replace frameCfg `number of frames` with `self._capture_frames`
         # Ref: `frameCfg/number of frames`, p.24, MMWAVE SDK User Guide
         for i, command in enumerate(self._config):
             if command.startswith("frameCfg"):
-                frame_cfg = command.split(" ")
+                frame_cfg = command.split()
                 frame_cfg[4] = f"{self._capture_frames:d}"
                 command = " ".join(frame_cfg)
                 self._config[i] = command
@@ -249,9 +261,14 @@ class Radar:
                 f"{self._config_port} - No response from radar, try to increase timeout"
             )
 
-        response = re.findall(RADAR_OUTPUT_REGEX, response.decode("utf-8"), re.DOTALL)[
-            0
-        ].strip()
+        decoded = response.decode("utf-8", errors="replace")
+        match = re.search(RADAR_OUTPUT_REGEX, decoded, re.DOTALL)
+        if match is None:
+            raise RuntimeError(
+                f"{self._config_port} - Unexpected radar response to `{command}`: "
+                f"{decoded!r}"
+            )
+        response = match.group(1).strip()
 
         logger.trace(f"{self._config_port} - response: {response}")
         if "Done" not in response:
@@ -274,7 +291,12 @@ class Radar:
         :rtype: Tuple[RadarStatus, int]1
         """
         resp = self._send_command_and_check_output("queryDemoStatus")
-        state, data_baudrate = re.search(RADAR_STATUS_QUERY_REGEX, resp).groups()
+        match = re.search(RADAR_STATUS_QUERY_REGEX, resp)
+        if match is None:
+            raise RuntimeError(
+                f"{self._config_port} - Unexpected radar status response: {resp!r}"
+            )
+        state, data_baudrate = match.groups()
         return RadarStatus(int(state)), int(data_baudrate)
 
     def initialize(self) -> None:
@@ -285,20 +307,31 @@ class Radar:
 
     def connect_serials(self) -> None:
         """Connect serial ports, setup baudrate and timeout"""
-        self._config_serial.port = self._config_port
-        self._config_serial.baudrate = self._config_baudrate
-        self._config_serial.timeout = self._timeout
-        self._config_serial.open()
+        try:
+            self._config_serial.port = self._config_port
+            self._config_serial.baudrate = self._config_baudrate
+            self._config_serial.timeout = self._timeout
+            self._config_serial.open()
 
-        self._data_serial.port = self._data_port
-        self._data_serial.baudrate = self._data_baudrate
-        self._data_serial.timeout = self._timeout
-        self._data_serial.open()
+            self._data_serial.port = self._data_port
+            self._data_serial.baudrate = self._data_baudrate
+            self._data_serial.timeout = self._timeout
+            self._data_serial.open()
+        except BaseException:
+            self.close_serials()
+            raise
 
     def close_serials(self) -> None:
-        """Close serial ports"""
-        self._config_serial.close()
-        self._data_serial.close()
+        """Close serial ports. Safe to call after partial initialization."""
+        for serial_port in (
+            getattr(self, "_config_serial", None),
+            getattr(self, "_data_serial", None),
+        ):
+            if serial_port is not None:
+                serial_port.close()
+
+    def close(self) -> None:
+        self.close_serials()
 
     @logger.catch(reraise=True)
     def config(self) -> None:
@@ -310,7 +343,7 @@ class Radar:
             # We need to replace frameCfg `number of frames` with `self._capture_frames`
             # Ref: `frameCfg/number of frames`, p.24, MMWAVE SDK User Guide
             if command.startswith("frameCfg"):
-                frame_cfg = command.split(" ")
+                frame_cfg = command.split()
                 frame_cfg[4] = f"{self._capture_frames:d}"
                 command = " ".join(frame_cfg)
 
@@ -338,8 +371,11 @@ class Radar:
 
     def dump_config(self, outfile: pathlib.Path) -> None:
         """Dump current radar config to file"""
-        with open(outfile, "w") as f:
-            f.write("\n".join(self._config))
+        with open(outfile, "w", encoding="utf-8") as config_file:
+            config_file.write("\n".join(self._config) + "\n")
 
     def __del__(self):
-        self.close_serials()
+        try:
+            self.close()
+        except Exception:
+            pass

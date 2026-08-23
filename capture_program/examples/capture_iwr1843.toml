@@ -1,5 +1,13 @@
 dataset_dir = "example_dataset"
 
+[metadata]
+title = "IWR1843 raw radar dataset"
+creator = "unknown"
+subject = "IWR1843, DCA1000, mmWave radar"
+description = "Raw ADC data collected with IWR1843BOOST and DCA1000EVM"
+date = "<today>"
+license = "CC-BY-SA-4.0"
+
 [logging.stderr]
 enable = true
 level = "INFO"
@@ -16,6 +24,10 @@ radar_config_port = "/dev/ttyACM0"
 radar_data_port = "/dev/ttyACM1"
 dca_ip = "192.168.33.180"
 dca_config_port = 4096
+dca_data_port = 4098
 host_ip = "192.168.33.30"
 radar_config_filename = "tests/configs/xwr18xx_profile_2023_01_01T00_00_00_000.cfg"
 capture_frames = 10
+export_algorithm_data = true
+algorithm_chirp_aggregation = "coherent_mean"
+save_chirp_cube = true

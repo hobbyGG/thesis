@@ -36,9 +36,10 @@ from __future__ import annotations
 import abc
 import datetime
 import importlib
+import json
 import pathlib
 import sys
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
 
 import toml
 from loguru import logger
@@ -48,7 +49,7 @@ class CaptureHardware(abc.ABC):
     """CaptureHardware is the abstract class for all capture hardware.
 
 
-    For each capture hardware, there are 5 stages of capture process:
+    For each capture hardware, there are 6 stages of capture process:
 
     1. Initialize capture hardware
 
@@ -85,6 +86,11 @@ class CaptureHardware(abc.ABC):
 
         This stage should dump the configuration of the capture hardware
         to `base_path/<config_name>` for future reference.
+
+    6. Finalize capture output
+
+        This success-only stage validates and publishes consumer-facing data.
+        Partial raw files from a failed capture are never finalized as complete.
     """
 
     _hw_name: str = ""
@@ -150,6 +156,22 @@ class CaptureHardware(abc.ABC):
         """Dump the configuration of the capture hardware to `base_path`"""
         raise NotImplementedError
 
+    def finalize_capture(self) -> None:
+        """Create validated, consumer-facing outputs after configuration dump.
+
+        Hardware implementations may override this hook. It runs only after a
+        successful capture, so failure cleanup can still preserve partial raw
+        files without attempting to publish them as complete algorithm input.
+        """
+
+    def close(self) -> None:
+        """Release hardware resources after capture.
+
+        Hardware implementations with persistent sockets, serial ports, or
+        pipelines should override this method. The default is a no-op so older
+        optional capture plugins remain compatible.
+        """
+
 
 class Capture:
     def __init__(self, base_path: pathlib.Path):
@@ -187,18 +209,65 @@ class Capture:
             logger.info("Capture finished")
 
             logger.info("Dumping capture hardware configurations")
-            for hw in self._cap_hw:
-                hw.dump_config()
+            self._dump_configs()
+            logger.info("Finalizing capture outputs")
+            self._finalize_outputs()
         except BaseException:
-            for hw in reversed(self._cap_hw):
-                abort_capture = getattr(hw, "abort_capture", None)
-                if not callable(abort_capture):
-                    continue
-                try:
-                    abort_capture()
-                except Exception:
-                    logger.exception(f"Failed to abort capture hardware `{hw.hw_name}`")
+            self._abort_hardware()
+            self._dump_configs(suppress_errors=True)
+            self._close_hardware(suppress_errors=True)
             raise
+        else:
+            self._close_hardware()
+
+    def _abort_hardware(self) -> None:
+        for hw in reversed(self._cap_hw):
+            abort_capture = getattr(hw, "abort_capture", None)
+            if not callable(abort_capture):
+                continue
+            try:
+                abort_capture()
+            except Exception:
+                logger.exception(f"Failed to abort capture hardware `{hw.hw_name}`")
+
+    def _dump_configs(self, suppress_errors: bool = False) -> None:
+        errors = []
+        for hw in self._cap_hw:
+            try:
+                hw.dump_config()
+            except Exception as exc:
+                errors.append(f"{hw.hw_name}: {exc}")
+                logger.exception(
+                    f"Failed to dump capture hardware configuration `{hw.hw_name}`"
+                )
+        if errors and not suppress_errors:
+            raise RuntimeError(
+                "hardware configuration dump failed: " + "; ".join(errors)
+            )
+
+    def _close_hardware(self, suppress_errors: bool = False) -> None:
+        errors = []
+        for hw in reversed(self._cap_hw):
+            try:
+                hw.close()
+            except Exception as exc:
+                errors.append(f"{hw.hw_name}: {exc}")
+                logger.exception(f"Failed to close capture hardware `{hw.hw_name}`")
+        if errors and not suppress_errors:
+            raise RuntimeError("hardware close failed: " + "; ".join(errors))
+
+    def _finalize_outputs(self) -> None:
+        errors = []
+        for hw in self._cap_hw:
+            try:
+                hw.finalize_capture()
+            except Exception as exc:
+                errors.append(f"{hw.hw_name}: {exc}")
+                logger.exception(
+                    f"Failed to finalize capture output for `{hw.hw_name}`"
+                )
+        if errors:
+            raise RuntimeError("hardware output finalization failed: " + "; ".join(errors))
 
 
 class CaptureManager:
@@ -231,8 +300,9 @@ class CaptureManager:
 
     CAPTURE_LOG_FILENAME = "capture.log"
     CAPTURE_MANAGER_CONFIG_OUTPUT_FILENAME = "config.toml"
+    CAPTURE_STATUS_FILENAME = "status.json"
     CAPTURE_DIR_PREFIX = "capture_"
-    CAPTURE_DIR_FORMAT = CAPTURE_DIR_PREFIX + "{:05d}"  # XXX: fixed to 5 digits?
+    CAPTURE_DIR_FORMAT = CAPTURE_DIR_PREFIX + "{:05d}"
 
     def __init__(self, config_filename: pathlib.Path):
         self._hw: list[CaptureHardware] = []
@@ -242,11 +312,11 @@ class CaptureManager:
         # Load config and create dataset directory
         self._load_config(self._config_filename)
         self._dataset_dir = pathlib.Path(self._config["dataset_dir"])
-        self._dataset_dir.mkdir(exist_ok=True)
+        self._dataset_dir.mkdir(parents=True, exist_ok=True)
 
-        # Create capture directory
-        self._capture_dir = self._get_next_capture_dir()
-        self._capture_dir.mkdir(exist_ok=True)
+        # Allocate the capture directory atomically so concurrent invocations do
+        # not write into the same capture_XXXXX directory.
+        self._capture_dir = self._create_next_capture_dir()
 
         # Init logging
         logger.remove()
@@ -267,74 +337,158 @@ class CaptureManager:
         logger.debug(f"Dataset directory created at `{self._dataset_dir}/`")
         logger.debug(f"Capture directory created at `{self._capture_dir}/`")
 
+        # Persist provenance before touching hardware. A failed initialization
+        # or capture must still leave enough evidence to reproduce the attempt.
+        self._write_config()
+        self._write_status(status="pending", phase="created")
+
     def _load_config(self, path: pathlib.Path) -> None:
-        with open(path) as f:
-            self._config = toml.load(f)
+        with open(path, encoding="utf-8") as config_file:
+            self._config = toml.load(config_file)
 
-        # Validate configuration
-        if "dataset_dir" not in self._config:
-            raise RuntimeError("`dataset_dir` is not specified in config")
+        if not self._config.get("dataset_dir"):
+            raise ValueError("`dataset_dir` is not specified in config")
 
-        if "metadata" not in self._config:
-            raise ValueError("No `metadata` section in config file")
+        hardware = self._config.get("hardware")
+        if not isinstance(hardware, dict) or not hardware:
+            raise ValueError("No capture hardware is specified in config")
+        for hw_name, hw_config in hardware.items():
+            if not isinstance(hw_config, dict) or not hw_config.get("hw_def_class"):
+                raise ValueError(
+                    f"Capture hardware `{hw_name}` is missing `hw_def_class`"
+                )
 
-        # Process dataset metadata and auto generated elements
-        if "date" not in self._config["metadata"]:
-            raise ValueError("No `date` in `metadata` section")
+        metadata = self._config.setdefault("metadata", {})
+        if not isinstance(metadata, dict):
+            raise ValueError("`metadata` must be a TOML table")
+        metadata_defaults = {
+            "title": "Millimeter-wave dataset",
+            "creator": "unknown",
+            "subject": "",
+            "description": "",
+            "license": "CC-BY-SA-4.0",
+        }
+        for key, default in metadata_defaults.items():
+            metadata.setdefault(key, default)
+        if metadata.get("date", "<today>") == "<today>":
+            metadata["date"] = datetime.datetime.now()
 
-        DEFAULTS_ELEMENTS = [
-            ("title", "Millimeter-wave dataset"),
-            ("creator", "unknown"),
-            ("subject", ""),
-            ("description", ""),
-            ("license", "CC-BY-SA-4.0"),
-        ]
-        for elem, default in DEFAULTS_ELEMENTS:
-            value = self._config["metadata"].get(elem, default)
-            self._config["metadata"][elem] = value
+        logging_config = self._config.setdefault("logging", {})
+        if not isinstance(logging_config, dict):
+            raise ValueError("`logging` must be a TOML table")
+        stderr_config = logging_config.setdefault("stderr", {})
+        logfile_config = logging_config.setdefault("logfile", {})
+        if not isinstance(stderr_config, dict):
+            raise ValueError("`logging.stderr` must be a TOML table")
+        if not isinstance(logfile_config, dict):
+            raise ValueError("`logging.logfile` must be a TOML table")
+        stderr_config.setdefault("enable", True)
+        stderr_config.setdefault("level", "INFO")
+        logfile_config.setdefault("enable", True)
+        logfile_config.setdefault("level", "TRACE")
+        logfile_config.setdefault("serialize", True)
 
-        if self._config["metadata"]["date"] == "<today>":
-            self._config["metadata"]["date"] = datetime.datetime.now()
+    def _create_next_capture_dir(self) -> pathlib.Path:
+        capture_ids = []
+        for path in self._dataset_dir.glob(f"{self.CAPTURE_DIR_PREFIX}*"):
+            suffix = path.name[len(self.CAPTURE_DIR_PREFIX) :]
+            if suffix.isdigit():
+                capture_ids.append(int(suffix))
 
-    def _get_next_capture_dir(self) -> pathlib.Path:
-        dir_names = [
-            i.name.split(self.CAPTURE_DIR_PREFIX)[-1]
-            for i in self._dataset_dir.glob(f"{self.CAPTURE_DIR_PREFIX}*")
-        ]
+        next_id = max(capture_ids, default=-1) + 1
+        while True:
+            capture_dir = self._dataset_dir / self.CAPTURE_DIR_FORMAT.format(next_id)
+            try:
+                capture_dir.mkdir(exist_ok=False)
+            except FileExistsError:
+                next_id += 1
+                continue
+            logger.info(f"Capture ID: {next_id}")
+            return capture_dir
 
-        next_id = 0
-        if dir_names:
-            next_id = max(map(int, dir_names)) + 1
+    def _write_config(self) -> None:
+        output = self._capture_dir / self.CAPTURE_MANAGER_CONFIG_OUTPUT_FILENAME
+        temporary = output.with_suffix(output.suffix + ".tmp")
+        with open(temporary, "w", encoding="utf-8") as config_file:
+            toml.dump(self._config, config_file)
+        temporary.replace(output)
 
-        logger.info(f"Capture ID: {next_id}")
-        return self._dataset_dir / self.CAPTURE_DIR_FORMAT.format(next_id)
+    def _write_status(
+        self,
+        status: str,
+        phase: str,
+        error: Optional[BaseException] = None,
+    ) -> None:
+        output = self._capture_dir / self.CAPTURE_STATUS_FILENAME
+        temporary = output.with_suffix(output.suffix + ".tmp")
+        payload = {
+            "schema_version": 1,
+            "status": status,
+            "phase": phase,
+            "updated_at": datetime.datetime.now().astimezone().isoformat(),
+        }
+        if error is not None:
+            payload["error"] = {
+                "type": type(error).__name__,
+                "message": str(error),
+            }
+        temporary.write_text(
+            json.dumps(payload, indent=2, sort_keys=True) + "\n",
+            encoding="utf-8",
+        )
+        temporary.replace(output)
+
+    def _record_failure(self, phase: str, error: BaseException) -> None:
+        try:
+            self._write_status(status="failed", phase=phase, error=error)
+        except Exception:
+            logger.exception("Failed to persist capture failure status")
+
+    def _close_initialized_hardware(self) -> None:
+        for hw in reversed(self._hw):
+            try:
+                hw.close()
+            except Exception:
+                logger.exception(f"Failed to close capture hardware `{hw.hw_name}`")
 
     def init_hw(self) -> None:
-        for hw in self._config["hardware"]:
-            logger.info(
-                f"Initializing capture hardware `{hw}` from "
-                f"`{self._config['hardware'][hw]['hw_def_class']}`"
-            )
-            # Get capture hardware class by `hw_def_class`
-            module_name, class_name = self._config["hardware"][hw][
-                "hw_def_class"
-            ].rsplit(".", 1)
-            module = importlib.import_module(module_name)
-            hw_class = getattr(module, class_name)
+        if self._hw:
+            raise RuntimeError("Capture hardware is already initialized")
 
-            # Create capture hardware instance
-            hw_config = self._config["hardware"][hw]
-            hw_obj = hw_class(hw_name=hw, **hw_config)
-            self._hw.append(hw_obj)
-            logger.success(f"Capture hardware `{hw}` initialized")
+        self._write_status(status="running", phase="initializing")
+        try:
+            for hw in self._config["hardware"]:
+                logger.info(
+                    f"Initializing capture hardware `{hw}` from "
+                    f"`{self._config['hardware'][hw]['hw_def_class']}`"
+                )
+                # Get capture hardware class by `hw_def_class`
+                module_name, class_name = self._config["hardware"][hw][
+                    "hw_def_class"
+                ].rsplit(".", 1)
+                module = importlib.import_module(module_name)
+                hw_class = getattr(module, class_name)
 
+                # Create capture hardware instance
+                hw_config = self._config["hardware"][hw]
+                hw_obj = hw_class(hw_name=hw, **hw_config)
+                self._hw.append(hw_obj)
+                logger.success(f"Capture hardware `{hw}` initialized")
+        except BaseException as exc:
+            self._close_initialized_hardware()
+            self._record_failure("initialization", exc)
+            raise
+
+        self._write_status(status="ready", phase="initialized")
         logger.success(
             f"Total of {len(self._config['hardware'])} capture hardware initialized"
         )
 
     def capture(self) -> None:
         if not self._hw:
-            raise RuntimeError("Capture hardware is not initialized")
+            error = RuntimeError("Capture hardware is not initialized")
+            self._record_failure("capture", error)
+            raise error
 
         # Initialize capture hardware and setup capture
         capture = Capture(self._capture_dir)
@@ -342,13 +496,12 @@ class CaptureManager:
             logger.info(f"Adding capture hardware `{hw.hw_name}`")
             capture.add_capture_hardware(hw)
 
-        # Start capture
-        capture.capture()
+        self._write_status(status="running", phase="capture")
+        try:
+            capture.capture()
+        except BaseException as exc:
+            self._record_failure("capture", exc)
+            raise
 
-        # After finishing capture, dump capture config into capture dir
-        with open(
-            capture._base_path / self.CAPTURE_MANAGER_CONFIG_OUTPUT_FILENAME, "w"
-        ) as f:
-            toml.dump(self._config, f)
-
+        self._write_status(status="complete", phase="complete")
         logger.success(f"Capture finished, all files output to `{capture._base_path}/`")

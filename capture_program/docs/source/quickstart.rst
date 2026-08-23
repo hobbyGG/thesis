@@ -204,6 +204,11 @@ The dataset directories structure is like this:
     │   ├── config.toml     # Capture configuration
     │   ├── capture.log     # Capture log
     │   ├── iwr1843_vert/   # Capture hardware name
+    │   │   ├── algorithm_input/
+    │   │   │   ├── adc_cube.npy
+    │   │   │   ├── chirp_cube.npy
+    │   │   │   ├── frame_times_s.npy
+    │   │   │   ├── manifest.json
     │   │   ├── dca.pcap    # DCA1000EVM capture pcap
     │   │   ├── radar.cfg   # Radar configuration
     │   │   ├── dca.json    # DCA1000EVM configuration
@@ -235,8 +240,8 @@ Easy and simple!
    DCA1000EVM, etc.)
 
 
-Parsing the Captured Raw Millimeter-wave Signal
------------------------------------------------
+Using Captured Radar Data in an Algorithm
+-----------------------------------------
 
 In the example configuration, the captured result will be stored in
 ``example_dataset/capture_00000/``. The layout should be like this:
@@ -247,66 +252,46 @@ In the example configuration, the captured result will be stored in
     ├── config.toml
     ├── capture.log
     ├── iwr1843/
+    │   ├── algorithm_input/
+    │   │   ├── adc_cube.npy
+    │   │   ├── chirp_cube.npy
+    │   │   ├── frame_times_s.npy
+    │   │   ├── manifest.json
     │   ├── dca.pcap
     │   ├── radar.cfg
     │   ├── dca.json
 
+The acquisition program, rather than each downstream algorithm, owns the
+DCA1000 and radar-specific adaptation. It checks packet and byte-counter
+continuity, decodes the two LVDS lanes and I/Q order, and reshapes samples using
+``radar.cfg`` before publishing ``manifest.json``.
 
-Let us try to parse the captured raw millimeter-wave signal from pcap file
-into a ``numpy.ndarray[numpy.complex64]`` array.
+Load the versioned, stable output through the reader:
 
 .. code-block:: python
 
-    from mmwavecapture.parser.pcap import PcapCparser
+    from mmwavecapture import load_algorithm_input
 
-    pcap_file = ("example_dataset/capture_00000/"
-                "iwr1843/dca.pcap")
-    data_ports = [4098]
-    pcap = PcapCparser(
-                pcap_file,
-                data_ports=data_ports,
-                lsb_quadrature=True,
-                preprocessing=True)
-    for port in data_ports:
-        print(pcap.validate_dca_data(port))
-        raw_signal = pcap.get_complex(port)
-        print(raw_signal.shape)
-        print(raw_signal.dtype)
-        print(raw_signal[:8])
+    capture = load_algorithm_input(
+        "example_dataset/capture_00000/iwr1843"
+    )
+    print(capture.adc_cube.shape)
+    print(capture.adc_cube.dtype)
+    print(capture.frame_times_s)
 
-The output should be like this
-(of course the complex numbers will be different):
+``adc_cube`` is ``complex64`` with axes
+``(frame, virtual_antenna, adc_sample)`` and is ready for the frame-level
+algorithm frontend. ``chirp_cube`` retains the lossless standardized axes
+``(frame, chirp_loop, virtual_antenna, adc_sample)``. Exact axes, TX/RX channel
+mapping, timing, aggregation, and integrity results are recorded in
+``manifest.json``.
 
-.. code-block:: bash
-
-    True
-    (327680,)
-    complex64
-    [ 1.6421e+04+6.8000e+01j -5.2000e+01+1.0800e+02j
-      1.4000e+01-1.6368e+04j 4.3000e+01+2.6000e+02j
-      3.2670e+04+1.6441e+04j -5.3700e+02-2.6200e+02j
-      -1.6415e+04+1.6223e+04j  3.2400e+02-4.3900e+02j]
-
-How come the raw data shape is ``(327680,)``?
-Let us check the ``radar.cfg`` file:
+An older capture containing only ``dca.pcap`` and ``radar.cfg`` can be exported
+once at the acquisition boundary:
 
 .. code-block:: bash
 
-   channelCfg 15 5 0
-   profileCfg 0 77 429 7 57.14 0 0 70 1 256 5209 0 0 30
-   chirpCfg 0 0 0 0 0 0 0 1
-   chirpCfg 1 1 0 0 0 0 0 4
-   frameCfg 0 1 16 10 100 1 0
-
-This means we have:
-
-- 10 frames
-- 2 TX antennas
-- 4 RX antennas
-- 16 chirps per frame
-- 256 samples per chirp
-
-Multiply them we get 327680 (10 * 2 * 4 * 16 * 256), which is the total complex numbers of the raw data!
+    uv run mmwavecapture-export example_dataset/capture_00000/iwr1843
 
 Debugging the pcap file by Wireshark
 ------------------------------------

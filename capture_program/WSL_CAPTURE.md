@@ -36,7 +36,7 @@ uv sync
 uv run pytest -q
 ```
 
-The expected software-only result is currently `13 passed`; hardware and
+The expected software-only result is currently `19 passed`; hardware and
 optional parser/RealSense tests are skipped by default.
 
 ## 2. Attach the radar USB UARTs
@@ -131,11 +131,25 @@ Successful output contains:
 example_dataset/capture_00000/
 ├── capture.log
 ├── config.toml
+├── status.json
 └── iwr1843/
+    ├── algorithm_input/
+    │   ├── adc_cube.npy
+    │   ├── chirp_cube.npy
+    │   ├── frame_times_s.npy
+    │   └── manifest.json
     ├── dca.json
     ├── dca.pcap
     └── radar.cfg
 ```
+
+`status.json` must report `"status": "complete"`. Failed attempts keep this
+file with the failing phase and error message, together with the configuration
+files that could be written safely.
+
+The `algorithm_input/manifest.json` file is written last, after DCA packet
+continuity, byte count, I/Q conversion, and radar dimensions have all passed.
+Its absence means the capture must not be handed to the algorithm as complete.
 
 Confirm that data packets exist before moving the dataset to the offline
 algorithm machine:
@@ -143,6 +157,7 @@ algorithm machine:
 ```bash
 test -s example_dataset/capture_00000/iwr1843/dca.pcap
 tcpdump -nn -r example_dataset/capture_00000/iwr1843/dca.pcap 'udp port 4098' -c 5
+uv run python -c "from mmwavecapture import load_algorithm_input; x=load_algorithm_input('example_dataset/capture_00000/iwr1843'); print(x.adc_cube.shape)"
 ```
 
 ## What the Mac tests do not prove

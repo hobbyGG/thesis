@@ -27,6 +27,9 @@ delta_Theta(t) = 4*pi*delta_q(t)/lambda
 - `evaluation.py` and `gates.py`: metric row construction and feasibility gate definitions.
 - `scenarios/`: one module per synthetic validation scenario. `scenarios.build_phase1_scenarios()` returns the clean paper scenario set, while `scenarios.build_all_phase1_scenarios()` returns sanity, appendix, robustness, and diagnostic scenarios as well.
 - `inputs.py`: backward-compatible re-export layer for older scenario-input imports.
+- `capture_reader.py`: loads the acquisition program's stable algorithm-input
+  schema into `ADCCubeObservation` and `FrontendConfig`; it does not parse raw
+  PCAP, LVDS, or radar configuration data.
 - `methods.py`: compatibility re-export layer used by low-level tests and older notebooks; paper method selection is controlled by `method_registry.py`.
 
 ## Extension Points
@@ -108,6 +111,26 @@ The `same_range_far_angles` scenario is the formal angle-bin motivation case: al
 
 `measured_bridge_point4_transverse` is an optional semi-measured diagnostic scenario, not part of default validation. It uses TDMS laser displacement from `卡3激光位移/3-4` as a provisional structural displacement reference. The raw TDMS/laser record may have a higher sampling rate, but the scenario resamples the displacement truth to the radar slow-time rate; the default radar phase/Kalman update rate is `100 Hz`, not `1000 Hz`. The laser truth is minimally processed by event-window extraction, resampling, unit conversion, and cold-start relative zeroing; it is not band-limited or power-line-notched by default. The default acceleration input is derived from a separate 0.2-30 Hz filtered copy of the laser displacement and then adds seeded accelerometer noise. Because the local TDMS channels show unresolved low-frequency/quasi-static and power-line contamination issues, this case is retained for debugging and boundary checks rather than for formal paper accuracy claims. Radar ADC/IQ/wrapped phase observations are still synthesized from the physical phase model because no measured mmWave radar ADC is available for this dataset.
 
+## Load a Real Radar Capture
+
+The capture program publishes the exact three-dimensional ADC cube expected by
+the Phase-1 frontend. The algorithm-side reader only consumes that stable
+schema:
+
+```python
+from simulation.phase1.capture_reader import load_captured_frontend_input
+from simulation.phase1.frontend import range_angle_process
+
+captured = load_captured_frontend_input(
+    "example_dataset/capture_00000/iwr1843"
+)
+range_angle = range_angle_process(captured.adc, captured.frontend_config)
+```
+
+The returned `frame_times_s` and frontend configuration come from the captured
+radar timing. They must be used instead of assuming the synthetic scenario's
+default slow-time sample rate.
+
 ## Run Tests
 
 ```bash
@@ -162,7 +185,7 @@ The single-run `.npz` output keeps the absolute synthetic truth (`q_m`, `main_ph
 
 Passing data-generation tests only means the synthetic observations are reproducible and physically shaped. Passing validation gates means the proposed method meets the current synthetic feasibility criteria. If any gate fails, report the failure and inspect the scenario instead of hiding it by tuning parameters.
 
-This phase is intentionally algorithm-level validation with a synthetic ADC/range-angle frontend. It does not claim to parse real IWR1843 ADC files, simulate a complete bridge or maglev finite-element model, include real antenna amplitude/phase calibration, or validate field multipath. Its purpose is to check whether known displacement, independently generated radar wrapped phase/frontend slow-time observations, and independently generated accelerometer measurements can be fused by the proposed estimator.
+This phase remains algorithm-level validation with a synthetic ADC/range-angle frontend. The separate `capture_program` package now parses and standardizes real IWR1843/DCA1000 ADC captures, and `capture_reader.py` can load that stable schema, but the synthetic validation results do not by themselves claim real antenna amplitude/phase calibration, a complete bridge or maglev finite-element model, or field-multipath validation. Their purpose is to check whether known displacement, independently generated radar wrapped phase/frontend slow-time observations, and independently generated accelerometer measurements can be fused by the proposed estimator.
 
 The tests include two independence checks intended to avoid algorithm-dependent simulation:
 

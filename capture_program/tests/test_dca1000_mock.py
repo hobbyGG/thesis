@@ -11,6 +11,7 @@ class FakeSocket:
         self.bound = None
         self.timeout = None
         self.sent = []
+        self.recv_count = 0
         self.closed = False
 
     def bind(self, address):
@@ -23,14 +24,14 @@ class FakeSocket:
         self.sent.append((payload, address))
 
     def recvfrom(self, _size):
+        self.recv_count += 1
         return self.response_factory(self), ("192.168.33.180", 4096)
 
     def close(self):
         self.closed = True
 
 
-def response_for_last_command(fake_socket, status=0):
-    command = struct.unpack("<H", fake_socket.sent[-1][0][2:4])[0]
+def response_packet(command, status=0):
     return struct.pack(
         "<HHHH",
         dca1000.DCA1000MagicNumber.MAGIC_HEADER,
@@ -38,6 +39,11 @@ def response_for_last_command(fake_socket, status=0):
         status,
         dca1000.DCA1000MagicNumber.MAGIC_FOOTER,
     )
+
+
+def response_for_last_command(fake_socket, status=0):
+    command = struct.unpack("<H", fake_socket.sent[-1][0][2:4])[0]
+    return response_packet(command, status)
 
 
 def install_fake_sockets(monkeypatch, response_factory=response_for_last_command):
@@ -93,6 +99,46 @@ def test_malformed_command_response_raises_protocol_error(monkeypatch):
 
     with pytest.raises(dca1000.DCA1000ProtocolError, match="expected 8"):
         dca.system_connection()
+
+
+def test_async_system_status_is_ignored_until_matching_response(monkeypatch):
+    def async_then_matching(fake_socket):
+        if fake_socket.recv_count == 1:
+            return response_packet(
+                dca1000.DCA1000Command.SYSTEM_ERROR_STATUS,
+                status=1,
+            )
+        return response_for_last_command(fake_socket)
+
+    sockets = install_fake_sockets(monkeypatch, async_then_matching)
+    dca = dca1000.DCA1000()
+
+    assert dca.stop_record() is True
+    assert sockets[0].recv_count == 2
+
+
+def test_unexpected_non_status_response_still_raises(monkeypatch):
+    install_fake_sockets(
+        monkeypatch,
+        lambda _socket: response_packet(dca1000.DCA1000Command.READ_FPGA_VERSION),
+    )
+    dca = dca1000.DCA1000()
+
+    with pytest.raises(dca1000.DCA1000ProtocolError, match="does not match"):
+        dca.stop_record()
+
+
+def test_requested_system_status_is_returned_without_being_ignored(monkeypatch):
+    install_fake_sockets(
+        monkeypatch,
+        lambda _socket: response_packet(
+            dca1000.DCA1000Command.SYSTEM_ERROR_STATUS,
+            status=7,
+        ),
+    )
+    dca = dca1000.DCA1000()
+
+    assert dca.system_error_status() == 7
 
 
 def test_close_is_idempotent(monkeypatch):

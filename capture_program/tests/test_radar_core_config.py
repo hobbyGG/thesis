@@ -22,3 +22,7 @@ def test_radar_core_config(radar_config):
     assert rcc.samples == 256
     assert rcc.antenna_shape == (-1, 16, 2, 4, 256)
     assert rcc.virtual_shape == (-1, 16, 8, 256)
+    assert rcc.command_args("chirpCfg") == (
+        ("0", "0", "0", "0", "0", "0", "0", "1"),
+        ("1", "1", "0", "0", "0", "0", "0", "4"),
+    )

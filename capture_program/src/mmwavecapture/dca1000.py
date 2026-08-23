@@ -34,11 +34,12 @@
 from __future__ import annotations
 
 import enum
+import functools
 import json
 import pathlib
 import socket
 import struct
-import functools
+import time
 
 from copy import deepcopy
 from typing import Any, Literal, Optional, Union, overload
@@ -222,15 +223,20 @@ class DCA1000:
     def _init_sockets(self) -> dict[str, socket.socket]:
         # Create UDP sockets for each port, and bind them to the host IP
         sockets = {}
-        for sock_type, port in self.config.config["ethernetConfig"].items():
-            if sock_type.endswith("Port"):
-                sock = socket.socket(
-                    socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
-                )
-                sock.bind((self.config.host_ip, port))
+        try:
+            for sock_type, port in self.config.config["ethernetConfig"].items():
+                if sock_type.endswith("Port"):
+                    sock = socket.socket(
+                        socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP
+                    )
+                    sock.bind((self.config.host_ip, port))
 
-                # Convert "DCA1000ConfigPort" to "config"
-                sockets[sock_type[7:-4].lower()] = sock
+                    # Convert "DCA1000ConfigPort" to "config"
+                    sockets[sock_type[7:-4].lower()] = sock
+        except BaseException:
+            for sock in sockets.values():
+                sock.close()
+            raise
 
         # It should have {"data": sock, "config": sock}
         return sockets
@@ -242,7 +248,10 @@ class DCA1000:
         self.socks = {}
 
     def __del__(self):
-        self.close()
+        try:
+            self.close()
+        except Exception:
+            pass
 
     @overload
     def _send_dca_command(
@@ -271,6 +280,9 @@ class DCA1000:
         timeout: float = 3.0,
         return_raw_status: bool = False,
     ) -> Union[bool, int]:
+        if timeout <= 0:
+            raise ValueError("timeout must be positive")
+
         # Construct the command header, data, and footer
         cmd_header = struct.pack(
             "<HHH",
@@ -283,42 +295,65 @@ class DCA1000:
         # Combine the header, data, and footer into a single command
         cmd = cmd_header + data + cmd_footer
 
-        # Setup socket timeout
-        self.socks["config"].settimeout(timeout)
+        config_socket = self.socks["config"]
+        deadline = time.monotonic() + timeout
 
         # Send the command to the DCA1000
-        self.socks["config"].sendto(
+        config_socket.settimeout(timeout)
+        config_socket.sendto(
             cmd, (self.config.dca_ip, self.config.dca_config_port)
         )
 
-        # Receive the response from the DCA1000
-        resp, _addr = self.socks["config"].recvfrom(1024)
+        while True:
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise TimeoutError(
+                    f"DCA1000 command {cmd_code.name} timed out after {timeout:.3f}s"
+                )
+            config_socket.settimeout(remaining)
 
-        # Decode the response
+            # DCA1000 emits an unsolicited SYSTEM_ERROR_STATUS packet when a
+            # finite LVDS stream ends. That packet shares the command socket and
+            # normally arrives immediately before the RECORD_STOP response.
+            resp, _addr = config_socket.recvfrom(1024)
+            response_command, status = self._decode_command_response(resp, cmd_code)
+
+            if response_command == cmd_code:
+                return status if return_raw_status else status == 0
+
+            if response_command == DCA1000Command.SYSTEM_ERROR_STATUS:
+                logger.debug(
+                    "Ignoring asynchronous DCA1000 response command "
+                    f"{response_command} while waiting for {cmd_code}"
+                )
+                continue
+
+            raise DCA1000ProtocolError(
+                f"DCA1000 response command {response_command} does not match {cmd_code}"
+            )
+
+    @staticmethod
+    def _decode_command_response(
+        resp: bytes,
+        cmd_code: DCA1000Command,
+    ) -> tuple[int, int]:
+        """Validate and decode one eight-byte DCA1000 command response."""
         # Reference: SPRUIJ4A, Table 14, p. 19
         if len(resp) != 8:
             raise DCA1000ProtocolError(
                 f"DCA1000 command {cmd_code.name} returned {len(resp)} bytes; expected 8"
             )
-        resp_dec = struct.unpack("<HHHH", resp)
-        if resp_dec[0] != DCA1000MagicNumber.MAGIC_HEADER:
+
+        header, response_command, status, footer = struct.unpack("<HHHH", resp)
+        if header != DCA1000MagicNumber.MAGIC_HEADER:
             raise DCA1000ProtocolError(
                 f"DCA1000 command {cmd_code.name} returned an invalid header"
             )
-        if resp_dec[1] != cmd_code:
-            raise DCA1000ProtocolError(
-                f"DCA1000 response command {resp_dec[1]} does not match {cmd_code}"
-            )
-        if resp_dec[3] != DCA1000MagicNumber.MAGIC_FOOTER:
+        if footer != DCA1000MagicNumber.MAGIC_FOOTER:
             raise DCA1000ProtocolError(
                 f"DCA1000 command {cmd_code.name} returned an invalid footer"
             )
-
-        if return_raw_status:
-            return resp_dec[2]
-
-        # Check if the command was successful
-        return resp_dec[2] == 0
+        return response_command, status
 
     @log_command
     def reset_fpga(self) -> bool:
@@ -437,7 +472,8 @@ class DCA1000:
     def system_connection(self) -> bool:
         """Check if the DCA1000EVM is connected to the host computer
 
-        Ref: 2.3.11 Query system aliveness status, p.62, DCA1000EVM CLI Software Developer Guide, v1.01
+        Ref: 2.3.11 Query system aliveness status, p.62,
+        DCA1000EVM CLI Software Developer Guide, v1.01
         """
         return self._send_dca_command(DCA1000Command.SYSTEM_CONNECTION)
 
@@ -445,7 +481,8 @@ class DCA1000:
     def system_error_status(self) -> int:
         """Check DCA1000EVM system error status
 
-        Ref: 2.3.10 Query record process status, p.60, DCA1000EVM CLI Software Developer Guide, v1.01
+        Ref: 2.3.10 Query record process status, p.60,
+        DCA1000EVM CLI Software Developer Guide, v1.01
         """
         # XXX: It will not return anything worth, you can test it as below:
         #        1. Connect the DCA1000 to the host computer
@@ -487,5 +524,11 @@ class DCA1000:
 
     def dump_config(self, outfile: pathlib.Path):
         """Dump the current configuration to a JSON file"""
-        with open(outfile, "w") as f:
-            json.dump(self.config._config, f, indent=4, ensure_ascii=False)
+        with open(outfile, "w", encoding="utf-8") as config_file:
+            json.dump(
+                self.config.config,
+                config_file,
+                indent=4,
+                ensure_ascii=False,
+            )
+            config_file.write("\n")
