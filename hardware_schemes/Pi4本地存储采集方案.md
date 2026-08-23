@@ -1,24 +1,24 @@
-# Pi 5 + SD 卡直存采集方案
+# Pi 4 + SD 卡直存采集方案
 
 本文档采用唯一硬件路线：
 
 ```text
-Raspberry Pi 5 直接本地记录到 microSD 卡
+Raspberry Pi 4 Model B 直接本地记录到 microSD 卡
 ```
 
-本方案不再考虑 USB SSD 作为主数据盘，也不把无线链路作为实时数据传输通道。桥上端或实验台端由 Raspberry Pi 5 控制采集、保存数据、记录日志；地面 PC 或笔记本只负责远程启动、停止、查看状态和实验后拷贝数据。
+本方案不再考虑 USB SSD 作为主数据盘，也不把无线链路作为实时数据传输通道。桥上端或实验台端由 Raspberry Pi 4 Model B 控制采集、保存数据、记录日志；地面 PC 或笔记本只负责远程启动、停止、查看状态和实验后拷贝数据。
 
 ## 1. 方案定位
 
 目标是搭建一套最轻量、最少线缆、最容易复现实验的采集节点：
 
 ```text
-IWR1843BOOST 板端固件 -> 选定目标复数 I/Q 或 wrapped phase -> Raspberry Pi 5 -> microSD
-ADXL355 -> SPI -> Raspberry Pi 5 -> microSD
-Raspberry Pi 5 -> Wi-Fi/SSH -> PC 控制与预览
+IWR1843BOOST 板端固件 -> 选定目标复数 I/Q 或 wrapped phase -> Raspberry Pi 4 -> microSD
+ADXL355 -> SPI -> Raspberry Pi 4 -> microSD
+Raspberry Pi 4 -> Wi-Fi/SSH -> PC 控制与预览
 ```
 
-本方案默认不采集长时间全量 DCA1000 原始 ADC 数据，但这不等于直接使用普通点云输出。位移相位算法至少需要每帧目标单元的复数 I/Q 或由板端固件计算出的 wrapped phase。采集内容应控制在 Pi 5 和 microSD 能稳定写入的范围内，重点保存算法需要的雷达相位/目标特征、加速度数据、同步日志和实验元数据。
+本方案默认不采集长时间全量 DCA1000 原始 ADC 数据，但这不等于直接使用普通点云输出。位移相位算法至少需要每帧目标单元的复数 I/Q 或由板端固件计算出的 wrapped phase。采集内容应控制在 Pi 4 和 microSD 能稳定写入的范围内，重点保存算法需要的雷达相位/目标特征、加速度数据、同步日志和实验元数据。
 
 适用场景：
 
@@ -37,14 +37,14 @@ Raspberry Pi 5 -> Wi-Fi/SSH -> PC 控制与预览
 
 | 类别 | 推荐硬件 | 用途 |
 |---|---|---|
-| 主控与存储 | Raspberry Pi 5，建议 8 GB | 控制采集、写 microSD、远程通信 |
+| 主控与存储 | Raspberry Pi 4 Model B，建议 4 GB | 控制采集、写 microSD、远程通信 |
 | 系统与数据卡 | 高耐久 microSD，A2/U3/V30，建议 256 GB 或 512 GB | 系统盘和实验数据盘 |
 | 毫米波雷达 | TI IWR1843BOOST | 输出雷达相位、目标和距离信息 |
 | 加速度计 | ADXL355 模块/评估板 | 三轴低噪声加速度采集 |
 | 可选协处理器 | STM32 / Teensy 4.1 / RP2040 | 更稳定的 ADXL355 采样和硬件时间戳 |
-| 网络 | Pi 5 Wi-Fi 或小型无线 AP | SSH 控制、状态查看、低速预览 |
-| 电源 | 稳定 5 V 5 A 供电 | 避免 Pi 5 欠压和写盘异常 |
-| 散热 | Pi 5 主动散热器或金属散热外壳 | 避免长时间采集降频 |
+| 网络 | Pi 4 自带 Wi-Fi 或小型无线 AP | SSH 控制、状态查看、低速预览 |
+| 电源 | 稳定 5.1 V 3 A 供电 | 避免 Pi 4 欠压和写盘异常 |
+| 散热 | Pi 4 散热片或带风扇外壳 | 避免长时间采集降频 |
 | 安装 | 刚性安装板、防护外壳、短线缆 | 雷达和加速度计共址固定 |
 
 microSD 建议使用高耐久卡，而不是普通消费级低速卡。优先选择标称适合视频连续写入或监控记录的型号，并在正式实验前做持续写入测试。
@@ -56,7 +56,7 @@ microSD 建议使用高耐久卡，而不是普通消费级低速卡。优先选
 推荐雷达链路为：
 
 ```text
-IWR1843BOOST 板端处理 -> 目标复数 I/Q 或 wrapped phase -> Raspberry Pi 5 -> microSD
+IWR1843BOOST 板端处理 -> 目标复数 I/Q 或 wrapped phase -> Raspberry Pi 4 -> microSD
 ```
 
 保存内容建议包括：
@@ -91,7 +91,7 @@ IWR1843BOOST 板端处理 -> 目标复数 I/Q 或 wrapped phase -> Raspberry Pi 
 推荐加速度链路为：
 
 ```text
-ADXL355 -> SPI -> Raspberry Pi 5 -> microSD
+ADXL355 -> SPI -> Raspberry Pi 4 -> microSD
 ```
 
 `accel.csv` 建议字段：
@@ -100,13 +100,13 @@ ADXL355 -> SPI -> Raspberry Pi 5 -> microSD
 timestamp_pi,sample_id,ax,ay,az,temp,range_g,odr_hz
 ```
 
-如果 Pi 5 直接读取 ADXL355 的实时性不够稳定，可以加一个 MCU：
+如果 Pi 4 直接读取 ADXL355 的实时性不够稳定，可以加一个 MCU：
 
 ```text
-ADXL355 -> SPI -> MCU -> UART/USB -> Raspberry Pi 5 -> microSD
+ADXL355 -> SPI -> MCU -> UART/USB -> Raspberry Pi 4 -> microSD
 ```
 
-MCU 只负责稳定采样和打时间戳，Pi 5 仍负责统一落盘和实验管理。
+MCU 只负责稳定采样和打时间戳，Pi 4 仍负责统一落盘和实验管理。
 
 ## 4. 实验目录结构
 
@@ -137,7 +137,7 @@ experiments/<experiment_id>/
 
 ## 5. 同步方案
 
-最低要求是所有数据都带 Pi 5 时间戳。推荐进一步保存雷达帧号和加速度样本号的对应关系。
+最低要求是所有数据都带 Pi 4 时间戳。推荐进一步保存雷达帧号和加速度样本号的对应关系。
 
 `sync_log.csv` 建议字段：
 
@@ -148,10 +148,10 @@ timestamp_pi,radar_frame_id,accel_sample_id,trigger_state,event
 同步优先级：
 
 1. **硬件触发或帧同步**  
-   如果 IWR1843 能输出 frame sync 或可用 GPIO 触发信号，接入 Pi 5 或 MCU，记录雷达帧与加速度样本的对应关系。
+   如果 IWR1843 能输出 frame sync 或可用 GPIO 触发信号，接入 Pi 4 或 MCU，记录雷达帧与加速度样本的对应关系。
 
 2. **统一进程时间戳**  
-   Pi 5 同时接收雷达特征和 ADXL355 数据时，统一使用 Pi 系统时间戳。
+   Pi 4 同时接收雷达特征和 ADXL355 数据时，统一使用 Pi 系统时间戳。
 
 3. **离线细对齐**  
    后处理阶段再用加速度短窗积分和雷达相位运动代理做小范围时间偏移估计。
@@ -163,9 +163,9 @@ timestamp_pi,radar_frame_id,accel_sample_id,trigger_state,event
 无线链路只承担控制、状态和低速预览：
 
 ```text
-PC -> SSH/HTTP/WebSocket -> Raspberry Pi 5
-Raspberry Pi 5 -> status/preview -> PC
-Raspberry Pi 5 -> microSD -> 完整数据本地保存
+PC -> SSH/HTTP/WebSocket -> Raspberry Pi 4
+Raspberry Pi 4 -> status/preview -> PC
+Raspberry Pi 4 -> microSD -> 完整数据本地保存
 ```
 
 建议命令：
@@ -197,13 +197,13 @@ microSD 是本方案的关键风险点。必须控制数据量，并在实验前
 正式采集前应做三项检查：
 
 1. 连续写入压力测试，时间不少于计划单次实验时长；
-2. 采集过程中监测 Pi 5 欠压、CPU 温度和剩余空间；
+2. 采集过程中监测 Pi 4 欠压、CPU 温度和剩余空间；
 3. 每次写入采用分段 flush，避免异常断电导致整段数据损坏。
 
 ## 8. 推荐实验流程
 
 1. 插入高耐久 microSD，确认剩余空间。
-2. 启动 Pi 5，连接 PC 到同一 Wi-Fi 或直连热点。
+2. 启动 Pi 4，连接 PC 到同一 Wi-Fi 或直连热点。
 3. 通过 SSH 检查雷达、ADXL355 和采集程序状态。
 4. 创建 `experiment_id`，写入 `metadata.json`。
 5. 启动采集，生成 `radar_features.csv`、`accel.csv` 和 `sync_log.csv`。
@@ -217,14 +217,14 @@ microSD 是本方案的关键风险点。必须控制数据量，并在实验前
 唯一推荐采购和搭建路线：
 
 ```text
-Raspberry Pi 5 8GB
+Raspberry Pi 4 Model B 4GB
 高耐久 microSD 256GB 或 512GB
 TI IWR1843BOOST
 ADXL355 模块/评估板
 可选 STM32 / Teensy 4.1 / RP2040
-Pi 5 主动散热器
-稳定 5V 5A 电源
-小型 Wi-Fi AP 或使用 Pi 5 自带 Wi-Fi
+Pi 4 散热片或带风扇外壳
+稳定 5.1V 3A 电源
+小型 Wi-Fi AP 或使用 Pi 4 自带 Wi-Fi
 刚性安装板和防护外壳
 ```
 
