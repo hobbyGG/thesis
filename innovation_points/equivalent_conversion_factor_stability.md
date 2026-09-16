@@ -66,13 +66,13 @@ $$
 \psi_T(k)=\angle z_T(k).
 $$
 
-其中，$\psi_T(k)$ 表示 target $T$ 在第 $k$ 个采样处的 wrapped phase，$\angle(\cdot)$ 表示复数取相角。由于 $\psi_T(k)$ 被限制在 $[-\pi,\pi]$，若直接用于线性拟合，$2\pi$ 分支跳变会污染转换系数估计。因此，转换系数估计需要局部连续相位或预测辅助校正相位，但不要求预先获得全时程完整解缠相位。记该局部连续相位为：
+其中，$\psi_T(k)$ 表示 target $T$ 在第 $k$ 个采样处的 wrapped phase，$\angle(\cdot)$ 表示复数取相角。由于 $\psi_T(k)$ 被限制在 $[-\pi,\pi]$，若直接用于线性拟合，$2\pi$ 分支跳变会污染转换系数估计。因此，Kalman 前的独立预校准可以在经过连续性门控的原始短段内构造局部连续相位，但不得使用 Kalman 或 Doppler corrected phase。记该局部连续相位为：
 
 $$
 \phi_T^{\mathrm{loc}}(k).
 $$
 
-其中，$\phi_T^{\mathrm{loc}}(k)$ 可以来自初始小位移无绕转窗口、短窗口 Itoh 局部解缠，也可以来自 AoA 几何初值启动后的 Kalman/Doppler 预测辅助分支校正。这里需要强调，$\phi_T^{\mathrm{loc}}(k)$ 不是预先完成的最终全时程解缠相位，而是用于转换系数自举或局部拟合的连续相位片段。然后可将该局部相位转换为雷达视线方向位移：
+其中，$\phi_T^{\mathrm{loc}}(k)$ 只能来自预校准阶段的原始连续小位移段或通过相位步长门控的短窗口 Itoh 局部解缠。它不是最终全时程解缠相位，也不能由已运行的 Kalman posterior、Kalman prediction 或 Doppler 预测辅助分支校正生成；其唯一用途是独立预校准和 holdout 验证。然后可将该局部相位转换为雷达视线方向位移：
 
 $$
 d_T^{\mathrm{loc}}(k)=\frac{\lambda}{4\pi}\left[\phi_T^{\mathrm{loc}}(k)-\bar{\phi}_T^{\mathrm{loc}}\right].
@@ -80,9 +80,35 @@ $$
 
 其中，$d_T^{\mathrm{loc}}(k)$ 表示 target $T$ 在局部窗口内的中心化 LoS 位移，$\lambda$ 表示雷达载波波长，$\bar{\phi}_T^{\mathrm{loc}}$ 表示该窗口内 $\phi_T^{\mathrm{loc}}(k)$ 的均值。
 
-需要特别说明：目标选择阶段不依赖相位解缠；转换系数自举阶段只需要短窗口内的相位分支正确，而不需要在 Kalman 之前完成最终意义上的在线相位解缠。本文最终框架采用 range-angle 几何关系给出 $\beta_T^{(0)}$，并在冷启动后由加速度预测和较大的初始测量噪声支撑 Kalman 递推启动；随后，预测辅助校正后的局部连续相位用于修正 $\beta_T$。若直接使用 wrapped phase，一旦相位跨越 $\pm\pi$，相位序列会出现人为跳变，最小二乘估计的转换系数会被严重污染。只有当工作位移很小、相位从未发生 wrapping 时，wrapped phase 才可能在中心化后近似可用。对于 77 GHz 雷达，$2\pi$ 相位约对应 $\lambda/2\approx1.95\text{ mm}$ 的 LoS 位移，因此毫米级结构振动已经可能出现相位绕转。
+需要特别说明：目标选择阶段不依赖相位解缠；局部 unwrap 只允许发生在 Kalman 前、预校准所使用的原始连续段内。本文最终框架先由 range-angle 几何关系给出 $\beta_T^{(0)}$，再用原始多 target phase 的 rank-1 共同运动结构估计逐目标相对投影，并以 native-timestamp ADXL 建立绝对尺度/公共时延候选；两条路径均使用不重叠双时间折验证。完成逐 target 接受或精确 AoA 回退后，正式 Kalman 从第 0 帧重新读取原始 wrapped phase，并在递推内部完成相位分支校正；预校准得到的局部 unwrap 序列不得作为正式滤波输入。若直接使用 wrapped phase 做线性拟合，一旦相位跨越 $\pm\pi$，相位序列会出现人为跳变，最小二乘估计的转换系数会被严重污染。只有当工作位移很小、相位从未发生 wrapping 时，wrapped phase 才可能在中心化后近似可用。对于 77 GHz 雷达，$2\pi$ 相位约对应 $\lambda/2\approx1.95\text{ mm}$ 的 LoS 位移，因此毫米级结构振动已经可能出现相位绕转。
 
 ## 4. 最小二乘转换系数
+
+当前方法先由第 $i$ 个 target 的 AoA 几何角 $\theta_i$ 给出原始投影与转换系数初值：
+
+$$
+\hat{p}_{i,0}=|\cos\theta_i|,
+\qquad
+\hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}.
+$$
+
+公共安装角偏差 $\delta$ 仍可由原始多 target phase 搜索，但它只作为辅助候选：
+
+$$
+p_i(\delta)=|\cos(\theta_i-\delta)|,
+\qquad
+\beta_i(\delta)=\frac{1}{\max(p_i(\delta),\epsilon_p)}.
+$$
+
+因为单个 $\delta$ 无法表达不同 target 各自的 angle-bin 量化与多径偏差，逐目标相对投影改由去趋势相位矩阵
+
+$$
+\mathbf{Y}\approx\mathbf{p}\mathbf{s}^{\mathsf T}
+$$
+
+的加权 rank-1 分解得到。$\mathbf{p}$ 的公共尺度不可由雷达单独辨识，因此用 AoA 初值的稳健中位比例锚定，只修正跨 target 的相对投影。进入参考集合前，target 必须在训练/holdout 两折都与 native-timestamp ADXL 动力学相干；两折第一奇异分量占比也必须通过共同运动阈值。训练折确定参考 target 与候选投影；holdout 对第 $i$ 个 target 验证时，由其余参考 target 重建共同分量，并在同一潜在运动下比较 $p_i^{\mathrm{cand}}$ 与 $p_{i,0}$，随后交换两半重复验证。该量衡量目标系数的条件改善，不解释为两个完整模型的独立概率比较。
+
+ADXL 路径与上述雷达相对路径并列，用于估计绝对投影和公共时延候选，而不是把同一 target 的 Kalman 结果作为标尺。
 
 设加速度传感器在同一标定窗口内给出的结构参考位移为：
 
@@ -90,7 +116,7 @@ $$
 q_a(k).
 $$
 
-其中，$q_a(k)$ 表示第 $k$ 个 slow-time 采样处由加速度信号得到的结构振动方向参考位移。实际计算时，可先对 $q_a(k)$ 和 $d_T^{\mathrm{loc}}(k)$ 进行窗口均值去除：
+其中，$q_a(k)$ 表示第 $k$ 个 slow-time 采样处由加速度信号得到的结构振动方向参考位移。实际实现必须从 ADXL native timestamps 上的原始加速度建立独立时域模型，再按候选公共时延与雷达时刻对齐；不得先把 ADXL 强制重采样到理想均匀时钟，也不得使用 Kalman 状态或后验构造 $q_a(k)$。实际计算时，可先对 $q_a(k)$ 和 $d_T^{\mathrm{loc}}(k)$ 进行窗口均值去除：
 
 $$
 \tilde{q}_a(k)=q_a(k)-\bar{q}_a,
@@ -140,7 +166,20 @@ $$
 }.
 $$
 
-该闭式解是标准的一维线性最小二乘解，本质上是在标定窗口内寻找一个标量，使雷达 LoS 位移经比例缩放后最接近加速度参考位移。
+该闭式解是标准的一维线性最小二乘解，本质上是在标定窗口内寻找一个标量，使雷达 LoS 位移经比例缩放后最接近加速度参考位移。它只能产生拟合候选，不能凭拟合段残差直接宣布校准成功。拟合窗口 $\mathcal{W}_{\mathrm{cal}}$ 与 holdout 必须不重叠，并用 holdout 检查相对原始 AoA 初值的独立改善；每折的参考 target 只能由本折训练段选择，对侧 holdout 不得反向修改训练集合。同时检查激励、原始相位连续性、参数物理边界、时延是否贴搜索边界以及跨折参数一致性。
+
+时间轴、激励、公共时延边界或跨折时延一致性失败时，整组 target 执行精确回退。其余相干性、跨折参数一致性、候选边界、改变量、不确定度和 holdout 改善逐 target 判断：
+
+$$
+\tilde{\beta}_i
+=
+\begin{cases}
+\beta_i^{\mathrm{cand}}, & g_i=1,\\
+\hat{\beta}_{i,0}, & g_i=0.
+\end{cases}
+$$
+
+全局失败时所有 $g_i=0$；target-specific 失败只令对应 $g_i=0$，其他 target 的独立候选不受牵连。当 ADXL 轴向/灵敏度或夹具传递增益未知时，ADXL 公共增益与所有投影的公共缩放不可由同一记录区分；这些量经独立验证后，绝对候选则可辨识。因而模式由标定来源预先决定：未验证值标定的实测入口固定采用 AoA 锚定相对候选，`validated` 入口固定采用绝对 ADXL 候选，不能用同一 holdout 的结果临时选择。无论逐目标接受还是回退，最终 $\tilde{\boldsymbol{\beta}}$ 在随后完整 Kalman 中都保持冻结，也不得复用上一次运行的缓存值。
 
 ## 5. Range-Angle Target 内的等效转换系数
 
@@ -348,33 +387,32 @@ $$
 
 其中，$S_{\beta,T}$ 表示 target $T$ 的转换系数相对稳定性指标，$\operatorname{std}(\cdot)$ 表示标准差，$\operatorname{mean}(\cdot)$ 表示均值。$S_{\beta,T}$ 越小，说明该 target 在不同短窗口内的等效转换关系越稳定。该指标可作为卡尔曼滤波前的 target 质量检查或后续多目标融合权重的依据。
 
-需要注意，本文的主选择流程仍然保持简单：候选发现、滑动窗口出现确认和结构频带一致性筛选不依赖 $\hat{\beta}_T$。转换系数稳定性检查发生在 target 通过筛选并完成局部连续相位估计或预测辅助相位校正之后，可作为后续自适应观测噪声和实验评价的依据。
+需要注意，本文的主选择流程仍然保持简单：候选发现、滑动窗口出现确认和结构频带一致性筛选不依赖 $\hat{\beta}_T$。转换系数稳定性检查只发生在 Kalman 前的独立预校准阶段，其输入是原始连续段的局部相位与 native-timestamp ADXL 数据，不得使用预测辅助 corrected phase。该指标可作为预校准接受/回退门控、初始观测噪声设置和实验评价的依据，但不能在正式 Kalman 期间继续递推 $\beta_T$。
 
-## 10. 闭环 Kalman 前后的接口
+## 10. 独立预校准与完整 Kalman 的接口
 
-经过 range-angle target selection 和冷启动初始化后，进入闭环 Kalman 前至少可得到如下 target 集合：
-
-$$
-\left\{
-T_i,\ z_{T_i}(k),\ \psi_{T_i}(k),\ \theta_{T_i},\ \beta_{T_i}^{(0)},\ b_{T_i}
-\right\}_{i=1}^{N_T}.
-$$
-
-其中，$N_T$ 表示当前可用 targets 数量，$T_i$ 表示第 $i$ 个有效 range-angle target，$z_{T_i}(k)$ 表示其复数 slow-time 序列，$\psi_{T_i}(k)$ 表示 wrapped phase，$\theta_{T_i}$ 表示该 target 的 AoA 几何角，$\beta_{T_i}^{(0)}$ 表示由 AoA 给出的转换系数初值，$b_{T_i}$ 表示冷启动阶段确定的初始相位偏置。后续在线 Kalman 融合阶段重新使用原始 wrapped phase，并在 Kalman 递推内部完成最终相位分支校正和转换系数自举更新。
-
-在初始微振阶段，预测辅助校正相位可用于更新：
+经过 range-angle target selection、AoA 初始化、原始数据独立预校准和 holdout 后，进入完整 Kalman 前至少可得到如下 target 集合：
 
 $$
 \left\{
-\hat{\beta}_{T_i,k},\ e_{\beta,T_i,k},\ S_{\beta,T_i,k}
+T_i,\ z_{T_i}(k),\ \psi_{T_i}(k),\ \theta_{T_i},\ \beta_{T_i}^{(0)},\ \tilde{\beta}_{T_i},\ b_{T_i}
 \right\}_{i=1}^{N_T}.
 $$
 
-其中，$\hat{\beta}_{T_i,k}$ 表示递推修正后的转换系数，$e_{\beta,T_i,k}$ 和 $S_{\beta,T_i,k}$ 可用于描述该 target 的转换关系质量。后续卡尔曼滤波或多目标相位融合主要使用原始 wrapped phase、当前转换系数和自适应测量噪声作为输入，而不是依赖单目标标定位移作为最终观测。
+其中，$N_T$ 表示当前可用 targets 数量，$T_i$ 表示第 $i$ 个有效 range-angle target，$z_{T_i}(k)$ 表示其复数 slow-time 序列，$\psi_{T_i}(k)$ 表示 wrapped phase，$\theta_{T_i}$ 表示该 target 的 AoA 几何角，$\beta_{T_i}^{(0)}$ 表示由 AoA 给出的转换系数初值，$\tilde{\beta}_{T_i}$ 表示通过独立校准接受或由失败门控精确回退得到的冻结转换系数，$b_{T_i}$ 表示初始相位偏置。接口还必须携带校准是否接受、拒绝原因、holdout 指标和时延边界状态，以便验证回退动作可追踪。
+
+正式 Kalman 必须从第 0 帧重新读取原始 wrapped phase，并使用冻结的转换系数：
+
+$$
+\tilde{\beta}_{T_i,k}=\tilde{\beta}_{T_i,0}=\tilde{\beta}_{T_i},
+\qquad k=0,1,\ldots
+$$
+
+预测辅助相位校正仍可在 Kalman 内部选择 wrapped phase 分支，但 corrected phase 只服务观测构造，绝不回接转换系数。预校准阶段产生的局部 unwrap 片段、拟合状态和 holdout 状态也不得续接为第 0 帧的滤波状态。旧的 Kalman/Doppler corrected phase 在线反哺 beta、自举递推方案已弃用，只能作为历史方案说明。
 
 ## 11. 可写入论文的简要表述
 
-本文在距离-角度联合维度中定义参考 target，并为每个通过筛选的 range-angle target 建立方向转换关系。目标选择阶段仅使用幅值峰、窗口出现率和结构频带一致性，不依赖相位解缠和转换系数。目标通过筛选后，本文首先利用 AoA 几何关系给出转换系数初值，并在冷启动阶段确定初始相位偏置；随后，在结构初始微振阶段，利用加速度驱动的结构主相位 Kalman 预测对 wrapped phase 进行分支校正，并用局部连续相位片段递推修正转换系数。对于角度接近而无法可靠分开的 angleBins，本文将其合并为一个等效 target，并估计等效转换系数。理论分析表明，当合并 target 内主要散射体的 LoS 投影系数接近或由单一散射体主导时，其复数相位可以稳定等效为一个线性 LoS 投影关系；只有当多个强散射体的投影系数差异较大且相对相位随结构位移明显变化时，固定转换系数才会出现漂移。因此，将参考目标从 rangeBin 升级到 range-angle target 可以显著降低转换系数畸变风险，并为后续结构主相位 Kalman 融合提供更稳定的多目标输入。
+本文在距离-角度联合维度中定义参考 target，并为每个通过筛选的 range-angle target 建立方向转换关系。目标选择阶段仅使用幅值峰、窗口出现率和结构频带一致性，不依赖相位解缠和转换系数。目标通过筛选后，本文先利用 AoA 几何关系给出转换系数初值，再从原始多 target phase 提出公共角偏差和逐目标相对投影候选；局部 unwrap 只允许用于 Kalman 前、通过连续性门控的预校准原始短段。候选必须经过 native-timestamp ADXL 动力学相干、不重叠 holdout 和 rank-1 共同运动门控。时间轴、激励、公共时延、参考数量或共同运动结构失败时整组回退；单个 target 的连续性、相干性、跨折一致性、物理边界或 holdout 失败时只回退该 target。接受或回退后的 $\tilde{\boldsymbol{\beta}}$ 保持冻结，正式结构主相位 Kalman 从第 0 帧重新处理原始 wrapped phase，corrected phase 不反哺转换系数。对于角度接近而无法可靠分开的 angleBins，本文将其合并为一个等效 target，并估计等效转换系数。理论分析表明，当合并 target 内主要散射体的 LoS 投影系数接近或由单一散射体主导时，其复数相位可以稳定等效为一个线性 LoS 投影关系；只有当多个强散射体的投影系数差异较大且相对相位随结构位移明显变化时，固定转换系数才会出现漂移。因此，将参考目标从 rangeBin 升级到 range-angle target 可以显著降低转换系数畸变风险，并为后续结构主相位 Kalman 融合提供更稳定的多目标输入。
 
 ## 12. 参考文献
 

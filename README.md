@@ -4,7 +4,23 @@
 
 ## 毫米波雷达采集程序
 
-原 GitHub 仓库中的 IWR1843 + DCA1000 采集程序完整保存在 [`capture_program/`](capture_program/)；其中包含 WSL 采集流程、硬件预检、异常清理、mock 测试、PCAP/LVDS 解析、算法输入标准化和统一读取模块。成功采集会同时保留原始 `dca.pcap`，并生成带版本清单的 `algorithm_input/`。WSL 实机采集请先阅读 [`capture_program/WSL_CAPTURE.md`](capture_program/WSL_CAPTURE.md)。替换仓库主体前的原始 `main` 历史另存于远端分支 `archive/mmwavecapture-main`。
+原 GitHub 仓库中的 IWR1843 + DCA1000 采集程序完整保存在 [`capture_program/`](capture_program/)；其中包含硬件预检、异常清理、mock 测试、PCAP/LVDS 解析、算法输入标准化和统一读取模块。成功采集会同时保留原始 `dca.pcap`，并生成带版本清单的 `algorithm_input/`。Pi 4 实机部署与预检步骤见 [`capture_program/PI4_CAPTURE.md`](capture_program/PI4_CAPTURE.md)。替换仓库主体前的原始 `main` 历史另存于远端分支 `archive/mmwavecapture-main`。
+
+本项目只采用下面这一套实机采集拓扑：**Raspberry Pi 4 是唯一采集主机和统一时间戳来源，电脑不直接连接或采集任何传感器数据。**
+
+```text
+电脑 ──Wi-Fi / SSH──→ Raspberry Pi 4
+                         ├──SPI + DRDY──→ ADXL355
+                         ├──USB─────────→ IWR1843BOOST
+                         └──Ethernet────→ DCA1000EVM
+
+IWR1843BOOST ←──60-pin HD / LVDS──→ DCA1000EVM
+```
+
+- 电脑只通过 Wi-Fi/SSH 下发命令、查看状态，以及在采集结束后下载数据做离线分析；电脑不参与采集时序。
+- Pi 4 通过 SPI 读取 ADXL355，并通过 DRDY GPIO 获取采样事件；通过 USB 串口配置和控制 IWR1843BOOST；通过有线以太网控制 DCA1000EVM 并接收其 UDP 原始 ADC 数据。
+- IWR1843BOOST 与 DCA1000EVM 之间通过板间 60-pin HD 接口传输 LVDS 数据，不通过树莓派 USB 传输原始 ADC。
+- 雷达、加速度计、GPIO 时间戳和 DCA 抓包均在 Pi 4 本地协调；电脑不得作为实机采集主机。
 
 ## 先看这里：已有做图和报告工具
 
@@ -15,8 +31,8 @@
 | 生成基础 SVG 折线图 | `simulation/phase1/reporting.py` 的 `write_basic_svg(...)` | 纯 Python/NumPy/标准库写 SVG，不依赖 matplotlib。验证报告和诊断图都用它。 |
 | 生成验证报告和关键诊断图 | `simulation/phase1/reporting.py` 的 `write_validation_report(...)` | 写 `metrics.csv`、`feasibility_gates.json`、`summary.md` 和 `plots/*.svg`。 |
 | 生成场景真值时域/频域图 | `simulation/phase1/scenario_diagnostics.py` | 写 `scenario_parameters.csv`、`summary.md` 和每个场景的位移/加速度 SVG 图。 |
-| 论文汇报可直接引用的图 | `reports/numerical_simulation_assets/` 和 `reports/numerical_simulation_assets_png/` | SVG 源图和 PNG 版本，已包含 range-angle、target selection、phase correction、confidence-aware R、beta bootstrap、激光实测分析图。 |
-| 仿真验证输出图 | `simulation/outputs/phase1_validation/plots/`、`simulation/outputs/phase1_report_validation/plots/` | 由验证脚本生成的 SVG 图。 |
+| 论文汇报可直接引用的图 | `reports/numerical_simulation_assets/` 和 `reports/numerical_simulation_assets_png/` | SVG 源图和 PNG 版本，已包含 range-angle、target selection、phase correction、quality-gated R 和激光实测分析图；旧 beta-bootstrap 图只作 legacy/ablation 对照。 |
+| 仿真验证输出图 | `simulation/outputs/phase1_validation/plots/`、`archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation/plots/` | 由验证脚本生成的 SVG 图。 |
 | 场景诊断输出图 | `simulation/outputs/phase1_scenario_diagnostics/plots/` | 每个场景的 time/frequency displacement/acceleration SVG。 |
 | 实测激光数据分析图 | `datafile/analysis/*.svg` | 激光通道时域、频谱、动态相关性、配对分数等图表。 |
 | Markdown 流程图/公式图 | `idea/overall_processing_architecture.md`、`idea/kalman_flowchart_preview.md`、`idea/mehrmaid_formula_test.md` | 使用 `mehrmaid` 代码块组织 Mermaid + Markdown/公式流程图。 |
@@ -33,7 +49,7 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 
 ## 一句话概览
 
-当前已实现 Phase 1 算法级验证链路，以及真实 IWR1843/DCA1000 原始 ADC 的采集侧标准化链路：PCAP 连续性检查、两通道 LVDS/IQ 解码、四维 chirp cube、帧级 ADC cube、时间轴、版本化 manifest 和算法侧薄读取器。
+当前已实现 Phase 1 算法级验证链路、IWR1843/DCA1000 原始 ADC 标准化链路，以及 Pi 4 本地的 IWR1843 + ADXL355 同步采集程序。采集侧包含 PCAP 连续性检查、两通道 LVDS/IQ 解码、四维 chirp cube、ADXL355 SPI/DRDY 原生采集、GPIO 雷达帧触发、共同 `CLOCK_MONOTONIC` 时间轴、版本化 manifest 和算法侧薄读取器。Pi 4 上已经完成真实 ADXL355 1 kHz 短采集、10 帧软件时间戳联合采集，以及不带 GPIO24 回环的 10 帧 `SYNC_IN` 诊断采集；PCAP、chirp cube 和两条原生时间轴均通过完整性检查。正式 `fusion_ready` 仍要求补接 GPIO18→GPIO24 的物理回环支路，并完成雷达触发到 ADC、ADXL 数字滤波延迟及两传感器数值/坐标标定。电脑始终仅通过 SSH 控制并在采集后做离线处理。
 
 当前仍未完成的是完整真实毫米波算法闭环：真实天线幅相标定、运动目标所需的 TDM-MIMO 多普勒相位补偿、实测目标检测/选择参数标定、真实雷达与加速度计/TDMS 同步融合验证，以及现场多径长期稳定性验证。
 
@@ -43,8 +59,9 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 |---|---|
 | 理解整体论文思路 | `thesis_idea_overview.md`、`next_chat_memory_prompt.md` |
 | 理解最终阶段性论文正文 | `基于毫米波雷达与 MEMS 加速度计融合的结构位移测量方法研究.md` |
-| 理解方法和代码对应关系 | `docs/algorithm_chain_review.md` |
+| 理解方法和代码对应关系 | `docs/data_processing_flow_2026-09-14.md` |
 | 理解 Phase 1 仿真包 | `simulation/phase1/README.md` |
+| 运行雷达与 ADXL355 同步采集 | `capture_program/PI4_CAPTURE.md`、`capture_program/examples/capture_synchronized_*.toml` |
 | 把真实雷达采集交给算法 | `capture_program/README.md` 的 Algorithm input contract，以及 `simulation/phase1/capture_reader.py` |
 | 运行完整单元测试 | `python3 -m unittest discover tests -v` |
 | 运行 Phase 1 标准验证 | `python3 -m simulation.phase1.run_validation --output-dir simulation/outputs/phase1_validation` |
@@ -58,10 +75,11 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 
 | 路径 | 内容 |
 |---|---|
-| `capture_program/` | IWR1843 + DCA1000 采集程序，包含 WSL 适配、原始 PCAP 留档、算法输入标准化、读取器、测试和文档。 |
+| `capture_program/` | 运行在 Raspberry Pi 4 上的 IWR1843 + DCA1000 采集程序，包含硬件控制、原始 PCAP 留档、算法输入标准化、读取器、测试和文档。 |
 | `simulation/` | Python 仿真和验证代码，核心在 `simulation/phase1/`。 |
 | `tests/` | `unittest` 测试，覆盖仿真、前端、目标选择、Kalman、baseline、报告、半实测场景。 |
 | `reports/` | 已整理的 Phase 1 方法与仿真汇报，以及可直接引用的 SVG/PNG 图表资产。 |
+| `archive/2026-09-14-pre-direct-aoa/` | 当前 Direct-AoA 版本之前的旧主线文档、验证产物、历史汇报和旧图表；含 `manifest.json`，可回溯恢复。 |
 | `datafile/` | 实测数据：`20250320test12.tdms`、CSV、metadata，以及激光/加速度分析结果。 |
 | `docs/` | 方法链审查和历史 implementation plan。 |
 | `idea/` | 总体处理架构、Kalman 流程图、Mehrmaid 测试图。 |
@@ -97,7 +115,7 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 | `selection.py` | 2D peak detection、同 range 近角度合并、presence/SNR/结构频带一致性评分、selected target 输出。 |
 | `inputs.py` | 统一场景输入构建层：一个 `Phase1Config` 生成 truth、accelerometer、target-level radar、frontend/range-angle、selected frontend、range-bin-only、Ma2026 等命名视图。 |
 | `method_registry.py` | 方法/基线注册表：集中声明要跑哪些方法、每个方法吃哪个输入视图、评估时如何映射 target reference。 |
-| `algorithm.py` | proposed 方法：结构主相位 Kalman、prediction-aided phase correction、online beta bootstrap、confidence-aware target-wise R。 |
+| `algorithm.py` | proposed 方法：结构主相位 Kalman、prediction-aided phase correction、独立批量 beta 预校准、冻结 beta 重跑、target-wise adaptive R。 |
 | `baselines.py` | oracle、Itoh-LS、single-target Ma-style、range-bin-only mixed phase、Ma-style iterative beta、固定 beta 等 baseline。 |
 | `ma2026/` | 正式 Ma 2026 baseline 复现包：实现 target-specific LoS Kalman、`Q` energy selection、alpha fit 和 convergence-time diagnostics；Range FFT 候选输入只作为仿真 adapter。 |
 | `pipeline.py` | 薄编排层：构建统一输入、运行 `method_registry`、生成指标和 artifacts；不再直接拼雷达输入。 |
@@ -122,7 +140,7 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 |---|---|
 | `nominal_multifrequency` | 标准多频结构振动。 |
 | `strong_wrapping` | 强相位缠绕，检验 prediction-aided phase correction。 |
-| `aoa_error_bootstrap` | AoA 初值误差下的 online beta bootstrap。 |
+| `aoa_error_bootstrap` | AoA 初值误差下的独立 beta 预校准与安全回退。 |
 | `target_snr_drop` | 目标 SNR 退化下的 confidence-aware target-wise R。 |
 | `target_dropout` | 单 target 缺失/遮挡。 |
 | `mixed_scatterer_rangebin` | 同 rangeBin 复合散射相位混合。 |
@@ -136,9 +154,9 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 | 路径 | 来源 | 内容 |
 |---|---|---|
 | `simulation/outputs/phase1_validation/` | `run_validation` | 当前标准验证输出：`metrics.csv`、`feasibility_gates.json`、`summary.md`、`plots/*.svg`。 |
-| `simulation/outputs/phase1_report_validation/` | 报告用验证输出副本 | 与报告/论文图表更贴近的 validation 输出。 |
+| `archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation/` | 报告用验证输出副本 | 与报告/论文图表更贴近的 validation 输出。 |
 | `simulation/outputs/phase1_extended_validation/` | `run_extended_validation` | Monte Carlo、ablation、AoA/SNR sensitivity CSV 和 `extended_summary.md`。 |
-| `simulation/outputs/phase1_report_extended_validation/` | 报告用 extended 输出副本 | 论文汇报使用的 extended 表格。 |
+| `archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_extended_validation/` | 报告用 extended 输出副本 | 论文汇报使用的 extended 表格。 |
 | `simulation/outputs/phase1_scenario_diagnostics/` | `run_scenario_diagnostics` | 场景参数表、summary、每场景时域/频域 SVG。 |
 | `simulation/outputs/phase1_multifrequency.npz` | `run_phase1` | 单次 synthetic multifrequency 仿真数据。 |
 
@@ -146,7 +164,7 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 
 | 路径 | 内容 |
 |---|---|
-| `reports/phase1_method_and_simulation_report.md` | Phase 1 方法与仿真汇报，包含流程图、实验设计、关键图、结果表和后续工作。 |
+| `archive/2026-09-14-pre-direct-aoa/legacy_docs/reports/phase1_method_and_simulation_report.md` | Phase 1 方法与仿真汇报，包含流程图、实验设计、关键图、结果表和后续工作。 |
 | `reports/numerical_simulation_assets/` | 汇报/论文用 SVG 源图。 |
 | `reports/numerical_simulation_assets_png/` | 同一批图的 PNG 版本，适合插入 Markdown/PDF/Word。 |
 
@@ -157,7 +175,7 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 - `vehicle_event_nonstationary_selected_vs_all_targets_displacement`
 - `strong_wrapping_phase_correction`
 - `target_snr_drop_adaptive_r`
-- `aoa_error_bootstrap_beta_bootstrap`
+- `aoa_error_bootstrap_beta_bootstrap` （历史 online-beta 诊断图，仅作 legacy/ablation）
 - `laser_time_channels`
 - `laser_spectrum_channels`
 - `laser_dynamic_correlation`
@@ -196,7 +214,7 @@ python3 -m simulation.phase1.run_extended_validation --output-dir simulation/out
 
 | 路径 | 内容 |
 |---|---|
-| `docs/algorithm_chain_review.md` | 最重要的追踪表：理论模块、代码入口、测试证据、输出证据、状态和缺口。 |
+| `docs/data_processing_flow_2026-09-14.md` | 最重要的追踪表：理论模块、代码入口、测试证据、输出证据、状态和缺口。 |
 | `docs/superpowers/plans/` | 历史 implementation plan，能看出 Phase 1 和半实测场景是如何拆解实现的。 |
 | `idea/overall_processing_architecture.md` | 总体处理架构，含 Mehrmaid 流程图。 |
 | `idea/kalman_flowchart_preview.md` | Kalman 融合流程图预览。 |
@@ -217,7 +235,7 @@ python3 -m unittest discover tests -v
 - `test_phase1_simulation.py`：真值、雷达、加速度合成。
 - `test_phase1_frontend.py`：ADC cube、range/angle FFT、frontend target 提取。
 - `test_phase1_target_selection.py`：峰值检测、角度合并、presence/SNR/频带筛选。
-- `test_phase1_methods.py`：proposed Kalman、beta bootstrap、confidence-aware R、算法可见输入边界。
+- `test_phase1_methods.py`：proposed Kalman、独立 beta 预校准/冻结、adaptive R、算法可见输入边界。
 - `test_phase1_ma2026_reproduction.py`：Ma-family baseline 复现。
 - `test_phase1_validation.py`：场景、指标、gates、报告和 SVG 输出。
 - `test_phase1_extended_experiments.py`：Monte Carlo / ablation / sensitivity 表格。
@@ -235,7 +253,7 @@ python3 -m unittest discover tests -v
 
 ## 后续 AI 协作建议
 
-1. 需要理解方法时，先读 `docs/algorithm_chain_review.md` 和 `simulation/phase1/README.md`。
+1. 需要理解方法时，先读 `docs/data_processing_flow_2026-09-14.md` 和 `simulation/phase1/README.md`。
 2. 需要画图时，先查本 README 的“已有做图和报告工具”，尤其是 `reporting.py`、`scenario_diagnostics.py`、`reports/numerical_simulation_assets_png/` 和 Obsidian 插件。
 3. 需要新增场景/测试情况时，在 `simulation/phase1/scenarios/` 新增一个 `build(base)` 模块，通过 `Phase1Config` 设置 target 数量、角度、SNR、range bin、dropout/degradation、ADC 参数等，并在 `scenarios/__init__.py` 注册。
 4. 需要改变雷达信息如何供算法使用时，优先看 `simulation/phase1/inputs.py` 的 `ScenarioInputs`、`RadarViews`、`FrontendViews`，不要在 `pipeline.py` 内临时拼输入。
@@ -251,7 +269,7 @@ python3 -m unittest discover tests -v
 - synthetic ADC cube、Range FFT、Angle FFT/DBF、range-angle map。
 - 2D peak detection、同 rangeBin 近角度合并、同 rangeBin 远角度分离。
 - target presence、SNR、结构频带一致性筛选。
-- AoA cold start、prediction-aided phase correction、online beta bootstrap。
+- AoA cold start、独立 beta 预校准、prediction-aided phase correction、冻结 beta 全记录融合。
 - 多目标结构主相位 Kalman、confidence-aware target-wise R。
 - Ma 2026 paper-equation baseline 已按公开论文流程复现；仍不是 Ma 官方源码 replay。
 - 标准合成验证、extended validation、场景诊断、SVG/CSV/Markdown 报告输出。

@@ -1,6 +1,6 @@
 # 论文整体思路说明
 
-> 当前状态：本文档已更新为当前方案的总览说明。最新完整数据流以 [idea/overall_processing_architecture.md](/Users/umep/thesis/idea/overall_processing_architecture.md) 为准；Kalman 融合创新点以 [innovation_points/multi_target_phase_kalman_fusion.md](/Users/umep/thesis/innovation_points/multi_target_phase_kalman_fusion.md) 为准。
+> 当前状态：本文档已更新为当前方案的总览说明。[idea/overall_processing_architecture.md](/Users/umep/thesis/idea/overall_processing_architecture.md) 与 [innovation_points/multi_target_phase_kalman_fusion.md](/Users/umep/thesis/innovation_points/multi_target_phase_kalman_fusion.md) 仍是整体数据流和 Kalman 融合创新点的参考；当前转换系数口径以本文档为准，其中若仍出现 Kalman posterior 或 LoS corrected phase 反哺在线更新 $\beta_i$ 的描述，均视为尚待同步的历史方案，不代表当前方法。
 
 本文的核心问题是：在毫米波雷达倒挂安装于结构测点、雷达随结构一起运动的情况下，如何利用周围静止反射目标恢复结构位移，并进一步从多个候选 target 中选择最可靠的观测目标。
 
@@ -20,7 +20,7 @@ $$
 
 不做最终意义上的相位解缠，也不依赖已知转换系数。
 
-第二，**AoA 冷启动与转换系数自举**。Ma 等人的 direction conversion factor 在本文统一记为 $\beta_i$，其方向为 LoS 位移/相位到结构真实振动方向位移/主相位：
+第二，**AoA 初始化与独立转换系数预校准**。Ma 等人的 direction conversion factor 在本文统一记为 $\beta_i$，其方向为 LoS 位移/相位到结构真实振动方向位移/主相位：
 
 $$
 q_k=\beta_i d_{i,k}^{\mathrm{LOS}},
@@ -28,7 +28,7 @@ q_k=\beta_i d_{i,k}^{\mathrm{LOS}},
 \Theta_k=\beta_i\phi_{i,k}^{\mathrm{LOS}}.
 $$
 
-当前代码与正文统一使用 $\beta_i$ 作为 LoS 到结构真实振动方向的转换系数。AoA 冷启动阶段不把角度估计视为最终标定值，而是先由结构方向到 LoS 的几何投影 $p_i=|\cos\theta_i|$ 给出转换系数初值：
+当前代码与正文统一使用 $\beta_i$ 作为 LoS 到结构真实振动方向的转换系数。AoA 不被视为最终标定值，而是先由结构方向到 LoS 的几何投影 $p_i=|\cos\theta_i|$ 给出转换系数初值：
 
 $$
 \hat{p}_{i,0}=|\cos\theta_i|,
@@ -36,36 +36,28 @@ $$
 \hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}.
 $$
 
-冷启动阶段结构近似静止，用于确定相位偏置 $b_i$，并根据 target 初始质量给出 target-wise 测量噪声初值。在线运行时，Kalman 预测模型先在结构方向得到主相位先验 $\Theta_k^-$，再用 $\Theta_k^- / \beta_i$ 投影回 LoS 相位空间辅助 wrapped phase 分支选择，得到第 $i$ 个 target 的 LoS 连续校正相位 $\phi_{i,k}^{\mathrm{LOS,corr}}$。注意，$\phi_{i,k}^{\mathrm{LOS,corr}}$ 仍然是 LoS 相位，不是结构方向主相位。随后将其乘以 $\beta_i$ 构造结构方向主相位观测：
+在任何 Kalman 递推开始之前，先从原始多 target slow-time phase 中搜索公共角偏差候选 $\delta$，并据此得到：
 
 $$
-y_{i,k}
-=
-\hat{\beta}_{i,k}^{-}
-\left(
-\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
-\right).
-$$
-
-短窗口自举也应优先表述为估计 $\beta_i$ 的斜率。令：
-
-$$
-x_\tau=\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i,
+p_i(\delta)=|\cos(\theta_i-\delta)|,
 \qquad
-y_\tau=\hat{\Theta}_{\tau}^{+}.
+\beta_i(\delta)=\frac{1}{\max(p_i(\delta),\epsilon_p)}.
 $$
 
-中心化后有：
+公共 $\delta$ 只描述安装级共同偏差，不能表示各 target 不同的 AoA 量化误差，因此它只作为辅助诊断/消融候选，不进入正式逐目标拟合先验。真正的逐目标校准在两个互不重叠的时间折上，从去趋势后的多 target 原始连续相位矩阵中提取 rank-1 共同振动分量，得到每个 target 独立的相对投影 $p_i$；再用 leave-one-target-out 的 holdout 预测检查该 target 的候选是否优于其原始 AoA 初值。与此同时，native-timestamp ADXL 原始加速度通过双积分回归估计绝对投影尺度和公共残余时延 $\tau$。
+
+当 ADXL 轴向/灵敏度或夹具传递增益未知时，ADXL 公共增益与所有投影的公共缩放不能仅凭同一记录区分；若这些量经过独立验证，ADXL 绝对候选则是可辨识的。因此模式由采集标定来源预先确定，而不使用 holdout 分数临时选支路：未验证或缺失验证标志的记录固定采用原始 AoA 锚定的相对投影修正，`validated` 记录固定采用 ADXL 绝对候选。每一时间折只按本折训练段的 ADXL 相干性选择参考 target，对侧时间折只负责验证，不反向改变训练集合；最终仍要求至少三个参考 target 在训练与 holdout 上都与 ADXL 动力学相干，并要求两折相位矩阵通过 rank-1 共同运动门。时间轴、激励、公共时延或共同运动结构等全局门控失败时整组回退。相位连续性、相干性、跨折稳定性、边界、改变量、方差或 holdout 改善等 target-specific 门控只回退对应 target：
 
 $$
-\hat{\beta}_{i,k+1}
+\tilde{\beta}_i
 =
-\frac{
-\sum_{\tau\in\mathcal{W}_{\beta}} x_{\tau,c}y_{\tau,c}
-}{
-\sum_{\tau\in\mathcal{W}_{\beta}} x_{\tau,c}^{2}
-}.
+\begin{cases}
+\beta_i^{\mathrm{cand}}, & g_i=1,\\
+\hat{\beta}_{i,0}, & g_i=0.
+\end{cases}
 $$
+
+这里 $g_i$ 是完全在 Kalman 前确定的逐目标接受标志。所有接受值和精确回退值组成 $\tilde{\boldsymbol{\beta}}$ 后整体冻结，随后从第 0 帧重新运行完整 Kalman；Kalman posterior、结构主相位后验和 LoS corrected phase 均不得返回校准器。
 
 第三，**结构主相位多 target Kalman 融合**。状态变量不再定义为 Ma 等人单 target 的 LoS 相位，而定义为结构振动方向主相位：
 
@@ -79,12 +71,12 @@ $$
 \Theta_k=\frac{4\pi}{\lambda}q_k.
 $$
 
-加速度直接进入系统模型预测主相位。多 target 融合的正文主叙事采用结构方向观测模型：每个 target 的 LoS 校正相位先乘以当前 $\hat{\beta}_{i,k}^{-}$，得到结构主相位观测
+加速度直接进入系统模型预测主相位。多 target 融合的正文主叙事采用结构方向观测模型：独立预校准已接受或精确回退后的 $\tilde{\beta}_i$ 在在线阶段保持冻结。每个 target 的 LoS 校正相位乘以 $\tilde{\beta}_i$，得到结构主相位观测
 
 $$
 y_{i,k}
 =
-\hat{\beta}_{i,k}^{-}
+\tilde{\beta}_i
 \left(
 \phi_{i,k}^{\mathrm{LOS,corr}}-b_i
 \right),
@@ -106,7 +98,7 @@ $$
 $$
 \hat{\phi}_{i,k}^{\mathrm{LOS},-}
 =
-\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i.
+\frac{\hat{\Theta}_k^-}{\tilde{\beta}_i}+b_i.
 $$
 
 再对 wrapped phase 进行统一校正，得到 LoS corrected phase：
@@ -123,39 +115,33 @@ $$
 \right).
 $$
 
-同一个 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 同时进入结构方向观测构造和转换系数自举更新，从而形成：
+该 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 只进入结构方向观测构造，不得再作为转换系数校准输入。当前流程为：
 
 $$
-\text{AoA 冷启动}
+\text{AoA 初值}
 \rightarrow
-\text{预测辅助相位校正}
+\text{原始多 target phase 的 rank-1 相对投影}
 \rightarrow
-\phi^{\mathrm{LOS,corr}}
+\text{native-timestamp ADXL 绝对尺度/公共时延候选}
 \rightarrow
-\begin{cases}
-\text{乘以 }\beta_i\text{ 后进行 Kalman 主相位更新}\\
-\text{用 LoS 相位与 }\Theta_k^+\text{ 自举 }\beta_i
-\end{cases}
+\text{双折 holdout 逐 target 接受或精确回退 AoA}
 \rightarrow
-\text{下一时刻更准确的 } \beta_i.
+\text{冻结 }\tilde{\boldsymbol{\beta}}
+\rightarrow
+\text{从第 0 帧完整 Kalman}.
 $$
 
-因此，当前方案不依赖预先完整解缠相位来估计转换系数，而是在 Kalman 闭环内部产生统一的局部连续校正相位，解决“转换系数需要解缠、解缠又需要转换系数”的循环依赖。
+因此，当前方案在 Kalman 外部先完成转换系数决策，再以冻结参数运行滤波。曾讨论的“用 Kalman posterior 或 LoS corrected phase 在线反哺 $\beta_i$”存在循环自证风险，已弃用，仅可作为历史方案说明。
 
-当前主方法采用 fixed/calibrated $\mathbf{Q}$ 与 confidence-aware target-wise $\mathbf{R}_k$ 的分工：过程噪声强度 $q^\star$ 通过候选集和无真值 prediction innovation energy 标定后在在线估计阶段保持固定；每个 target 的 $R_{i,0}$ 由 SNR、presence、geometry 等初始质量给出。若观测写在结构方向，则第 $i$ 个 target 的等效观测噪声应写为：
+当前主方法采用 fixed/calibrated $\mathbf{Q}$ 与 quality-gated target-wise $\mathbf{R}_k$ 的分工：过程噪声强度 $q^\star$ 通过候选集和无真值 prediction innovation energy 标定后在在线估计阶段保持固定；每个 target 的 $R_{i,0}$ 由 SNR、presence、geometry 等初始质量给出。若观测写在结构方向，则第 $i$ 个 target 的等效观测噪声应写为：
 
 $$
 R_{i,k}^{\Theta}
 \approx
-\left(\hat{\beta}_{i,k}^{-}\right)^2R_{i,k}^{\mathrm{LOS}}
-+
-\left(
-\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
-\right)^2
-\sigma_{\beta_i,k}^{2}.
+\tilde{\beta}_i^2R_{i,k}^{\mathrm{LOS}}.
 $$
 
-这说明 LoS 相位噪声会被 $\beta_i^2$ 放大，$\beta_i$ 自身不确定也会进入结构方向观测误差。当前代码与正文保持同一坐标系：先构造结构方向观测 $y_{i,k}$，再以 $H_i=[1,0]$ 进入 Kalman 更新。
+这说明 LoS 相位噪声会被冻结转换系数的平方放大。转换系数不确定性由 Kalman 前的独立校准与 holdout 接受/回退门控处理，不在在线阶段以“逐步收敛的 beta 方差”重复计入。当前代码与正文保持同一坐标系：先构造结构方向观测 $y_{i,k}$，再以 $H_i=[1,0]$ 进入 Kalman 更新。
 
 ## 1. 数学模型说明
 
@@ -651,7 +637,7 @@ $$
 
 ### 4.3 可替代的转换因子估计办法
 
-普通最小二乘或遍历 RMSE 方法虽然直接，但在倒挂场景下可能不够稳健。原因包括：加速度双积分存在低频漂移，雷达相位可能存在解缠错误，同一 bin 内可能存在多散射叠加，车辆或行人会造成短时异常，并且雷达与加速度可能存在微小时延。因此，本节保留若干可对比的转换因子估计思路，用于解释本文最终采用“AoA 冷启动 + Kalman 预测校正 + 短窗口最小二乘自举”的来源。
+普通最小二乘或遍历 RMSE 方法虽然直接，但在倒挂场景下可能不够稳健。原因包括：加速度双积分存在低频漂移，雷达相位可能存在解缠错误，同一 bin 内可能存在多散射叠加，车辆或行人会造成短时异常，并且雷达与加速度可能存在微小时延。因此，本节保留若干转换因子估计思路，作为方法演进记录和对照候选。凡是依赖 Kalman posterior 或 LoS corrected phase 在线反哺 $\beta_i$ 的方案均已弃用，不代表本文当前方法。
 
 可选方案包括以下几类。
 
@@ -752,11 +738,11 @@ $$
 \beta_0\approx \frac{1}{|\eta_0|}.
 $$
 
-这种方法可以把雷达空间角度元数据和加速度拟合得到的投影关系结合起来。本文最终采用的转换系数自举策略即以该思想为起点：先用 AoA 提供可启动的几何初值，再利用 Kalman 闭环生成的校正相位在线修正转换系数。
+这种方法可以把雷达空间角度元数据和加速度拟合得到的投影关系结合起来。本文当前方法以该思想为起点，但校准完全位于 Kalman 之前：先由 AoA 给出初值，再从原始多 target phase 提出公共角偏差和逐目标相对投影候选，并必须通过 native-timestamp ADXL 动力学相干、rank-1 共同运动与不重叠 holdout 门控。全局门失败时整组回退；逐目标门失败时只精确回退对应 target。最后统一冻结 $\beta_i$。
 
-### 4.4 当前结论：AoA 冷启动与预测校正自举
+### 4.4 当前结论：AoA 初始化与独立转换系数预校准
 
-转换因子的获取方式已经从“离线完整标定”调整为“几何初值 + 在线自举”。本文沿用 Ma 等人的方向定义，将 $\beta_i$ 作为 LoS 位移/相位到结构真实振动方向位移/主相位的转换系数：
+本文沿用 Ma 等人的方向定义，将 $\beta_i$ 作为 LoS 位移/相位到结构真实振动方向位移/主相位的转换系数：
 
 $$
 q(k)=\beta_i d_{\mathrm{LOS},i}(k),
@@ -764,7 +750,7 @@ q(k)=\beta_i d_{\mathrm{LOS},i}(k),
 \Theta_k=\beta_i\phi_{i,k}^{\mathrm{LOS}}.
 $$
 
-当前方案中，AoA 不被视为最终精确转换系数，而是作为 Kalman 闭环启动所需的几何先验。若第 $i$ 个 target 的 AoA 与结构振动方向夹角为 $\theta_i$，则先得到结构主相位到 LoS 相位的几何投影 $p_i$，再取其倒数作为 LoS 到结构方向的转换系数初值：
+当前方案中，AoA 不被视为最终精确转换系数，而是独立预校准的几何初值。若第 $i$ 个 target 的 AoA 与结构振动方向夹角为 $\theta_i$，则先得到结构主相位到 LoS 相位的几何投影 $p_i$，再取其倒数作为 LoS 到结构方向的转换系数初值：
 
 $$
 \hat{p}_{i,0}=|\cos\theta_i|,
@@ -772,15 +758,38 @@ $$
 \hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}.
 $$
 
-进入 Kalman 框架的 target 相位仍是 wrapped phase。由加速度驱动的预测模型先给出结构主相位先验，再通过当前 $\hat{\beta}_{i,k}^{-}$ 投影为各 target 的 LoS 相位先验：
+随后在任何 Kalman 递推之前，先使用原始多 target slow-time phase 搜索一个共享角偏差 $\delta$。该偏差作用在 AoA 投影上：
+
+$$
+p_i(\delta)=|\cos(\theta_i-\delta)|,
+\qquad
+\beta_i(\delta)=\frac{1}{\max(p_i(\delta),\epsilon_p)}.
+$$
+
+公共角偏差候选只负责描述多个静止 target 共同的几何偏差，不能由 Kalman posterior、$\Theta_k^+$ 或 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 构造。真正的逐目标候选由原始相位矩阵的 rank-1 共同运动结构给出，并进一步使用 ADXL 的 native timestamps 和原始加速度做独立动力学门控/绝对时域校准。拟合段和 holdout 段不重叠且双向交换；相对模式要求至少三个 ADXL 相干参考 target，且两折第一奇异分量占比均通过阈值。
+
+模式由标定来源预先决定：未验证的轴向、灵敏度或夹具传递增益采用 AoA 锚定相对候选，`validated` 记录采用 ADXL 绝对候选，不得在同一 holdout 上择优。时间轴、激励、公共时延、参考数量或 rank-1 共同运动门失败时，整组精确回退到本次 AoA 初值；单个 target 的相位连续性、相干性、跨折参数一致性、物理边界、改变量、不确定度或条件 holdout 改善失败时，只令该 target 回退：
+
+$$
+\tilde{\beta}_i
+=
+\begin{cases}
+\beta_i^{\mathrm{cand}}, & g_i=1,\\
+\hat{\beta}_{i,0}, & g_i=0.
+\end{cases}
+$$
+
+任何失败都不得复用上一次运行的缓存值；通过的其他 target 不因单个坏 target 被丢弃。
+
+一旦完成接受或回退决策，$\tilde{\boldsymbol{\beta}}$ 即冻结，并从第 0 帧重新运行完整 Kalman。进入 Kalman 的 target 相位仍是 wrapped phase；由加速度驱动的预测模型先给出结构主相位先验，再通过冻结的 $\tilde{\beta}_i$ 投影为各 target 的 LoS 相位先验：
 
 $$
 \hat{\phi}_{i,k}^{\mathrm{LOS},-}
 =
-\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i.
+\frac{\hat{\Theta}_k^-}{\tilde{\beta}_i}+b_i.
 $$
 
-随后对 wrapped phase 进行预测辅助相位校正，得到 LoS corrected phase：
+预测辅助相位校正仍用于选择 wrapped phase 分支，但只服务 Kalman 观测：
 
 $$
 \phi_{i,k}^{\mathrm{LOS,corr}}
@@ -793,15 +802,15 @@ $$
 \frac{
 \hat{\phi}_{i,k}^{\mathrm{LOS},-}-\psi_{i,k}
 }{2\pi}
-\right).
+\right),
 $$
 
-该校正相位仍然位于 LoS 相位空间；它不是结构主相位 $\Theta_k$。用于 Kalman 更新时，先转换成结构方向主相位观测：
+并构造结构方向主相位观测：
 
 $$
 y_{i,k}
 =
-\hat{\beta}_{i,k}^{-}
+\tilde{\beta}_i
 \left(
 \phi_{i,k}^{\mathrm{LOS,corr}}-b_i
 \right),
@@ -809,35 +818,7 @@ y_{i,k}
 y_{i,k}=\Theta_k+e_{i,k}.
 $$
 
-因此，转换系数计算不再要求预先获得一段完整解缠相位，而是使用 Kalman 闭环中生成的局部连续 LoS 校正相位。为降低冷启动相位偏置和微弱振动阶段均值误差对斜率估计的影响，当前主方法不采用未中心化 plain LS，而采用中心化并带 AoA 先验约束的窗口 LS。令：
-
-$$
-x_\tau=\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i,
-\qquad
-y_\tau=\hat{\Theta}_\tau^+,
-$$
-
-中心化后：
-
-$$
-\hat{\beta}_{i,k+1}
-=
-\frac{
-\sum_{\tau\in\mathcal{W}_{\beta}}
-x_{\tau,c}y_{\tau,c}
-+
-\lambda_\beta\hat{\beta}_{i,0}
-}{
-\sum_{\tau\in\mathcal{W}_{\beta}}
-x_{\tau,c}^{2}
-+
-\lambda_\beta
-},
-$$
-
-该更新仅在窗口内结构响应激励足够、target quality 足够好、相位分支稳定时执行；若条件不足，则保持上一时刻 $\beta_i$。转换系数稳定性仍可作为后续质量评价指标：稳定的 $\beta_i$ 说明该 target 更可能是可靠静止参考目标，不稳定则可能意味着多散射混叠、遮挡或动态干扰。但它不作为前端 target selection 的主判据，也不作为 Kalman 启动前的必要条件。
-
-相对于 Ma 等人的离线转换因子标定，本文的处理保留了其“加速度辅助相位预测”的核心思想，但改变了相位状态和参数更新位置。Ma 等人的状态是单 target 的 LoS 相位，转换因子 $\beta_i$ 通常在滤波前通过离线遍历或标定得到；本文的状态是结构振动方向主相位，$\beta_i$ 由 AoA 冷启动，并在 LoS corrected phase $\phi_{i,k}^{\mathrm{LOS,corr}}$ 与结构主相位后验 $\Theta_k^+$ 的支持下随 Kalman 递推在线收敛。当前代码与论文正文统一使用 $\beta_i$ 表达 LoS 到结构真实振动方向的转换方向。
+相对于 Ma 等人的离线转换因子标定，本文保留了“加速度辅助相位预测”的思想，同时把转换系数决策与状态递推严格隔离。旧的“$\phi_{i,k}^{\mathrm{LOS,corr}}$ 或 $\Theta_k^+$ 反哺 $\beta_{i,k+1}$”在线自举方案已弃用，因为同一滤波闭环容易产生自反馈和循环验证；该方案只能作为历史讨论，不得再写成当前或最终方法。
 
 ### 4.5 当前硬件约束：TI IWR1843
 
@@ -852,3 +833,21 @@ $$
 5. 本文真正需要的不是单帧角度估计精度最大化，而是获得稳定的 range-angle 复数 slow-time 序列，用于后续相位跟踪、IQ 圆弧判断和加速度-雷达转换因子估计。
 
 因此，后续文献调研和算法选择应围绕 IWR1843 的实际能力展开：优先考虑能在 3TX/4RX MIMO 数据上稳定输出角度门控复信号的方法，再考虑是否需要超分辨角度估计。
+
+### 4.6 唯一实机采集拓扑：Raspberry Pi 4 本地采集
+
+当前项目只采用单采集主机方案：Raspberry Pi 4 负责传感器控制、原始数据接收和同步事件记录，电脑只通过 Wi-Fi/SSH 控制 Pi，并在采集完成后下载数据进行离线分析。
+
+```text
+电脑 ──Wi-Fi / SSH──→ Raspberry Pi 4
+                         ├──SPI + DRDY──→ ADXL355
+                         ├──USB─────────→ IWR1843BOOST
+                         ├──GPIO18──────→ IWR1843BOOST SYNC_IN（硬件触发模式）
+                         └──Ethernet────→ DCA1000EVM
+
+IWR1843BOOST ←──60-pin HD / LVDS──→ DCA1000EVM
+```
+
+其中，Pi 4 通过 SPI 读取 ADXL355，DRDY 接入 Pi GPIO；IWR1843BOOST 的 USB 接 Pi，用于雷达配置和控制；DCA1000EVM 的网线直连 Pi 有线网口，用于控制和接收 UDP 原始 ADC 数据；IWR1843BOOST 与 DCA1000EVM 通过 60-pin HD 板间接口传输 LVDS 数据。硬件触发模式下，Pi 另以 GPIO18 驱动 IWR1843BOOST J6-9 `SYNC_IN`，并可用 GPIO24 回环记录实际边沿。电脑不直接连接 IWR1843BOOST、DCA1000EVM 或 ADXL355，不承担抓包或传感器时间戳工作。同步设计必须建立在 Pi 4 单机统一时间域上。
+
+目前 `capture_program/` 已实现软件时间戳与 GPIO 硬件触发两种统一采集模式，并输出 ADXL355 DRDY 与雷达帧参考的 `CLOCK_MONOTONIC` 时间轴。该实现已通过无硬件聚焦测试，但真实 SPI 持续采样、DCA 数据完整性、`SYNC_IN` 波形、雷达触发时延、ADXL 数字滤波群延迟和跨传感器漂移仍待上电台架验证，因此现阶段不得将软件输出等同于已完成实机同步精度验证。

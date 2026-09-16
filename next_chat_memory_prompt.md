@@ -11,14 +11,14 @@
 请优先阅读以下文件：
 
 1. `/Users/umep/thesis/thesis_idea_overview.md`
-   - 这是当前论文整体思路说明，已经同步到最新版闭环方案。
-   - 包含数学模型、关键结论、Ma 等人的转换因子方法、AoA 冷启动与转换系数自举、IWR1843 硬件约束。
+   - 这是当前论文整体思路说明，已经同步到最新版转换系数方案。
+   - 包含数学模型、关键结论、Ma 等人的转换因子方法、AoA 初始化与独立转换系数预校准、IWR1843 硬件约束。
 2. `/Users/umep/thesis/idea/overall_processing_architecture.md`
-   - 这是当前最重要的整体架构文档。
-   - 包含最新版完整数据流、两个 Mehrmaid 流程图、target 提取、AoA 冷启动、预测辅助相位校正、转换系数自举、固定 $Q$ 与自适应 $R$ 的接口关系。
+   - 这是整体架构参考文档。
+   - 其中若仍出现 Kalman posterior 或 LoS corrected phase 在线反哺 $\beta_i$ 的段落，均是尚待同步的历史方案；转换系数部分以本 Prompt 和 `thesis_idea_overview.md` 的当前口径为准。
 3. `/Users/umep/thesis/innovation_points/multi_target_phase_kalman_fusion.md`
-   - 这是结构主相位多 target Kalman 融合创新点的正式说明。
-   - 包含与 Ma 等人框架的区别：状态变量由单 target LoS 相位改为结构主相位，转换系数由离线标定改为 AoA 冷启动与在线自举，多个 target 共同构造观测模型。
+   - 这是结构主相位多 target Kalman 融合创新点的参考说明。
+   - 其中在线自举表述已弃用；当前区别是状态变量由单 target LoS 相位改为结构主相位，$\beta_i$ 在 Kalman 前经独立原始数据预校准或精确回退 AoA，并在完整滤波期间冻结。
 4. `/Users/umep/thesis/draft_inverted_radar_theory_model.md`
    - 这是更完整的倒挂式毫米波雷达理论章节草稿。
    - 包含 mmVib 相位模型、倒挂几何模型、FMCW 回波模型、IQ 模型、多 target、角度门控等内容。
@@ -28,9 +28,9 @@
 
 当前讨论的核心不是重新发明毫米波雷达测距理论，而是：
 
-> 基于 mmVib 的相位测量理论，建立倒挂式毫米波雷达的结构位移估计框架：前端从 range-angle map 中在线筛选多个可用静止参考 target；后端参考 Ma 等人的 acceleration-aided Kalman filtering 思想，但将状态变量从单 target LoS 相位改为结构振动方向主相位，并用 AoA 冷启动、预测辅助相位校正和短窗口最小二乘自举打通转换系数与相位连续性的循环依赖。
+> 基于 mmVib 的相位测量理论，建立倒挂式毫米波雷达的结构位移估计框架：前端从 range-angle map 中在线筛选多个可用静止参考 target；后端参考 Ma 等人的 acceleration-aided Kalman filtering 思想，但将状态变量从单 target LoS 相位改为结构振动方向主相位。滤波前先以 AoA 给出 $\beta_i$ 初值，再由原始多 target phase 的双折 rank-1 共同运动估计逐目标相对投影，并用 native-timestamp ADXL 提供独立动力学门控、绝对候选和公共时延。未验证记录固定走 AoA 锚定相对模式，`validated` 记录固定走 ADXL 绝对模式；全局门失败整组回退，逐目标门失败只回退该 target。随后冻结整组 $\beta_i$，从第 0 帧运行完整 Kalman，绝不使用 Kalman posterior 或 LoS corrected phase 反哺 $\beta_i$。
 
-## 当前最新版方法闭环
+## 当前最新版方法流程
 
 ### 0.1 前端 target selection 不依赖相位解缠
 
@@ -46,7 +46,7 @@ $$
 
 不做最终意义上的相位解缠，也不预先估计精确转换系数。
 
-### 0.2 AoA 冷启动用于打破转换系数与相位校正死锁
+### 0.2 AoA 初值与独立 beta 预校准
 
 Ma 论文里的 direction conversion factor 本文统一记为 $\beta_i$，方向是：
 
@@ -64,11 +64,19 @@ $$
 \hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}.
 $$
 
-AoA 初值不是最终精确转换系数，只用于启动 Kalman 闭环。冷启动阶段结构近似静止，用于估计相位偏置 $b_i$，并初始化较大的 target-wise 测量噪声 $r_{i,0}$。
+AoA 初值不是最终精确转换系数。任何 Kalman 递推开始前，先仅从原始多 target slow-time phase 搜索公共角偏差候选 $\delta$：
+
+$$
+p_i(\delta)=|\cos(\theta_i-\delta)|,
+\qquad
+\beta_i(\delta)=\frac{1}{\max(p_i(\delta),\epsilon_p)}.
+$$
+
+该候选不得使用 Kalman posterior、结构主相位后验或 LoS corrected phase。公共角偏差仅作辅助诊断/消融，不进入正式逐目标拟合先验；真正的逐目标候选由原始相位的双折 rank-1 共同运动结构得到，并用 ADXL native timestamps 上的原始加速度做独立动力学/绝对时域校准。相对模式至少需要三个训练/holdout 均与 ADXL 相干的参考 target，且两折 rank-1 占比均过门。时间轴、激励、公共时延、参考数量或共同运动门失败时整组回退；单个 target 的连续性、相干性、物理边界、跨折一致性或条件 holdout 改善失败时只回退该 target。不得复用公共偏差结果或历史缓存。接受值与回退值合成 $\tilde{\boldsymbol{\beta}}$ 后冻结，再从第 0 帧运行完整 Kalman。初始近静止段仍可用于估计相位偏置 $b_i$ 和 target-wise 测量噪声初值 $r_{i,0}$，但不构成在线 beta 自举。
 
 ### 0.3 Kalman 状态是结构主相位，不是 Ma 的单 target LoS 相位
 
-状态变量定义为：
+本阶段只在独立校准接受或 AoA 精确回退、并冻结 $\tilde{\boldsymbol{\beta}}$ 后启动。状态变量定义为：
 
 $$
 \mathbf{x}_k=
@@ -101,14 +109,14 @@ T^2/2 & T
 \end{bmatrix}.
 $$
 
-### 0.4 预测辅助相位校正同时服务观测更新和转换系数自举
+### 0.4 冻结 beta 后的预测辅助相位校正只服务 Kalman 观测
 
 雷达 phase wrapping 发生在 LoS 相位空间，因此分支选择时需要先把结构主相位预测投影回 LoS：
 
 $$
 \hat{\phi}_{i,k}^{\mathrm{LOS},-}
 =
-\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i.
+\frac{\hat{\Theta}_k^-}{\tilde{\beta}_i}+b_i.
 $$
 
 然后对原始 wrapped phase 执行预测辅助相位校正：
@@ -127,14 +135,12 @@ $$
 
 注意：$\phi_{i,k}^{\mathrm{LOS,corr}}$ 仍是第 $i$ 个 target 的 LoS 连续相位，不是结构主相位 $\Theta_k$。
 
-同一个 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 同时进入两条路径：
-
-1. 乘以 $\beta_i$ 构造结构方向主相位观测：
+该 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 只用于构造结构方向主相位观测：
 
 $$
 y_{i,k}
 =
-\hat{\beta}_{i,k}^{-}
+\tilde{\beta}_i
 \left(
 \phi_{i,k}^{\mathrm{LOS,corr}}-b_i
 \right).
@@ -148,21 +154,19 @@ y_{i,k}=\Theta_k+e_{i,k},
 H_i=[1,0].
 $$
 
-2. 作为转换系数短窗口最小二乘自举的 LoS 侧数据。不能把同一 target 参与生成的后验结构相位直接作为该 target 的 $\beta_i$ 收敛证据；为避免自反馈，$\beta_i$ 的在线更新应使用第 $i$ 个 target 的 LoS corrected phase 与不含 target $i$ 的结构方向参考状态进行最小二乘拟合，并用加速度参考或可靠几何 target 做尺度锚定。令 $x_\tau=\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i$，$y_\tau=\Theta_{\tau}^{\mathrm{ref},-i}$，中心化后：
+LoS corrected phase 不进入任何转换系数拟合，也不反馈更新 $\tilde{\beta}_i$。当前数据流固定为：
 
 $$
-\hat{\beta}_{i,k+1}
-=
-\frac{
-\sum_{\tau\in\mathcal{W}_{\beta}}
-x_{\tau,c}y_{\tau,c}
-}{
-\sum_{\tau\in\mathcal{W}_{\beta}}
-x_{\tau,c}^{2}
-}.
+\text{原始 target phase + AoA + native-timestamp ADXL}
+\rightarrow
+\text{独立预校准 + holdout}
+\rightarrow
+\text{接受冻结 beta 或精确回退 AoA}
+\rightarrow
+\text{从第 0 帧完整 Kalman}.
 $$
 
-因此，本文不是先独立完成一段完整相位解缠再标定 $\beta$，而是在 Kalman 闭环内生成局部 LoS corrected phase，并让该校正相位支撑结构方向观测更新；转换系数更新必须另接不含当前 target 的结构方向参考状态。当前代码与正文统一采用结构方向观测模型 $H_i=[1,0]$。
+旧的“LoS corrected phase 或 Kalman posterior $\rightarrow\beta_{i,k+1}$”方案已弃用，仅保留为历史讨论。当前代码与正文统一采用结构方向观测模型 $H_i=[1,0]$。
 
 ### 0.5 当前噪声策略
 
@@ -192,7 +196,7 @@ r_{\max}
 \right].
 $$
 
-这样在冷启动和初始微振阶段，若某些 target 或转换系数尚未稳定，其测量噪声会保持较大，滤波器更依赖加速度预测；只有在 target-wise beta error、last-window median error 和更新 gate 共同支持时，才能说短窗口自举使 $\hat{\beta}_{i,k}$ 进入可信范围，随后 $R$ 才应回落并恢复多 target 观测权重。
+转换系数不确定性在 Kalman 前通过独立校准的接受/精确回退门控消化；$\tilde{\beta}_i$ 在线保持冻结。$R$ 的自适应只反映 target phase 质量、结构方向残差和观测一致性，不得再解释为在线 beta 收敛过程，也不得以 $R$ 回落反证 beta 校准成功。
 
 ## 已形成的关键理论结论
 
@@ -594,6 +598,8 @@ $$
 
 ## 转换因子估计的候选方法
 
+本节是方法演进记录与对照方法池，不等同于当前主方法。尤其是任何利用 Kalman posterior 或 LoS corrected phase 在线更新 $\beta_i$ 的做法均已弃用。
+
 普通最小二乘可能不够稳健，原因包括：
 
 - 加速度双积分有低频漂移；
@@ -698,6 +704,8 @@ $$
 
 再在附近小范围搜索或拟合。
 
+当前主方法只采用如下决策链：AoA 逐目标初值 $\rightarrow$ 公共角偏差仅作诊断/消融 + 原始多 target phase 的双折 rank-1 逐目标相对投影 $\rightarrow$ native-timestamp ADXL 动力学相干/绝对候选/公共时延与不重叠 holdout $\rightarrow$ 按标定来源预选相对或绝对模式 $\rightarrow$ 全局失败整组回退、逐目标失败只回退对应 AoA $\rightarrow$ 冻结 $\beta_i$ $\rightarrow$ 从第 0 帧运行完整 Kalman。上述候选方法可作为 baseline 或预校准内部的比较对象，但不得把 Kalman 输出回接为 beta 标定依据。
+
 ## IWR1843 硬件约束
 
 当前雷达为 **TI IWR1843**：
@@ -710,14 +718,37 @@ $$
 - MUSIC/ESPRIT/稀疏重构/SBL/atomic norm 等可调研，但不能默认适合低通道数、复杂桥下多径和实时相位跟踪；
 - 目标不是单帧角度估计精度最大化，而是得到稳定的 range-angle 复数 slow-time 序列，用于相位跟踪、IQ 圆弧判断和转换因子估计。
 
+## 实机采集拓扑（后续对话必须保持）
+
+项目只采用下面这一套采集方案：**Raspberry Pi 4 是唯一采集主机和统一时间戳来源，电脑只负责通过 Wi-Fi/SSH 控制，以及采集结束后的数据下载和离线分析。**
+
+```text
+电脑 ──Wi-Fi / SSH──→ Raspberry Pi 4
+                         ├──SPI + DRDY──→ ADXL355
+                         ├──USB─────────→ IWR1843BOOST
+                         ├──GPIO18──────→ IWR1843BOOST SYNC_IN（硬件触发模式）
+                         └──Ethernet────→ DCA1000EVM
+
+IWR1843BOOST ←──60-pin HD / LVDS──→ DCA1000EVM
+```
+
+- ADXL355 的 SPI 和 DRDY 均接 Pi 4。
+- IWR1843BOOST 的 USB 接 Pi 4，用于配置和控制雷达。
+- DCA1000EVM 的网线直连 Pi 4 的有线网口，用于控制和接收 UDP 原始 ADC 数据。
+- IWR1843BOOST 与 DCA1000EVM 通过 60-pin HD 接口传输 LVDS 数据。
+- 电脑不直接连接传感器、不运行实机抓包、不参与采集时序；SSH 只负责控制，命令到达时间不是同步时间戳。
+- 后续实现、文档和实验设计必须保持 Pi 4 单机采集，不得让电脑参与采集或传感器计时。
+
+同步采集软件现已落在 `capture_program/`：C 原生 ADXL355 采集器使用 spidev + libgpiod DRDY，C 帧触发器产生有限 GPIO18 脉冲并可由 GPIO24 回环记录内核边沿，`SynchronizedRadarAdxl` 统一协调雷达/DCA 与 ADXL 生命周期。软件时间戳模式输出 `sensorStart` bracket + 标称周期估计；硬件模式输出每帧触发参考；两者均写 `sync/radar_frame_monotonic_ns.npy` 和 `timeline.json`，且不把 PCAP 接收时间或 GPIO 边沿冒充雷达 ADC 采样时刻。当前只完成无硬件聚焦测试，`hardware_validated` 必须保持 `false`，直到真实 Pi 上的 SPI、1 kHz DRDY 积压、DCA 丢包、J6-9 `SYNC_IN`、触发波形、帧对应、时延和漂移全部实测通过。
+
 ## 当前需要继续讨论的问题
 
-当前论文方法论框架已经基本闭环。下一步应围绕“如何写成论文方法章节”和“如何设计实验验证”继续推进，而不是重新回到旧的离线转换因子路线。重点包括：
+当前论文方法论框架已经基本闭环。下一步应围绕“如何写成论文方法章节”和“如何设计实验验证”继续推进，不得重新采用已弃用的 Kalman posterior / LoS corrected phase 在线反哺 beta 方案。重点包括：
 
-1. 将整体方法整理成 Method 章节结构：系统模型、target 提取、多 target 观测构造、AoA 冷启动、预测辅助相位校正、转换系数自举、固定 $Q$ 与自适应 $R$。
-2. 明确第一版算法的可复现实验参数：滑动窗口长度、角度合并阈值、结构频带阈值、$Q$ 的遍历范围、$R$ 的上下界和遗忘因子。
-3. 设计 ablation study：单 target vs 多 target；无 AoA 冷启动 vs AoA 冷启动；固定转换系数 vs 在线自举；固定 $R$ vs 自适应 $R$；是否使用 Doppler/chirp 间相位变化率作为辅助先验。
-4. 设计闭环有效性验证：初始微振阶段 target-wise beta error、last-window median error、更新 gate、$R_i$ 的自动回落、$\phi_{i,k}^{\mathrm{LOS,corr}}$ 的分支选择错误率、多 target innovation 一致性。车辆事件等短时非平稳激励只能说明 AoA 初值误差对位移估计影响被降低，不能证明所有 target-wise beta 均收敛到真值。
-5. 继续保留 Ma 等人方法作为 baseline：Ma 式单 target LoS phase Kalman + 离线转换因子；本文作为结构主相位多 target Kalman + AoA 冷启动 + 在线转换系数自举。
+1. 将整体方法整理成 Method 章节结构：系统模型、target 提取、AoA 初值、原始多 target phase 公共角偏差候选、native-timestamp ADXL 独立时域校准、不重叠 holdout、精确 AoA 回退、冻结 beta、从第 0 帧完整 Kalman、多 target 观测构造、固定 $Q$ 与自适应 $R$。
+2. 明确第一版算法的可复现实验参数：公共角偏差搜索范围、ADXL 原生时间戳与公共时延范围、校准/holdout 划分、关键门控、滑动窗口长度、角度合并阈值、结构频带阈值、$Q$ 的遍历范围、$R$ 的上下界和遗忘因子。
+3. 设计 ablation study：单 target vs 多 target；原始 AoA 精确回退 vs 仅公共角偏差候选 vs 通过 ADXL holdout 的冻结 beta；固定 $R$ vs 自适应 $R$；是否使用 Doppler/chirp 间相位变化率作为辅助先验。
+4. 设计独立校准有效性验证：记录接受/拒绝原因、拟合段与 holdout 残差改善、跨折 beta/时延一致性、全局失败时的整组 AoA 回退与逐目标失败时的单目标 AoA 回退、完整 Kalman 期间 beta history 恒定、$\phi_{i,k}^{\mathrm{LOS,corr}}$ 的分支选择错误率和多 target innovation 一致性。车辆事件等短时非平稳激励不能单独证明转换系数校准到真值。
+5. 继续保留 Ma 等人方法作为 baseline：Ma 式单 target LoS phase Kalman + 离线转换因子；本文作为结构主相位多 target Kalman + AoA 初始化 + 独立原始数据预校准/holdout + 精确回退 + 冻结 beta。
 
-请在新对话中不要重新推翻上述共识，除非发现明确数学错误。优先在这些共识上继续推进方法章节写作、公式统一和实验方案设计。
+请在新对话中以本文件和 `thesis_idea_overview.md` 的上述转换系数口径为准。其他源文档里尚未同步的在线 beta 叙述一律视为已弃用历史方案，除非发现明确数学错误，不得将其恢复为当前方法。
