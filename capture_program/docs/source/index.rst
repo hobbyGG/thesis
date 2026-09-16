@@ -10,6 +10,23 @@ Welcome to Millimeter-wave Capture Standard (mmwave-capture-std)'s documentation
 
 **mmwave-capture-std** is a *fast*, *reliable*, and *replicable* Texas Instruments millimeter-wave capture toolkit, focus on data capturing and raw data parsing.
 
+The supported project deployment uses Raspberry Pi 4 as the only acquisition
+host. IWR1843BOOST USB, DCA1000EVM Ethernet, and ADXL355 SPI/DRDY all connect to
+the Pi. The operator computer only reaches the Pi through Wi-Fi/SSH, while
+IWR1843BOOST and DCA1000EVM are joined by their 60-pin HD connector.
+
+Synchronized radar and ADXL355 capture is available in two modes. The
+``software_timestamp`` mode brackets ``sensorStart`` on the Pi monotonic clock
+and needs no radar GPIO wire. The ``hardware_trigger`` mode drives Pi GPIO18 to
+IWR1843BOOST J6-9 ``SYNC_IN`` and can observe the same edge on GPIO24. Both
+modes retain the 1 kHz ADXL355 DRDY timestamps from GPIO25.
+
+.. warning::
+
+   Source code and focused mock tests are not a powered bench validation. Keep
+   ``hardware_validated = false`` until the actual firmware, J6 routing,
+   waveform, frame correspondence, and latency have been measured.
+
 It stands out with three key attributes:
 
 #. **Fast**: It parses raw data into ``np.ndarray[np.complex64]`` 2.09 times faster than state-of-the-art packages (0.593s v.s. 1.239s).
@@ -18,7 +35,8 @@ It stands out with three key attributes:
 
 #. **Replicable**: It simplifies the process of replicating the recording setup by using a toml config file to manage capture hardware, layout the dataset as HDF5-like structure, and provide sensor config files to each capture result.
 
-Here is an example of using ``mmwave-capture-std`` to capture mmwave data from IWR1483BOOST and DCA1000EVM:
+Here is an example of running ``mmwave-capture-std`` locally on the Pi to
+capture data from IWR1843BOOST and DCA1000EVM:
 
 .. code-block:: bash
 
@@ -57,10 +75,42 @@ Change the following setting in ``example/capture_iwr1843.toml`` to your setup:
 .. code-block:: toml
 
    [hardware.iwr1843]
-   dca_eth_interface = "enp5s0"
+   dca_eth_interface = "eth0"
    radar_config_port = "/dev/ttyACM0"
    radar_data_port = "/dev/ttyACM1"
    capture_frames = 10
+
+For a combined radar and ADXL355 run, build the Linux GPIO uAPI v2 native
+helpers and start with the software timestamp example:
+
+.. code-block:: bash
+
+   make -C native/adxl355_capture
+   make -C native/adxl355_capture print-hw
+   make -C native/frame_trigger
+   uv run mmwavecapture-std examples/capture_synchronized_software.toml
+
+The hardware-trigger example is
+``examples/capture_synchronized_hardware.toml``. It additionally requires
+GPIO18 (physical pin 12) to J6-9 ``SYNC_IN`` and a common ground. GPIO24 is an
+optional diagnostic branch enabled only with ``use_loopback = true`` and
+``loopback_line = 24``. See :doc:`Setup <setup>` before
+powering the fixture. Trigger frequency is limited to 90% of nominal radar
+frame rate, and both initial delay and trigger period must stay below the
+conservative 5-second DCA guard. Normal/SIGTERM cleanup only makes a best-effort
+attempt to leave GPIO18 low; real fixtures should use a hardware pull-down and
+have the waveform measured.
+
+A successful combined run publishes radar and ADXL355 algorithm-input
+packages plus ``sync/timeline.json`` and
+``sync/radar_frame_monotonic_ns.npy``. The software timeline is an estimate
+from the ``sensorStart`` bracket and the decoded radar manifest's nominal frame
+period. The hardware timeline uses a physical loopback edge or, without
+loopback, a userspace GPIO-set-completion reference that is not claimed as an
+observed edge. Neither is represented as radar ADC sampling time, and DCA PCAP
+timestamps remain Ethernet receive times. Loading requires the complete
+sibling sync manifest and any capture-root status in addition to the decoded
+radar package; the returned object exposes that combined manifest.
 
 
 Where to start?

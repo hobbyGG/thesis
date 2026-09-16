@@ -7,8 +7,9 @@ Quickstart
 
 ``mmwave-capture-std`` consists of 3 modules: mmwave hardware interface (:class:`~mmwavecapture.radar.Radar`, :class:`~mmwavecapture.dca1000.DCA1000`), data capture and hardware managing (:class:`~mmwavecapture.capture.capture`), and raw data parser (:class:`~mmwavecapture.parser`).
 
-In the following quickstart, we will demonstrate how to use :class:`~mmwavecapture`
-to capture raw data from TI IWR1843 radar (IWR1843BOOST) and DCA1000EVM data capture card on Linux.
+In the following quickstart, all commands and live capture processes run on a
+Raspberry Pi 4. The Pi receives raw data from TI IWR1843BOOST and DCA1000EVM;
+the operator computer only controls the Pi over Wi-Fi/SSH.
 
 
 Prerequisites
@@ -20,8 +21,14 @@ Please refer to :doc:`Setup page <setup>` for more details.
 
 For the following quickstart, we assume you have the following hardware setup:
 
+- Raspberry Pi 4 running 64-bit Raspberry Pi OS
 - IWR1843BOOST (Out-of-box demo SDK: 3.6.0)
 - DCA1000EVM (FPGA firmware: 2.8)
+- ADXL355 connected to Pi SPI0 CE0 with DRDY on GPIO25
+
+The IWR1843BOOST USB and DCA1000EVM Ethernet cables both terminate at the Pi.
+IWR1843BOOST and DCA1000EVM are also joined by their 60-pin HD connector. See
+:doc:`Setup page <setup>` for the complete topology.
 
 Millimeter-wave Hardware Interface
 ----------------------------------
@@ -31,9 +38,9 @@ In ``mmwave-capture-std``, :class:`~mmwavecapture.radar.Radar` and :class:`~mmwa
 Communicate with Radar
 ``````````````````````
 
-Let us start with communicate with the radar, first connect radar USB
-cable to your computer, and get the config and port UART path. On
-Linux it should be ``/dev/ttyACM0`` and ``/dev/ttyACM1`` respectively.
+First connect the IWR1843BOOST XDS110 USB cable directly to the Raspberry Pi
+and identify both UART paths on the Pi. Raspberry Pi OS normally exposes them
+as ``/dev/ttyACM0`` and ``/dev/ttyACM1`` respectively.
 
 .. note:: Having trouble to find UART path? See reference: MMWAVE SDK User Guide
 
@@ -90,8 +97,9 @@ Vola, the radar start to sensing!
 Communicate with DCA1000EVM
 ```````````````````````````
 
-Now, we want to communicate with the DCA1000EVM data capture card via
-Ethernet, please connect DCA1000EVM Ethernet to your computer Ethernet interface.
+Connect the DCA1000EVM Ethernet port directly to the Raspberry Pi wired
+interface. The example uses Pi interface ``eth0`` with address
+``192.168.33.30/24`` and DCA1000EVM address ``192.168.33.180``.
 
 A minimum code to communicate with DCA1000EVM data capture card will be like this:
 
@@ -133,11 +141,194 @@ Great, now the data capture card is start to capture data from the radar.
     card status LED, you will see the ``LVDS_PATH_ERR_LED3`` is on (red light).
 
 
-Capturing Data and Dataset Capture Management
----------------------------------------------
+Synchronized radar and ADXL355 capture
+--------------------------------------
 
-Now we know how to communicate with radar and DCA1000EVM data capture card,
-we can then start to capture raw data from radar and DCA1000EVM data capture card.
+The combined capture runs entirely on the Pi and places radar, ADXL355, and
+synchronization evidence under one hardware directory. Before running it,
+build the two Linux GPIO uAPI v2 native helpers:
+
+.. code-block:: bash
+
+   make -C native/adxl355_capture
+   make -C native/adxl355_capture print-hw
+   make -C native/frame_trigger
+
+``print-hw`` must report ``ADXL355 Linux hardware support: 1``. The ADXL355
+example uses ``/dev/spidev0.0`` and GPIO25 (physical pin 22) for DRDY. See
+:doc:`Setup <setup>` for the complete 3.3 V, GND, MOSI, MISO, SCLK, CE0, and
+DRDY pin table.
+
+Choose one mode:
+
+- ``software_timestamp`` uses
+  ``examples/capture_synchronized_software.toml`` and radar
+  ``frameCfg triggerSelect=1``. It needs no radar GPIO wire. The coordinator
+  records the Pi monotonic-time bracket around ``sensorStart`` and constructs
+  frame references from its midpoint plus the decoded radar algorithm
+  manifest's nominal period. It never falls back to configured frame count.
+- ``hardware_trigger`` uses
+  ``examples/capture_synchronized_hardware.toml`` and
+  ``frameCfg triggerSelect=2``. Connect GPIO18 (physical pin 12) to
+  IWR1843BOOST J6-9 ``SYNC_IN`` and Pi GND to J6-4. This normal two-wire
+  configuration uses ``use_loopback = false`` and is sufficient for the
+  operational ``algorithm_ready`` gate. For optional kernel edge diagnostics,
+  branch the GPIO18 net to GPIO24 (physical pin 18), then set
+  ``use_loopback = true`` and ``loopback_line = 24``.
+
+Hardware trigger count must equal ``capture_frames``. Its frequency is capped
+at 90% of the configured radar frame rate and defaults to that value when
+omitted. Both ``initial_delay_ms`` and the inter-trigger period must stay below
+5 seconds as a conservative guard against DCA1000's roughly 10-second no-LVDS
+timeout.
+The edge is a Pi-side radar trigger
+reference, not a measured ADC sampling instant. It does not frequency-lock the
+ADXL355 and radar ADC clocks.
+
+Normal exit and SIGTERM only make a best-effort attempt to return GPIO18 low;
+SIGKILL cannot run cleanup. Use a hardware pull-down on the assembled trigger
+net and confirm idle and pulse levels with a scope or logic analyzer.
+
+Run the read-only software-mode preflight first:
+
+.. code-block:: bash
+
+   uv run mmwavecapture-preflight \
+     --interface eth0 \
+     --host-ip 192.168.33.30 \
+     --config-serial /dev/ttyACM0 \
+     --data-serial /dev/ttyACM1 \
+     --spi-device /dev/spidev0.0 \
+     --gpiochip /dev/gpiochip0 \
+     --adxl-binary native/adxl355_capture/build/adxl355_capture \
+     --sync-mode software_timestamp
+
+Then record the short software fixture locally on the Pi:
+
+.. code-block:: bash
+
+   uv run mmwavecapture-std examples/capture_synchronized_software.toml
+
+For hardware mode, change the preflight mode and add the trigger binary:
+
+.. code-block:: bash
+
+   uv run mmwavecapture-preflight \
+     --interface eth0 \
+     --host-ip 192.168.33.30 \
+     --config-serial /dev/ttyACM0 \
+     --data-serial /dev/ttyACM1 \
+     --spi-device /dev/spidev0.0 \
+     --gpiochip /dev/gpiochip0 \
+     --adxl-binary native/adxl355_capture/build/adxl355_capture \
+     --sync-mode hardware_trigger \
+     --trigger-binary native/frame_trigger/frame_trigger
+
+Only after the additional power-off wiring and firmware checks, run:
+
+.. code-block:: bash
+
+   uv run mmwavecapture-std examples/capture_synchronized_hardware.toml
+
+Keep ``hardware_validated = false`` until the actual J6 routing, firmware
+response, waveform, frame correspondence, and latency have been measured. A
+passing preflight or mock test is not that measurement.
+
+The successful output is:
+
+.. code-block:: text
+
+   example_synchronized_dataset/capture_00000/
+   |-- capture.log
+   |-- config.toml
+   |-- status.json
+   `-- synchronized/
+       |-- radar/
+       |   |-- dca.pcap
+       |   |-- radar.cfg
+       |   |-- dca.json
+       |   `-- algorithm_input/...
+       |-- adxl355/
+       |   |-- samples.bin
+       |   |-- summary.json
+       |   |-- ready.json
+       |   |-- config.json
+       |   `-- algorithm_input/...
+       `-- sync/
+           |-- config.json
+           |-- manifest.json
+           |-- timeline.json
+           |-- radar_frame_monotonic_ns.npy
+           |-- frame_trigger_events.csv       # hardware mode only
+           `-- frame_trigger_summary.json     # hardware mode only
+
+Use the validated readers at the algorithm boundary:
+
+.. code-block:: python
+
+   from mmwavecapture import (
+       load_adxl355_input,
+       load_algorithm_input,
+       load_synchronized_timeline,
+   )
+
+   run = "example_synchronized_dataset/capture_00000/synchronized"
+   radar = load_algorithm_input(f"{run}/radar")
+   adxl = load_adxl355_input(f"{run}/adxl355")
+   timeline = load_synchronized_timeline(run)
+
+   print(radar.adc_cube.shape)
+   print(adxl.acceleration_mps2.shape)
+   print(timeline.radar_frame_monotonic_ns)
+   print(timeline.manifest["provenance"])
+   print(timeline.combined_manifest["status"])
+
+In software mode, the synchronized timeline is the ``sensorStart`` bracket
+midpoint plus the decoded radar manifest's nominal frame period. In hardware
+mode it uses GPIO24 kernel loopback edges when enabled, otherwise GPIO18
+userspace output-set completion times; the latter is not an observed physical
+edge. Both are explicitly reference times rather than radar ADC sample times.
+DCA1000 PCAP timestamps remain Ethernet packet receive times.
+
+Timeline publication requires the real decoded radar algorithm manifest with
+complete packet integrity. The loader also requires the sibling combined sync
+manifest and any capture-root ``status.json`` to be complete, then cross-checks
+mode, quality, validation flag, array metadata, period, provenance, and decoded
+radar dimensions. Disabled optional exports are omitted from the combined file
+map.
+
+At the default 1 kHz ODR, ADXL355 fails closed on any DRDY sequence gap,
+multi-event GPIO backlog, FIFO overrun/protocol error, non-one-set pre-pop
+depth, or nonzero post-pop depth. Partial records remain diagnostic evidence,
+but a complete ADXL algorithm-input manifest is not published. The stored
+digital-filter group delay is currently uncalibrated; zero does not mean zero
+physical latency. The coordinator supervises the ADXL process throughout the
+combined run and fails the package if it exits early.
+
+For a completed hardware-trigger capture, check the default operational gate
+and run the standalone algorithm from the repository root:
+
+.. code-block:: bash
+
+   run=example_synchronized_dataset/capture_00000/synchronized
+   uv run mmwavecapture-fusion-check "$run"
+   PYTHONPATH=capture_program/src \
+     capture_program/.venv/bin/python -m simulation.phase1.run_captured \
+     "$run" --adxl-axis x --adxl-sign 1
+
+The runner keeps the radar and ADXL355 native timelines separate and
+preintegrates acceleration over each actual radar interval. It writes
+``algorithm/phase1_result.npz`` plus a JSON provenance summary. Add
+``--adxl-sign -1`` when the selected sensor axis points opposite to positive
+structural displacement. Add
+``--require-calibrated`` only when the strict ``fusion_ready`` gate is needed.
+
+
+Radar-only CaptureManager example
+---------------------------------
+
+The older radar-only example remains available when ADXL355 synchronization is
+not required.
 
 Unlike other packages, ``mmwave-capture-std`` separate the data capturing from the
 millimeter-wave hardware interface, so we have a separate module for data capturing.
@@ -234,10 +425,9 @@ Easy and simple!
 
 .. note::
 
-   Sure you will need to connect all the hardware to your computer,
-   and modify the ``config.toml`` file to match your hardware configuration.
-   (e.g. change the radar serial port name, change the IP address of the
-   DCA1000EVM, etc.)
+   Connect all capture hardware to the Raspberry Pi and modify ``config.toml``
+   to match the Pi's UART paths and dedicated DCA Ethernet interface. The
+   operator computer remains outside the live capture path.
 
 
 Using Captured Radar Data in an Algorithm

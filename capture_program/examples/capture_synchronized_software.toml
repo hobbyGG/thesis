@@ -1,0 +1,52 @@
+dataset_dir = "example_synchronized_dataset"
+
+[metadata]
+title = "IWR1843 and ADXL355 synchronized capture"
+creator = "unknown"
+subject = "IWR1843, DCA1000, ADXL355"
+description = "Pi-local capture using host timestamp alignment"
+date = "<today>"
+license = "CC-BY-SA-4.0"
+
+[logging.stderr]
+enable = true
+level = "INFO"
+
+[logging.logfile]
+enable = true
+level = "TRACE"
+serialize = true
+
+[hardware.synchronized]
+hw_def_class = "mmwavecapture.capture.SynchronizedRadarAdxl"
+sync_mode = "software_timestamp"
+pre_roll_s = 2.0
+post_roll_s = 2.0
+hardware_validated = false
+export_adxl_algorithm_data = true
+export_sync_timeline = true
+
+[hardware.synchronized.radar_kwargs]
+dca_eth_interface = "eth0"
+radar_config_port = "/dev/serial/by-id/usb-Texas_Instruments_XDS110__03.00.00.43__Embed_with_CMSIS-DAP_R2101050-if00"
+radar_data_port = "/dev/serial/by-id/usb-Texas_Instruments_XDS110__03.00.00.43__Embed_with_CMSIS-DAP_R2101050-if03"
+dca_ip = "192.168.33.180"
+dca_config_port = 4096
+dca_data_port = 4098
+host_ip = "192.168.33.30"
+radar_config_filename = "examples/configs/iwr1843_software_trigger.cfg"
+capture_frames = 10
+export_algorithm_data = true
+# Required while export_sync_timeline=true: decoded radar metadata is the
+# timeline source, so configured frame counts are never used as a fallback.
+algorithm_chirp_aggregation = "coherent_mean"
+save_chirp_cube = true
+
+[hardware.synchronized.adxl_kwargs]
+executable = "native/adxl355_capture/build/adxl355_capture"
+spi_device = "/dev/spidev0.0"
+gpiochip = "/dev/gpiochip0"
+drdy_line = 25
+odr_hz = 1000
+range_g = 2
+spi_hz = 5000000

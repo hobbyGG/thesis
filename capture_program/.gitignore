@@ -8,6 +8,8 @@ example_dataset/
 dataset/
 docs/build/
 configs/
+!examples/configs/
+!examples/configs/*.cfg
 /*.pcap
 docs/source/_build/
 docs/source/html/

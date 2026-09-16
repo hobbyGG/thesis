@@ -33,11 +33,14 @@
 
 from __future__ import annotations
 
-import time
+import math
 import pathlib
 import shutil
 import signal
 import subprocess
+import threading
+import time
+from numbers import Real
 from typing import Any, Dict, Optional
 
 import netifaces
@@ -77,7 +80,9 @@ class RadarDCA(CaptureHardware):
         init_capture_hw: bool = True,
         tcpdump_path: Optional[str] = None,
         capture_timeout_s: Optional[float] = None,
+        capture_duration_s: Optional[float] = None,
         tcpdump_startup_delay_s: float = 0.2,
+        pcap_timestamp_precision: str = "nano",
         **kwargs: Dict[str, Any],
     ) -> None:
         self.hw_name = hw_name
@@ -89,15 +94,49 @@ class RadarDCA(CaptureHardware):
         self._dca_config_port = dca_config_port
         self._dca_data_port = dca_data_port
         self._host_ip = host_ip
-        self._capture_frames = capture_frames
         self._export_algorithm_data = export_algorithm_data
         self._algorithm_chirp_aggregation = algorithm_chirp_aggregation
         self._save_chirp_cube = save_chirp_cube
         self._initialized = False
         self._tcpdump_startup_delay_s = tcpdump_startup_delay_s
+        if pcap_timestamp_precision not in ("micro", "nano"):
+            raise ValueError(
+                "pcap_timestamp_precision must be `micro` or `nano`"
+            )
+        self._pcap_timestamp_precision = pcap_timestamp_precision
 
+        if isinstance(capture_frames, bool) or not isinstance(capture_frames, int):
+            raise ValueError("capture_frames must be an integer")
         if capture_frames < 0:
             raise ValueError("capture_frames must be zero or positive")
+        self._capture_frames = capture_frames
+
+        if capture_duration_s is not None:
+            if isinstance(capture_duration_s, bool) or not isinstance(
+                capture_duration_s, Real
+            ):
+                raise ValueError("capture_duration_s must be a positive finite number")
+            capture_duration_s = float(capture_duration_s)
+            if not math.isfinite(capture_duration_s) or capture_duration_s <= 0:
+                raise ValueError("capture_duration_s must be a positive finite number")
+        if capture_frames > 0 and capture_duration_s is not None:
+            raise ValueError(
+                "capture_duration_s is only valid when capture_frames is zero"
+            )
+        self._capture_duration_s = capture_duration_s
+
+        if capture_timeout_s is not None:
+            if isinstance(capture_timeout_s, bool) or not isinstance(
+                capture_timeout_s, Real
+            ):
+                raise ValueError("capture_timeout_s must be a positive finite number")
+            capture_timeout_s = float(capture_timeout_s)
+            if not math.isfinite(capture_timeout_s) or capture_timeout_s <= 0:
+                raise ValueError("capture_timeout_s must be a positive finite number")
+        if capture_frames == 0 and capture_timeout_s is not None:
+            raise ValueError(
+                "capture_timeout_s is only valid when capture_frames is positive"
+            )
         if algorithm_chirp_aggregation not in ("coherent_mean", "first"):
             raise ValueError(
                 "algorithm_chirp_aggregation must be `coherent_mean` or `first`"
@@ -110,16 +149,12 @@ class RadarDCA(CaptureHardware):
             )
         self._tcpdump_bin_path = resolved_tcpdump
 
-        radar_config = mmwavecapture.radar.RadarCoreConfig(radar_config_filename)
-        if capture_timeout_s is None:
-            if capture_frames <= 0:
-                raise ValueError(
-                    "capture_timeout_s is required when capture_frames is not positive"
-                )
+        if capture_frames > 0 and capture_timeout_s is None:
+            radar_config = mmwavecapture.radar.RadarCoreConfig(
+                radar_config_filename
+            )
             expected_capture_s = capture_frames * radar_config.frame_period / 1000.0
             capture_timeout_s = expected_capture_s + 15.0
-        if capture_timeout_s <= 0:
-            raise ValueError("capture_timeout_s must be positive")
         self._capture_timeout_s = capture_timeout_s
 
         # tcpdump
@@ -127,8 +162,13 @@ class RadarDCA(CaptureHardware):
         self._catcher = None
         self._dca_recording = False
         self._radar_started = False
+        self._capture_interrupted = False
+        self._normal_stop_requested = False
+        self._capture_started_monotonic: Optional[float] = None
+        self._capture_wait_event = threading.Event()
+        self._shutdown_lock = threading.Lock()
 
-        # DCA interface & host IP check
+        # Pi's dedicated DCA interface and IPv4 check
         if dca_eth_interface not in netifaces.interfaces():
             raise ValueError(f"Interface {dca_eth_interface} not found")
         if netifaces.AF_INET not in netifaces.ifaddresses(dca_eth_interface):
@@ -137,7 +177,7 @@ class RadarDCA(CaptureHardware):
             netif["addr"]
             for netif in netifaces.ifaddresses(dca_eth_interface)[netifaces.AF_INET]
         ]:
-            raise ValueError(f"Host IP {host_ip} not found in {dca_eth_interface}")
+            raise ValueError(f"Pi DCA IP {host_ip} not found in {dca_eth_interface}")
 
         # DCA1000EVM
         self.dca = mmwavecapture.dca1000.DCA1000(
@@ -228,6 +268,8 @@ class RadarDCA(CaptureHardware):
                 "-q",
                 "-n",
                 "-U",
+                "--time-stamp-precision",
+                self._pcap_timestamp_precision,
                 "-w",
                 str(outfile),
                 "udp",
@@ -274,6 +316,12 @@ class RadarDCA(CaptureHardware):
             process.wait(timeout=2)
 
     def _shutdown_capture(self) -> None:
+        # abort_capture() may run on a signal/control thread while stop_capture()
+        # wakes up. Serialize cleanup so hardware stop commands are issued once.
+        with self._shutdown_lock:
+            self._shutdown_capture_locked()
+
+    def _shutdown_capture_locked(self) -> None:
         errors = []
 
         if self._radar_started:
@@ -307,7 +355,28 @@ class RadarDCA(CaptureHardware):
 
     def abort_capture(self) -> None:
         """Stop all active resources without waiting for a finite capture."""
+        self._capture_interrupted = True
+        self._normal_stop_requested = False
+        self._capture_wait_event.set()
         self._shutdown_capture()
+
+    def request_continuous_stop(self) -> None:
+        """Wake an indefinite continuous capture for normal finalization.
+
+        This is intentionally separate from :meth:`abort_capture`: a
+        synchronized coordinator calls it after its finite hardware trigger
+        train completes, so the resulting whole-frame PCAP may still be
+        validated and published.
+        """
+
+        if self._capture_frames != 0:
+            raise RuntimeError("normal stop requests are only valid in continuous mode")
+        if self._capture_started_monotonic is None:
+            raise RuntimeError("continuous capture was not started")
+        if self._capture_interrupted:
+            raise RuntimeError("continuous capture has already been interrupted")
+        self._normal_stop_requested = True
+        self._capture_wait_event.set()
 
     def close(self) -> None:
         """Stop active work and release serial ports and UDP sockets."""
@@ -352,53 +421,61 @@ class RadarDCA(CaptureHardware):
         if not self.base_path:
             raise ValueError("Base path is not set")
 
+        self._capture_wait_event.clear()
+        self._capture_interrupted = False
+        self._normal_stop_requested = False
+        self._capture_started_monotonic = None
         try:
             # Start DCA tcpdump before enabling the DCA data stream.
             self.start_tcpdump_capture(
                 outfile=self.base_path / self.PCAP_OUTPUT_FILENAME
             )
 
-            # Match the DCA1000 "no LVDS data" status packet after finite frames.
-            self._catcher = subprocess.Popen(
-                [
-                    self._tcpdump_bin_path,
-                    "-i",
-                    self._dca_eth_interface,
-                    "-s",
-                    "256",
-                    "-c",
-                    "1",
-                    "-q",
-                    "-n",
-                    "udp",
-                    "and",
-                    "src",
-                    "host",
-                    self._dca_ip,
-                    "and",
-                    "dst",
-                    "host",
-                    self._host_ip,
-                    "and",
-                    "dst",
-                    "port",
-                    str(self._dca_config_port),
-                    "and",
-                    "udp[10:4] == 0x0a000001",
-                ],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE,
-            )
+            # Finite frame captures end with DCA1000's "no LVDS data" packet.
+            # Continuous mode has no such packet until software stops the radar,
+            # so its completion is controlled by the interruptible event below.
+            if self._capture_frames > 0:
+                self._catcher = subprocess.Popen(
+                    [
+                        self._tcpdump_bin_path,
+                        "-i",
+                        self._dca_eth_interface,
+                        "-s",
+                        "256",
+                        "-c",
+                        "1",
+                        "-q",
+                        "-n",
+                        "udp",
+                        "and",
+                        "src",
+                        "host",
+                        self._dca_ip,
+                        "and",
+                        "dst",
+                        "host",
+                        self._host_ip,
+                        "and",
+                        "dst",
+                        "port",
+                        str(self._dca_config_port),
+                        "and",
+                        "udp[10:4] == 0x0a000001",
+                    ],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                )
 
             time.sleep(self._tcpdump_startup_delay_s)
             capture_process = self._cap_tcpdump
             if capture_process is None:
                 raise RuntimeError("capture tcpdump was not started")
             self._check_process_started(capture_process, "capture tcpdump")
-            catcher_process = self._catcher
-            if catcher_process is None:
-                raise RuntimeError("termination catcher was not started")
-            self._check_process_started(catcher_process, "termination catcher")
+            if self._capture_frames > 0:
+                catcher_process = self._catcher
+                if catcher_process is None:
+                    raise RuntimeError("termination catcher was not started")
+                self._check_process_started(catcher_process, "termination catcher")
 
             self._require_success(self.dca.start_record(), "start recording")
             self._dca_recording = True
@@ -410,6 +487,7 @@ class RadarDCA(CaptureHardware):
         try:
             self.radar.start_sensor()
             self._radar_started = True
+            self._capture_started_monotonic = time.monotonic()
         except Exception:
             self._abort_safely()
             raise
@@ -417,23 +495,49 @@ class RadarDCA(CaptureHardware):
     def stop_capture(self) -> None:
         wait_error = None
         try:
-            if not self._catcher:
-                raise RuntimeError("termination catcher was not started")
-            returncode = self._catcher.wait(timeout=self._capture_timeout_s)
-            if returncode != 0:
-                detail = self._process_error(self._catcher)
-                message = f"termination catcher exited with code {returncode}"
-                if detail:
-                    message = f"{message}: {detail}"
-                raise RuntimeError(message)
-        except Exception as exc:
+            if self._capture_frames > 0:
+                if not self._catcher:
+                    raise RuntimeError("termination catcher was not started")
+                returncode = self._catcher.wait(timeout=self._capture_timeout_s)
+                if returncode != 0:
+                    detail = self._process_error(self._catcher)
+                    message = f"termination catcher exited with code {returncode}"
+                    if detail:
+                        message = f"{message}: {detail}"
+                    raise RuntimeError(message)
+            else:
+                if self._capture_started_monotonic is None:
+                    raise RuntimeError("continuous capture was not started")
+                wait_timeout_s = None
+                if self._capture_duration_s is not None:
+                    elapsed_s = time.monotonic() - self._capture_started_monotonic
+                    wait_timeout_s = max(0.0, self._capture_duration_s - elapsed_s)
+                interrupted = self._capture_wait_event.wait(
+                    timeout=wait_timeout_s
+                )
+                if self._capture_interrupted or (
+                    interrupted and not self._normal_stop_requested
+                ):
+                    raise RuntimeError(
+                        "continuous capture was aborted before normal completion"
+                    )
+        except BaseException as exc:
             wait_error = exc
+            self._capture_interrupted = True
 
         shutdown_error = None
         try:
             self._shutdown_capture()
         except Exception as exc:
             shutdown_error = exc
+            self._capture_interrupted = True
+
+        # Close the race where an external abort begins after a timed wait has
+        # expired but before normal cleanup finishes.
+        if wait_error is None and self._capture_interrupted:
+            wait_error = RuntimeError(
+                "continuous capture was aborted before normal completion"
+            )
 
         if wait_error and shutdown_error:
             raise RuntimeError(f"{wait_error}; cleanup failed: {shutdown_error}")
@@ -451,6 +555,8 @@ class RadarDCA(CaptureHardware):
     def finalize_capture(self) -> None:
         """Publish packet-checked arrays in the stable algorithm-input schema."""
 
+        if self._capture_interrupted:
+            raise RuntimeError("cannot finalize an interrupted radar capture")
         if not self._export_algorithm_data:
             return
         if not self.base_path:

@@ -5,6 +5,7 @@ import struct
 import numpy as np
 import pytest
 
+import mmwavecapture.algorithm_input as algorithm_input_module
 from mmwavecapture.algorithm_input import (
     AlgorithmInputError,
     DCA1000IntegrityError,
@@ -16,6 +17,33 @@ from mmwavecapture.algorithm_input import (
 
 
 PCAP_FIXTURE = "tests/pcaps/test_one_frame.pcap"
+
+
+def test_nanosecond_pcap_timestamp_is_kept_as_integer(tmp_path):
+    path = tmp_path / "nano.pcap"
+    global_header = struct.pack(
+        "<IHHIIII",
+        0xA1B23C4D,
+        2,
+        4,
+        0,
+        0,
+        65535,
+        1,
+    )
+    packet = b"synthetic"
+    packet_header = struct.pack(
+        "<IIII",
+        1_800_000_000,
+        123_456_789,
+        len(packet),
+        len(packet),
+    )
+    path.write_bytes(global_header + packet_header + packet)
+
+    records = list(algorithm_input_module._pcap_records(path))
+
+    assert records == [(1, 1_800_000_000_123_456_789, 1, packet)]
 
 
 def write_matching_radar_config(path):
@@ -107,6 +135,9 @@ def test_export_and_reader_publish_lossless_and_direct_algorithm_cubes(tmp_path)
     assert capture.chirp_cube.shape == (1, 2, 8, 256)
     assert capture.adc_cube.shape == (1, 8, 256)
     assert capture.frame_times_s.tolist() == [0.0]
+    assert capture.frame_receive_times_epoch_ns.shape == (1,)
+    assert capture.frame_receive_times_epoch_ns.dtype == np.dtype(np.int64)
+    assert capture.frame_receive_times_epoch_ns[0] > 0
     np.testing.assert_array_equal(capture.chirp_cube.reshape(-1), signal)
     np.testing.assert_allclose(
         capture.adc_cube,
@@ -129,6 +160,13 @@ def test_export_and_reader_publish_lossless_and_direct_algorithm_cubes(tmp_path)
         "virtual_antenna",
         "adc_sample",
     ]
+    assert manifest["timing"]["frame_times_s"]["is_measured_frame_start"] is False
+    receive_timing = manifest["timing"]["frame_receive_times_epoch_ns"]
+    assert receive_timing["is_measured_frame_start"] is False
+    assert "packet containing" in receive_timing["semantics"]
+    assert manifest["packet_integrity"]["first_packet_epoch_ns"] == int(
+        capture.frame_receive_times_epoch_ns[0]
+    )
 
 
 def test_reader_can_resolve_capture_or_hardware_directory(tmp_path):

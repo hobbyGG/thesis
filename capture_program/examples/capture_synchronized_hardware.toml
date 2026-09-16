@@ -1,0 +1,87 @@
+dataset_dir = "example_synchronized_dataset"
+
+[metadata]
+title = "IWR1843 and ADXL355 hardware-triggered capture"
+creator = "unknown"
+subject = "IWR1843, DCA1000, ADXL355, SYNC_IN"
+description = "Pi-local capture with finite GPIO radar frame triggers"
+date = "<today>"
+license = "CC-BY-SA-4.0"
+
+[logging.stderr]
+enable = true
+level = "INFO"
+
+[logging.logfile]
+enable = true
+level = "TRACE"
+serialize = true
+
+[hardware.synchronized]
+hw_def_class = "mmwavecapture.capture.SynchronizedRadarAdxl"
+sync_mode = "hardware_trigger"
+pre_roll_s = 2.0
+post_roll_s = 2.0
+# This is a metrology/calibration declaration, not the operational SYNC gate.
+# A complete capture remains algorithm-ready with false; set true only after
+# independently documenting electrical/timing calibration.
+hardware_validated = false
+export_adxl_algorithm_data = true
+export_sync_timeline = true
+# After bench calibration, copy the template, replace every placeholder with
+# measured values, set validated=true, and uncomment all fields below together.
+# fusion_calibration_filename = "examples/fusion_calibration.validated.json"
+# trigger_edge_uncertainty_ns = 0
+# radar_trigger_latency_ns = 0
+# radar_trigger_latency_uncertainty_ns = 0
+# radar_trigger_latency_source = "scope-bench-calibration-id"
+# adxl_filter_group_delay_uncertainty_ns = 0
+
+[hardware.synchronized.radar_kwargs]
+dca_eth_interface = "eth0"
+radar_config_port = "/dev/serial/by-id/usb-Texas_Instruments_XDS110__03.00.00.43__Embed_with_CMSIS-DAP_R2101050-if00"
+radar_data_port = "/dev/serial/by-id/usb-Texas_Instruments_XDS110__03.00.00.43__Embed_with_CMSIS-DAP_R2101050-if03"
+dca_ip = "192.168.33.180"
+dca_config_port = 4096
+dca_data_port = 4098
+host_ip = "192.168.33.30"
+radar_config_filename = "examples/configs/iwr1843_hardware_trigger.cfg"
+capture_frames = 10
+export_algorithm_data = true
+# Required while export_sync_timeline=true: decoded radar metadata is the
+# timeline source, so configured frame counts are never used as a fallback.
+algorithm_chirp_aggregation = "coherent_mean"
+save_chirp_cube = true
+
+[hardware.synchronized.adxl_kwargs]
+executable = "native/adxl355_capture/build/adxl355_capture"
+spi_device = "/dev/spidev0.0"
+gpiochip = "/dev/gpiochip0"
+drdy_line = 25
+odr_hz = 1000
+range_g = 2
+spi_hz = 5000000
+# Set all three fields only after measuring the ADXL355 digital-filter delay.
+# group_delay_ns = 1780000
+# group_delay_calibrated = true
+# group_delay_source = "adxl355-1khz-bench-calibration-id"
+
+[hardware.synchronized.trigger_kwargs]
+binary_path = "native/frame_trigger/frame_trigger"
+gpiochip = "/dev/gpiochip0"
+output_line = 18
+# GPIO24 electrical loopback is optional. The normal product configuration uses
+# the GPIO SET completion timestamp as its Pi CLOCK_MONOTONIC frame reference.
+use_loopback = false
+# To enable optional edge-observation diagnostics, set both fields:
+# use_loopback = true
+# loopback_line = 24
+# The radar frameCfg minimum period is 9 ms. A 100 Hz GPIO trigger has a 10 ms
+# period, preserving the coordinator's 10% guard while producing 100 Hz actual
+# radar slow-time observations.
+frequency_hz = 100.0
+count = 10
+pulse_width_us = 100
+# Both this delay and the inter-trigger period must stay below the conservative
+# 5 s DCA1000 no-LVDS guard.
+initial_delay_ms = 1000

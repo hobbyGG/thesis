@@ -33,4 +33,18 @@
 
 from mmwavecapture.capture.capture import Capture, CaptureManager, CaptureHardware
 
+from mmwavecapture.capture.adxl355 import Adxl355Process
 from mmwavecapture.capture.radardca import RadarDCA
+from mmwavecapture.capture.synchronized import SynchronizedRadarAdxl
+from mmwavecapture.capture.trigger import FrameTriggerError, FrameTriggerProcess
+
+__all__ = [
+    "Adxl355Process",
+    "Capture",
+    "CaptureHardware",
+    "CaptureManager",
+    "FrameTriggerError",
+    "FrameTriggerProcess",
+    "RadarDCA",
+    "SynchronizedRadarAdxl",
+]

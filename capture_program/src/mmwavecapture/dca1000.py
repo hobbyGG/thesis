@@ -115,7 +115,7 @@ class DCA1000Config:
 
     @property
     def host_ip(self) -> str:
-        # This is the IP address of the host computer
+        # Address of the Raspberry Pi interface connected directly to DCA1000.
         return self._config["ethernetConfigUpdate"]["systemIPAddress"]
 
     @host_ip.setter
@@ -178,10 +178,10 @@ class DCA1000Config:
 class DCA1000:
     """This class is used to communicate with the DCA1000EVM over ethernet.
 
-    The DCA1000EVM is a data capture card that is used to capture data from the
-    Texas Instruments millimeter-wave radar sensor. The DCA1000EVM is connected
-    to the host computer via ethernet, and the host computer can send commands
-    to the DCA1000EVM to control its behavior.
+    The DCA1000EVM captures data from the Texas Instruments millimeter-wave
+    radar sensor. In this project it is connected directly to the Raspberry Pi
+    4 by Ethernet, and the Pi sends commands to control its behavior. The
+    operator computer reaches the Pi only over Wi-Fi/SSH.
 
     This class does not capture data from the DCA1000EVM. Instead, it is used to
     send commands to the DCA1000EVM to control its behavior.
@@ -221,7 +221,7 @@ class DCA1000:
         self.socks = self._init_sockets()
 
     def _init_sockets(self) -> dict[str, socket.socket]:
-        # Create UDP sockets for each port, and bind them to the host IP
+        # Create UDP sockets and bind them to the Pi's dedicated DCA address.
         sockets = {}
         try:
             for sock_type, port in self.config.config["ethernetConfig"].items():
@@ -439,7 +439,7 @@ class DCA1000:
         data = struct.pack(
             "<BBBBBBBBBBBBBBHH",
             *[
-                # Host IP
+                # Raspberry Pi DCA-interface IP
                 *map(
                     int,
                     self.config.config["ethernetConfigUpdate"]["systemIPAddress"].split(
@@ -470,7 +470,7 @@ class DCA1000:
 
     @log_command
     def system_connection(self) -> bool:
-        """Check if the DCA1000EVM is connected to the host computer
+        """Check if the DCA1000EVM responds to the Raspberry Pi
 
         Ref: 2.3.11 Query system aliveness status, p.62,
         DCA1000EVM CLI Software Developer Guide, v1.01
@@ -485,7 +485,7 @@ class DCA1000:
         DCA1000EVM CLI Software Developer Guide, v1.01
         """
         # XXX: It will not return anything worth, you can test it as below:
-        #        1. Connect the DCA1000 to the host computer
+        #        1. Connect DCA1000 Ethernet directly to the Raspberry Pi
         #        2. Do not start the radar
         #        3. Run `record_start` ($ uv run pytest -k test_record_start)
         #        4. Wait until DCA1000 get LVDS timeout error (about 10 seconds)
@@ -515,7 +515,7 @@ class DCA1000:
         return major, minor, mode
 
     def read(self):
-        """Read DCA1000EVM data from host ip data port
+        """Read DCA1000EVM data from the Pi's local data port
 
         .. note::
             It is not recommended to use this method.

@@ -3,6 +3,7 @@ import struct
 import threading
 
 import mmwavecapture.dca1000 as dca1000
+import pytest
 
 
 def unused_udp_port(host):
@@ -16,11 +17,13 @@ def unused_udp_port(host):
 
 def test_dca_command_round_trip_over_real_loopback_udp():
     host_ip = "127.0.0.1"
-    # Use a second address in 127/8 so the test remains local even when WSL uses
-    # mirrored networking. Sending from loopback to an interface address is not
-    # reliably routed back into the same WSL instance.
+    # Use a second address in 127/8 so the test never depends on the Pi's
+    # physical Wi-Fi or dedicated DCA Ethernet interfaces.
     dca_ip = "127.0.0.2"
-    config_port = unused_udp_port(dca_ip)
+    try:
+        config_port = unused_udp_port(dca_ip)
+    except OSError:
+        pytest.skip("this kernel does not provide a secondary IPv4 loopback address")
     data_port = unused_udp_port(host_ip)
     ready = threading.Event()
     server_errors = []

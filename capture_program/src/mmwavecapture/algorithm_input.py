@@ -45,6 +45,9 @@ class DCA1000PacketStats:
     first_byte_count: int
     last_byte_count: int
     capture_order_monotonic: bool
+    pcap_timestamp_resolution_ns: int
+    first_packet_epoch_ns: int
+    last_packet_epoch_ns: int
     first_packet_epoch_s: float
     last_packet_epoch_s: float
 
@@ -61,6 +64,7 @@ class AlgorithmCapture:
 
     adc_cube: np.ndarray
     frame_times_s: np.ndarray
+    frame_receive_times_epoch_ns: np.ndarray
     chirp_cube: Optional[np.ndarray]
     manifest: Mapping[str, Any]
     directory: pathlib.Path
@@ -71,16 +75,17 @@ class _RawPacket:
     sequence_id: int
     byte_count: int
     data: bytes
-    timestamp_s: float
+    timestamp_epoch_ns: int
+    timestamp_resolution_ns: int
     capture_index: int
 
 
-def _pcap_records(path: pathlib.Path) -> Iterator[Tuple[int, float, bytes]]:
+def _pcap_records(path: pathlib.Path) -> Iterator[Tuple[int, int, int, bytes]]:
     magic_formats = {
-        b"\xd4\xc3\xb2\xa1": ("<", 1_000_000.0),
-        b"\xa1\xb2\xc3\xd4": (">", 1_000_000.0),
-        b"\x4d\x3c\xb2\xa1": ("<", 1_000_000_000.0),
-        b"\xa1\xb2\x3c\x4d": (">", 1_000_000_000.0),
+        b"\xd4\xc3\xb2\xa1": ("<", 1_000),
+        b"\xa1\xb2\xc3\xd4": (">", 1_000),
+        b"\x4d\x3c\xb2\xa1": ("<", 1),
+        b"\xa1\xb2\x3c\x4d": (">", 1),
     }
 
     with open(path, "rb") as pcap_file:
@@ -88,7 +93,7 @@ def _pcap_records(path: pathlib.Path) -> Iterator[Tuple[int, float, bytes]]:
         if len(global_header) != 24:
             raise AlgorithmInputError(f"PCAP global header is truncated: {path}")
         try:
-            endian, timestamp_divisor = magic_formats[global_header[:4]]
+            endian, timestamp_resolution_ns = magic_formats[global_header[:4]]
         except KeyError as exc:
             raise AlgorithmInputError(
                 f"unsupported PCAP magic {global_header[:4].hex()}: {path}"
@@ -113,7 +118,11 @@ def _pcap_records(path: pathlib.Path) -> Iterator[Tuple[int, float, bytes]]:
             packet = pcap_file.read(captured_length)
             if len(packet) != captured_length:
                 raise AlgorithmInputError(f"PCAP packet data is truncated: {path}")
-            yield link_type, seconds + fraction / timestamp_divisor, packet
+            timestamp_epoch_ns = (
+                int(seconds) * 1_000_000_000
+                + int(fraction) * timestamp_resolution_ns
+            )
+            yield link_type, timestamp_epoch_ns, timestamp_resolution_ns, packet
 
 
 def _ipv4_offset(link_type: int, packet: bytes) -> Optional[int]:
@@ -188,14 +197,38 @@ def read_dca1000_pcap(
     duplicates, and sequence gaps fail closed.
     """
 
-    path = pathlib.Path(pcap_file)
+    raw_bytes, stats, _packets = _read_dca1000_pcap_packets(
+        pathlib.Path(pcap_file),
+        data_port=data_port,
+    )
+    return raw_bytes, stats
+
+
+def _read_dca1000_pcap_packets(
+    path: pathlib.Path,
+    *,
+    data_port: int,
+) -> Tuple[bytes, DCA1000PacketStats, Sequence[_RawPacket]]:
+    """Return the checked byte stream plus packet timing metadata.
+
+    DCA1000 packet timestamps are host receive timestamps from libpcap. They
+    are deliberately retained as integer epoch nanoseconds so a nanosecond
+    PCAP is not rounded through a floating-point Unix timestamp. They are not
+    radar frame-start timestamps.
+    """
+
     if not path.is_file():
         raise FileNotFoundError(path)
     if not 0 < int(data_port) <= 65535:
         raise ValueError("data_port must be between 1 and 65535")
 
     packets = []
-    for capture_index, (link_type, timestamp_s, packet) in enumerate(
+    for capture_index, (
+        link_type,
+        timestamp_epoch_ns,
+        timestamp_resolution_ns,
+        packet,
+    ) in enumerate(
         _pcap_records(path)
     ):
         udp = _udp_payload(link_type, packet)
@@ -220,7 +253,8 @@ def read_dca1000_pcap(
                 sequence_id=sequence_id,
                 byte_count=byte_count,
                 data=data,
-                timestamp_s=timestamp_s,
+                timestamp_epoch_ns=timestamp_epoch_ns,
+                timestamp_resolution_ns=timestamp_resolution_ns,
                 capture_index=capture_index,
             )
         )
@@ -274,6 +308,17 @@ def read_dca1000_pcap(
 
     first = accepted[0]
     last = accepted[-1]
+    first_packet_epoch_ns = min(
+        packet.timestamp_epoch_ns for packet in accepted
+    )
+    last_packet_epoch_ns = max(
+        packet.timestamp_epoch_ns for packet in accepted
+    )
+    timestamp_resolutions = {
+        packet.timestamp_resolution_ns for packet in accepted
+    }
+    if len(timestamp_resolutions) != 1:
+        raise AlgorithmInputError("PCAP packet timestamp resolution changed mid-file")
     stats = DCA1000PacketStats(
         packet_count=len(accepted),
         duplicate_packet_count=duplicate_count,
@@ -283,10 +328,51 @@ def read_dca1000_pcap(
         first_byte_count=first.byte_count,
         last_byte_count=last.byte_count,
         capture_order_monotonic=capture_order_monotonic,
-        first_packet_epoch_s=min(packet.timestamp_s for packet in accepted),
-        last_packet_epoch_s=max(packet.timestamp_s for packet in accepted),
+        pcap_timestamp_resolution_ns=timestamp_resolutions.pop(),
+        first_packet_epoch_ns=first_packet_epoch_ns,
+        last_packet_epoch_ns=last_packet_epoch_ns,
+        first_packet_epoch_s=first_packet_epoch_ns / 1_000_000_000.0,
+        last_packet_epoch_s=last_packet_epoch_ns / 1_000_000_000.0,
     )
-    return bytes(stream), stats
+    return bytes(stream), stats, tuple(accepted)
+
+
+def _frame_receive_times_epoch_ns(
+    packets: Sequence[_RawPacket],
+    *,
+    frames: int,
+    frame_payload_bytes: int,
+) -> np.ndarray:
+    """Map each frame to the packet containing its first raw byte.
+
+    The returned values timestamp packet reception at the Pi. Packetization,
+    LVDS transfer, DCA buffering, Ethernet, and host receive latency remain in
+    the values, so callers must not reinterpret them as frame-start times.
+    """
+
+    if frames <= 0 or frame_payload_bytes <= 0:
+        raise ValueError("frames and frame_payload_bytes must be positive")
+    result = np.empty(frames, dtype=np.int64)
+    packet_index = 0
+    for frame_index in range(frames):
+        frame_start = frame_index * frame_payload_bytes
+        while packet_index < len(packets):
+            packet = packets[packet_index]
+            packet_end = packet.byte_count + len(packet.data)
+            if packet.byte_count <= frame_start < packet_end:
+                result[frame_index] = packet.timestamp_epoch_ns
+                break
+            if frame_start < packet.byte_count:
+                raise DCA1000IntegrityError(
+                    f"frame {frame_index} begins before packet byte "
+                    f"{packet.byte_count}"
+                )
+            packet_index += 1
+        else:
+            raise DCA1000IntegrityError(
+                f"no DCA1000 packet contains the first byte of frame {frame_index}"
+            )
+    return result
 
 
 def decode_two_lane_complex(
@@ -483,7 +569,10 @@ def export_algorithm_input(
     if chirp_aggregation not in ("coherent_mean", "first"):
         raise ValueError("chirp_aggregation must be `coherent_mean` or `first`")
 
-    raw_bytes, packet_stats = read_dca1000_pcap(pcap_path, data_port=data_port)
+    raw_bytes, packet_stats, accepted_packets = _read_dca1000_pcap_packets(
+        pcap_path,
+        data_port=data_port,
+    )
     config = RadarCoreConfig(radar_path)
     # IWR1843's configured sampleSwap determines which half of each two-lane
     # group is Q. Decode once to learn the count, then enforce the full layout.
@@ -507,6 +596,17 @@ def export_algorithm_input(
     frame_times_s = (
         np.arange(radar["frames"], dtype=np.float64) * radar["frame_period_s"]
     )
+    frame_payload_bytes = (
+        radar["chirp_loops_per_frame"]
+        * radar["virtual_antennas"]
+        * radar["adc_samples_per_chirp"]
+        * 4
+    )
+    frame_receive_times_epoch_ns = _frame_receive_times_epoch_ns(
+        accepted_packets,
+        frames=radar["frames"],
+        frame_payload_bytes=frame_payload_bytes,
+    )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     temporary = output_path.parent / f".{output_path.name}.tmp-{uuid.uuid4().hex}"
@@ -515,8 +615,14 @@ def export_algorithm_input(
         arrays = {}
         adc_filename = "adc_cube.npy"
         frame_times_filename = "frame_times_s.npy"
+        frame_receive_times_filename = "frame_receive_times_epoch_ns.npy"
         np.save(temporary / adc_filename, adc_cube, allow_pickle=False)
         np.save(temporary / frame_times_filename, frame_times_s, allow_pickle=False)
+        np.save(
+            temporary / frame_receive_times_filename,
+            frame_receive_times_epoch_ns,
+            allow_pickle=False,
+        )
         arrays["adc_cube"] = _array_description(
             adc_filename,
             adc_cube,
@@ -525,6 +631,11 @@ def export_algorithm_input(
         arrays["frame_times_s"] = _array_description(
             frame_times_filename,
             frame_times_s,
+            ("frame",),
+        )
+        arrays["frame_receive_times_epoch_ns"] = _array_description(
+            frame_receive_times_filename,
+            frame_receive_times_epoch_ns,
             ("frame",),
         )
         if save_chirp_cube:
@@ -550,6 +661,30 @@ def export_algorithm_input(
             "packet_integrity": {
                 "complete": True,
                 **asdict(packet_stats),
+            },
+            "timing": {
+                "frame_times_s": {
+                    "clock": "radar_config_nominal",
+                    "semantics": "nominal_relative_frame_schedule",
+                    "origin": "first_decoded_frame",
+                    "is_measured_frame_start": False,
+                },
+                "frame_receive_times_epoch_ns": {
+                    "clock": "host_realtime_via_libpcap",
+                    "semantics": (
+                        "host receive time of the DCA1000 packet containing "
+                        "the frame's first raw byte"
+                    ),
+                    "is_measured_frame_start": False,
+                    "timestamp_resolution_ns": (
+                        packet_stats.pcap_timestamp_resolution_ns
+                    ),
+                    "warning": (
+                        "Includes radar, LVDS, DCA packetization, Ethernet, and "
+                        "host receive latency; do not use as frame start without "
+                        "an explicit delay model."
+                    ),
+                },
             },
             "radar": dict(radar),
             "processing": {
@@ -659,6 +794,7 @@ def load_algorithm_input(
     expected_axes = {
         "adc_cube": ["frame", "virtual_antenna", "adc_sample"],
         "frame_times_s": ["frame"],
+        "frame_receive_times_epoch_ns": ["frame"],
         "chirp_cube": [
             "frame",
             "chirp_loop",
@@ -680,6 +816,16 @@ def load_algorithm_input(
     frame_times_s = _load_array(
         directory, "frame_times_s", arrays["frame_times_s"], mmap_mode
     )
+    frame_receive_times_epoch_ns = (
+        _load_array(
+            directory,
+            "frame_receive_times_epoch_ns",
+            arrays["frame_receive_times_epoch_ns"],
+            mmap_mode,
+        )
+        if "frame_receive_times_epoch_ns" in arrays
+        else np.array([], dtype=np.int64)
+    )
     chirp_cube = (
         _load_array(directory, "chirp_cube", arrays["chirp_cube"], mmap_mode)
         if "chirp_cube" in arrays
@@ -694,6 +840,25 @@ def load_algorithm_input(
         raise AlgorithmInputError("frame_times_s must be a float64 vector")
     if frame_times_s.shape[0] != adc_cube.shape[0]:
         raise AlgorithmInputError("frame_times_s length does not match adc_cube frames")
+    if frame_receive_times_epoch_ns.size:
+        if (
+            frame_receive_times_epoch_ns.ndim != 1
+            or frame_receive_times_epoch_ns.dtype != np.dtype(np.int64)
+        ):
+            raise AlgorithmInputError(
+                "frame_receive_times_epoch_ns must be an int64 vector"
+            )
+        if frame_receive_times_epoch_ns.shape[0] != adc_cube.shape[0]:
+            raise AlgorithmInputError(
+                "frame_receive_times_epoch_ns length does not match adc_cube frames"
+            )
+        if (
+            np.any(frame_receive_times_epoch_ns <= 0)
+            or np.any(np.diff(frame_receive_times_epoch_ns) < 0)
+        ):
+            raise AlgorithmInputError(
+                "frame_receive_times_epoch_ns must be positive and nondecreasing"
+            )
     if chirp_cube is not None:
         if chirp_cube.ndim != 4 or chirp_cube.dtype != np.dtype(np.complex64):
             raise AlgorithmInputError(
@@ -759,6 +924,7 @@ def load_algorithm_input(
     return AlgorithmCapture(
         adc_cube=adc_cube,
         frame_times_s=frame_times_s,
+        frame_receive_times_epoch_ns=frame_receive_times_epoch_ns,
         chirp_cube=chirp_cube,
         manifest=manifest,
         directory=directory,

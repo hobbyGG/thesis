@@ -27,6 +27,8 @@ realsense = [
 mmwavecapture-std = "mmwavecapture.cli:cli"
 mmwavecapture-preflight = "mmwavecapture.preflight:cli"
 mmwavecapture-export = "mmwavecapture.export_cli:cli"
+mmwavecapture-adxl-export = "mmwavecapture.adxl355_export_cli:cli"
+mmwavecapture-fusion-check = "mmwavecapture.fusion_check_cli:cli"
 
 [tool.hatch.build.targets.sdist]
 include = ["src/mmwavecapture"]

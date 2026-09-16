@@ -18,14 +18,16 @@ level = "TRACE"
 serialize = true
 
 [hardware.iwr1843]
+# Run this configuration locally on Raspberry Pi 4. The operator computer only
+# reaches the Pi over Wi-Fi/SSH and is not part of the live capture path.
 hw_def_class = "mmwavecapture.capture.RadarDCA"  # It should be `module.class_name`
-dca_eth_interface = "enp5s0"
-radar_config_port = "/dev/ttyACM0"
-radar_data_port = "/dev/ttyACM1"
+dca_eth_interface = "eth0"  # Pi wired port connected directly to DCA1000EVM
+radar_config_port = "/dev/serial/by-id/usb-Texas_Instruments_XDS110__03.00.00.43__Embed_with_CMSIS-DAP_R2101050-if00"
+radar_data_port = "/dev/serial/by-id/usb-Texas_Instruments_XDS110__03.00.00.43__Embed_with_CMSIS-DAP_R2101050-if03"
 dca_ip = "192.168.33.180"
 dca_config_port = 4096
 dca_data_port = 4098
-host_ip = "192.168.33.30"
+host_ip = "192.168.33.30"  # Static address on the Pi's DCA interface
 radar_config_filename = "tests/configs/xwr18xx_profile_2023_01_01T00_00_00_000.cfg"
 capture_frames = 10
 export_algorithm_data = true

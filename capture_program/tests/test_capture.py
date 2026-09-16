@@ -50,7 +50,7 @@ def capture_manager_config():
 
 @pytest.fixture
 def eth_interface():
-    return "enp5s0"
+    return "eth0"
 
 
 @pytest.mark.manual

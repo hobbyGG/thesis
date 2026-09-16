@@ -9,6 +9,30 @@ Millimeter-wave Capture Standard (mmwave-capture-std)
 Texas Instruments millimeter-wave capture toolkit,
 focus on data capturing and raw data parsing.
 
+Project deployment topology
+---------------------------
+
+The Raspberry Pi 4 is the only acquisition host. The operator computer only
+controls the Pi through Wi-Fi/SSH; no radar USB or DCA1000 Ethernet capture
+connection terminates at the operator computer.
+
+```text
+operator computer --Wi-Fi / SSH--> Raspberry Pi 4
+                                      |--SPI + DRDY--> ADXL355
+                                      |--USB---------> IWR1843BOOST
+                                      |--GPIO18------> IWR1843BOOST SYNC_IN
+                                      |       `------> GPIO24 loopback input (optional)
+                                      |--GND---------> IWR1843BOOST GND
+                                      |  (two required wires in hardware-trigger mode)
+                                      `--Ethernet----> DCA1000EVM
+
+IWR1843BOOST <--------60-pin HD connector--------> DCA1000EVM
+```
+
+The capture command, radar UART control, DCA packet recording, ADXL355 sampling,
+timestamps, integrity checks, and initial file output all run locally on the Pi. See
+[PI4_CAPTURE.md](PI4_CAPTURE.md) for the required setup.
+
 It stands out with three key attributes:
 
 1. Fast: It parses raw data into `np.ndarray[np.complex64]` **2.09** times
@@ -70,17 +94,202 @@ to your setup: (assume you did not change any setting on DCA1000EVM EEPROM)
 
 ```toml
 [hardware.iwr1843]
-dca_eth_interface = "enp5s0"
+dca_eth_interface = "eth0" # Pi wired port connected directly to DCA1000EVM
 radar_config_port = "/dev/ttyACM0"
 radar_data_port = "/dev/ttyACM1"
 capture_frames = 10
 ```
 
+Synchronized radar and ADXL355 capture
+--------------------------------------
+
+The synchronized collector runs the radar/DCA and ADXL355 under one Pi capture
+lifecycle. Build the two native GPIO helpers on the Pi first:
+
+```bash
+sudo apt install -y build-essential linux-libc-dev
+make -C native/adxl355_capture
+make -C native/adxl355_capture print-hw   # must report hardware support: 1
+make -C native/frame_trigger
+```
+
+Both native helpers use the Linux GPIO character-device uAPI v2 directly.
+They need compatible kernel UAPI headers, but do not link to `libgpiod` and do
+not require `pkg-config`.
+
+The default ADXL355 wiring is SPI0 CE0 plus DRDY on GPIO25: physical pins
+1/6/19/21/23/24/22 provide 3.3 V, GND, MOSI, MISO, SCLK, CE0, and DRDY. Full
+ADXL board pin mapping and power-off checks are in
+[PI4_CAPTURE.md](PI4_CAPTURE.md).
+
+Choose one configuration:
+
+- `examples/capture_synchronized_software.toml` needs no radar GPIO wire. It
+  brackets `sensorStart` with Pi `CLOCK_MONOTONIC` timestamps and estimates
+  later frame references using the nominal period in the decoded radar
+  algorithm manifest. There is no configured-frame-count fallback.
+- `examples/capture_synchronized_hardware.toml` uses GPIO18 (physical pin 12)
+  to IWR1843BOOST J6-9 `SYNC_IN` plus Pi GND (physical pin 14) to J6-4. The
+  normal configuration records the Pi `CLOCK_MONOTONIC` time immediately after
+  each GPIO SET completes. An optional branch to GPIO24 adds kernel edge
+  observations for diagnostics, but it is not required for acquisition or the
+  asynchronous algorithm.
+
+Focused Pi hardware results are recorded in
+[PI4_VALIDATION_2026-08-30.md](PI4_VALIDATION_2026-08-30.md).
+
+Hardware-trigger mode requires `frameCfg triggerSelect=2`; software mode
+requires `triggerSelect=1`. A hardware edge is a radar trigger reference, not
+a measured radar ADC sampling instant. It also does not frequency-lock the
+ADXL355 and radar ADC clocks. Keep `hardware_validated = false` until the
+powered wiring, firmware, trigger waveform, frame count, and latency have been
+measured on the actual fixture.
+
+For hardware mode, trigger count must equal `capture_frames`, frequency must
+not exceed 90% of the configured radar frame rate, and both the initial delay
+and inter-trigger period must stay below the conservative 5 s DCA no-LVDS
+guard. The 100 Hz hardware example uses a 9 ms radar minimum period and a
+10 ms GPIO trigger period, retaining that 10% timing guard. Normal completion
+and SIGTERM make a best-effort attempt to leave GPIO18 low; SIGKILL cannot
+provide that guarantee. Use a hardware pull-down on the real trigger net and
+verify idle and pulse levels on the assembled fixture with a scope or logic
+analyzer.
+
+Run a read-only Pi preflight, then start with the software configuration:
+Replace `CONFIG_UART` and `DATA_UART` with the two actual XDS110 by-id names.
+
+```bash
+uv run mmwavecapture-preflight \
+  --interface eth0 --host-ip 192.168.33.30 \
+  --config-serial /dev/serial/by-id/CONFIG_UART \
+  --data-serial /dev/serial/by-id/DATA_UART \
+  --spi-device /dev/spidev0.0 --gpiochip /dev/gpiochip0 \
+  --adxl-binary native/adxl355_capture/build/adxl355_capture \
+  --radar-config examples/configs/iwr1843_software_trigger.cfg \
+  --capture-frames 10 --output-path example_synchronized_dataset \
+  --sync-mode software_timestamp
+
+uv run mmwavecapture-std examples/capture_synchronized_software.toml
+```
+
+For hardware mode, change preflight to `--sync-mode hardware_trigger` and add
+`--trigger-binary native/frame_trigger/frame_trigger`, use the hardware-trigger
+radar config, and then run
+`examples/capture_synchronized_hardware.toml` only after making the extra
+power-off wiring checks.
+
+A completed synchronized directory contains `radar/`, `adxl355/`, and `sync/`.
+The ADXL directory contains the fail-closed native stream plus a validated
+`algorithm_input/` package. The sync directory contains the combined manifest,
+`timeline.json`, and `radar_frame_monotonic_ns.npy`; hardware mode also records
+the finite trigger CSV and summary.
+
+The timeline is published only after the decoded radar algorithm manifest has
+certified packet integrity. Its loader also requires the sibling combined
+manifest to be complete and, when present, the capture-root `status.json` to
+be complete. Optional output paths appear in the combined file map only when
+their exports were requested.
+
+```python
+from mmwavecapture import load_adxl355_input, load_synchronized_timeline
+
+run = "example_synchronized_dataset/capture_00000/synchronized"
+adxl = load_adxl355_input(f"{run}/adxl355")
+timeline = load_synchronized_timeline(run)
+assert timeline.combined_manifest["status"] == "complete"
+```
+
+The software timeline uses the `sensorStart` bracket midpoint plus nominal
+period from the decoded radar package. The hardware timeline uses GPIO18
+`userspace_set_completed` references by default and optional GPIO24 loopback
+edges when explicitly configured. Neither reference is labelled as radar ADC
+time. DCA1000 PCAP timestamps are Ethernet receive times, never frame-start
+timestamps.
+
+At the configured 1 kHz ADXL ODR, any DRDY sequence gap, queued GPIO-event
+backlog, FIFO overrun/protocol error, non-one-set pre-pop depth, or nonzero
+post-pop FIFO depth fails the capture instead of silently assigning uncertain
+data to a timestamp. Each accepted edge uses a `STATUS`/`FIFO_ENTRIES`/
+temperature snapshot, one nine-byte `FIFO_DATA` XYZ pop, then confirmation that
+`FIFO_ENTRIES` is zero; it does not compare FIFO XYZ with current-data XYZ.
+Focused mock tests do not prove that a powered Pi can sustain this policy. The
+coordinator supervises the ADXL child through pre-roll, trigger waiting, and
+radar completion; an early ADXL exit interrupts the blocking radar/trigger
+backend and fails the combined package.
+
+Algorithm-ready and calibrated-fusion-ready packages
+-----------------------------------------------------
+
+Structural validity and scientific fusion readiness are separate. Validate a
+completed directory with:
+
+```bash
+uv run mmwavecapture-fusion-check \
+  example_synchronized_dataset/capture_00000/synchronized
+```
+
+The loader exposes two gates. `algorithm_ready` requires complete DCA decoding,
+a loss-free non-mock ADXL stream, hardware-trigger-controlled frame references,
+a lossless radar chirp cube, and full native-time coverage. It accepts either
+the default GPIO SET-completion reference or an optional GPIO24 loopback edge.
+`fusion_ready` is the stricter calibrated/metrology gate and additionally
+requires characterized timing, validated hardware, calibrated ADXL delay, and
+validated value/geometry calibration. The checker enforces `algorithm_ready`
+by default; add `--require-calibrated` to enforce `fusion_ready`, or
+`--allow-not-ready` to print diagnostics without a failing exit status.
+
+Start from `examples/fusion_calibration.template.json`, replace every
+placeholder with measured ADXL bias/scale/installation rotation and measured
+radar range/channel/array geometry, then set `validated=true`. The template is
+deliberately not accepted as fusion-ready.
+
+```python
+from mmwavecapture import load_fusion_input
+
+capture = load_fusion_input(
+    "example_synchronized_dataset/capture_00000/synchronized"
+)
+assert capture.algorithm_ready, capture.quality.algorithm_readiness_failures
+
+# These remain two different native-rate CLOCK_MONOTONIC timelines. Until
+# radar latency is calibrated, use the hardware-trigger reference timeline.
+radar_t_ns = (
+    capture.radar_adc_sample_monotonic_ns
+    if capture.radar_adc_sample_monotonic_ns is not None
+    else capture.radar_reference_monotonic_ns
+)
+adxl_t_ns = capture.adxl_sample_monotonic_ns
+adxl_xyz_mps2 = capture.adxl355.acceleration_mps2
+```
+
+No nearest-neighbour timestamp pairing or acquisition-time resampling is
+performed. The Phase-1 adapter integrates the chosen structural-axis ADXL
+samples over each actual radar interval, so unequal rates and nonuniform radar
+intervals are handled explicitly. Samples with uncovered endpoints, invalid
+data, or an excessive ADXL gap are rejected rather than interpolated through
+silently.
+
+After copying a completed capture, run the algorithm independently from the
+repository root. Without a calibration file it uses the selected nominal ADXL
+axis and half-wavelength array geometry and records explicit warnings:
+
+```bash
+PYTHONPATH=capture_program/src \
+  capture_program/.venv/bin/python -m simulation.phase1.run_captured \
+  example_synchronized_dataset/capture_00000/synchronized \
+  --adxl-axis x --adxl-sign 1
+```
+
+The command writes `algorithm/phase1_result.npz` and a JSON provenance summary.
+Use `--adxl-sign -1` when the selected sensor axis points opposite to the
+positive structural-displacement direction.
+Add `--require-calibrated` only when the stricter `fusion_ready` gate is needed.
+
 Where to start?
 ---------------
 
-First, setup your environment (hardware, software, and network):
-[Setup](https://mmwave-capture-std.readthedocs.io/en/latest/setup.html).
+First, set up Raspberry Pi OS, the direct hardware connections, and the
+dedicated Pi-to-DCA network by following [PI4_CAPTURE.md](PI4_CAPTURE.md).
 
 Then, read our quickstart to get familiar with how mmwave-capture-std works:
 [Quickstart](https://mmwave-capture-std.readthedocs.io/en/latest/quickstart.html).
@@ -102,7 +311,11 @@ reshaping. Downstream code never needs to parse PCAP, LVDS, or `radar.cfg`.
 - `adc_cube.npy` is the frame-level `complex64` cube with axes
   `(frame, virtual_antenna, adc_sample)`. By default it is the coherent mean
   over chirp loops and matches the current algorithm frontend directly.
-- `frame_times_s.npy` is the nominal relative frame-start time axis.
+- `frame_times_s.npy` is the nominal relative radar-frame reference axis; it is
+  not a measured ADC or hardware frame-start timestamp.
+- `frame_receive_times_epoch_ns.npy` records the Pi PCAP receive time of the
+  packet containing each frame's first raw byte. It is transport diagnostics,
+  not a radar-frame or ADC timestamp.
 - `manifest.json` records the schema version, exact axes, radar dimensions,
   TX/RX mapping, timing, transform, and DCA packet-integrity result.
 
@@ -139,8 +352,8 @@ DCA command packets, radar UART commands, tcpdump startup, finite-capture
 timeouts, asynchronous DCA1000 status packets, and interrupted sensor startup.
 Each attempt writes `config.toml` and `status.json` before hardware access; a
 failed capture therefore retains its configuration, phase, and error message.
-Before using the hardware under WSL, follow [WSL_CAPTURE.md](WSL_CAPTURE.md) and
-run `mmwavecapture-preflight`.
+Before using the hardware, run `mmwavecapture-preflight` locally on the Pi and
+do not capture until every prerequisite reports `PASS`.
 
 Links
 -----
