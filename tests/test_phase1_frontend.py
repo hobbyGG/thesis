@@ -288,6 +288,7 @@ class Phase1FrontendTest(unittest.TestCase):
             frontend_num_virtual_rx=8,
             frontend_num_angle_bins=32,
             frontend_angle_window="rect",
+            frontend_angle_estimation_method="fft",
         )
         fine = Phase1Config(
             duration_s=0.08,
@@ -302,6 +303,7 @@ class Phase1FrontendTest(unittest.TestCase):
             frontend_num_virtual_rx=8,
             frontend_num_angle_bins=128,
             frontend_angle_window="rect",
+            frontend_angle_estimation_method="fft",
         )
         coarse_truth = generate_multifrequency_truth(coarse)
         fine_truth = generate_multifrequency_truth(fine)

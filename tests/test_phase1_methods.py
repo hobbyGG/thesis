@@ -440,7 +440,17 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
         np.testing.assert_array_equal(confidence_result.extra["selected_indices"], selected)
         self.assertEqual(confidence_result.extra["process_noise_intensity"], 5.0e4)
         self.assertEqual(confidence_result.extra["calibrated_q"], 5.0e4)
-        self.assertEqual(confidence_result.extra["adaptive_r_mode"], "beta_confidence")
+        self.assertEqual(confidence_result.extra["adaptive_r_mode"], "posterior_residual")
+        self.assertFalse(confidence_result.extra["beta_update_enabled"])
+        self.assertFalse(confidence_result.extra["beta_calibration_accepted"])
+        np.testing.assert_allclose(
+            confidence_result.extra["beta_history"],
+            np.repeat(
+                confidence_result.beta_hat[:, None],
+                confidence_result.q_hat_m.size,
+                axis=1,
+            ),
+        )
         self.assertIn("beta_variance_history", confidence_result.extra)
         self.assertIn("beta_uncertainty_r_theta_history", confidence_result.extra)
         self.assertEqual(config.process_noise_intensity, 5.0)
@@ -474,7 +484,7 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
         result = estimate_proposed_full_pipeline_aoa_fixed_beta(radar_input, accel, config)
 
         self.assertEqual(result.method_name, "proposed_full_pipeline_aoa_fixed_beta")
-        self.assertEqual(result.extra["adaptive_r_mode"], "beta_confidence")
+        self.assertEqual(result.extra["adaptive_r_mode"], "posterior_residual")
         self.assertEqual(result.extra["beta_update_enabled"], False)
         self.assertEqual(result.extra["process_noise_intensity"], 5.0e4)
         self.assertEqual(result.extra["calibrated_q"], 5.0e4)
@@ -489,6 +499,10 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
             np.testing.assert_allclose(target_history, radar.measured_beta[target_idx])
         self.assertIn("beta_variance_history", result.extra)
         self.assertIn("beta_uncertainty_r_theta_history", result.extra)
+        beta_uncertainty_r = np.nan_to_num(
+            result.extra["beta_uncertainty_r_theta_history"], nan=0.0
+        )
+        self.assertEqual(float(np.max(np.abs(beta_uncertainty_r))), 0.0)
 
     def test_calibrated_name_remains_backward_compatible_alias(self):
         config = Phase1Config(
@@ -577,7 +591,7 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
         np.testing.assert_allclose(result.extra["initial_r"], quality_initial_r)
         np.testing.assert_array_equal(result.extra["selected_indices"], selected)
 
-    def test_beta_confidence_full_pipeline_tracks_beta_uncertainty_in_r(self):
+    def test_beta_confidence_compatibility_alias_uses_frozen_precalibrated_beta(self):
         config = Phase1Config(
             duration_s=0.8,
             sample_rate_hz=1000.0,
@@ -610,17 +624,24 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
 
         self.assertEqual(result.method_name, "proposed_full_pipeline_beta_confidence")
         self.assertEqual(result.extra["legacy_alias"], "proposed_full_pipeline_beta_confidence_r")
-        self.assertEqual(result.extra["adaptive_r_mode"], "beta_confidence")
+        self.assertEqual(result.extra["adaptive_r_mode"], "posterior_residual")
+        self.assertFalse(result.extra["beta_update_enabled"])
+        self.assertEqual(
+            result.extra["beta_calibration_strategy"],
+            "independent_prepass_frozen",
+        )
         self.assertEqual(beta_variance.shape, radar.wrapped_phase_rad.shape)
         self.assertEqual(beta_r.shape, radar.wrapped_phase_rad.shape)
-        self.assertGreater(np.nanmedian(beta_variance[selected, 0]), np.nanmedian(beta_variance[selected, -1]))
-        self.assertTrue(np.nanmax(beta_r[selected]) > 0.0)
+        np.testing.assert_allclose(beta_variance[selected, 0], beta_variance[selected, -1])
         np.testing.assert_allclose(
-            result.r_theta_history[selected, 0],
-            result.extra["base_r_theta_history"][selected, 0] + beta_r[selected, 0],
+            np.nan_to_num(beta_r[selected], nan=0.0), 0.0
+        )
+        np.testing.assert_allclose(
+            result.extra["beta_history"],
+            np.repeat(result.beta_hat[:, None], result.q_hat_m.size, axis=1),
         )
 
-    def test_beta_bootstrap_reports_fft_derived_frontend_beta_diagnostics(self):
+    def test_beta_precalibration_reports_independent_frontend_diagnostics(self):
         scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "aoa_error_bootstrap"][0]
         config = replace(
             scenario,
@@ -642,6 +663,7 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
         )
         references = inputs.frontend.target_reference_indices
         selected = np.asarray(result.extra["selected_indices"], dtype=int)
+        initial_beta = np.asarray(result.extra["beta_initial"], dtype=float)
         initial_errors = []
         final_errors = []
         for target_idx in selected:
@@ -649,16 +671,21 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
             if reference_idx < 0:
                 continue
             true_beta = float(inputs.radar.target_level.beta[reference_idx])
-            finite_history = result.extra["beta_history"][target_idx]
-            finite_history = finite_history[np.isfinite(finite_history)]
-            if finite_history.size == 0:
-                continue
-            initial_errors.append(abs(float(finite_history[0]) - true_beta) / true_beta)
+            initial_errors.append(abs(float(initial_beta[target_idx]) - true_beta) / true_beta)
             final_errors.append(abs(float(result.beta_hat[target_idx]) - true_beta) / true_beta)
 
         self.assertGreater(len(final_errors), 0)
         self.assertTrue(np.isfinite(float(np.median(initial_errors))))
         self.assertTrue(np.isfinite(float(np.median(final_errors))))
+        self.assertEqual(
+            result.extra["beta_calibration_strategy"],
+            "independent_prepass_frozen",
+        )
+        self.assertFalse(result.extra["beta_update_enabled"])
+        np.testing.assert_allclose(
+            result.extra["beta_history"],
+            np.repeat(result.beta_hat[:, None], result.q_hat_m.size, axis=1),
+        )
         q_ref = cold_start_reference_mean(inputs.truth.q_m, config)
         truth_relative = inputs.truth.q_m - q_ref
         result_rmse = float(np.sqrt(np.nanmean((result.q_hat_m - truth_relative) ** 2)) * 1e3)
@@ -1212,7 +1239,7 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
         self.assertTrue(np.all(finite_gate == 0.0))
         np.testing.assert_allclose(result.beta_hat, np.array([2.0], dtype=float))
 
-    def test_beta_confidence_variance_decays_after_stable_projection_bootstrap(self):
+    def test_frozen_beta_path_does_not_decay_online_beta_variance(self):
         scenario = [item for item in build_phase1_scenarios() if item.scenario_name == "aoa_error_bootstrap"][0]
         config = replace(
             scenario,
@@ -1231,7 +1258,14 @@ class Phase1KalmanMethodsTest(unittest.TestCase):
         finite = variance[np.isfinite(variance)]
 
         self.assertGreater(finite.size, 10)
-        self.assertLess(float(finite[-1]), float(finite[0]))
+        np.testing.assert_allclose(finite, finite[0])
+        self.assertFalse(result.extra["beta_update_enabled"])
+        np.testing.assert_allclose(
+            np.nan_to_num(
+                result.extra["beta_uncertainty_r_theta_history"], nan=0.0
+            ),
+            0.0,
+        )
 
     def test_quality_gated_r_suppresses_growth_for_high_quality_target(self):
         result = self._quality_gated_r_probe(selection_score=1.0)
