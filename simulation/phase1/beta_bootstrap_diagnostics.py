@@ -89,6 +89,7 @@ def beta_bootstrap_rows_from_result(result, radar, target_reference_indices=None
     return beta_bootstrap_diagnostic_rows(
         beta_history=beta_history,
         beta_true=radar.beta,
+        beta_initial=result.extra.get("beta_initial"),
         selected_indices=selected_indices,
         target_reference_indices=target_reference_indices,
         gate_history=result.extra.get("beta_update_gate_history"),

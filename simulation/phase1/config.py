@@ -35,6 +35,13 @@ class Phase1Config:
     frontend_num_virtual_rx: int = 8
     frontend_num_angle_bins: int = 64
     frontend_angle_window: str = "hann"
+    # Direct target-angle estimator.  ``fft`` is retained as the legacy
+    # baseline; the new default performs a local, continuous angle fit after
+    # FFT range/angle gating and does not run any downstream beta adaptation.
+    frontend_angle_estimation_method: str = "local_music_ml"
+    frontend_angle_search_half_width_u: float = 0.12
+    frontend_angle_music_grid_size: int = 129
+    frontend_angle_max_snapshots: int = 512
     num_targets: int = 5
     target_angles_deg: Sequence[float] = (10.0, 25.0, 40.0, 55.0, 70.0)
     target_snr_db: Sequence[float] = (20.0, 15.0, 12.0, 9.0, 6.0)
@@ -93,11 +100,12 @@ class Phase1Config:
     max_measurement_variance: float = 25.0
     adaptive_r_forgetting: float = 0.95
 
+    # Legacy online-beta ablation controls. The public capture-facing
+    # beta-confidence entry no longer uses these fields for beta updates.
     beta_window_samples: int = 80
     beta_update_start_s: float = 0.25
     beta_bootstrap_prior_weight: float = 500.0
-    # beta variance is expressed in beta-coordinate units. It is propagated into
-    # structural phase observation noise as (phi_los_corr - bias)^2 * var(beta).
+    # These variance controls remain for the legacy beta-confidence-R ablation.
     beta_confidence_initial_variance: float = 0.04
     beta_confidence_min_variance: float = 1.0e-6
     beta_confidence_max_variance: float = 0.25
@@ -119,6 +127,27 @@ class Phase1Config:
     beta_anchor_max_scale: float = 1.35
     beta_common_aoa_bias_search_deg: float = 15.0
     beta_common_aoa_bias_step_deg: float = 0.05
+    # The capture-facing adaptive-beta path is a batch pre-calibration.  It
+    # never feeds a target's Kalman posterior back into that target's beta.
+    beta_calibration_strategy: str = "independent_prepass_frozen"
+    beta_calibration_fraction: float = 0.5
+    beta_calibration_min_block_samples: int = 80
+    beta_calibration_min_angle_span_deg: float = 8.0
+    beta_calibration_min_holdout_improvement: float = 0.01
+    beta_calibration_max_wrapped_phase_step_rad: float = 2.5132741228718345
+    beta_calibration_min_delta_standard_score: float = 1.0
+    # When enabled (the default), a common-AoA candidate is not applied unless
+    # the independent native-timestamp ADXL stage also validates it.
+    beta_calibration_use_adxl: bool = True
+    beta_calibration_adxl_min_block_samples: int = 120
+    beta_calibration_adxl_min_holdout_improvement: float = 0.02
+    beta_calibration_min_coherence: float = 0.60
+    beta_calibration_max_abs_delay_s: float = 0.05
+    beta_calibration_delay_step_s: float = 5.0e-4
+    beta_calibration_max_relative_change: float = 0.25
+    beta_calibration_min_relative_scale_targets: int = 3
+    beta_calibration_min_relative_rank1_fraction: float = 0.90
+    beta_calibration_scale_mode: str = "aoa_anchored_relative"
     beta_min_abs: float = 1.0 / 1.2
     beta_max_abs: float = 1.0 / 0.05
 

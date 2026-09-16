@@ -25,6 +25,7 @@ class MeasuredBridgeRecord:
     event_window_s: tuple[float, float]
     sample_rate_hz: float
     preprocessing: MeasuredBridgePreprocessConfig
+    source_laser_sample_rate_hz: float = 0.0
 
 
 def preprocess_measured_signal(signal, sample_rate_hz, config: MeasuredBridgePreprocessConfig):
@@ -262,4 +263,5 @@ def load_measured_bridge_record(config) -> MeasuredBridgeRecord:
         event_window_s=(float(event_window_s[0]), float(event_window_s[0]) + target_duration_s),
         sample_rate_hz=target_rate_hz,
         preprocessing=preprocess_config,
+        source_laser_sample_rate_hz=float(laser_fs),
     )

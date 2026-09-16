@@ -1,7 +1,14 @@
+from copy import copy
 from dataclasses import dataclass, field, replace
 
 import numpy as np
 
+from .beta_calibration import (
+    BetaCalibrationConfig,
+    CommonAoABiasConfig,
+    calibrate_common_aoa_bias,
+    calibrate_targetwise_beta,
+)
 from .phase_utils import itoh_unwrap, prediction_correct_wrapped_phase
 
 
@@ -57,13 +64,60 @@ def _estimate_target_biases(radar, config):
     return biases
 
 
-def _state_matrices(config):
-    dt = 1.0 / config.sample_rate_hz
+def _state_matrices_for_dt(config, dt):
+    dt = float(dt)
+    if not np.isfinite(dt) or dt <= 0.0:
+        raise ValueError("state-transition dt must be finite and positive")
     a = np.array([[1.0, dt], [0.0, 1.0]], dtype=float)
     b = np.array([0.5 * dt * dt, dt], dtype=float)
     q0 = np.array([[dt**3 / 3.0, dt**2 / 2.0], [dt**2 / 2.0, dt]], dtype=float)
     q = float(config.process_noise_intensity) * q0
     return a, b, q
+
+
+def _state_matrices(config):
+    return _state_matrices_for_dt(config, 1.0 / config.sample_rate_hz)
+
+
+def _validated_acceleration_preintegration(accel, n_samples):
+    preintegration = getattr(accel, "preintegration", None)
+    if preintegration is None:
+        return None
+
+    expected = (max(int(n_samples) - 1, 0),)
+    fields = {
+        "duration_s": float,
+        "delta_v_mps": float,
+        "delta_q_m": float,
+        "interval_valid": bool,
+    }
+    arrays = {}
+    for name, dtype in fields.items():
+        if not hasattr(preintegration, name):
+            raise ValueError(
+                f"acceleration preintegration is missing required field {name!r}"
+            )
+        value = np.asarray(getattr(preintegration, name), dtype=dtype)
+        if value.shape != expected:
+            raise ValueError(
+                f"acceleration preintegration {name} must have shape {expected}"
+            )
+        arrays[name] = value
+
+    if not np.all(arrays["interval_valid"]):
+        invalid = np.flatnonzero(~arrays["interval_valid"])
+        raise ValueError(
+            "acceleration preintegration contains invalid radar interval(s): "
+            + ", ".join(str(int(index)) for index in invalid)
+        )
+    if (
+        np.any(~np.isfinite(arrays["duration_s"]))
+        or np.any(arrays["duration_s"] <= 0.0)
+        or np.any(~np.isfinite(arrays["delta_v_mps"]))
+        or np.any(~np.isfinite(arrays["delta_q_m"]))
+    ):
+        raise ValueError("acceleration preintegration contains invalid numeric values")
+    return arrays
 
 
 def _initial_state_from_cold_start(radar, beta, target_bias, config, selected_indices=None):
@@ -415,6 +469,500 @@ def _initial_beta_from_radar(radar):
     return np.asarray(radar.measured_beta, dtype=float).copy()
 
 
+def _selected_beta_indices(radar, n_targets):
+    selected = getattr(radar, "selected_indices", None)
+    if selected is None:
+        return np.arange(n_targets, dtype=int)
+    selected = np.asarray(selected, dtype=int).reshape(-1)
+    if selected.size == 0:
+        return selected
+    valid = selected[(selected >= 0) & (selected < n_targets)]
+    _, first = np.unique(valid, return_index=True)
+    return valid[np.sort(first)]
+
+
+def _beta_calibration_weights(radar, selected, n_targets):
+    initial_r = getattr(radar, "initial_r", None)
+    if initial_r is not None:
+        initial_r = np.asarray(initial_r, dtype=float)
+        if initial_r.shape == (n_targets,):
+            values = 1.0 / np.maximum(initial_r[selected], np.finfo(float).eps)
+            if np.all(np.isfinite(values)) and np.all(values > 0.0):
+                return values / np.median(values)
+
+    scores = getattr(radar, "selection_scores", None)
+    if scores is not None:
+        scores = np.asarray(scores, dtype=float).reshape(-1)
+        if scores.size == n_targets:
+            values = scores[selected]
+        elif scores.size == selected.size:
+            values = scores
+        else:
+            values = None
+        if values is not None and np.all(np.isfinite(values)):
+            values = np.maximum(values, 1.0e-3)
+            return values / np.median(values)
+    return np.ones(selected.size, dtype=float)
+
+
+def _longest_common_phase_segment(radar, selected, required_targets=1):
+    phase = np.asarray(radar.wrapped_phase_rad, dtype=float)[selected].copy()
+    required_targets = int(required_targets)
+    if required_targets < 1 or required_targets > selected.size:
+        raise ValueError("invalid_beta_calibration_required_target_count")
+    row_valid = np.isfinite(phase)
+    available = getattr(radar, "available_mask", None)
+    if available is not None:
+        available = np.asarray(available, dtype=bool)
+        if available.shape != np.asarray(radar.wrapped_phase_rad).shape:
+            raise ValueError("radar_available_mask_shape_mismatch")
+        row_valid &= available[selected]
+    phase[~row_valid] = np.nan
+    valid = np.count_nonzero(row_valid, axis=0) >= required_targets
+    boundaries = np.flatnonzero(np.diff(np.r_[False, valid, False]))
+    if boundaries.size == 0:
+        return phase, np.empty(0, dtype=int)
+    segments = [
+        np.arange(start, stop, dtype=int)
+        for start, stop in boundaries.reshape(-1, 2)
+    ]
+    return phase, max(segments, key=lambda item: item.size)
+
+
+def _radar_calibration_time(radar, config, n_samples):
+    extra = getattr(radar, "extra", None)
+    radar_time_ns = extra.get("radar_time_ns") if isinstance(extra, dict) else None
+    if radar_time_ns is None:
+        return np.arange(n_samples, dtype=float) / float(config.sample_rate_hz), None
+    radar_time_ns = np.asarray(radar_time_ns).reshape(-1)
+    if radar_time_ns.size != n_samples:
+        raise ValueError("radar_time_ns_shape_mismatch")
+    origin_ns = int(radar_time_ns[0])
+    time_s = np.asarray(
+        [(int(value) - origin_ns) * 1.0e-9 for value in radar_time_ns],
+        dtype=float,
+    )
+    if np.any(~np.isfinite(time_s)) or np.any(np.diff(time_s) <= 0.0):
+        raise ValueError("radar_time_ns_not_strictly_increasing")
+    return time_s, origin_ns
+
+
+def _native_acceleration_for_beta_calibration(accel, config, radar_origin_ns):
+    native_time_ns = getattr(accel, "native_time_ns", None)
+    native_mps2 = getattr(accel, "native_mps2", None)
+    if native_time_ns is not None and native_mps2 is not None:
+        if radar_origin_ns is None:
+            raise ValueError("radar_native_timestamps_unavailable")
+        time_ns = np.asarray(native_time_ns).reshape(-1)
+        values = np.asarray(native_mps2, dtype=float).reshape(-1)
+        if time_ns.size != values.size or time_ns.size < 2:
+            raise ValueError("adxl_native_time_value_shape_mismatch")
+        if any(
+            int(right) <= int(left)
+            for left, right in zip(time_ns[:-1], time_ns[1:])
+        ):
+            raise ValueError("adxl_native_time_not_strictly_increasing")
+        valid_mask = getattr(accel, "valid_mask", None)
+        if valid_mask is not None:
+            valid_mask = np.asarray(valid_mask, dtype=bool).reshape(-1)
+            if valid_mask.size != values.size or not np.all(valid_mask):
+                raise ValueError("adxl_native_samples_invalid")
+        if np.any(~np.isfinite(values)):
+            raise ValueError("adxl_native_samples_nonfinite")
+
+        preintegration = getattr(accel, "preintegration", None)
+        if preintegration is not None:
+            for field_name in ("coverage_complete", "gap_within_limit", "interval_valid"):
+                quality = getattr(preintegration, field_name, None)
+                if quality is not None and not np.all(np.asarray(quality, dtype=bool)):
+                    raise ValueError(f"adxl_{field_name}_failed")
+
+        origin_ns = int(radar_origin_ns)
+        time_s = np.asarray(
+            [(int(value) - origin_ns) * 1.0e-9 for value in time_ns],
+            dtype=float,
+        )
+        return time_s, values
+
+    if radar_origin_ns is not None:
+        raise ValueError("adxl_native_timestamps_unavailable")
+    values = np.asarray(getattr(accel, "measured_mps2"), dtype=float).reshape(-1)
+    if values.size < 2 or np.any(~np.isfinite(values)):
+        raise ValueError("acceleration_samples_unavailable")
+    time_s = np.arange(values.size, dtype=float) / float(config.sample_rate_hz)
+    return time_s, values
+
+
+def _validate_beta_preintegration_timeline(radar, accel):
+    preintegration = getattr(accel, "preintegration", None)
+    if preintegration is None:
+        return
+    # Uniform-rate simulations legitimately omit native timestamps and their
+    # interval anchors.  Once native ADXL timestamps are present, however, the
+    # preintegrated intervals must prove that they use the same radar frame
+    # boundaries as the phase data; silently assuming alignment is unsafe.
+    if getattr(accel, "native_time_ns", None) is None:
+        return
+    starts = getattr(preintegration, "radar_start_time_ns", None)
+    ends = getattr(preintegration, "radar_end_time_ns", None)
+    if starts is None and ends is None:
+        raise ValueError("preintegration_radar_timeline_missing")
+    if starts is None or ends is None:
+        raise ValueError("preintegration_radar_timeline_incomplete")
+    extra = getattr(radar, "extra", None)
+    radar_time_ns = extra.get("radar_time_ns") if isinstance(extra, dict) else None
+    if radar_time_ns is None:
+        raise ValueError("preintegration_radar_timeline_without_radar_timestamps")
+    radar_values = [int(value) for value in np.asarray(radar_time_ns).reshape(-1)]
+    start_values = [int(value) for value in np.asarray(starts).reshape(-1)]
+    end_values = [int(value) for value in np.asarray(ends).reshape(-1)]
+    if start_values != radar_values[:-1] or end_values != radar_values[1:]:
+        raise ValueError("preintegration_radar_timeline_mismatch")
+
+
+def _radar_with_measured_beta(radar, measured_beta, config):
+    values = np.asarray(measured_beta, dtype=float).copy()
+    updates = {"measured_beta": values}
+    initial_r = getattr(radar, "initial_r", None)
+    original_beta = np.asarray(radar.measured_beta, dtype=float)
+    if initial_r is not None:
+        initial_r = np.asarray(initial_r, dtype=float)
+        if initial_r.shape == values.shape and original_beta.shape == values.shape:
+            safe_original = np.maximum(np.abs(original_beta), np.finfo(float).eps)
+            initial_r_scale = (values / safe_original) ** 2
+            updates["initial_r"] = np.clip(
+                initial_r * initial_r_scale,
+                float(config.min_measurement_variance),
+                float(config.max_measurement_variance),
+            )
+    try:
+        return replace(radar, **updates)
+    except TypeError:
+        cloned = copy(radar)
+        for name, value in updates.items():
+            setattr(cloned, name, value)
+        return cloned
+
+
+def _independent_beta_precalibration(radar, accel, config):
+    """Estimate and gate frozen per-target beta before filtering."""
+
+    strategy = str(config.beta_calibration_strategy)
+    if strategy != "independent_prepass_frozen":
+        raise ValueError(f"unsupported beta_calibration_strategy: {strategy}")
+    wrapped = np.asarray(radar.wrapped_phase_rad, dtype=float)
+    if wrapped.ndim != 2:
+        raise ValueError("radar wrapped phase must have target and sample axes")
+    n_targets, n_samples = wrapped.shape
+    initial = _clip_beta(_initial_beta_from_radar(radar), config)
+    selected = _selected_beta_indices(radar, n_targets)
+    frozen = initial.copy()
+
+    common_candidate = initial.copy()
+    common_variance = np.inf
+    common_confidence = 0.0
+    common_delta_deg = 0.0
+    common_train_ratio = np.inf
+    common_holdout_ratio = np.inf
+    common_improvement = -np.inf
+    common_samples = np.zeros(2, dtype=int)
+    common_accepted = False
+    common_reason = "not_attempted"
+
+    extra = getattr(radar, "extra", None)
+    angles = extra.get("angle_deg") if isinstance(extra, dict) else None
+    if selected.size < 2:
+        common_reason = "insufficient_target_count"
+    elif angles is None:
+        common_reason = "measured_angles_unavailable"
+    else:
+        try:
+            angles = np.asarray(angles, dtype=float)
+            if angles.shape != (n_targets,):
+                raise ValueError("measured_angle_shape_mismatch")
+            common_phase = wrapped[selected].copy()
+            available = getattr(radar, "available_mask", None)
+            if available is not None:
+                available = np.asarray(available, dtype=bool)
+                if available.shape != wrapped.shape:
+                    raise ValueError("radar_available_mask_shape_mismatch")
+                common_phase[~available[selected]] = np.nan
+            common = calibrate_common_aoa_bias(
+                common_phase,
+                angles[selected],
+                target_weights=_beta_calibration_weights(radar, selected, n_targets),
+                config=CommonAoABiasConfig(
+                    calibration_fraction=float(config.beta_calibration_fraction),
+                    delta_bounds_deg=(
+                        -float(config.beta_common_aoa_bias_search_deg),
+                        float(config.beta_common_aoa_bias_search_deg),
+                    ),
+                    delta_step_deg=float(config.beta_common_aoa_bias_step_deg),
+                    min_angle_span_deg=float(config.beta_calibration_min_angle_span_deg),
+                    min_block_samples=int(config.beta_calibration_min_block_samples),
+                    max_wrapped_phase_step_rad=float(
+                        config.beta_calibration_max_wrapped_phase_step_rad
+                    ),
+                    min_holdout_improvement=float(
+                        config.beta_calibration_min_holdout_improvement
+                    ),
+                    min_delta_standard_score=float(
+                        config.beta_calibration_min_delta_standard_score
+                    ),
+                    beta_bounds=(
+                        max(1.0, float(config.beta_min_abs)),
+                        float(config.beta_max_abs),
+                    ),
+                    max_relative_beta_change=float(
+                        config.beta_calibration_max_relative_change
+                    ),
+                ),
+            )
+            common_candidate[selected] = common.candidate_beta
+            common_variance = float(common.variance_deg2)
+            common_confidence = float(common.confidence)
+            common_delta_deg = float(common.delta_deg)
+            common_train_ratio = float(common.calibration_residual_ratio)
+            common_holdout_ratio = float(common.holdout_residual_ratio)
+            common_improvement = float(common.holdout_improvement)
+            common_samples[:] = (common.calibration_samples, common.holdout_samples)
+            common_accepted = bool(common.accepted)
+            common_reason = common.reason
+        except (TypeError, ValueError, FloatingPointError) as exc:
+            common_reason = f"input_rejected:{exc}"
+
+    adxl_candidate = initial.copy()
+    adxl_raw_candidate = initial.copy()
+    adxl_relative_candidate = initial.copy()
+    adxl_variance = np.full(n_targets, np.inf, dtype=float)
+    adxl_confidence = np.zeros(n_targets, dtype=float)
+    adxl_coherence = np.zeros(n_targets, dtype=float)
+    adxl_holdout_coherence = np.zeros(n_targets, dtype=float)
+    adxl_improvement = np.full(n_targets, -np.inf, dtype=float)
+    adxl_raw_improvement = np.full(n_targets, -np.inf, dtype=float)
+    adxl_relative_improvement = np.full(n_targets, -np.inf, dtype=float)
+    adxl_accepted_mask = np.zeros(n_targets, dtype=bool)
+    adxl_reason_by_target = np.full(n_targets, "not_selected", dtype=object)
+    adxl_delay_s = np.nan
+    adxl_samples = np.zeros(2, dtype=int)
+    adxl_fold_common_scale = np.full(2, np.nan, dtype=float)
+    adxl_relative_fold_rank1_fraction = np.zeros(2, dtype=float)
+    adxl_relative_fold_reference_mask = np.zeros(
+        (2, n_targets),
+        dtype=bool,
+    )
+    adxl_relative_adxl_eligible_mask = np.zeros(n_targets, dtype=bool)
+    adxl_scale_mode = "disabled"
+    adxl_accepted = False
+    adxl_all_accepted = False
+    adxl_reason = "disabled"
+    if not bool(config.beta_calibration_use_adxl) and selected.size:
+        adxl_reason_by_target[selected] = "disabled"
+    if bool(config.beta_calibration_use_adxl) and selected.size:
+        try:
+            _validate_beta_preintegration_timeline(radar, accel)
+            required_targets = (
+                min(
+                    selected.size,
+                    int(config.beta_calibration_min_relative_scale_targets),
+                )
+                if str(config.beta_calibration_scale_mode)
+                == "aoa_anchored_relative"
+                else 1
+            )
+            phase, segment = _longest_common_phase_segment(
+                radar,
+                selected,
+                required_targets=required_targets,
+            )
+            radar_time_s, radar_origin_ns = _radar_calibration_time(
+                radar, config, n_samples
+            )
+            acceleration_time_s, acceleration_mps2 = (
+                _native_acceleration_for_beta_calibration(
+                    accel, config, radar_origin_ns
+                )
+            )
+            unwrapped = np.unwrap(phase[:, segment], axis=1)
+            adxl = calibrate_targetwise_beta(
+                radar_time_s[segment],
+                unwrapped,
+                acceleration_mps2,
+                wavelength_m=float(config.wavelength_m()),
+                # The same original AoA beta is the fit prior, validation
+                # baseline, and exact fallback.  The separately reported
+                # common-AoA hypothesis cannot influence this formal path.
+                initial_beta=initial[selected],
+                fit_prior_beta=initial[selected],
+                acceleration_time_s=acceleration_time_s,
+                target_weights=_beta_calibration_weights(
+                    radar, selected, n_targets
+                ),
+                config=BetaCalibrationConfig(
+                    calibration_fraction=float(config.beta_calibration_fraction),
+                    delay_bounds_s=(
+                        -float(config.beta_calibration_max_abs_delay_s),
+                        float(config.beta_calibration_max_abs_delay_s),
+                    ),
+                    delay_step_s=float(config.beta_calibration_delay_step_s),
+                    min_block_samples=int(
+                        config.beta_calibration_adxl_min_block_samples
+                    ),
+                    min_target_coherence=float(config.beta_calibration_min_coherence),
+                    min_holdout_improvement=float(
+                        config.beta_calibration_adxl_min_holdout_improvement
+                    ),
+                    beta_bounds=(
+                        max(1.0, float(config.beta_min_abs)),
+                        float(config.beta_max_abs),
+                    ),
+                    max_relative_beta_change=float(
+                        config.beta_calibration_max_relative_change
+                    ),
+                    max_unwrapped_phase_step_rad=float(
+                        config.beta_calibration_max_wrapped_phase_step_rad
+                    ),
+                    min_relative_scale_targets=int(
+                        config.beta_calibration_min_relative_scale_targets
+                    ),
+                    min_relative_rank1_fraction=float(
+                        config.beta_calibration_min_relative_rank1_fraction
+                    ),
+                    scale_mode=str(config.beta_calibration_scale_mode),
+                ),
+            )
+            adxl_candidate[selected] = adxl.candidate_beta
+            adxl_raw_candidate[selected] = adxl.raw_candidate_beta
+            adxl_relative_candidate[selected] = adxl.relative_candidate_beta
+            adxl_variance[selected] = adxl.variance
+            adxl_confidence[selected] = adxl.confidence
+            adxl_coherence[selected] = adxl.coherence
+            adxl_holdout_coherence[selected] = adxl.holdout_coherence
+            adxl_improvement[selected] = adxl.holdout_improvement
+            adxl_raw_improvement[selected] = adxl.raw_holdout_improvement
+            adxl_relative_improvement[selected] = (
+                adxl.relative_holdout_improvement
+            )
+            adxl_accepted_mask[selected] = adxl.accepted_mask
+            for position, target_index in enumerate(selected):
+                adxl_reason_by_target[int(target_index)] = adxl.reason_by_target[
+                    position
+                ]
+            adxl_delay_s = float(adxl.delay_s)
+            adxl_samples[:] = (adxl.calibration_samples, adxl.holdout_samples)
+            adxl_fold_common_scale[:] = adxl.fold_common_scale
+            adxl_relative_fold_rank1_fraction[:] = (
+                adxl.relative_fold_rank1_fraction
+            )
+            adxl_relative_fold_reference_mask[:, selected] = (
+                adxl.relative_fold_reference_mask
+            )
+            adxl_relative_adxl_eligible_mask[selected] = (
+                adxl.relative_adxl_eligible_mask
+            )
+            adxl_scale_mode = adxl.scale_mode
+            adxl_accepted = bool(adxl.accepted)
+            adxl_all_accepted = bool(adxl.all_accepted)
+            adxl_reason = adxl.reason
+        except (TypeError, ValueError, FloatingPointError) as exc:
+            adxl_reason = f"input_rejected:{exc}"
+            adxl_reason_by_target[selected] = adxl_reason
+
+    if adxl_accepted:
+        frozen[selected] = adxl.beta
+    elif common_accepted and not bool(config.beta_calibration_use_adxl):
+        frozen[selected] = common.beta
+
+    common_only_accepted = common_accepted and not bool(
+        config.beta_calibration_use_adxl
+    )
+    accepted = common_only_accepted or adxl_accepted
+    accepted_mask = np.zeros(n_targets, dtype=bool)
+    if common_only_accepted:
+        accepted_mask[selected] = True
+    elif adxl_accepted:
+        accepted_mask[:] = adxl_accepted_mask
+    all_selected_accepted = bool(
+        selected.size > 0
+        and np.count_nonzero(accepted_mask) == selected.size
+    )
+    reason_code = int(common_only_accepted) + 2 * int(adxl_accepted)
+    if adxl_accepted:
+        used_stage = "targetwise_adxl"
+        reason = adxl_reason
+    elif common_only_accepted:
+        used_stage = "common_aoa"
+        reason = f"accepted_common_aoa;adxl:{adxl_reason}"
+    else:
+        used_stage = "aoa_initial_fallback"
+        if common_accepted and bool(config.beta_calibration_use_adxl):
+            reason = f"common_aoa_candidate_unverified;adxl:{adxl_reason}"
+        else:
+            reason = f"common_aoa:{common_reason};adxl:{adxl_reason}"
+
+    diagnostics = {
+        "beta_initial": initial,
+        "beta_calibration_candidate": frozen.copy(),
+        "beta_calibration_beta_frozen": frozen.copy(),
+        # Preserve the legacy all-or-nothing field's meaning.  Consumers that
+        # support partial target calibration should use any_accepted + mask.
+        "beta_calibration_accepted": all_selected_accepted,
+        "beta_calibration_any_accepted": bool(accepted),
+        "beta_calibration_accepted_mask": accepted_mask,
+        "beta_calibration_accepted_count": int(np.count_nonzero(accepted_mask)),
+        "beta_calibration_all_selected_accepted": all_selected_accepted,
+        "beta_calibration_reason_code": reason_code,
+        "beta_calibration_strategy": strategy,
+        "beta_calibration_used_stage": used_stage,
+        "beta_calibration_reason": reason,
+        "beta_calibration_common_aoa_candidate": common_candidate,
+        "beta_calibration_common_aoa_accepted": bool(common_accepted),
+        "beta_calibration_common_aoa_reason": common_reason,
+        "beta_calibration_common_aoa_bias_deg": common_delta_deg,
+        "beta_calibration_common_aoa_variance_deg2": common_variance,
+        "beta_calibration_common_aoa_confidence": common_confidence,
+        "beta_calibration_common_aoa_train_residual_ratio": common_train_ratio,
+        "beta_calibration_common_aoa_holdout_residual_ratio": common_holdout_ratio,
+        "beta_calibration_common_aoa_holdout_improvement": common_improvement,
+        "beta_calibration_common_aoa_samples": common_samples,
+        "beta_calibration_adxl_candidate": adxl_candidate,
+        "beta_calibration_adxl_raw_candidate": adxl_raw_candidate,
+        "beta_calibration_adxl_relative_candidate": adxl_relative_candidate,
+        "beta_calibration_adxl_accepted": bool(adxl_all_accepted),
+        "beta_calibration_adxl_any_accepted": bool(adxl_accepted),
+        "beta_calibration_adxl_all_accepted": bool(adxl_all_accepted),
+        "beta_calibration_adxl_accepted_mask": adxl_accepted_mask,
+        "beta_calibration_adxl_reason_by_target": tuple(adxl_reason_by_target),
+        "beta_calibration_adxl_reason": adxl_reason,
+        "beta_calibration_adxl_scale_mode_requested": str(
+            config.beta_calibration_scale_mode
+        ),
+        "beta_calibration_adxl_scale_mode": adxl_scale_mode,
+        "beta_calibration_adxl_fold_common_scale": adxl_fold_common_scale,
+        "beta_calibration_adxl_relative_fold_rank1_fraction": (
+            adxl_relative_fold_rank1_fraction
+        ),
+        "beta_calibration_adxl_relative_fold_reference_mask": (
+            adxl_relative_fold_reference_mask
+        ),
+        "beta_calibration_adxl_relative_adxl_eligible_mask": (
+            adxl_relative_adxl_eligible_mask
+        ),
+        "beta_calibration_adxl_variance": adxl_variance,
+        "beta_calibration_adxl_confidence": adxl_confidence,
+        "beta_calibration_adxl_delay_s": adxl_delay_s,
+        "beta_calibration_adxl_coherence": adxl_coherence,
+        "beta_calibration_adxl_holdout_coherence": adxl_holdout_coherence,
+        "beta_calibration_adxl_holdout_improvement": adxl_improvement,
+        "beta_calibration_adxl_raw_holdout_improvement": adxl_raw_improvement,
+        "beta_calibration_adxl_relative_holdout_improvement": (
+            adxl_relative_improvement
+        ),
+        "beta_calibration_adxl_samples": adxl_samples,
+    }
+    return frozen, diagnostics
+
+
 def estimate_proposed(radar_input, accel, config):
     return run_structural_phase_kalman(
         method_name="proposed",
@@ -449,17 +997,34 @@ def calibrated_process_noise_intensity(config):
 
 
 def estimate_proposed_full_pipeline_beta_confidence(radar_input, accel, config):
-    selected = _select_calibrated_q_result(radar_input, accel, config)
+    frozen_beta, calibration = _independent_beta_precalibration(
+        radar_input, accel, config
+    )
+    calibrated_radar = _radar_with_measured_beta(
+        radar_input, frozen_beta, config
+    )
+    calibrated_initial_r = getattr(calibrated_radar, "initial_r", None)
+    original_initial_r = getattr(radar_input, "initial_r", None)
+    if calibrated_initial_r is not None and original_initial_r is not None:
+        calibration["beta_calibration_initial_r_before"] = np.asarray(
+            original_initial_r, dtype=float
+        ).copy()
+        calibration["beta_calibration_initial_r_after"] = np.asarray(
+            calibrated_initial_r, dtype=float
+        ).copy()
+    selected = _select_aoa_fixed_q_result(calibrated_radar, accel, config)
     result = selected["result"]
     process_noise_intensity = float(selected["q"])
     extra = {
         **result.extra,
+        **calibration,
         "process_noise_intensity": process_noise_intensity,
         "calibrated_q": process_noise_intensity,
         "calibrated_q_candidates": selected["candidates"],
         "calibrated_q_metric": "innovation_energy",
         "calibrated_q_metric_values": selected["metric_values"],
         "calibrated_q_selection_index": int(selected["index"]),
+        "beta_update_enabled": False,
     }
     return replace(
         result,
@@ -486,6 +1051,32 @@ def estimate_proposed_full_pipeline_aoa_fixed_beta(radar_input, accel, config):
         result,
         method_name="proposed_full_pipeline_aoa_fixed_beta",
         extra=extra,
+    )
+
+
+def estimate_direct_aoa_fixed_beta(radar_input, accel, config):
+    """Run the direct-AoA pipeline with a frozen geometry-derived beta.
+
+    The frontend is responsible for producing the calibrated target angle
+    (and hence ``measured_beta``).  This entry point deliberately performs no
+    beta pre-calibration or online beta feedback; it only runs the unchanged
+    structural Kalman stage so comparisons isolate the AoA estimator.
+    """
+    result = estimate_proposed_full_pipeline_aoa_fixed_beta(radar_input, accel, config)
+    return replace(
+        result,
+        method_name="direct_aoa_fixed_beta",
+        extra={
+            **result.extra,
+            "beta_update_enabled": False,
+            "beta_source": "frontend_direct_aoa",
+            "aoa_angle_deg": (
+                np.asarray(radar_input.extra.get("angle_deg"), dtype=float).copy()
+                if isinstance(getattr(radar_input, "extra", None), dict)
+                and radar_input.extra.get("angle_deg") is not None
+                else np.full(np.asarray(radar_input.measured_beta).shape, np.nan)
+            ),
+        },
     )
 
 
@@ -704,7 +1295,10 @@ def _run_aoa_fixed_candidate(radar_input, accel, config, process_noise_intensity
         selected_indices=radar_input.selected_indices,
         initial_r=radar_input.initial_r,
         beta_update_mode="centered_regularized_ls",
-        adaptive_r_mode="beta_confidence",
+        # Beta is fixed in this ablation, so propagating a dynamic beta
+        # variance into R is internally inconsistent. Retain measurement-only
+        # posterior-residual adaptation without beta-uncertainty inflation.
+        adaptive_r_mode="posterior_residual",
         initial_r_policy="provided_or_config",
     )
 
@@ -823,6 +1417,10 @@ def run_structural_phase_kalman(
 ):
     n_targets, n_samples = radar.wrapped_phase_rad.shape
     a_mat, b_vec, q_mat = _state_matrices(config)
+    acceleration_preintegration = _validated_acceleration_preintegration(
+        accel,
+        n_samples,
+    )
     p = np.diag([config.initial_state_variance, config.initial_rate_variance])
     beta = _clip_beta(initial_beta, config)
     beta_prior = beta.copy()
@@ -899,12 +1497,31 @@ def run_structural_phase_kalman(
     beta_common_aoa_bias_deg = 0.0
 
     for sample_idx in range(n_samples):
-        accel_idx = max(sample_idx - 1, 0)
-        u = _phase_accel_input(measured_accel[accel_idx], config)
         if sample_idx > 0:
-            x_pred = a_mat @ x + b_vec * u
-            p_pred = a_mat @ p @ a_mat.T + q_mat
-            x_beta_reference = a_mat @ x_beta_reference + b_vec * u
+            if acceleration_preintegration is None:
+                accel_idx = sample_idx - 1
+                u = _phase_accel_input(measured_accel[accel_idx], config)
+                input_increment = b_vec * u
+                transition_a = a_mat
+                transition_q = q_mat
+            else:
+                interval_idx = sample_idx - 1
+                transition_dt = acceleration_preintegration["duration_s"][interval_idx]
+                transition_a, _unused_b, transition_q = _state_matrices_for_dt(
+                    config,
+                    transition_dt,
+                )
+                phase_scale = 4.0 * np.pi / config.wavelength_m()
+                input_increment = phase_scale * np.array(
+                    [
+                        acceleration_preintegration["delta_q_m"][interval_idx],
+                        acceleration_preintegration["delta_v_mps"][interval_idx],
+                    ],
+                    dtype=float,
+                )
+            x_pred = transition_a @ x + input_increment
+            p_pred = transition_a @ p @ transition_a.T + transition_q
+            x_beta_reference = transition_a @ x_beta_reference + input_increment
         else:
             x_pred = x
             p_pred = p
@@ -1253,6 +1870,16 @@ def run_structural_phase_kalman(
             "beta_fft_reference_theta_rad": beta_fft_reference_theta,
             "target_quality_history": target_quality_history,
             "base_r_update_gate_history": base_r_update_gate_history,
+            "propagation_timing": (
+                "native_timestamp_preintegration"
+                if acceleration_preintegration is not None
+                else "fixed_sample_rate"
+            ),
+            "transition_duration_s": (
+                acceleration_preintegration["duration_s"].copy()
+                if acceleration_preintegration is not None
+                else np.full(max(n_samples - 1, 0), 1.0 / config.sample_rate_hz)
+            ),
         },
     )
 

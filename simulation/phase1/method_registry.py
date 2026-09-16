@@ -4,6 +4,7 @@ from typing import Callable, Optional, Sequence
 import numpy as np
 
 from .algorithm import (
+    estimate_direct_aoa_fixed_beta,
     MethodResult,
     estimate_proposed_full_pipeline_aoa_fixed_beta,
     estimate_proposed_full_pipeline_beta_confidence,
@@ -55,16 +56,23 @@ def all_method_specs() -> tuple[MethodSpec, ...]:
             role="paper",
         ),
         MethodSpec(
+            "direct_aoa_fixed_beta",
+            _run_direct_aoa_fixed_beta,
+            _frontend_target_references,
+            role="paper",
+        ),
+        MethodSpec(
             "proposed_full_pipeline_aoa_fixed_beta",
             _run_proposed_full_pipeline_aoa_fixed_beta,
             _frontend_target_references,
-            role="paper",
+            role="ablation",
         ),
         MethodSpec(
             "proposed_full_pipeline_beta_confidence",
             _run_proposed_full_pipeline_beta_confidence,
             _frontend_target_references,
-            role="paper",
+            role="legacy",
+            status="legacy",
         ),
     )
 
@@ -141,6 +149,14 @@ def _run_selected_aoa_fixed_beta(inputs: ScenarioInputs):
 
 def _run_proposed_full_pipeline_aoa_fixed_beta(inputs: ScenarioInputs):
     return estimate_proposed_full_pipeline_aoa_fixed_beta(
+        inputs.radar.selected_frontend,
+        inputs.accelerometer,
+        inputs.scenario,
+    )
+
+
+def _run_direct_aoa_fixed_beta(inputs: ScenarioInputs):
+    return estimate_direct_aoa_fixed_beta(
         inputs.radar.selected_frontend,
         inputs.accelerometer,
         inputs.scenario,

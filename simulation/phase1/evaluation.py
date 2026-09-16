@@ -115,6 +115,12 @@ def _beta_initial_median_relative_error(result, radar, selected_indices, target_
 
 
 def _initial_beta_values(result, radar, target_reference_indices):
+    explicit = result.extra.get("beta_initial")
+    if explicit is not None:
+        explicit = np.asarray(explicit, dtype=float)
+        if explicit.shape == (target_reference_indices.size,):
+            return explicit.copy()
+
     history = result.extra.get("beta_history")
     if history is not None:
         history = np.asarray(history, dtype=float)

@@ -6,6 +6,7 @@ import numpy as np
 from .config import Phase1Config
 from .radar import RadarAlgorithmInput
 from .truth import TruthSignal
+from .angle_estimation import estimate_local_music, estimate_local_music_ml
 
 
 @dataclass(frozen=True)
@@ -35,7 +36,17 @@ class FrontendConfig:
     radar_mount: str = "downward"
     noise_power: float = 0.0
     use_phase1_snr: bool = True
+    # Legacy scenarios historically injected the target SNR in both places.
+    # Explicit switches let capture-package writers choose one physical layer
+    # without changing legacy scenario behavior.
+    inject_target_slow_time_noise: bool = True
+    inject_adc_receiver_noise: bool = True
     default_range_bin_start: int = 4
+    angle_estimation_method: str = "fft"
+    angle_search_half_width_u: float = 0.12
+    angle_music_grid_size: int = 129
+    angle_max_snapshots: int = 512
+    array_channel_calibration: Sequence[complex] = ()
 
 
 @dataclass(frozen=True)
@@ -66,6 +77,12 @@ class RangeAngleObservation:
     angle_axis_deg: np.ndarray
     spatial_frequency_axis: np.ndarray
     frame_times_s: np.ndarray
+    range_snapshots: Optional[np.ndarray] = None
+    array_positions_wavelengths: Optional[np.ndarray] = None
+    angle_estimation_method: str = "fft"
+    angle_search_half_width_u: float = 0.12
+    angle_music_grid_size: int = 129
+    angle_max_snapshots: int = 512
 
 
 @dataclass(frozen=True)
@@ -79,6 +96,8 @@ class FrontendTargetObservation:
     range_m: np.ndarray
     angle_deg: np.ndarray
     target_reference_indices: Optional[np.ndarray] = None
+    angle_estimation_method: str = "fft"
+    angle_estimation_diagnostics: Tuple[dict, ...] = ()
 
 
 def angle_deg_to_measured_beta(angle_deg, radar_mount: str = "downward"):
@@ -203,7 +222,11 @@ def simulate_adc_cube(
 
         los_phase = theta / float(scatterer.beta) + float(scatterer.phase_bias_rad)
         slow_time = float(scatterer.amplitude) * np.exp(1j * los_phase)
-        if frontend_config.use_phase1_snr and np.isfinite(scatterer.snr_db):
+        if (
+            frontend_config.use_phase1_snr
+            and frontend_config.inject_target_slow_time_noise
+            and np.isfinite(scatterer.snr_db)
+        ):
             snr_linear = 10.0 ** (float(scatterer.snr_db) / 10.0)
             noise_std = float(scatterer.amplitude) / np.sqrt(2.0 * snr_linear)
             noise_scale = np.full(n_frames, noise_std, dtype=float)
@@ -248,21 +271,61 @@ def range_angle_process(
         raise ValueError("adc_cube virtual RX axis does not match frontend_config")
     if adc_cube.shape[2] != frontend_config.num_adc_samples:
         raise ValueError("adc_cube ADC sample axis does not match frontend_config")
+    calibrated_range_axis = np.asarray(adc.range_axis_m, dtype=float)
+    if calibrated_range_axis.shape != (frontend_config.num_range_bins,):
+        raise ValueError("ADC range_axis_m must match num_range_bins")
+    if np.any(~np.isfinite(calibrated_range_axis)):
+        raise ValueError("ADC range_axis_m must be finite")
 
     range_fft = np.fft.fft(adc_cube, n=frontend_config.num_range_bins, axis=2)
     range_by_rx = np.transpose(range_fft, (0, 2, 1))
+    calibration = np.asarray(frontend_config.array_channel_calibration, dtype=complex)
+    if calibration.size:
+        if calibration.shape != (frontend_config.num_virtual_rx,):
+            raise ValueError("array_channel_calibration must have one value per virtual RX")
+        range_by_rx = range_by_rx * calibration[None, None, :]
     angle_window = angle_window_values(frontend_config)
-    angle_fft = np.fft.fft(range_by_rx * angle_window[None, None, :], n=frontend_config.num_angle_bins, axis=2)
-    range_angle_cube = np.fft.fftshift(angle_fft, axes=2)
+    configured_positions = np.asarray(
+        frontend_config.virtual_array_positions_wavelengths,
+        dtype=float,
+    )
+    if configured_positions.size:
+        positions = virtual_array_positions_wavelengths(frontend_config)
+        spatial_axis = spatial_frequency_axis(frontend_config)
+        sin_angle = np.clip(
+            spatial_axis / float(frontend_config.antenna_spacing_wavelengths),
+            -1.0,
+            1.0,
+        )
+        steering = np.exp(-2j * np.pi * positions[:, None] * sin_angle[None, :])
+        range_angle_cube = np.einsum(
+            "frv,va->fra",
+            range_by_rx * angle_window[None, None, :],
+            steering,
+            optimize=True,
+        )
+    else:
+        angle_fft = np.fft.fft(
+            range_by_rx * angle_window[None, None, :],
+            n=frontend_config.num_angle_bins,
+            axis=2,
+        )
+        range_angle_cube = np.fft.fftshift(angle_fft, axes=2)
     angle_gain = max(float(np.sum(angle_window)), 1.0e-12)
     range_angle_cube = range_angle_cube / float(frontend_config.num_adc_samples * angle_gain)
 
     return RangeAngleObservation(
         range_angle_cube=range_angle_cube.astype(complex),
-        range_axis_m=range_axis_m(frontend_config),
+        range_axis_m=calibrated_range_axis.copy(),
         angle_axis_deg=angle_axis_deg(frontend_config),
         spatial_frequency_axis=spatial_frequency_axis(frontend_config),
         frame_times_s=adc.frame_times_s.copy(),
+        range_snapshots=range_by_rx.copy(),
+        array_positions_wavelengths=virtual_array_positions_wavelengths(frontend_config),
+        angle_estimation_method=str(frontend_config.angle_estimation_method),
+        angle_search_half_width_u=float(frontend_config.angle_search_half_width_u),
+        angle_music_grid_size=int(frontend_config.angle_music_grid_size),
+        angle_max_snapshots=int(frontend_config.angle_max_snapshots),
     )
 
 
@@ -296,6 +359,7 @@ def extract_frontend_target_observation(
     radar_mount: str = "downward",
     magnitude_threshold: float = 0.0,
     target_reference_indices: Optional[Sequence[int]] = None,
+    angle_estimation_method: Optional[str] = None,
 ) -> FrontendTargetObservation:
     """Extract target slow-time series from selected range-angle bins."""
 
@@ -315,9 +379,37 @@ def extract_frontend_target_observation(
         raise ValueError("range_angle_cube must have shape (num_frames, num_range_bins, num_angle_bins)")
 
     n_targets = int(range_bin_arr.size)
+    method = str(angle_estimation_method or getattr(range_angle, "angle_estimation_method", "fft")).lower()
+    if method not in ("fft", "local_music", "local_music_ml"):
+        raise ValueError("angle_estimation_method must be 'fft', 'local_music' or 'local_music_ml'")
     slow_time = np.empty((n_targets, cube.shape[0]), dtype=complex)
-    for target_idx, (range_bin, angle_bin) in enumerate(zip(range_bin_arr, angle_bin_arr)):
-        slow_time[target_idx] = cube[:, int(range_bin), int(angle_bin)]
+    target_angles_deg = range_angle.angle_axis_deg[angle_bin_arr].astype(float).copy()
+    diagnostics = [dict(method="fft") for _ in range(n_targets)]
+    if method in ("local_music", "local_music_ml") and range_angle.range_snapshots is not None and n_targets:
+        positions = np.asarray(range_angle.array_positions_wavelengths, dtype=float)
+        for rb in sorted(set(range_bin_arr.tolist())):
+            idx = np.flatnonzero(range_bin_arr == rb)
+            estimator = estimate_local_music if method == "local_music" else estimate_local_music_ml
+            result = estimator(
+                np.asarray(range_angle.range_snapshots)[:, int(rb), :].T,
+                positions,
+                range_angle.angle_axis_deg[angle_bin_arr[idx]],
+                search_half_width_u=float(getattr(range_angle, "angle_search_half_width_u", 0.12)),
+                music_grid_size=int(getattr(range_angle, "angle_music_grid_size", 129)),
+                max_snapshots=int(getattr(range_angle, "angle_max_snapshots", 512)),
+            )
+            usable = idx[: result.angles_deg.size]
+            target_angles_deg[usable] = result.angles_deg
+            slow_time[usable] = result.source_slow_time[: usable.size]
+            for local, target_idx in enumerate(usable):
+                diagnostics[int(target_idx)] = result.diagnostics[local]
+            # More candidates than identifiable spatial sources are left on
+            # the coarse FFT path instead of silently broadcasting/truncating.
+            for target_idx in idx[usable.size:]:
+                slow_time[int(target_idx)] = cube[:, int(rb), int(angle_bin_arr[target_idx])]
+    else:
+        for target_idx, (range_bin, angle_bin) in enumerate(zip(range_bin_arr, angle_bin_arr)):
+            slow_time[target_idx] = cube[:, int(range_bin), int(angle_bin)]
 
     available_mask = np.isfinite(slow_time.real) & np.isfinite(slow_time.imag)
     available_mask &= np.abs(slow_time) > float(magnitude_threshold)
@@ -325,7 +417,6 @@ def extract_frontend_target_observation(
     wrapped_phase_rad = np.angle(slow_time).astype(float)
     wrapped_phase_rad[~available_mask] = np.nan
 
-    target_angles_deg = range_angle.angle_axis_deg[angle_bin_arr]
     return FrontendTargetObservation(
         measured_beta=np.asarray(angle_deg_to_measured_beta(target_angles_deg, radar_mount), dtype=float),
         slow_time=slow_time,
@@ -336,6 +427,8 @@ def extract_frontend_target_observation(
         range_m=range_angle.range_axis_m[range_bin_arr].copy(),
         angle_deg=target_angles_deg.copy(),
         target_reference_indices=None if reference_indices is None else reference_indices.copy(),
+        angle_estimation_method=method,
+        angle_estimation_diagnostics=tuple(diagnostics),
     )
 
 
@@ -346,6 +439,7 @@ def to_algorithm_radar_input(frontend_target: FrontendTargetObservation) -> Rada
         measured_beta=np.asarray(frontend_target.measured_beta, dtype=float).copy(),
         wrapped_phase_rad=np.asarray(frontend_target.wrapped_phase_rad, dtype=float).copy(),
         available_mask=np.asarray(frontend_target.available_mask, dtype=bool).copy(),
+        extra={"angle_deg": np.asarray(frontend_target.angle_deg, dtype=float).copy()},
     )
 
 
@@ -378,6 +472,10 @@ def _validate_frontend_config(frontend_config: FrontendConfig) -> None:
     if frontend_config.noise_power < 0.0:
         raise ValueError("noise_power must be non-negative")
     angle_window_values(frontend_config)
+    if str(frontend_config.angle_estimation_method).lower() not in ("fft", "local_music", "local_music_ml"):
+        raise ValueError("unsupported angle_estimation_method")
+    if frontend_config.angle_search_half_width_u <= 0.0:
+        raise ValueError("angle_search_half_width_u must be positive")
 
 
 def _fit_sequence(values, count: int, name: str) -> np.ndarray:
@@ -431,7 +529,10 @@ def _normalize_scatterers(
 
 def _adc_noise_power(scatterers: Sequence[ScattererTruth], frontend_config: FrontendConfig) -> float:
     noise_power = float(frontend_config.noise_power)
-    if not frontend_config.use_phase1_snr:
+    if (
+        not frontend_config.use_phase1_snr
+        or not frontend_config.inject_adc_receiver_noise
+    ):
         return noise_power
 
     for scatterer in scatterers:

@@ -29,9 +29,9 @@ _SCENARIO_DESCRIPTIONS = {
         paper_section_zh="主实验",
     ),
     "aoa_error_bootstrap": ScenarioDescription(
-        label_zh="FFT AoA 初值误差与 beta 收敛",
-        validation_purpose_zh="验证 angle FFT 前端 AoA 量化/分辨率误差存在时，在线 beta bootstrap 能否收敛",
-        validation_focus_zh="FFT 前端 AoA 初值误差、beta/bootstrap 收敛、多目标结构方向融合",
+        label_zh="FFT AoA 初值误差与 beta 预校准",
+        validation_purpose_zh="验证 angle FFT 前端 AoA 量化/分辨率误差存在时，独立 beta 预校准能否安全修正或回退",
+        validation_focus_zh="FFT 前端 AoA 初值误差、beta 独立预校准、冻结参数多目标融合",
         paper_section_zh="消融实验",
     ),
     "target_snr_drop": ScenarioDescription(

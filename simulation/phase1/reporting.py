@@ -54,6 +54,7 @@ def write_basic_svg(path, t, series, title, x_label="", y_label=""):
     x_scaled = _scale(x, x_lo, x_hi, plot_w)
     body = [
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">',
+        f'<rect x="0" y="0" width="{width}" height="{height}" fill="white" />',
         f'<text x="{left}" y="24" font-size="16" font-family="Arial, sans-serif">{escape(title)}</text>',
         f'<rect x="{left}" y="{top}" width="{plot_w}" height="{plot_h}" fill="white" stroke="#777" />',
     ]
@@ -135,7 +136,9 @@ def _find_result(results, method_name):
 
 def _preferred_full_pipeline_result(results):
     return (
-        _find_result(results, "proposed_full_pipeline_beta_confidence")
+        _find_result(results, "direct_aoa_fixed_beta")
+        or _find_result(results, "proposed_full_pipeline_aoa_fixed_beta")
+        or _find_result(results, "proposed_full_pipeline_beta_confidence")
         or _find_result(results, "proposed_full_pipeline_calibrated")
     )
 
@@ -413,6 +416,7 @@ def write_validation_report(summary, output_dir):
                 "range_bin_itoh",
                 "range_bin_only_mixed_phase",
                 "selected_aoa_fixed_beta",
+                "direct_aoa_fixed_beta",
                 "proposed_full_pipeline_aoa_fixed_beta",
                 "proposed_full_pipeline_beta_confidence",
             )
@@ -425,6 +429,7 @@ def write_validation_report(summary, output_dir):
             "range_bin_only_mixed_phase": "#777777",
             "ma2026_reproduction": "#ddaa33",
             "selected_aoa_fixed_beta": "#aa3377",
+            "direct_aoa_fixed_beta": "#117733",
             "proposed_full_pipeline_aoa_fixed_beta": "#4477aa",
             "proposed_full_pipeline_beta_confidence": "#009988",
         }

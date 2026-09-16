@@ -192,6 +192,10 @@ def build_frontend_views(
         chirps_per_frame=int(scenario.chirps_per_frame),
         num_angle_bins=int(scenario.frontend_num_angle_bins),
         angle_window=str(scenario.frontend_angle_window),
+        angle_estimation_method=str(getattr(scenario, "frontend_angle_estimation_method", "fft")),
+        angle_search_half_width_u=float(getattr(scenario, "frontend_angle_search_half_width_u", 0.12)),
+        angle_music_grid_size=int(getattr(scenario, "frontend_angle_music_grid_size", 129)),
+        angle_max_snapshots=int(getattr(scenario, "frontend_angle_max_snapshots", 512)),
     )
     adc = simulate_adc_cube(truth, scenario, frontend_config)
     range_angle = range_angle_process(adc, frontend_config)
@@ -257,6 +261,7 @@ def selected_frontend_algorithm_input(
         calibration_indices=selected.calibration_indices.copy(),
         initial_r=selected.calibration_initial_r.copy(),
         selection_scores=selected.quality_score.copy(),
+        extra={"angle_deg": frontend_targets.angle_deg.copy()},
     )
 
 
@@ -286,6 +291,12 @@ def frontend_aoa_diagnostic_rows(frontend_targets: FrontendTargetObservation, ta
                 "true_beta": true_beta,
                 "measured_beta": measured_beta_value,
                 "beta_initial_relative_error": abs(measured_beta_value - true_beta) / max(abs(true_beta), 1.0e-12),
+                "angle_estimation_method": str(getattr(frontend_targets, "angle_estimation_method", "fft")),
+                "angle_estimation_diagnostics": (
+                    frontend_targets.angle_estimation_diagnostics[target_idx]
+                    if target_idx < len(getattr(frontend_targets, "angle_estimation_diagnostics", ()))
+                    else {}
+                ),
             }
         )
     return rows
@@ -377,6 +388,8 @@ def slice_frontend_targets(frontend_targets, indices):
         range_m=frontend_targets.range_m[indices].copy(),
         angle_deg=frontend_targets.angle_deg[indices].copy(),
         target_reference_indices=None if references is None else references.copy(),
+        angle_estimation_method=frontend_targets.angle_estimation_method,
+        angle_estimation_diagnostics=tuple(frontend_targets.angle_estimation_diagnostics[int(i)] for i in indices),
     )
 
 
