@@ -1,0 +1,4 @@
+interface:
+  display_name: "Connect Pi 4"
+  short_description: "Find the Pi 4 by MAC and connect over SSH"
+  default_prompt: "Use $connect-pi4 to find the Raspberry Pi 4 and connect over SSH."

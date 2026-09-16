@@ -1,236 +1,156 @@
-# Pi 4 + SD 卡直存采集方案
+# Pi 4 本地统一存储与采集方案
 
-本文档采用唯一硬件路线：
+本文档规定实验室和现场的唯一采集方式：Raspberry Pi 4 Model B 同时采集 IWR1843BOOST/DCA1000EVM 雷达原始数据和 ADXL355 加速度数据，在 Pi 本地统一时间戳、落盘和组织实验目录。
 
-```text
-Raspberry Pi 4 Model B 直接本地记录到 microSD 卡
-```
-
-本方案不再考虑 USB SSD 作为主数据盘，也不把无线链路作为实时数据传输通道。桥上端或实验台端由 Raspberry Pi 4 Model B 控制采集、保存数据、记录日志；地面 PC 或笔记本只负责远程启动、停止、查看状态和实验后拷贝数据。
-
-## 1. 方案定位
-
-目标是搭建一套最轻量、最少线缆、最容易复现实验的采集节点：
+## 1. 唯一系统拓扑
 
 ```text
-IWR1843BOOST 板端固件 -> 选定目标复数 I/Q 或 wrapped phase -> Raspberry Pi 4 -> microSD
-ADXL355 -> SPI -> Raspberry Pi 4 -> microSD
-Raspberry Pi 4 -> Wi-Fi/SSH -> PC 控制与预览
+电脑 ──Wi-Fi / SSH──→ Raspberry Pi 4
+                         ├──SPI + DRDY──→ ADXL355
+                         ├──USB────────→ IWR1843BOOST
+                         └──Ethernet────→ DCA1000EVM
+
+IWR1843BOOST ←─60-pin HD / LVDS─→ DCA1000EVM
 ```
 
-本方案默认不采集长时间全量 DCA1000 原始 ADC 数据，但这不等于直接使用普通点云输出。位移相位算法至少需要每帧目标单元的复数 I/Q 或由板端固件计算出的 wrapped phase。采集内容应控制在 Pi 4 和 microSD 能稳定写入的范围内，重点保存算法需要的雷达相位/目标特征、加速度数据、同步日志和实验元数据。
+- USB 链路用于 Pi 配置和控制 IWR1843BOOST。
+- 60-pin HD/LVDS 链路将雷达原始 ADC 数据送到 DCA1000EVM。
+- Pi 有线网口直连 DCA1000EVM，接收 UDP 原始数据。
+- Pi 通过 SPI 读取 ADXL355，通过 DRDY GPIO 记录样本时间。
+- Pi Wi-Fi 只用于 SSH 控制、状态查看和采后拷贝，不承载实时原始 ADC 数据。
 
-适用场景：
+## 2. Pi 本地存储
 
-- 现场或实验室短到中等时长采集；
-- 只需要保存雷达目标特征、wrapped phase、幅值、SNR、加速度和同步信息；
-- 需要设备轻、部署快、线缆少；
-- 需要后续离线验证多目标选择、相位解缠和融合算法。
+Pi 4 是所有采集数据的首次落盘点。系统盘可使用高耐久 microSD；DCA1000 原始数据的正式采集优先使用 Pi USB 3 高速 SSD，并必须在实验前完成端到端持续写入压力测试。
 
-不适用场景：
-
-- 长时间连续保存 DCA1000 原始 ADC；
-- 高速大吞吐雷达 cube 全量落盘；
-- 对写盘零丢包有强工程保证的正式长期监测。
-
-## 2. 硬件组成
-
-| 类别 | 推荐硬件 | 用途 |
+| 存储内容 | 保存位置 | 要求 |
 |---|---|---|
-| 主控与存储 | Raspberry Pi 4 Model B，建议 4 GB | 控制采集、写 microSD、远程通信 |
-| 系统与数据卡 | 高耐久 microSD，A2/U3/V30，建议 256 GB 或 512 GB | 系统盘和实验数据盘 |
-| 毫米波雷达 | TI IWR1843BOOST | 输出雷达相位、目标和距离信息 |
-| 加速度计 | ADXL355 模块/评估板 | 三轴低噪声加速度采集 |
-| 可选协处理器 | STM32 / Teensy 4.1 / RP2040 | 更稳定的 ADXL355 采样和硬件时间戳 |
-| 网络 | Pi 4 自带 Wi-Fi 或小型无线 AP | SSH 控制、状态查看、低速预览 |
-| 电源 | 稳定 5.1 V 3 A 供电 | 避免 Pi 4 欠压和写盘异常 |
-| 散热 | Pi 4 散热片或带风扇外壳 | 避免长时间采集降频 |
-| 安装 | 刚性安装板、防护外壳、短线缆 | 雷达和加速度计共址固定 |
+| DCA1000 PCAP/原始 ADC | Pi 本地实验目录 | 持续写入不丢包，优先 SSD |
+| ADXL355 原始样本 | 同一 Pi 实验目录 | 二进制定长记录，保存 DRDY 时间戳 |
+| 雷达配置和 DCA 配置 | 同一 Pi 实验目录 | 采集时使用的实际版本 |
+| 同步事件 | 同一 Pi 实验目录 | 单调时钟、触发号、帧号和样本号 |
+| 健康与采集日志 | 同一 Pi 实验目录 | 欠压、温度、剩余空间、丢包和漏样 |
 
-microSD 建议使用高耐久卡，而不是普通消费级低速卡。优先选择标称适合视频连续写入或监控记录的型号，并在正式实验前做持续写入测试。
+未完成落盘和完整性校验前，不依赖电脑端保存任何唯一副本。
 
-## 3. 数据链路
-
-### 3.1 雷达链路
-
-推荐雷达链路为：
+## 3. 雷达采集链路
 
 ```text
-IWR1843BOOST 板端处理 -> 目标复数 I/Q 或 wrapped phase -> Raspberry Pi 4 -> microSD
+Pi USB → IWR1843BOOST 配置/控制
+IWR1843BOOST → 60-pin HD/LVDS → DCA1000EVM
+DCA1000EVM → Ethernet/UDP → Pi 本地 PCAP
 ```
 
-保存内容建议包括：
+Pi 本地程序负责：
 
-- `frame_id`
-- `timestamp_pi`
-- `target_id`
-- `range_bin`
-- `range_m`
-- `iq_real`
-- `iq_imag`
-- `wrapped_phase_rad`
-- `amplitude`
-- `snr_db`
-- `angle_or_beta_preview`
-- `quality_flag`
+1. 通过稳定的 `/dev/serial/by-id/` 路径识别 IWR1843BOOST 的控制串口。
+2. 配置 DCA1000EVM 并启动 Pi 本地抓包。
+3. 下发已归档的雷达配置。
+4. 在硬件触发就绪后开始有限帧采集。
+5. 根据 DCA 包序号和字节计数检测丢包。
+6. 在 Pi 上解码或封存 PCAP，并将雷达帧数与触发数对照。
 
-也可以保存少量调试用中间量，例如候选 target 数量、range profile 局部峰值、目标健康度等。但不建议把全量 ADC 或完整 range-angle cube 长时间写入 microSD。
+PCAP 中的网络包到达时间不是雷达帧开始时间，不用它代替硬件触发时间。
 
-需要明确三种数据层级：
-
-| 数据层级 | 是否满足相位位移算法 | 是否符合本方案 |
-|---|---|---|
-| 普通点云坐标、速度、SNR | 不满足。点云通常不保留可连续跟踪的复数相位 | 不作为主数据 |
-| 选定 range/range-angle 单元的复数 I/Q 或 wrapped phase | 满足。可用于相位解缠和位移恢复 | 本方案主数据 |
-| DCA1000 原始 ADC 全量数据 | 满足且最底层，但数据量大 | 仅作为研发验证，不作为 SD 卡直存主方案 |
-
-因此，不买 DCA1000 的前提是：需要修改或复用 IWR1843 板端处理程序，让它在 UART/USB 等链路中输出选定目标的复数 I/Q 或 wrapped phase。若只能使用官方普通点云 demo，无法直接支撑本文的原始相位算法。
-
-### 3.2 加速度链路
-
-推荐加速度链路为：
+## 4. ADXL355 采集链路
 
 ```text
-ADXL355 -> SPI -> Raspberry Pi 4 -> microSD
+ADXL355 → SPI → Pi 4
+ADXL355 DRDY → Pi GPIO 中断
 ```
 
-`accel.csv` 建议字段：
+Pi 直接采集 ADXL355，不在主方案中增加 MCU 或第二台采集器。每个样本至少记录：
 
 ```text
-timestamp_pi,sample_id,ax,ay,az,temp,range_g,odr_hz
+sample_id, drdy_timestamp_ns, read_complete_timestamp_ns,
+x_raw, y_raw, z_raw, fifo_state, error_flags
 ```
 
-如果 Pi 4 直接读取 ADXL355 的实时性不够稳定，可以加一个 MCU：
+温度通道按较低频率单独记录，不放进每个 DRDY 的实时 SPI 热路径。
 
-```text
-ADXL355 -> SPI -> MCU -> UART/USB -> Raspberry Pi 4 -> microSD
-```
-
-MCU 只负责稳定采样和打时间戳，Pi 4 仍负责统一落盘和实验管理。
-
-## 4. 实验目录结构
-
-每次实验建立独立目录：
-
-```text
-experiments/<experiment_id>/
-  radar_features.csv
-  accel.csv
-  sync_log.csv
-  preview.csv
-  node_status.csv
-  capture_log.txt
-  metadata.json
-```
-
-文件含义：
-
-| 文件 | 内容 |
-|---|---|
-| `radar_features.csv` | 雷达每帧目标、相位、幅值、SNR 和质量指标 |
-| `accel.csv` | ADXL355 全采样率三轴加速度 |
-| `sync_log.csv` | 雷达帧、加速度样本、触发状态和时间戳对应关系 |
-| `preview.csv` | 降采样预览数据，用于远程查看 |
-| `node_status.csv` | CPU 温度、欠压状态、剩余空间、写盘速率 |
-| `capture_log.txt` | 启停、错误、丢样、异常事件日志 |
-| `metadata.json` | 硬件型号、安装方式、采样率、实验说明 |
+采集程序需要检查设备 ID、ODR、量程、时间戳单调性、样本序号连续性和 FIFO 溢出。
 
 ## 5. 同步方案
 
-最低要求是所有数据都带 Pi 4 时间戳。推荐进一步保存雷达帧号和加速度样本号的对应关系。
-
-`sync_log.csv` 建议字段：
+定量融合使用 Pi 作为统一时基和触发协调者：
 
 ```text
-timestamp_pi,radar_frame_id,accel_sample_id,trigger_state,event
+Pi GPIO OUT → IWR1843BOOST SYNC_IN
+Pi 记录每个触发边沿的 CLOCK_MONOTONIC 时间
+Pi GPIO/DRDY 记录每个 ADXL355 样本的同类时间
 ```
 
-同步优先级：
-
-1. **硬件触发或帧同步**  
-   如果 IWR1843 能输出 frame sync 或可用 GPIO 触发信号，接入 Pi 4 或 MCU，记录雷达帧与加速度样本的对应关系。
-
-2. **统一进程时间戳**  
-   Pi 4 同时接收雷达特征和 ADXL355 数据时，统一使用 Pi 系统时间戳。
-
-3. **离线细对齐**  
-   后处理阶段再用加速度短窗积分和雷达相位运动代理做小范围时间偏移估计。
-
-正式实验应至少做到第 2 项；如果要做定量精度评价，建议做到第 1 项。
-
-## 6. 远程控制
-
-无线链路只承担控制、状态和低速预览：
+一次采集的时序为：
 
 ```text
-PC -> SSH/HTTP/WebSocket -> Raspberry Pi 4
-Raspberry Pi 4 -> status/preview -> PC
-Raspberry Pi 4 -> microSD -> 完整数据本地保存
+预检查
+→ 创建 Pi 本地实验目录
+→ 启动 Pi 本地 DCA 抓包并进入 RECORD
+→ 启动 ADXL355 并预采集 1–2 s
+→ 配置 IWR1843BOOST 进入硬件触发等待
+→ Pi 产生 N 个帧触发并记录时间
+→ 停止触发，ADXL355 继续后采集 1–2 s
+→ 停止所有采集并 flush/fsync
+→ 校验数据完整性
+→ 封存实验目录
 ```
 
-建议命令：
+雷达第 `i` 帧对应第 `i` 个触发边沿，雷达帧时间轴由 Pi 的真实触发记录生成，不使用 `frame_index × nominal_period` 替代。
 
-- `start <experiment_id>`：开始采集；
-- `stop`：停止采集并 flush 文件；
-- `status`：查看温度、欠压、剩余空间、采样率；
-- `preview`：返回低速预览；
-- `package`：实验结束后打包本次目录。
+该同步线是目标实现，正式接线和采集前必须先用当前 IWR1843 固件验证 `triggerSelect=2`，并核对 IWR1843BOOST 与 DCA1000EVM 连接时的 `SYNC_IN` 路由和板卡版本；验证完成前不能把硬件触发视为已可用功能。
 
-实验结束后可以通过 SFTP/rsync 下载数据，也可以关机后直接取出 microSD 读卡。
-
-## 7. SD 卡写入边界
-
-microSD 是本方案的关键风险点。必须控制数据量，并在实验前做写入测试。
-
-建议边界：
-
-| 数据类型 | 是否建议写入 microSD | 说明 |
-|---|---|---|
-| ADXL355 100-1000 Hz CSV | 建议 | 数据量小 |
-| 雷达每帧目标特征 CSV | 建议 | 适合本方案 |
-| 低速 preview | 建议 | 用于远程查看 |
-| 状态日志和元数据 | 建议 | 必须保存 |
-| 短时少量 ADC 片段 | 谨慎 | 只用于调试 |
-| 长时间 DCA1000 原始 ADC | 不建议 | 写入压力和丢包风险高 |
-| 完整 range-angle cube | 不建议 | 数据量过大 |
-
-正式采集前应做三项检查：
-
-1. 连续写入压力测试，时间不少于计划单次实验时长；
-2. 采集过程中监测 Pi 4 欠压、CPU 温度和剩余空间；
-3. 每次写入采用分段 flush，避免异常断电导致整段数据损坏。
-
-## 8. 推荐实验流程
-
-1. 插入高耐久 microSD，确认剩余空间。
-2. 启动 Pi 4，连接 PC 到同一 Wi-Fi 或直连热点。
-3. 通过 SSH 检查雷达、ADXL355 和采集程序状态。
-4. 创建 `experiment_id`，写入 `metadata.json`。
-5. 启动采集，生成 `radar_features.csv`、`accel.csv` 和 `sync_log.csv`。
-6. 采集期间只回传低速 `preview` 和 `status`。
-7. 停止采集后关闭文件并校验行数、时长、丢样和剩余空间。
-8. 下载实验目录或取出 microSD。
-9. 在 PC 上进行离线融合处理和精度评价。
-
-## 9. 最终推荐
-
-唯一推荐采购和搭建路线：
+## 6. 实验目录
 
 ```text
-Raspberry Pi 4 Model B 4GB
-高耐久 microSD 256GB 或 512GB
-TI IWR1843BOOST
-ADXL355 模块/评估板
-可选 STM32 / Teensy 4.1 / RP2040
-Pi 4 散热片或带风扇外壳
-稳定 5.1V 3A 电源
-小型 Wi-Fi AP 或使用 Pi 4 自带 Wi-Fi
-刚性安装板和防护外壳
+captures/<experiment_id>/
+  radar/
+    dca.pcap
+    radar.cfg
+    dca.json
+    algorithm_input/
+      adc_cube.npy
+      frame_times_s.npy
+      manifest.json
+  adxl355/
+    samples_raw.bin
+    samples_raw.npy
+    acceleration_mps2.npy
+    sample_times_s.npy
+    manifest.json
+  sync/
+    radar_trigger_times_ns.npy
+    sync.json
+  status/
+    capture.log
+    health.json
+  metadata.json
 ```
 
-本方案的核心原则是：
+Pi 本地协调程序创建并拥有该目录的完整生命周期。各子程序不在电脑上各自创建实验副本，也不由电脑事后拼接雷达和加速度原始文件。
+
+## 7. 完整性判定
+
+以下任一条件出现时，实验必须标记为不完整，不静默插值或修复：
+
+- DCA1000 包序号或字节计数不连续；
+- 触发数与解码雷达帧数不一致；
+- ADXL355 样本时间戳不单调或出现超限长间隔；
+- ADXL355 FIFO 溢出或设备中途复位；
+- Pi 欠压、存储写满、文件未正常关闭或必需元数据缺失。
+
+## 8. 电脑端边界
 
 ```text
-只把必要的雷达特征、加速度、同步和日志写入 SD 卡；
-不把 SD 卡当作长时间原始 ADC 高速数据盘。
+电脑 → Wi-Fi/SSH → Pi 本地协调程序
+Pi 封存实验目录 → scp/rsync → 电脑离线副本
 ```
+
+电脑只负责 SSH 命令、状态观察、采后拷贝和离线处理。电脑不连接传感器，不参与采集、计时、实验目录创建或原始文件组织。
+
+## 9. 上线前压测
+
+1. 在 Pi 上以目标雷达配置运行不少于单次正式实验时长的 DCA1000 接收与写盘测试。
+2. 同时运行 ADXL355 目标 ODR，检查调度负载下的漏样和时间戳抖动。
+3. 记录 Pi CPU 温度、欠压、内存、网口丢包、磁盘写入延迟和剩余空间。
+4. 模拟 SSH 断开，确认 Pi 本地采集不受影响，仍能按预设时长安全收尾。
+5. 通过已封存的 Pi 目录重建离线输入，确认不需要从电脑端补充任何采集期间文件。

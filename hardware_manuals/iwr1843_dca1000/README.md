@@ -26,6 +26,22 @@ TI official documents downloaded for the thesis hardware bring-up.
 
 ## Bring-Up Notes
 
+The thesis uses one acquisition topology only:
+
+```text
+Computer --Wi-Fi/SSH--> Raspberry Pi 4
+                           |--SPI + DRDY--> ADXL355
+                           |--USB---------> IWR1843BOOST
+                           `--Ethernet----> DCA1000EVM
+
+IWR1843BOOST <--60-pin HD/LVDS--> DCA1000EVM
+```
+
+The Raspberry Pi is the sole capture host, clock owner, and local storage
+node.  The computer is only an SSH terminal and may copy completed captures
+for offline analysis; it does not connect to the sensor data paths or
+participate in acquisition timing.
+
 - The capture board name is `DCA1000EVM`, not `DAC1000`.
 - IWR1843 exposes a 2-lane LVDS interface for raw ADC data; DCA1000 supports 2-lane and 4-lane LVDS modes.
 - DCA1000 default Ethernet settings from the user guide:
@@ -34,5 +50,6 @@ TI official documents downloaded for the thesis hardware bring-up.
   - config port: `4096`
   - ADC data port: `4098`
 - IWR1843BOOST requires a 5 V supply rated above 2.5 A; the supply brick is not included in the kit.
-- IWR1843BOOST USB exposes XDS110/JTAG plus UART ports for flashing, Radar/mmWave Studio, and logs.
-- For thesis experiments, the likely first path is mmWave Studio + DCA1000EVM raw ADC capture, then parse `.bin` into the existing Python range/angle and phase pipeline.
+- IWR1843BOOST USB connects to the Pi and exposes XDS110/JTAG plus UART ports for configuration, flashing, and logs.
+- DCA1000EVM Ethernet connects directly to the Pi's wired interface. The Pi uses Wi-Fi separately for SSH control.
+- The Pi-native capture program records DCA1000 UDP traffic as `dca.pcap`, checks packet continuity, and converts the raw stream into the repository's versioned range/angle and phase-processing input.

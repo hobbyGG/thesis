@@ -1,724 +1,601 @@
-# 倒挂式毫米波雷达结构位移估计整体处理架构
+# 倒挂式毫米波雷达结构位移测量：直接 AoA 主线数据流
 
-## 1. 系统目标
+> 版本：Direct-AoA Phase 1，2026-09-14
+>
+> 当前主方案已经撤掉 Kalman 后的动态 beta 修正和 Kalman 前独立 beta 预校准。系统先从雷达阵列空间相位直接估计 target 角度，再按几何关系得到固定 beta，最后进行结构主相位位移估计。旧 beta 反馈方案保存在 [overall_processing_architecture_legacy_beta.md](</Users/umep/thesis/archive/2026-09-14-pre-direct-aoa/legacy_docs/idea/overall_processing_architecture_legacy_beta.md>)，只用于历史复现和消融。
 
-本文研究的传感系统由毫米波雷达和加速度传感器共址安装在梁体测点处，雷达朝向正下方。与激光测振仪、LVDT 等需要静态参考系或固定安装基准的位移传感器不同，倒挂式毫米波雷达随结构共同运动，并利用周围近似静止的环境散射体作为参考目标，从而在不额外布设外部静态参考点的条件下估计结构振动方向位移。
+## 1. 研究对象与主线定义
 
-系统的核心任务可以表述为：
-
-$$
-\text{从雷达观测到的多个环境静止散射 target 中，恢复梁体测点在结构振动方向上的连续位移。}
-$$
-
-由于自然环境中的参考 target 数量多、角度和反射强度不同、同一 rangeBin 内可能存在多个散射体，并且雷达原始相位存在 $2\pi$ 缠绕，本文将整体处理流程拆分为四个层级：
+雷达和加速度计共址安装在结构测点处。雷达观测周围相对静止的环境散射体；结构运动改变雷达与散射体之间的传播距离，因此回波 LoS 相位包含结构位移信息。对第 (i) 个 target：
 
 $$
-\text{参考 target 提取}
-\rightarrow
-\text{AoA 几何初始化与冷启动}
-\rightarrow
-\text{转换系数自举更新}
-\rightarrow
-\text{结构主相位 Kalman 融合}.
-$$
-
-其中，target 提取阶段不依赖相位解缠；AoA 几何初始化为每个 target 给出可启动的转换系数初值；冷启动和初始微振阶段通过固定/标定过程噪声 $Q$ 与 posterior-residual、target-quality-gated 自适应测量噪声 $R$ 使滤波器优先依赖加速度预测，并在短窗口内递推修正转换系数。wrapped phase 的在线分支校正、降噪和多 target 融合统一在结构主相位 Kalman 框架内部完成。
-
-## 2. 总体数据流
-
-### 2.1 详细数据流图组
-
-#### 2.1.1 Target 提取与筛选流程
-
-```mehrmaid
-flowchart TD
-    A("梁上共址安装<br/>毫米波雷达 + 加速度计<br/>雷达朝向正下方") --> B("同步采集")
-    B --> C("毫米波雷达 ADC 原始数据")
-    B --> D("同步加速度<br/>$a(k)$")
-
-    C --> E("Range FFT + Angle FFT / DBF<br/>复数 range-angle map: $Y_k(b,p)$")
-    E --> F("幅值图<br/>$A_k(b,p)=|Y_k(b,p)|$")
-    F --> G("二维峰值检测<br/>候选 range-angle peaks<br/>候选数量 $M$")
-
-    G --> G1("候选 peak / target 1")
-    G --> G2("候选 peak / target 2")
-    G --> GM("候选 peak / target $M$")
-
-    G1 --> H("同 rangeBin 角度合并<br/>$|\theta_i-\theta_j|\lt15^\circ$ 视为等效 target")
-    G2 --> H
-    GM --> H
-    H --> I("target 跟踪与滑动窗口维护<br/>$\mathcal{W}_t=[t-W+1,t]$")
-    I --> J("出现率稳定性确认<br/>$R_T(t)\ge \tau_R$")
-
-    D --> K("加速度频谱分析<br/>结构振动频带 $\Omega(t)$")
-    J --> L("target 频带一致性筛选<br/>$G_T(t)\ge \tau_G$")
-    K --> L
-
-    L --> ASET("筛选后可用参考 target 集合<br/>$\mathcal{A}_k=\{T_1,T_2,\ldots,T_m\}$<br/>$m\le M$")
-    ASET --> T1("Target 1<br/>$z_1(k),\ \psi_{1,k},\ \theta_1,\ b_1$")
-    ASET --> T2("Target 2<br/>$z_2(k),\ \psi_{2,k},\ \theta_2,\ b_2$")
-    ASET --> Tm("Target $m$<br/>$z_m(k),\ \psi_{m,k},\ \theta_m,\ b_m$")
-```
-
-#### 2.1.2 结构主相位 Kalman 融合闭环
-
-该图承接 2.1.1 的输出。经过多目标选取与筛选后，当前时刻有 $m$ 个可用 target 进入 Kalman 框架。需要注意，这些 target 输入的是原始 wrapped phase $\psi_{i,k}$，而不是已经完整解缠的连续相位。
-
-```mehrmaid
-flowchart TD
-    AB("选定 angle bin<br/>复数 slow-time 序列")
-    MT("多目标选取模块<br/>输出 $m$ 个可用 target<br/>$\{\psi_{i,k},\theta_i,b_i\}_{i=1}^{m}$")
-    AOA("AoA 冷启动<br/>$\hat{p}_{i,0}=|\cos\theta_i|$<br/>$\hat{\beta}_{i,0}=1/\max(\hat{p}_{i,0},\epsilon_p)$")
-    BETA("转换系数预测<br/>$\hat{\beta}_{i,k}^{-}=\hat{\beta}_{i,k-1}^{+}$")
-
-    ACC("加速度传感器<br/>$a_{k-1}$")
-    XPREV("上一时刻后验<br/>$\mathbf{x}_{k-1},\mathbf{P}_{k-1}$")
-    PRED("预测模型 / 系统模型<br/>$\mathbf{x}_{k}^{-}=\mathbf{A}\mathbf{x}_{k-1}+\mathbf{B}\frac{4\pi}{\lambda}a_{k-1}$")
-
-    CORR("预测辅助相位校正<br/>$\hat{\phi}_{i,k}^{\mathrm{LOS},-}=\hat{\Theta}_{k}^{-}/\hat{\beta}_{i,k}^{-}+b_i$<br/>$\phi_{i,k}^{\mathrm{LOS,corr}}=\psi_{i,k}+2\pi\operatorname{round}\left(\frac{\hat{\phi}_{i,k}^{\mathrm{LOS},-}-\psi_{i,k}}{2\pi}\right)$")
-    ZC("LOS corrected phase<br/>$\phi_{i,k}^{\mathrm{LOS,corr}}$")
-    YOBS("结构方向观测构造<br/>$y_{i,k}=\hat{\beta}_{i,k}^{-}(\phi_{i,k}^{\mathrm{LOS,corr}}-b_i)$")
-    OBS("结构方向观测模型<br/>$\mathbf{y}_{k}=\mathbf{H}\mathbf{x}_{k}+\mathbf{e}_{k}$<br/>$H_i=[1,0]$")
-
-    KF("Kalman 更新<br/>$\mathbf{x}_{k}^{+}=\mathbf{x}_{k}^{-}+\mathbf{K}_{k}(\mathbf{y}_{k}-\mathbf{H}\mathbf{x}_{k}^{-})$")
-    OUT("结构主相位与位移输出<br/>$\mathbf{x}_{k}=[\hat{\Theta}_{k},\dot{\hat{\Theta}}_{k}]^T$<br/>$\hat{q}_{k}=\frac{\lambda}{4\pi}\hat{\Theta}_{k}$")
-
-    subgraph UPD["在线参数更新"]
-        LS("转换系数中心化 LS 更新<br/>$x_\tau=\phi_{i,\tau}^{\mathrm{LOS,corr}}-b_i,\ y_\tau=\hat{\Theta}_{\tau}^{+}$<br/>$\hat{\beta}_{i,k+1}=\frac{\sum x_{\tau,c}y_{\tau,c}+\lambda_{\beta}\hat{\beta}_{i,0}}{\sum x_{\tau,c}^{2}+\lambda_{\beta}}$")
-        RUP("target-wise adaptive $R^\Theta$<br/>$R_{i,k}^{\Theta}\approx(\hat{\beta}_{i,k}^{-})^2R_{i,k}^{\mathrm{LOS}}+(\phi_{i,k}^{\mathrm{LOS,corr}}-b_i)^2\sigma_{\beta_i,k}^2$")
-    end
-
-    AB --> MT
-    AB --> AOA
-    MT --> BETA
-    AOA --> BETA
-    BETA --> CORR
-    BETA --> YOBS
-    MT -- "wrapped phase $\psi_{i,k}$" --> CORR
-
-    ACC --> PRED
-    XPREV --> PRED
-    PRED -- "结构主相位先验 $\hat{\Theta}_{k}^{-}$" --> CORR
-
-    CORR --> ZC
-    ZC --> YOBS
-    YOBS --> OBS
-    OBS --> KF --> OUT
-    OUT -- "进入下一时刻" --> XPREV
-
-    ZC -- "同一 $\phi_{i,k}^{\mathrm{LOS,corr}}$" --> LS
-    OUT -- "$\hat{\Theta}_{k}$" --> LS
-    LS -- "$\hat{\beta}_{i,k+1}$" --> BETA
-
-    KF --> RUP
-    RUP -- "$r_{i,k+1}$ updates $\mathbf{R}_{k+1}$" --> OBS
-```
-
-### 2.2 模块流向简图
-
-```mehrmaid
-flowchart LR
-    S("共址传感系统<br/>倒挂毫米波雷达 + 加速度计")
-    RA("Range-Angle target 提取<br/>二维峰值 / 角度合并 / 滑动窗口稳定性<br/>候选 target 数 $M$")
-    FS("结构频带一致性筛选<br/>由加速度谱确认可用参考 target<br/>可用 target 数 $m\le M$")
-    INIT("AoA 冷启动<br/>$\hat{\beta}_{i,0},\ b_i,\ r_{i,0}$")
-    KF("结构主相位 Kalman 融合<br/>系统模型 + 结构方向多目标观测")
-    UNW("预测辅助相位校正<br/>$\hat{\phi}_{i,k}^{\mathrm{LOS},-}\rightarrow \phi_{i,k}^{\mathrm{LOS,corr}}$")
-    ADAPT("在线自举与权重更新<br/>$\hat{\beta}_{i,k+1},\ r_{i,k+1}$")
-    OUT("结构振动方向位移<br/>$\hat{q}_{k}=\lambda\hat{\Theta}_{k}/(4\pi)$")
-
-    S --> RA --> FS --> INIT --> KF --> UNW --> KF --> OUT
-    UNW --> ADAPT
-    KF --> ADAPT
-    ADAPT --> KF
-```
-
-上述详细图组将数据流处理过程拆分为 target 提取筛选和 Kalman 融合闭环两个子过程，简图则突出各模块之间的主线关系。Kalman 后半段的核心是：系统模型先由加速度给出结构主相位先验 $\mathbf{x}_k^-$，再通过各 target 当前转换系数 $\beta_i$ 投影回 target-wise LoS 相位预测 $\hat{\phi}_{i,k}^{\mathrm{LOS},-}$，用于选择 wrapped phase 的 $2\pi$ 分支。得到的 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 是第 $i$ 个 target 的 LoS 连续校正相位；它先乘以 $\beta_i$ 转为结构方向主相位观测 $y_{i,k}$，再进入多目标 Kalman 更新。与此同时，$\phi_{i,k}^{\mathrm{LOS,corr}}$ 与后验主相位 $\hat{\Theta}_k^+$ 一起进入短窗口 $\mathcal{W}_{\beta}$，递推修正每个 target 的转换系数 $\beta_i$。因此，转换系数计算所需的局部连续相位并不是预先独立完成的全时程解缠结果，而是 Kalman 预测辅助分支校正后的在线 LoS 局部相位。
-
-这一点也使本文方法相对于 Doppler-based phase unwrapping 形成更进一步的状态空间化表达。后者主要利用同一帧内多个 chirp 估计 LoS 相位变化率，并以该相位变化率预测下一时刻相位分支；本文则在 Ma 等人的 acceleration-aided Kalman 框架上，将状态定义为结构振动方向主相位，使滤波器在每个时刻同时具有 $\hat{\Theta}_k^-$、$\dot{\hat{\Theta}}_k^-$ 以及加速度输入带来的动力学约束。通过除以 $\beta_i$ 投影后，这一共享状态可分别给出多个 target 的 LoS 相位和相位变化趋势预测：
-
-$$
-\hat{\phi}_{i,k}^{\mathrm{LOS},-}
-=
-\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i,
+\Theta(k)=\frac{4\pi}{\lambda}q(k),
 \qquad
-\dot{\hat{\phi}}_{i,k}^{\mathrm{LOS},-}
-=
-\frac{\dot{\hat{\Theta}}_k^-}{\hat{\beta}_{i,k}^{-}}.
-$$
-
-因而，本文不是单纯依赖 chirp 间相位差估计分支，而是利用更丰富的结构主相位状态先验约束多 target 的相位分支校正；最终精度提升仍需通过实验验证，但从模型信息来源看，其分支选择约束比单一 Doppler 预测更完整。
-
-该流程中需要特别区分三类相位：
-
-1. target selection 阶段输出的是 wrapped phase：
-
-$$
-\psi_i(k)=\angle z_i(k),\qquad \psi_i(k)\in(-\pi,\pi].
-$$
-
-2. prediction-aided phase correction 后得到的是 LoS corrected phase：
-
-$$
-\phi_{i,k}^{\mathrm{LOS,corr}}\in\mathbb{R}.
-$$
-
-它属于第 $i$ 个 target 的 LoS 相位空间，不能直接等同于结构主相位。
-
-3. Kalman 输出的结构主相位是连续相位：
-
-$$
-\Theta_k=\frac{4\pi}{\lambda}q_k,\qquad \Theta_k\in\mathbb{R}.
-$$
-
-其中，$q_k$ 表示梁体测点在结构振动方向上的真实位移。最终位移由结构主相位恢复：
-
-$$
-\hat{q}_k=\frac{\lambda}{4\pi}\hat{\Theta}_k.
-$$
-
-## 3. 模块一：Range-Angle Map 与参考 Target 提取
-
-毫米波雷达 ADC 原始数据首先经过 Range FFT 和 Angle FFT/DBF 处理，得到每一帧的复数 range-angle map：
-
-$$
-Y_k(b,p),
-$$
-
-其中 $b$ 表示 rangeBin，$p$ 表示 angleBin，$k$ 表示 slow-time 采样索引。其幅值图为：
-
-$$
-A_k(b,p)=|Y_k(b,p)|.
-$$
-
-对每一帧幅值图进行二维局部峰检测，得到候选 range-angle peaks。对于同一 rangeBin 内角度相近的 peaks，若其角度差小于设定阈值，例如 $15^\circ$，则将其合并为一个等效 target：
-
-$$
-T=(b,\mathcal{C}),
-$$
-
-其中 $\mathcal{C}$ 表示被合并的 angleBin 集合。这样处理的物理含义是：角度相近的散射体具有接近的 LoS 投影系数，其复数相位变化可近似等效为一个稳定 target；而角度差异较大的散射体应尽量分开，以降低同一 rangeBin 内多散射体叠加造成的相位畸变和转换系数漂移。
-
-## 4. 模块二：滑动窗口稳定性确认
-
-单帧出现的峰值不能直接视为可用参考 target。本文为每个候选 target 维护滑动窗口：
-
-$$
-\mathcal{W}_t=[t-W+1,t].
-$$
-
-在窗口内统计 target 出现率：
-
-$$
-R_T(t)=
-\frac{1}{W}
-\sum_{\tau=t-W+1}^{t}I_T(\tau),
+\phi_i^{\mathrm{LOS}}(k)=\frac{\Theta(k)}{\beta_i}+b_i.
 $$
 
 其中：
 
-$$
-I_T(\tau)=
-\begin{cases}
-1,& T\text{ 在第 }\tau\text{ 帧被检测到},\\
-0,& T\text{ 在第 }\tau\text{ 帧未被检测到}.
-\end{cases}
-$$
+- \(q(k)\)：结构测点沿目标方向的结构主位移；
+- \(\Theta(k)\)：结构主相位；
+- \(\phi_i^{\mathrm{LOS}}(k)\)：第 (i) 个 target 的 LoS 相位；
+- \(b_i\)：target 固定相位偏置；
+- (\beta_i)：LoS 相位到结构主相位的几何转换系数；
+- \(\lambda\)：雷达波长。
 
-当：
-
-$$
-R_T(t)\ge\tau_R
-$$
-
-时，认为该 target 在时间上稳定存在。该步骤只判断 target 是否稳定出现，不进行相位解缠，也不估计转换系数。
-
-## 5. 模块三：结构频带一致性筛选
-
-通过滑动窗口确认只能说明 target 稳定存在，尚不能说明其相位变化由结构振动驱动。因此，本文进一步引入加速度数据确定结构振动频带。设同步加速度信号为 $a(k)$，在滑动窗口内计算其功率谱：
+当前直接 AoA 主线的关键变换是：
 
 $$
-P_a(f)=
-\left|
-\mathcal{F}\{a(k),k\in\mathcal{W}_t\}
-\right|^2.
+\hat\theta_i
+\longrightarrow
+\hat\beta_i=\frac{1}{|\cos\hat\theta_i|}
+\longrightarrow
+\text{固定 }\hat\beta_i\text{ 的结构位移估计}.
 $$
 
-由加速度谱确定结构主频 $f_a(t)$ 及结构振动频带：
+\(\hat\beta_i\) 只由前端直接测得的 target 角度产生，不由位移结果反向更新。
+
+## 2. 总体数据流图
+
+```mehrmaid
+flowchart TD
+    CFG["Phase1Config / 采集配置<br/>采样率、载频、ADC参数、target场景、随机种子"]
+    CFG --> SIM["仿真数据生成层"]
+    CFG --> ALGCFG["算法参数层<br/>角度方法、搜索区、Q/R、门限"]
+
+    subgraph TRUTH["A. 结构真值分支：只用于生成和最终评价"]
+        Q["结构位移真值 q(k)"]
+        V["速度 v(k)"]
+        ACC_T["加速度真值 a_true(k)"]
+        ANG_T["target真实角度 θ_i"]
+        BETA_T["真实 beta_i"]
+        Q --> V
+        V --> ACC_T
+    end
+    SIM --> TRUTH
+
+    subgraph MEAS["B. 观测仿真分支"]
+        RADAR_IDEAL["理想 target-level 雷达观测<br/>true LoS phase / wrapped phase / beta<br/>仅作 oracle、基线和评价参考"]
+        ADC["合成 ADC cube<br/>frame × virtual antenna × ADC sample"]
+        ACC_M["加速度计观测<br/>a_meas(k)=a_true(k)+noise/bias/drift"]
+        TRUTH --> RADAR_IDEAL
+        TRUTH --> ADC
+        ACC_T --> ACC_M
+    end
+
+    subgraph RF["C. 雷达前端"]
+        RFFT["Range FFT<br/>沿快时间提取距离单元"]
+        AFFT["Angle-FFT / 几何 DBF<br/>生成粗略 Range-Angle Map"]
+        MAP["复数 Range-Angle Map<br/>Y(k,b,p)"]
+        SNAP["目标距离单元多通道复快拍<br/>X_b ∈ C^(M×N)"]
+        ADC --> RFFT
+        RFFT --> AFFT --> MAP
+        RFFT --> SNAP
+    end
+
+    subgraph DET["D. 候选 target 检测与质量筛选"]
+        PEAK["2D幅值峰检测<br/>candidate (range bin, angle bin)"]
+        MERGE["同距离近角峰合并<br/>远角峰保留为不同候选"]
+        QUALITY["目标质量筛选<br/>IQ有效性、SNR、可用mask、加速度相关性"]
+        MAP --> PEAK --> MERGE --> QUALITY
+        ACC_M --> QUALITY
+    end
+
+    subgraph AOA["E. 直接 target AoA 估计：粗—精—精修"]
+        COARSE["粗筛：FFT候选角度<br/>只确定局部搜索中心"]
+        MUSIC["精筛：局部 MUSIC<br/>协方差 + 噪声子空间 + 局部谱峰"]
+        ML["精修：局部 ML/NLS<br/>联合变量投影，连续优化 θ"]
+        STEER["固定最终导向矢量<br/>重建完整 target slow-time IQ"]
+        SNAP --> MUSIC
+        MERGE --> COARSE
+        COARSE --> MUSIC --> ML --> STEER
+        QUALITY --> ML
+    end
+
+    subgraph GEO["F. 几何转换：只由直接角度决定"]
+        THETA["直接角度输出 θ_hat_i"]
+        BETA["beta_hat_i = 1 / |cos(theta_hat_i)|<br/>冻结，不接受Kalman反馈"]
+        ML --> THETA --> BETA
+    end
+
+    subgraph FUSION["G. 固定 beta 的结构主相位估计"]
+        INPUT["RadarAlgorithmInput<br/>wrapped phase、fixed beta、available mask、selected indices"]
+        BIAS["冷启动偏置估计 b_i"]
+        PRED["加速度驱动状态预测<br/>x_k^- = A x_(k-1)^+ + B a_meas(k-1)"]
+        CORR["预测辅助相位分支校正<br/>LoS预测与wrapped phase对齐"]
+        OBS["结构方向观测<br/>y_i,k = beta_hat_i(phi_i,k^LOS,corr - b_i)"]
+        KF["结构主相位 Kalman update<br/>x_k=[Theta_k, Theta_dot_k]^T"]
+        QR["Q批量选择 + target-wise R更新<br/>不更新 beta"]
+        OUT["结构主相位 / 相对位移<br/>q_hat = lambda Theta_hat/(4 pi)"]
+        STEER --> INPUT
+        BETA --> INPUT
+        QUALITY --> INPUT
+        INPUT --> BIAS --> CORR
+        INPUT --> CORR
+        ACC_M --> PRED
+        KF --> PRED
+        PRED --> CORR --> OBS --> KF --> OUT
+        KF --> QR
+        QR --> KF
+    end
+
+    subgraph EVAL["H. 评价与报告：真值只在这里进入"]
+        ANG_E["AoA角度误差<br/>theta_hat - theta_true"]
+        BETA_E["beta相对误差"]
+        DISP_E["位移RMSE / MAE / 最大误差"]
+        WRAP_E["相位分支错误率"]
+        TRUTH --> ANG_E
+        TRUTH --> BETA_E
+        TRUTH --> DISP_E
+        TRUTH --> WRAP_E
+        THETA --> ANG_E
+        BETA --> BETA_E
+        OUT --> DISP_E
+        CORR --> WRAP_E
+    end
+
+    RADAR_IDEAL -. "evaluation/reference only" .-> EVAL
+```
+
+图中的实线是算法数据流，虚线是评价参考流。真值分支不能进入 target AoA、target selection 或固定 beta Kalman 的算法输入。
+
+## 3. 仿真数据生成层
+
+### 3.1 结构真值
+
+入口为 [truth.py](/Users/umep/thesis/simulation/phase1/truth.py) 的 `generate_truth_signal()`。输出：
+
+```text
+t[N]                 slow-time时间轴
+q_m[N]               结构位移真值
+v_mps[N]             结构速度真值
+a_mps2[N]            结构加速度真值
+frequencies_hz      结构频率分量
+amplitudes_m        各分量幅值
+```
+
+场景可以生成普通多频、强相位缠绕、同距离多目标、AoA 偏差和 SNR 下降等工况。
+
+### 3.2 目标几何和相位真值
+
+`build_default_scatterers()` 为每个散射体建立：
+
+```text
+range_m
+angle_deg
+amplitude
+snr_db
+phase_bias_rad
+beta = 1 / |cos(angle_deg)|
+range_bin_index
+```
+
+`simulate_adc_cube()` 对第 (i) 个 target 生成：
 
 $$
-\Omega(t)=
-[f_a(t)-\Delta f,\ f_a(t)+\Delta f].
+\begin{aligned}
+\Theta(k)&=\frac{4\pi q(k)}{\lambda},\\
+\phi_i^{\mathrm{LOS}}(k)&=\frac{\Theta(k)}{\beta_i}+b_i,\\
+s_i(k)&=A_i e^{j\phi_i^{\mathrm{LOS}}(k)}+n_i(k),\\
+a_i(m)&=e^{j2\pi p_m\sin\theta_i},\\
+r_i(n)&=e^{j2\pi f_{r,i}n/N_r}.
+\end{aligned}
 $$
 
-对于每个通过稳定性确认的 target $T$，取其复数 slow-time 序列：
+ADC 中的 target 回波为：
 
 $$
-z_T(k),\qquad k\in\mathcal{W}_t.
+X_i(k,m,n)=s_i(k)a_i(m)r_i(n).
 $$
 
-去除窗口均值后得到：
+所有 target 的 (X_i) 叠加后得到 ADC cube，并按场景加入噪声、目标退化和 dropout。
+
+### 3.3 两条雷达观测分支
+
+仿真同时生成两类对象：
+
+| 对象 | 用途 | 是否进入当前直接 AoA 主算法 |
+|---|---|---|
+| `RadarObservation` | 理想 target-level LoS/wrapped phase、真实 beta、oracle 对照 | 否，只有评价和指定基线使用 |
+| `ADCCubeObservation` | 物理形状 ADC 数据，包含距离和阵元空间相位 | 是，经前端处理后使用 |
+
+这一划分防止算法直接读取 `true_los_phase_rad`、`true beta` 或 `q_true`。
+
+### 3.4 加速度观测
+
+普通仿真中：
 
 $$
-\tilde{z}_T(k)=z_T(k)-\bar{z}_{T,\mathcal{W}},
+a_{\mathrm{meas}}(k)=a_{\mathrm{true}}(k)+n_a(k)+b_a+d_a(k).
 $$
 
-并计算其功率谱：
+加速度观测有两个用途：
+
+1. target quality / selection：辅助判断目标是否与结构振动相关；
+2. 固定 beta Kalman：作为结构主相位的动力学输入。
+
+加速度不参与 `estimate_local_music()` 或 `estimate_local_music_ml()` 的阵列角度拟合。
+
+## 4. 雷达前端与候选 target
+
+入口为 [frontend.py](/Users/umep/thesis/simulation/phase1/frontend.py) 和 [scenario_inputs.py](/Users/umep/thesis/simulation/phase1/scenario_inputs.py)。
+
+### 4.1 Range FFT
+
+ADC cube 的快时间轴做距离 FFT：
+
+```text
+adc_cube:       [N_frame, M_virtual_rx, N_adc]
+range_fft:      [N_frame, M_virtual_rx, N_range]
+range_by_rx:    [N_frame, N_range, M_virtual_rx]
+```
+
+Phase1 默认参数为 77 GHz、6 MHz ADC、256 samples/chirp、60 us chirp、4 chirps/frame；slow-time/Kalman 采样率单独由 `sample_rate_hz` 定义。
+
+### 4.2 Angle-FFT / 几何 DBF
+
+默认旧前端使用 Angle-FFT 得到粗角度轴。若配置了阵元坐标，则前端使用几何导向矢量进行 DBF。当前 1-D 方位 Phase1 使用 8 个方位虚拟阵元等效模型；真实 IWR1843 ADC 接入时必须核对实际虚拟阵元坐标和方位/俯仰通道映射。
+
+输出：
+
+```text
+range_angle_cube[N_frame, N_range, N_angle]
+angle_axis_deg[N_angle]
+range_snapshots[N_frame, N_range, M_virtual_rx]
+array_positions_wavelengths[M_virtual_rx]
+```
+
+### 4.3 候选检测、合并和筛选
+
+1. 在冷启动参考帧的 Range-Angle 幅值图上检测二维局部峰；
+2. 将候选峰表示为 `(range_bin, angle_bin)`；
+3. 同一距离单元内近角峰可合并，明显远角峰保留为不同 target；
+4. 对每个候选提取完整 slow-time IQ 和 wrapped phase；
+5. 根据 IQ 有效性、SNR、质量分数、可用 mask 以及与加速度观测的相关性选择进入位移算法的 target。
+
+候选 target 的数据结构为：
+
+```text
+range_bins[T]
+angle_bins[T]
+range_m[T]
+angle_deg[T]
+slow_time[T, N_frame]
+wrapped_phase_rad[T, N_frame]
+available_mask[T, N_frame]
+```
+
+当前 selection 的输出只决定哪些目标进入后端，不改变 target 的阵列空间角度估计模型。
+
+## 5. 直接 AoA：粗筛、精筛、精修
+
+入口为 [angle_estimation.py](/Users/umep/thesis/simulation/phase1/angle_estimation.py) 的 `estimate_local_music()` 或 `estimate_local_music_ml()`。
+
+### 5.1 第一段：FFT 粗筛
+
+Angle-FFT 只提供：
+
+- 目标候选数量；
+- 每个候选的初始角度；
+- 每个候选的距离单元；
+- 后续局部搜索中心。
+
+它不作为最终角度值，也不负责补偿阵元幅相误差。
+
+### 5.2 第二段：局部 MUSIC 精筛
+
+对于同一距离单元的多通道复快拍：
 
 $$
-P_T(f)=
-\left|
-\mathcal{F}\{\tilde{z}_T(k),k\in\mathcal{W}_t\}
-\right|^2.
+X_b=[x_b(1),x_b(2),\ldots,x_b(L)]
 $$
 
-定义结构频带能量占比：
+计算样本协方差：
 
 $$
-G_T(t)=
-\frac{
-\sum_{f\in\Omega(t)}P_T(f)
-}{
-\sum_{f\in\Omega_{\mathrm{valid}}}P_T(f)+\epsilon
-}.
+R_b=\frac{1}{L}X_bX_b^H.
 $$
 
-若：
+对 (R_b) 特征分解，得到噪声子空间 (E_n)，在 FFT 粗角度附近计算：
 
 $$
-G_T(t)\ge\tau_G,
+P_{\mathrm{MUSIC}}(u)=
+\frac{1}{a^H(u)E_nE_n^Ha(u)},
+\qquad u=\sin\theta.
 $$
 
-则认为该 target 的 slow-time 变化主要由结构运动驱动，可作为参考 target。该模块输出可用参考 target 集合：
+当前实现只在局部空间频率区间内搜索，并用谱峰邻域二次插值得到连续初值。
+
+### 5.3 第三段：局部 ML/NLS 精修
+
+对于单个或同一距离单元内的多个目标，使用校准导向矢量：
 
 $$
-\mathcal{A}_k=\{T_1,T_2,\ldots,T_m\},
+Y=A(\boldsymbol{\theta})C+N,
 \qquad
-m\le M.
+A=[a(\theta_1),\ldots,a(\theta_K)].
 $$
 
-## 6. 模块四：AoA 初始化与转换系数自举更新
-
-对于每个可用 target $T_i$，需要估计其 LoS 位移到结构振动方向位移的转换系数：
+给定角度后，先用最小二乘求线性复幅度 (C)，再优化角度：
 
 $$
-q(k)=\beta_i d_{\mathrm{LOS},i}(k).
-$$
-
-该转换系数用于将 LoS corrected phase 转换为结构方向主相位观测。传统处理通常需要先获得一段连续雷达相位，再与加速度参考位移拟合 $\beta_i$。这会带来潜在循环依赖：Kalman 相位解缠需要 $\beta_i$，而 $\beta_i$ 标定又可能需要解缠后的相位。本文采用 AoA 几何初始化与自举更新的方式避免该问题。
-
-若第 $i$ 个 target 的 AoA 与结构振动方向之间的夹角为 $\theta_i$，则先由几何关系得到结构方向到 LoS 的投影初值 $p_i$，再取其倒数作为 LoS 到结构方向的转换系数初值：
-
-$$
-\hat{p}_{i,0}=|\cos\theta_i|,
-\qquad
-\hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}.
-$$
-
-当本文只选取或合并角度较小的 target 时，AoA 初值通常不会偏离真实转换关系过远。冷启动阶段假设结构近似静止，用于确定每个 target 的初始相位偏置 $b_i$，并将滤波状态初始化为：
-
-$$
-\mathbf{x}_0\approx
-\begin{bmatrix}
-0\\
-0
-\end{bmatrix}.
-$$
-
-同时，将每个 target 的测量噪声初始化为较大值：
-
-$$
-r_{i,0}=r_{\max}.
-$$
-
-这意味着在刚进入 Kalman 框架时，滤波器主要依赖加速度驱动的结构主相位预测，而不是完全相信由 AoA 初值构造的雷达观测。
-
-当车辆或其他荷载从远处接近时，桥梁通常会先出现小幅可辨识振动。该阶段相位分支选择相对容易，同时又具有足够动态信息用于估计转换系数。由 Kalman 预测得到结构主相位 $\hat{\Theta}_k^-$ 后，第 $i$ 个 target 的 LoS 相位预测为：
-
-$$
-\hat{\phi}_{i,k}^{\mathrm{LOS},-}
+\hat{\boldsymbol{\theta}}
 =
-\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i.
+\arg\min_{\boldsymbol{\theta}}
+\left\|Y-A(\boldsymbol{\theta})\hat C\right\|_F^2.
 $$
 
-利用该预测值对原始 wrapped phase 进行分支校正：
+这一步是连续角度拟合，不是神经网络机器学习。`max_snapshots` 只限制拟合窗口，不截断最终慢时间输出。
+
+### 5.4 最终角度输出与慢时间重建
+
+角度估计输出：
+
+```text
+angle_deg[T]
+angle_estimation_method
+angle_estimation_diagnostics[T]
+```
+
+以最终角度构造固定导向矩阵，对全部有效时间快拍做投影，得到：
+
+```text
+source_slow_time[T, N_frame]
+wrapped_phase_rad[T, N_frame]
+available_mask[T, N_frame]
+```
+
+固定导向矩阵重建是为了避免逐帧选择不同角度 bin 带来的相位跳变。
+
+### 5.5 AoA 质量门
+
+如果出现以下情况，不能把结果宣传为高精度角度：
+
+- FFT 粗峰落在局部搜索区之外；
+- 有效快拍数不足；
+- 目标数大于阵元可辨识数量；
+- MUSIC 协方差非有限或条件数过差；
+- ML/NLS 残差过大；
+- 同距离多目标的候选关联不稳定。
+
+这些诊断应在报告中单独统计，不能只报告成功案例的角度 RMSE。
+
+## 6. 直接角度到固定 beta
+
+前端完成角度估计后执行：
 
 $$
-\phi_{i,k}^{\mathrm{LOS,corr}}
-=
-\psi_{i,k}
-+
-2\pi
-\operatorname{round}
-\left(
-\frac{
-\hat{\phi}_{i,k}^{\mathrm{LOS},-} - \psi_{i,k}
-}{2\pi}
-\right).
+\hat\beta_i=\frac{1}{|\cos\hat\theta_i|}.
 $$
 
-这里的 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 仍然是 LoS 连续相位。在短窗口 $\mathcal{W}_{\beta}$ 内，可用校正后的 LoS 连续相位与结构主相位估计递推修正 $\beta_i$。文档早期版本采用未中心化 plain LS；当前正文统一表述为估计 LoS corrected phase 到结构主相位的斜率。令：
+`FrontendTargetObservation.measured_beta` 和 `RadarAlgorithmInput.measured_beta` 都来自该映射。`direct_aoa_fixed_beta` 的不变量是：
 
-$$
-x_k
-=
-\phi_{i,k}^{\mathrm{LOS,corr}}-b_i,
-\qquad
-y_k
-=
-\hat{\Theta}_k^+.
-$$
+```text
+beta_hat(k) = beta_hat(0) = frontend angle-derived beta
+beta_update_enabled = False
+beta_source = frontend_direct_aoa
+```
 
-中心化后窗口更新写为：
+因此不存在：
 
-$$
-\hat{\beta}_{i}
-=
-\frac{
-\sum_{k\in\mathcal{W}_{\beta}}
-x_{k,c}y_{k,c}
-+
-\lambda_\beta\hat{\beta}_{i,0}
-}{
-\sum_{k\in\mathcal{W}_{\beta}}
-x_{k,c}^2
-+
-\lambda_\beta
-}.
-$$
+```text
+Kalman posterior -> beta fit -> beta rewrite -> same Kalman posterior
+```
 
-该估计只在窗口内结构响应激励足够、target quality 足够好且相位分支稳定时更新；若振动过弱或观测质量不足，则保持 AoA 初值或上一时刻估计值。随着前几次分支校正成功，$\hat{\beta}_i$ 会在短时间内从几何初值收敛到该 target 的等效转换系数。该过程不是先验完整解缠，而是由 AoA 初值、加速度预测和自适应测量噪声共同支撑的在线自举。
+旧 `adaptive_beta`、`proposed_full_pipeline_beta_confidence` 和旧 bootstrap 诊断仍保留为显式 legacy/ablation。
 
-可定义窗口内转换系数拟合残差：
+## 7. 固定 beta 的结构主相位 Kalman
 
-$$
-e_{\beta,i}
-=
-\frac{
-\left\|
-\hat{\boldsymbol{\Theta}}_{\mathcal{W}}^{+}
--
-\hat{\beta}_i
-\left(
-\boldsymbol{\phi}_{i,\mathcal{W}}^{\mathrm{LOS,corr}}
--
-b_i\mathbf{1}
-\right)
-\right\|_2
-}{
-\left\|
-\hat{\boldsymbol{\Theta}}_{\mathcal{W}}^{+}
-\right\|_2
-}.
-$$
+### 7.1 算法可见输入
 
-在第一版方法中，该残差主要用于描述和实验分析；滤波过程中的 target 权重由后文的自适应 $R_i$ 自动调节。即当 $\beta_i$ 尚未收敛或 target 相位质量较差时，其残差会增大，进而使对应观测噪声增大；当 $\beta_i$ 收敛后，对应 target 的观测权重自动恢复。
+[radar.py](/Users/umep/thesis/simulation/phase1/radar.py) 中的 `RadarAlgorithmInput` 只接收：
 
-这一设计避免了“转换系数必须先由完整解缠相位标定”的死锁，同时保留了 Ma 等人预测辅助相位校正思想和 Doppler-based phase unwrapping 文献中的相位速度辅助分支选择思想。若雷达帧内包含多个 chirps，还可用同一 range-angle target 的 chirp 间相位差估计 LoS 相位变化率，作为 $\hat{\phi}_{i,k}^{\mathrm{LOS},-}$ 的辅助先验，但这不是闭环成立的必要条件。
+```text
+measured_beta[T]
+wrapped_phase_rad[T, N]
+available_mask[T, N]
+selected_indices
+calibration_indices
+initial_r[T]
+selection_scores[T]
+extra["angle_deg"]
+```
 
-## 7. 模块五：结构主相位 Kalman 融合
+不接收：
 
-在线 Kalman 融合阶段重新使用每个 target 的原始 wrapped phase：
+```text
+q_true, true_beta, true_los_phase, a_true, scatterer truth labels
+```
 
-$$
-\psi_{i,k}=\angle z_i(k).
-$$
+### 7.2 冷启动和预测
 
-定义结构振动方向主相位：
-
-$$
-\Theta_k=\frac{4\pi}{\lambda}q_k,
-$$
-
-并构造状态向量：
+状态为：
 
 $$
 \mathbf{x}_k=
 \begin{bmatrix}
 \Theta_k\\
-\dot{\Theta}_k
+\dot\Theta_k
 \end{bmatrix}.
 $$
 
-由于加速度计测得的是结构振动方向加速度，状态预测可直接写为：
+系统预测为：
 
 $$
-\mathbf{x}_k^-
+\mathbf{x}_k^-=
+A\mathbf{x}_{k-1}^+
++B\frac{4\pi}{\lambda}a_{\mathrm{meas}}(k-1).
+$$
+
+冷启动阶段仅估计各 target 的固定相位偏置 (b_i) 和初始状态，不估计 beta。
+
+### 7.3 预测辅助相位校正
+
+用固定 beta 将结构主相位预测映射回各 target 的 LoS 相位：
+
+$$
+\hat\phi_{i,k}^{\mathrm{LOS},-}
 =
-\mathbf{A}\mathbf{x}_{k-1}
-+
-\mathbf{B}\frac{4\pi}{\lambda}a_{k-1}
-+
-\mathbf{w}_{k-1},
+\frac{\hat\Theta_k^-}{\hat\beta_i}+b_i.
 $$
 
-其中：
+对于原始 wrapped phase：
 
 $$
-\mathbf{A}=
-\begin{bmatrix}
-1&T\\
-0&1
-\end{bmatrix},
-\qquad
-\mathbf{B}=
-\begin{bmatrix}
-T^2/2\\
-T
-\end{bmatrix}.
+\psi_{i,k}=\operatorname{angle}(z_i(k)),
 $$
 
-过程噪声采用固定形式：
-
-$$
-\mathbf{Q}
-=
-q
-\begin{bmatrix}
-T^3/3 & T^2/2\\
-T^2/2 & T
-\end{bmatrix}.
-$$
-
-由预测主相位得到第 $i$ 个 target 的 LoS 相位预测：
-
-$$
-\hat{\phi}_{i,k}^{\mathrm{LOS},-}
-=
-\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i.
-$$
-
-利用该预测值对 wrapped phase 进行分支校正：
+选择与预测最接近的 (2\pi) 分支：
 
 $$
 \phi_{i,k}^{\mathrm{LOS,corr}}
 =
 \psi_{i,k}
-+
-2\pi
-\operatorname{round}
++2\pi\operatorname{round}
 \left(
-\frac{
-\hat{\phi}_{i,k}^{\mathrm{LOS},-} - \psi_{i,k}
-}{2\pi}
+\frac{\hat\phi_{i,k}^{\mathrm{LOS},-}-\psi_{i,k}}{2\pi}
 \right).
 $$
 
-该 corrected phase 仍然是 LoS 连续相位。为了使正文主坐标系与加速度和状态定义一致，将其转换为结构方向主相位观测：
+### 7.4 多 target 结构方向观测
+
+每个 target 的 LoS 校正相位转到结构主相位坐标：
 
 $$
 y_{i,k}
 =
-\hat{\beta}_{i,k}^{-}
+\hat\beta_i
 \left(
 \phi_{i,k}^{\mathrm{LOS,corr}}-b_i
 \right).
 $$
 
-将所有可用 target 的结构方向观测堆叠为：
+观测模型为：
 
 $$
-\mathbf{y}_k
-=
-\begin{bmatrix}
-y_{1,k}\\
-y_{2,k}\\
-\vdots\\
-y_{m,k}
-\end{bmatrix}.
+y_{i,k}=\Theta_k+e_{i,k},
+\qquad H_i=[1,0].
 $$
 
-结构方向观测模型为：
+多个 target 共享同一结构主相位状态，因此后端融合不是把多个独立位移结果简单平均，而是在共同状态层进行更新。
+
+### 7.5 Q、R 和输出
+
+当前 direct 方法仍然执行：
+
+- 在候选过程噪声 (Q) 中用 innovation energy 选择 (Q^\star)；
+- 根据 target SNR 和初始质量设置 (R_{i,0})；
+- 根据 posterior residual 和质量门更新 target-wise (R_{i,k})；
+- 记录 innovation、相位校正结果、(R) 历史和 target quality。
+
+这些是结构位移滤波参数，不是 beta 后续处理。
+
+输出：
+
+```text
+q_hat_m[N]
+theta_hat_rad[N]
+theta_dot_hat_radps[N]
+los_corrected_phase_rad[T, N]
+beta_hat[T]
+r_theta_history[T, N]
+innovation_rad[T, N]
+```
+
+位移为：
 
 $$
-\mathbf{y}_k
-=
-\mathbf{H}\mathbf{x}_k+\mathbf{e}_k,
-\qquad
-\mathbf{H}
-=
-\begin{bmatrix}
-1&0\\
-1&0\\
-\vdots&\vdots\\
-1&0
-\end{bmatrix}.
+\hat q_k=\frac{\lambda}{4\pi}\hat\Theta_k.
 $$
 
-也即每个 target 的观测行均为：
+## 8. 评价与对照分支
 
-$$
-\mathbf{H}_i
-=
-\begin{bmatrix}
-1&0
-\end{bmatrix}.
-$$
+### 8.1 评价顺序
 
-观测噪声协方差采用 target-wise 对角形式，但此时噪声已位于结构主相位坐标：
+在 [evaluation.py](/Users/umep/thesis/simulation/phase1/evaluation.py) 中：
 
-$$
-\mathbf{R}_k^{\Theta}
-=
-\operatorname{diag}
-\left(
-R_{1,k}^{\Theta},R_{2,k}^{\Theta},\ldots,R_{m,k}^{\Theta}
-\right).
-$$
+```text
+frontend estimated angle vs scatterer true angle
+frontend beta vs scatterer true beta
+Kalman displacement vs cold-start-relative q_true
+corrected phase vs true LoS phase
+```
 
-其中第 $i$ 个 target 的结构方向观测噪声近似包含两部分：
+评价阶段可以访问真值，但真值不得回流到算法对象。
 
-$$
-R_{i,k}^{\Theta}
-\approx
-\left(\hat{\beta}_{i,k}^{-}\right)^2R_{i,k}^{\mathrm{LOS}}
-+
-\left(
-\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
-\right)^2
-\sigma_{\beta_i,k}^{2}.
-$$
+### 8.2 当前默认方法
 
-然后执行标准 Kalman 更新：
+[method_registry.py](/Users/umep/thesis/simulation/phase1/method_registry.py) 当前默认注册：
 
-$$
-\mathbf{K}_k
-=
-\mathbf{P}_k^-
-\mathbf{H}^\mathrm{T}
-\left(
-\mathbf{H}\mathbf{P}_k^-\mathbf{H}^\mathrm{T}
-+
-\mathbf{R}_k^{\Theta}
-\right)^{-1},
-$$
+| 方法 | 作用 |
+|---|---|
+| `oracle` | 理想参考，不作为工程算法结论 |
+| `range_bin_itoh` | 传统距离单元相位基线 |
+| `ma2026_reproduction` | 公开公式流程基线 |
+| `angle_fft_local_music` | 共同 Angle-FFT 粗筛 + 局部 MUSIC，固定 beta |
+| `angle_fft_local_music_ml` | 共同 Angle-FFT 粗筛 + 局部 MUSIC + ML/NLS，固定 beta；当前主方法 |
 
-$$
-\mathbf{x}_k
-=
-\mathbf{x}_k^-
-+
-\mathbf{K}_k
-\left(
-\mathbf{y}_k
--
-\mathbf{H}\mathbf{x}_k^-
-\right).
-$$
+旧方法：
 
-Kalman 更新后，当前主方法不直接使用第 $i$ 个 target 的预测创新来更新基础测量噪声。预测创新为：
+```text
+proposed_full_pipeline_aoa_fixed_beta
+proposed_full_pipeline_beta_confidence
+adaptive_beta
+```
 
-$$
-e_{i,k}^-
-=
-y_{i,k}
--
-\mathbf{H}_i\mathbf{x}_k^-.
-$$
+只作为显式 ablation/legacy，不进入默认主结论。
 
-同时包含过程模型误差、加速度输入误差和 radar 观测误差。参考 Akhlaghi 等人关于 adaptive adjustment of noise covariance 的分工，prediction innovation 更适合反映过程模型或 $Q$ 的不确定性，而 posterior residual 更适合用于 measurement noise covariance estimation。因此本文采用后验残差：
+### 8.3 当前成对比较命令
 
-$$
-\varepsilon_{i,k}
-=
-y_{i,k}
--
-\mathbf{H}_i\mathbf{x}_k^+.
-$$
+```bash
+python3 -m simulation.phase1.run_direct_aoa_comparison
+```
 
-基础测量噪声的瞬时估计写为：
+输出：
 
-$$
-\tilde{r}_{i,k}
-=
-\varepsilon_{i,k}^{2}
-+
-\mathbf{H}_i\mathbf{P}_k^+\mathbf{H}_i^{\mathrm{T}},
-$$
+```text
+simulation/outputs/direct_aoa_comparison.csv
+simulation/outputs/direct_aoa_angle_comparison.csv
+```
 
-并引入 target quality gate。令 $\rho_{i,k}\in[0,1]$ 表示由 SNR、presence、range-angle 稳定性、IQ 幅值稳定性和转换系数置信度等可见量构造的 target 质量，定义
+前者比较两种方法的位移 RMSE 和角度 RMSE，后者比较逐场景、逐 target 的角度误差。两种方法使用完全相同的 Angle-FFT 粗筛；唯一变量是局部 MUSIC 后是否继续进行 ML/NLS 精修。
 
-$$
-\Delta r_{i,k}
-=
-\tilde{r}_{i,k}
--
-r_{i,k},
-$$
+## 9. 数据边界和当前缺口
 
-$$
-g_{i,k}
-=
-\begin{cases}
-1-\rho_{i,k}, & \Delta r_{i,k}>0,\\
-1, & \Delta r_{i,k}\le 0.
-\end{cases}
-$$
+| 环节 | 当前 Phase 1 状态 | 实验阶段还需补充 |
+|---|---|---|
+| 结构真值 | 合成多频/非平稳/强 wrapping | 实测结构响应统计 |
+| ADC | 合成 ADC cube | 真实 IWR1843 DCA1000 ADC 解析和同步 |
+| 阵列 | 8 方位虚拟阵元等效模型 | IWR1843 真实虚拟阵元坐标、幅相和姿态标定 |
+| AoA | 局部 MUSIC + ML/NLS | 角反射器转台标定、阵元误差、多径验证 |
+| beta | 直接由 AoA 映射并冻结 | 独立几何测量确认 \(\theta\) 定义和安装姿态 |
+| 加速度 | 带噪真值或半实测驱动 | 原生时间戳、轴向、比例因子和同步验证 |
+| Kalman | 固定 beta、加速度预测、Q/R处理 | 真实 radar/ADXL 联合采集验证 |
+| 评价 | 角度、beta、位移、分支错误 | 激光/LVDT 对照和重复试验 |
 
-最终用遗忘因子与上下限约束更新该 target 的基础测量噪声：
+最重要的物理限制是：阵列固定通道相位偏差与角度相位斜率存在可辨识性混淆。没有独立幅相/几何标定时，MUSIC 或 ML/NLS 可以有很好的重复性，但不能自动保证绝对 AoA 精度。
 
-$$
-r_{i,k+1}
-=
-\operatorname{clip}
-\left[
-r_{i,k}
-+
-(1-\alpha)g_{i,k}\Delta r_{i,k},
-\ r_{\min},
-\ r_{\max}
-\right],
-$$
+## 10. 与旧 beta 动态方案的关系
 
-其中 $0<\alpha<1$ 为遗忘因子。初始阶段 $r_{i,0}$ 由 target 初始质量、SNR、presence 和几何投影等信息给出；低质量 target 会得到较大的初始测量噪声，高质量 target 可更早参与更新。该门控机制使 target 质量下降且后验残差增大时自动降低对应 target 的观测权重；当结构响应突然增强但 target 质量正常时，抑制将预测模型误差误归因于 measurement noise 的 $R$ 异常上涨。针对 AoA cold start 阶段转换系数尚未收敛的问题，结构方向有效观测噪声应包含 $\beta_i$ 对 LoS 相位噪声的放大，以及 $\beta_i$ 本身不确定性传播项：
+```mehrmaid
+flowchart LR
+    OLD["旧方案<br/>AoA beta初值"] --> OLD_KF["LoS phase Kalman"]
+    OLD_KF --> OLD_FIT["用位移/加速度结果拟合 beta"]
+    OLD_FIT --> OLD_KF
 
-$$
-R_{i,k}^{\Theta}
-\approx
-\left(\hat{\beta}_{i,k}^{-}\right)^2R_{i,k}^{\mathrm{LOS}}
-+
-\left(
-\phi_{i,k}^{\mathrm{LOS,corr}}-b_i
-\right)^2
-\sigma_{\beta_i,k}^{2}.
-$$
+    NEW["新方案<br/>ADC阵列空间快拍"] --> NEW_AOA["直接 AoA<br/>FFT→局部MUSIC→ML/NLS"]
+    NEW_AOA --> NEW_BETA["几何 beta 冻结"]
+    NEW_BETA --> NEW_KF["结构主相位 Kalman"]
 
-这使“转换系数越不确定，越降低观测权重”与在线 bootstrap 收敛过程对应起来。当前代码与正文统一在结构方向观测空间表达有效噪声，$\beta_i$ 不确定性直接进入 $R_{i,k}^{\Theta}$，不会再把结构主相位到 LoS 相位的投影参数作为主符号。
+    OLD -. "legacy/ablation" .-> CMP["比较角度误差、beta误差、位移RMSE"]
+    NEW -. "main" .-> CMP
+```
 
-该设计参考 Akhlaghi、Zhou 和 Huang 的 *Adaptive Adjustment of Noise Covariance in Kalman Filter for Dynamic State Estimation* 中“prediction innovation 更适合反映过程模型误差、posterior residual 更适合估计 measurement noise”的 Q/R 归因思想，同时参考 Mehra 的 covariance matching 框架和 Li 等人在 INS/GNSS 多观测通道中的 measurement noise covariance estimation。本文的改进不在于重复已有 adaptive Kalman 公式，而在于把该思想改造为 radar target-wise 观测权重模型：每个 target 拥有独立 $R_{i,k}^{\Theta}$，基础噪声估计使用后验协方差投影 $\mathbf{H}_{i}\mathbf{P}_k^+\mathbf{H}_{i}^{\mathrm{T}}$，$R$ 的上涨受 target quality gate 约束，并额外叠加 AoA cold start 下的 $\beta_i$ 置信度传播项。由此，已有文献提供统计依据，本文解决的是倒挂毫米波雷达多 target 相位融合中的观测质量归因问题。
+旧方案试图利用结构运动结果补偿 AoA 引起的 beta 误差，因此 beta 与位移状态存在反馈耦合。新方案先完成空间角度估计，再把 beta 作为固定几何输入，研究重点转为：
 
-## 8. 关键接口关系
+1. 直接 AoA 是否比 Angle-FFT 更准确；
+2. 角度误差是否满足 beta/REMS 要求；
+3. 短时 1.5 s 响应中，局部 MUSIC-ML 是否稳定；
+4. 同距离多目标和低 SNR 是否造成角度估计失败。
 
-为避免方法链条出现循环依赖，各模块接口应明确如下。
-
-| 模块 | 输入 | 输出 | 是否依赖 Kalman 内部相位校正 |
-|---|---|---|---|
-| Range-Angle Map | ADC 原始数据 | 复数 range-angle map | 否 |
-| target 选择 | range-angle map、加速度频带 | 可用 target 集合、wrapped phase | 否 |
-| AoA 与冷启动初始化 | target AoA、静止初始相位 | $\beta_i^{(0)}$、$b_i$、较大的 $r_{i,0}$ | 否 |
-| 转换系数自举更新 | LoS corrected phase $\phi_{i,k}^{\mathrm{LOS,corr}}$、结构主相位后验 $\hat{\Theta}_k^+$ | $\hat{\beta}_{i,k}$、$e_{\beta,i}$、$S_{\beta,i}$ | 依赖已启动的 Kalman 递推，但不依赖预先完整解缠 |
-| Kalman 融合 | wrapped phase、$\hat{\beta}_{i,k}$、加速度、结构方向 $R_{i,k}^{\Theta}$ | 连续主相位、结构位移 | 是，在框架内部完成 |
-
-因此，本文流程中不存在一套独立于 Kalman 的预处理式完整相位解缠。wrapped phase 的 $2\pi$ 分支选择在 Kalman 预测辅助相位校正步骤中在线完成，校正后的 $\phi_{i,k}^{\mathrm{LOS,corr}}$ 是 LoS 连续相位；它一方面经 $\beta_i$ 转换为结构方向观测 $y_{i,k}$ 参与 Kalman 更新，另一方面与结构主相位后验一起用于自举 $\beta_i$。转换系数不再要求由一段预先完整解缠的雷达相位单独标定，而是以 AoA 几何值启动，并在初始微振阶段借助加速度预测、基础测量噪声更新和转换系数置信度传播逐步收敛。这样，转换系数需要连续相位、连续相位校正又需要转换系数的循环依赖被打断。
-
-## 9. 与三个创新点的对应关系
-
-整体架构中的三个核心创新点对应关系如下：
-
-1. **在线多 target 选择**：对应 Range-Angle Map、角度合并、滑动窗口稳定性确认和结构频带一致性筛选，解决“哪些环境散射体可作为参考 target”的问题。
-2. **复合 target 等效转换系数稳定性**：对应 AoA 几何初始化、短窗口自举更新和稳定性评价，解释 angle cluster 或复合散射 target 何时可用一个稳定 $\beta_i$ 表示。
-3. **结构主相位多 target Kalman 融合**：对应最终在线融合框架，将 Ma 等人的单目标 LoS 相位状态改写为结构振动方向主相位状态，并把多个 target 的 LoS corrected phase 先转换为结构方向主相位观测后共同更新；固定/标定 $Q$ 与 posterior-residual、quality-gated、confidence-aware target-wise $R^\Theta$ 共同完成初始自举和稳定融合。
-
-该架构使论文主线形成闭环：
-
-$$
-\text{找 target}
-\rightarrow
-\text{用 AoA 给转换关系初值}
-\rightarrow
-\text{在 Kalman 中自举收敛转换系数和观测权重}
-\rightarrow
-\text{用多 target 相位约束同一个结构主相位}
-\rightarrow
-\text{输出梁体位移}.
-$$
+当前研究不再把“Kalman 在线修正 beta”作为主创新或主结果。
