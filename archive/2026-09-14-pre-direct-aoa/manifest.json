@@ -1,0 +1,1014 @@
+{
+  "archive": "2026-09-14-pre-direct-aoa",
+  "created_at": "2026-09-14T09:51:11.839347+00:00",
+  "current_entrypoint": "simulation/phase1/run_captured.py: direct_aoa_fixed_beta",
+  "moved_items": [
+    {
+      "group": "legacy_docs",
+      "original": "idea/overall_processing_architecture_legacy_beta.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_docs/idea/overall_processing_architecture_legacy_beta.md"
+    },
+    {
+      "group": "legacy_docs",
+      "original": "reports/phase1_method_and_simulation_report.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_docs/reports/phase1_method_and_simulation_report.md"
+    },
+    {
+      "group": "legacy_docs",
+      "original": "docs/superpowers/plans",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_docs/docs/superpowers/plans"
+    },
+    {
+      "group": "legacy_evidence_docs",
+      "original": "docs/agent_handoff_2026-09-08.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_evidence_docs/docs/agent_handoff_2026-09-08.md"
+    },
+    {
+      "group": "legacy_evidence_docs",
+      "original": "docs/maglev_preexperiment_review_2026-09-08.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_evidence_docs/docs/maglev_preexperiment_review_2026-09-08.md"
+    },
+    {
+      "group": "legacy_outputs",
+      "original": "simulation/outputs/phase1_report_validation",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation"
+    },
+    {
+      "group": "legacy_outputs",
+      "original": "simulation/outputs/phase1_report_extended_validation",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_extended_validation"
+    },
+    {
+      "group": "legacy_outputs",
+      "original": "simulation/outputs/phase1_extended_validation",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_extended_validation"
+    },
+    {
+      "group": "legacy_outputs",
+      "original": "simulation/outputs/maglev_capture_demo",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo"
+    },
+    {
+      "group": "legacy_outputs",
+      "original": "simulation/outputs/maglev_review_2026-09-08",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_review_2026-09-08"
+    },
+    {
+      "group": "legacy_presentations",
+      "original": "reports/thesis_progress_v1.pptx",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1.pptx"
+    },
+    {
+      "group": "legacy_presentations",
+      "original": "reports/thesis_progress_v1.pptx.inspect.ndjson",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1.pptx.inspect.ndjson"
+    },
+    {
+      "group": "legacy_presentations",
+      "original": "reports/thesis_progress_v1_native_equations.pptx",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_native_equations.pptx"
+    },
+    {
+      "group": "legacy_presentations",
+      "original": "reports/thesis_progress_v1_native_equations.pptx.inspect.ndjson",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_native_equations.pptx.inspect.ndjson"
+    },
+    {
+      "group": "legacy_presentations",
+      "original": "reports/thesis_progress_v1_vehicle_event_experiment.pptx",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_vehicle_event_experiment.pptx"
+    },
+    {
+      "group": "legacy_presentations",
+      "original": "reports/thesis_progress_v1_vehicle_event_experiment.pptx.inspect.ndjson",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_vehicle_event_experiment.pptx.inspect.ndjson"
+    },
+    {
+      "group": "legacy_presentations",
+      "original": "reports/thesis_progress_v1_with_conversion_theory.pptx",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_with_conversion_theory.pptx"
+    },
+    {
+      "group": "legacy_presentations",
+      "original": "reports/thesis_progress_v1_with_conversion_theory.pptx.inspect.ndjson",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_with_conversion_theory.pptx.inspect.ndjson"
+    },
+    {
+      "group": "legacy_assets",
+      "original": "reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap.svg"
+    },
+    {
+      "group": "legacy_assets",
+      "original": "reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap_latest_ppt.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap_latest_ppt.svg"
+    },
+    {
+      "group": "legacy_assets",
+      "original": "reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap_ppt.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap_ppt.svg"
+    },
+    {
+      "group": "legacy_assets",
+      "original": "reports/numerical_simulation_assets/vehicle_event_aoa_error_beta_bootstrap.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets/vehicle_event_aoa_error_beta_bootstrap.svg"
+    },
+    {
+      "group": "legacy_assets",
+      "original": "reports/numerical_simulation_assets/target_snr_drop_adaptive_r.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets/target_snr_drop_adaptive_r.svg"
+    },
+    {
+      "group": "legacy_assets",
+      "original": "reports/numerical_simulation_assets_png/target_snr_drop_adaptive_r.png",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets_png/target_snr_drop_adaptive_r.png"
+    },
+    {
+      "group": "legacy_outputs",
+      "original": "simulation/outputs/phase1_validation",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_validation"
+    },
+    {
+      "group": "legacy_outputs",
+      "original": "simulation/outputs/phase1_scenario_diagnostics",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics"
+    },
+    {
+      "group": "legacy_outputs",
+      "original": "simulation/outputs/phase1_multifrequency.npz",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_multifrequency.npz"
+    }
+  ],
+  "files": [
+    {
+      "original": "idea/overall_processing_architecture_legacy_beta.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_docs/idea/overall_processing_architecture_legacy_beta.md",
+      "bytes": 24820,
+      "sha256": "4f2137b7098f805876e728b45e5001e710e4e96174574eb5cbf8a28f42b3f88d"
+    },
+    {
+      "original": "reports/phase1_method_and_simulation_report.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_docs/reports/phase1_method_and_simulation_report.md",
+      "bytes": 39902,
+      "sha256": "83c1d6b48b16925b532431e02578dfbb2b0e9b061f1216dc855a988f4b20f343"
+    },
+    {
+      "original": "docs/superpowers/plans/2026-06-15-phase1-simulation-validation.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_docs/docs/superpowers/plans/2026-06-15-phase1-simulation-validation.md",
+      "bytes": 64344,
+      "sha256": "0d030200b48c7c90d23b13bf8a31db5020e4eebff4a4de3fd3ddb75fea7e11d6"
+    },
+    {
+      "original": "docs/superpowers/plans/2026-06-16-measured-bridge-phase1-scenario.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_docs/docs/superpowers/plans/2026-06-16-measured-bridge-phase1-scenario.md",
+      "bytes": 26976,
+      "sha256": "fad3b9f9b5d0c00dcf2ed1eb982ebea282fde2935c5061ac0b1de270adf32ddd"
+    },
+    {
+      "original": "docs/superpowers/plans/2026-06-26-beta-numerical-adaptation.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_docs/docs/superpowers/plans/2026-06-26-beta-numerical-adaptation.md",
+      "bytes": 18288,
+      "sha256": "f5fb3864d620bb62bae34bdbb441a72943777e4761db91ba43f0dc7071fbcb01"
+    },
+    {
+      "original": "docs/superpowers/plans/2026-06-26-phase1-beta-symbol-code-alignment.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_docs/docs/superpowers/plans/2026-06-26-phase1-beta-symbol-code-alignment.md",
+      "bytes": 22124,
+      "sha256": "4995c8ecdc90c2b395c9b989c5dc9fb4a4b5a46b38e129d0798e9e006a8ca894"
+    },
+    {
+      "original": "docs/superpowers/plans/2026-06-29-beta-independent-bootstrap.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_docs/docs/superpowers/plans/2026-06-29-beta-independent-bootstrap.md",
+      "bytes": 17144,
+      "sha256": "26284ff73a308d971a7d084a33d5921e7c7b4a7c2806f1672b895abd1c42cf2d"
+    },
+    {
+      "original": "docs/agent_handoff_2026-09-08.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_evidence_docs/docs/agent_handoff_2026-09-08.md",
+      "bytes": 19268,
+      "sha256": "c70c741c2142a8191b9415b19688c1ab285af10f35bed454137ca142b6f8dc1a"
+    },
+    {
+      "original": "docs/maglev_preexperiment_review_2026-09-08.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_evidence_docs/docs/maglev_preexperiment_review_2026-09-08.md",
+      "bytes": 6810,
+      "sha256": "dc0173fb1cde9639db266efc4374c8e4e2933bc7ac72ea5a66669517a4dc4e49"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_validation/beta_bootstrap_diagnostics.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation/beta_bootstrap_diagnostics.csv",
+      "bytes": 5308,
+      "sha256": "b8b4aeaccb87ac7605655dae6ea38e0536951d691e0ce7b6ec0ed75f6d648dd3"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_validation/feasibility_gates.json",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation/feasibility_gates.json",
+      "bytes": 1093,
+      "sha256": "1c091589b1195cea7e5415d4e95b8ccf79401c212d1e547e887915f0e87670e3"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_validation/frontend_aoa_diagnostics.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation/frontend_aoa_diagnostics.csv",
+      "bytes": 3645,
+      "sha256": "ab716ea48bfeb15e81fcb0332c1cd044f73ef850faa69b005c0c6931b0dac2b1"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_validation/metrics.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation/metrics.csv",
+      "bytes": 9288,
+      "sha256": "252d7ead44849305eff42cbd52bd684c2b6515b5a3b3af62b8d552a04d4478b8"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_validation/plots/aoa_error_bootstrap_beta_bootstrap.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation/plots/aoa_error_bootstrap_beta_bootstrap.svg",
+      "bytes": 61047,
+      "sha256": "bcda1243cdbf693b34ae0659fac791269fd192ed13d9ea594b5b3b04def33884"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_validation/plots/aoa_error_bootstrap_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation/plots/aoa_error_bootstrap_displacement.svg",
+      "bytes": 40163,
+      "sha256": "5c0b71090fbee30727628ca44bb4a8ee93142d9d25a1c68a77b824c995326b74"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_validation/plots/strong_wrapping_phase_correction.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation/plots/strong_wrapping_phase_correction.svg",
+      "bytes": 25740,
+      "sha256": "7a3b2c0fffcf372b533d94cfd6f4309a1787b475f6a8dc2f62e9f17541105fdd"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_validation/plots/target_snr_drop_adaptive_r.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation/plots/target_snr_drop_adaptive_r.svg",
+      "bytes": 50123,
+      "sha256": "cbae5f855809f127b7a2c511397cbdb82d4f8130a1faee3bec475d0c30e1838c"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_validation/summary.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_validation/summary.md",
+      "bytes": 7774,
+      "sha256": "7d4c9147a7987948f81152f5ee11f4e3a99dfbd9100226f15cc4c060caa1b7c4"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_extended_validation/ablation_summary.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_extended_validation/ablation_summary.csv",
+      "bytes": 7736,
+      "sha256": "fab2022e15d97c4dfbbc01a9c50e981cc604947cbefd0a363d15694bdd4c1d74"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_extended_validation/extended_summary.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_extended_validation/extended_summary.md",
+      "bytes": 10517,
+      "sha256": "046c3fb96a0ed4139dbd0be6b6c8c94e67e8e18e61f0ca631c7e91168ef1ad1a"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_extended_validation/monte_carlo_metrics.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_extended_validation/monte_carlo_metrics.csv",
+      "bytes": 27214,
+      "sha256": "3295e1703dda96a2feb1c8002ca4fc741ffa4136b387b7178d742e93fe757c89"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_extended_validation/monte_carlo_summary.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_extended_validation/monte_carlo_summary.csv",
+      "bytes": 5642,
+      "sha256": "acdf1b2800557518c831d1b9697fe23e2a9c3323cc9ed3d7be542e4c5e8f8239"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_extended_validation/sensitivity_frontend.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_extended_validation/sensitivity_frontend.csv",
+      "bytes": 4239,
+      "sha256": "37915044a55dd8a24ed1c8a1d6bbdf16668858a99a876681f8643534ea1f4f76"
+    },
+    {
+      "original": "simulation/outputs/phase1_report_extended_validation/sensitivity_snr.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_report_extended_validation/sensitivity_snr.csv",
+      "bytes": 6645,
+      "sha256": "d81df6024637f92d1a7a115a75d3400ec13d8b343e1edbe73c3de838a8e7a149"
+    },
+    {
+      "original": "simulation/outputs/phase1_extended_validation/ablation_summary.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_extended_validation/ablation_summary.csv",
+      "bytes": 7736,
+      "sha256": "fab2022e15d97c4dfbbc01a9c50e981cc604947cbefd0a363d15694bdd4c1d74"
+    },
+    {
+      "original": "simulation/outputs/phase1_extended_validation/extended_summary.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_extended_validation/extended_summary.md",
+      "bytes": 10517,
+      "sha256": "046c3fb96a0ed4139dbd0be6b6c8c94e67e8e18e61f0ca631c7e91168ef1ad1a"
+    },
+    {
+      "original": "simulation/outputs/phase1_extended_validation/monte_carlo_metrics.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_extended_validation/monte_carlo_metrics.csv",
+      "bytes": 27214,
+      "sha256": "3295e1703dda96a2feb1c8002ca4fc741ffa4136b387b7178d742e93fe757c89"
+    },
+    {
+      "original": "simulation/outputs/phase1_extended_validation/monte_carlo_summary.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_extended_validation/monte_carlo_summary.csv",
+      "bytes": 5642,
+      "sha256": "acdf1b2800557518c831d1b9697fe23e2a9c3323cc9ed3d7be542e4c5e8f8239"
+    },
+    {
+      "original": "simulation/outputs/phase1_extended_validation/sensitivity_frontend.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_extended_validation/sensitivity_frontend.csv",
+      "bytes": 4239,
+      "sha256": "37915044a55dd8a24ed1c8a1d6bbdf16668858a99a876681f8643534ea1f4f76"
+    },
+    {
+      "original": "simulation/outputs/phase1_extended_validation/sensitivity_snr.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_extended_validation/sensitivity_snr.csv",
+      "bytes": 6645,
+      "sha256": "d81df6024637f92d1a7a115a75d3400ec13d8b343e1edbe73c3de838a8e7a149"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/acceleration_mps2.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/acceleration_mps2.npy",
+      "bytes": 96128,
+      "sha256": "875570e4d5f11ac7d33b847e27a043fbbe064321c394a2f6fc34741380c34880"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/acceleration_raw.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/acceleration_raw.npy",
+      "bytes": 48128,
+      "sha256": "7a0c043b908758e33b835d2f8079256cea45bd31d23b84114854ba5298f3e946"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/drdy_monotonic_ns.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/drdy_monotonic_ns.npy",
+      "bytes": 32128,
+      "sha256": "e49bad39774173edadc1a36a574227f27fbd405c23e43c015b7de073f015552c"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/estimated_sample_monotonic_ns.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/estimated_sample_monotonic_ns.npy",
+      "bytes": 32128,
+      "sha256": "221f0eadd3ca1c09dd6b6f94d7029ccbdddf5f21cdcbddc3b6db51f88048c1aa"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/manifest.json",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/manifest.json",
+      "bytes": 4109,
+      "sha256": "f6b6774f57344d1a2e323c5857421a3e9184a81f0e1e75884e10bcc53b5c6c00"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/sample_times_s.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/adxl355/algorithm_input/sample_times_s.npy",
+      "bytes": 32128,
+      "sha256": "94d2abb828c5f238eb06144184116cafcee1e63708c49daf79c457a5f07dfaff"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/algorithm/phase1_result.json",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/algorithm/phase1_result.json",
+      "bytes": 4761,
+      "sha256": "a0b394db621ff83194ec2f4b46384bf6d3323f72ffebb609f172765fa3c6b746"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/algorithm/phase1_result.npz",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/algorithm/phase1_result.npz",
+      "bytes": 273448,
+      "sha256": "6a2ddcc90ecc80cecd1611207ccddbc3f747a7697d019dc69005f1eeb69075b3"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/manifest.json",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/manifest.json",
+      "bytes": 9329,
+      "sha256": "9f2b678409b4d1a006a3965fcc3c351b4e7d0734dfbef3284e5706de16c8f582"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/plots/captured_acceleration.png",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/plots/captured_acceleration.png",
+      "bytes": 152152,
+      "sha256": "ab3b17ff4d700babf51a21c3154831a39ed40719344dc0e28b33ecb3bd994904"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/plots/captured_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/plots/captured_acceleration.svg",
+      "bytes": 116442,
+      "sha256": "45b2492b0745a704505a12e4d471ddcdfb6633ec5dcfa75c4302fcd193bb83dc"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/plots/captured_displacement.png",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/plots/captured_displacement.png",
+      "bytes": 38717,
+      "sha256": "b0873f54885a5ef4d4f8aad4154ab1ee6d3769946c1ccf36d05e2e4be37e7d43"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/plots/captured_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/plots/captured_displacement.svg",
+      "bytes": 15538,
+      "sha256": "63f6a8fb1e308d19e5f397ba6c51150bf3d100519a1b79fa9384aa938703300c"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/plots/captured_displacement_error.png",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/plots/captured_displacement_error.png",
+      "bytes": 84187,
+      "sha256": "4770e653666933dedcbe65eabc0fe1f06198afb35b520f2ba61288acea87c384"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/plots/captured_displacement_error.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/plots/captured_displacement_error.svg",
+      "bytes": 15774,
+      "sha256": "3e001f657661d199d063c499a4b65bfdbec72bc03272d211dce03b68e1e9a616"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/plots/captured_displacement_spectrum.png",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/plots/captured_displacement_spectrum.png",
+      "bytes": 30084,
+      "sha256": "35f3270531d7507322b087ff08e964f5c251ca483bc21b9293e38e48651d2dc7"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/plots/captured_displacement_spectrum.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/plots/captured_displacement_spectrum.svg",
+      "bytes": 9085,
+      "sha256": "d231a8689541e87aba5df7ccef1d9ab57936cc1b6234027071d2e932322f6fc9"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/radar/algorithm_input/adc_cube.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/radar/algorithm_input/adc_cube.npy",
+      "bytes": 6553728,
+      "sha256": "9dc5e6318c9d6ca2e928bf916c4d3de17c76ea44e53269912c7c123df3bb4530"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/radar/algorithm_input/chirp_cube.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/radar/algorithm_input/chirp_cube.npy",
+      "bytes": 104857728,
+      "sha256": "e167dbb0e0da2b9d56798b25828555e5bc255d99ff1fee7ae6fe0afd4f89003a"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/radar/algorithm_input/frame_times_s.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/radar/algorithm_input/frame_times_s.npy",
+      "bytes": 3328,
+      "sha256": "9a28b083989bcbdf66b566830c4dd9199e9c4fa4425c3121756eb9f9399e7977"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/radar/algorithm_input/manifest.json",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/radar/algorithm_input/manifest.json",
+      "bytes": 5202,
+      "sha256": "d2c4199b940ac7431a6f23a80b9125208591991bea177f5f82f2946e1e5ee006"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/radar_adc_sample_monotonic_ns.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/radar_adc_sample_monotonic_ns.npy",
+      "bytes": 3328,
+      "sha256": "563ac30a81901d34aa71a77adf6eb8a5c13fec9c98dde6cc5afc3b579ed23bce"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/radar_reference_monotonic_ns.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/radar_reference_monotonic_ns.npy",
+      "bytes": 3328,
+      "sha256": "0b7ce5522ba69aebb423792193a3102dbf2b0cbec628218e4402171be062779b"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/truth_acceleration_mps2.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/truth_acceleration_mps2.npy",
+      "bytes": 32128,
+      "sha256": "5e74f0acba9fedc3e575b4fcca1970621579fddd05cdc241ade06d5f96491f75"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/truth_adxl_time_ns.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/truth_adxl_time_ns.npy",
+      "bytes": 32128,
+      "sha256": "221f0eadd3ca1c09dd6b6f94d7029ccbdddf5f21cdcbddc3b6db51f88048c1aa"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/truth_displacement_m.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/truth_displacement_m.npy",
+      "bytes": 3328,
+      "sha256": "a2370241c9b9bcb43a9927597eaea7552604c3a9cf413b5173113bbb8f4e2c83"
+    },
+    {
+      "original": "simulation/outputs/maglev_capture_demo/truth_time_ns.npy",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_capture_demo/truth_time_ns.npy",
+      "bytes": 3328,
+      "sha256": "563ac30a81901d34aa71a77adf6eb8a5c13fec9c98dde6cc5afc3b579ed23bce"
+    },
+    {
+      "original": "simulation/outputs/maglev_review_2026-09-08/adaptive_beta.json",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_review_2026-09-08/adaptive_beta.json",
+      "bytes": 8369,
+      "sha256": "abd7c90b6ef3be44322482b561699d4293acdd9e00ca31d858b1ae89de043919"
+    },
+    {
+      "original": "simulation/outputs/maglev_review_2026-09-08/adaptive_beta.npz",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_review_2026-09-08/adaptive_beta.npz",
+      "bytes": 271606,
+      "sha256": "c0e0ddcf6796c9ea27f7372fca978d4c51ccd9b9ffee8c3c5059555c84cb7c4c"
+    },
+    {
+      "original": "simulation/outputs/maglev_review_2026-09-08/evidence.json",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_review_2026-09-08/evidence.json",
+      "bytes": 5513,
+      "sha256": "f56752a4b2c4836da33a1b47ae581151ad07b66faab2be84162674c387f70dc2"
+    },
+    {
+      "original": "simulation/outputs/maglev_review_2026-09-08/fixed_beta.json",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_review_2026-09-08/fixed_beta.json",
+      "bytes": 5653,
+      "sha256": "a3364fa76263b4c40eea8c32b8256d3f83c6722bcad5960cecc6b6267d3db3f4"
+    },
+    {
+      "original": "simulation/outputs/maglev_review_2026-09-08/fixed_beta.npz",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_review_2026-09-08/fixed_beta.npz",
+      "bytes": 273448,
+      "sha256": "6a2ddcc90ecc80cecd1611207ccddbc3f747a7697d019dc69005f1eeb69075b3"
+    },
+    {
+      "original": "simulation/outputs/maglev_review_2026-09-08/target_beta_diagnostics.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/maglev_review_2026-09-08/target_beta_diagnostics.csv",
+      "bytes": 1172,
+      "sha256": "eca1b299067d26354a72bd2b67514d9cd072584beea8b858999ceaaa2219eae0"
+    },
+    {
+      "original": "reports/thesis_progress_v1.pptx",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1.pptx",
+      "bytes": 1005363,
+      "sha256": "dafd783f7765fc6024fd758f4ce0194275c26e26bf46ccdaccaa410609b06868"
+    },
+    {
+      "original": "reports/thesis_progress_v1.pptx.inspect.ndjson",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1.pptx.inspect.ndjson",
+      "bytes": 77322,
+      "sha256": "fbc659ea6a5cd40e4c7e1661ac31358be81ee0c6d5a70d95c887d0b99b2a2263"
+    },
+    {
+      "original": "reports/thesis_progress_v1_native_equations.pptx",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_native_equations.pptx",
+      "bytes": 3310866,
+      "sha256": "fe6cc20bf9c4d3c02a0bd01b486d9cfe23ca9e1536f7d0389456d40e35af2453"
+    },
+    {
+      "original": "reports/thesis_progress_v1_native_equations.pptx.inspect.ndjson",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_native_equations.pptx.inspect.ndjson",
+      "bytes": 92112,
+      "sha256": "97e9305f32429b72640f1d0a3f21373b837abf00bb4789ec39c8ac0636c1bedc"
+    },
+    {
+      "original": "reports/thesis_progress_v1_vehicle_event_experiment.pptx",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_vehicle_event_experiment.pptx",
+      "bytes": 2707257,
+      "sha256": "e968c4d9bf68b875128bad7340cdc262546768d7982a0177de55271fa3b9baca"
+    },
+    {
+      "original": "reports/thesis_progress_v1_vehicle_event_experiment.pptx.inspect.ndjson",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_vehicle_event_experiment.pptx.inspect.ndjson",
+      "bytes": 112242,
+      "sha256": "b0cbfceb530b4ddb9001babe2e5bc3f1d53221ae4ef5f2cb91a773fa6125257a"
+    },
+    {
+      "original": "reports/thesis_progress_v1_with_conversion_theory.pptx",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_with_conversion_theory.pptx",
+      "bytes": 3012643,
+      "sha256": "fd2558a5896513ee87e4817fee9fa6f2c91f0c8668099f073e30b9b4ae36a75b"
+    },
+    {
+      "original": "reports/thesis_progress_v1_with_conversion_theory.pptx.inspect.ndjson",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_presentations/reports/thesis_progress_v1_with_conversion_theory.pptx.inspect.ndjson",
+      "bytes": 90199,
+      "sha256": "b1be9420b1fb3b1e46da220bcb80c5b078d30a4fd1d911bf3cd8811bb3308bda"
+    },
+    {
+      "original": "reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap.svg",
+      "bytes": 47291,
+      "sha256": "94829b4792f88620023bcb323669b21a34dc951f75259f0fcf3c90baadf64a05"
+    },
+    {
+      "original": "reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap_latest_ppt.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap_latest_ppt.svg",
+      "bytes": 47427,
+      "sha256": "f6c75a0b655bbdda8e4cd8c41745e8326a8eb79d8ede98377024ed48f221bb6e"
+    },
+    {
+      "original": "reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap_ppt.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets/aoa_error_bootstrap_beta_bootstrap_ppt.svg",
+      "bytes": 47336,
+      "sha256": "070cb25d5255220388a8f5bac373febed55e60af50af4ccfd4be091bd6cd10be"
+    },
+    {
+      "original": "reports/numerical_simulation_assets/vehicle_event_aoa_error_beta_bootstrap.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets/vehicle_event_aoa_error_beta_bootstrap.svg",
+      "bytes": 47296,
+      "sha256": "7bb8b31a207e6432af3039707ffe9cd6cad1e9e2aa49a788f46298d5f7e7d6b4"
+    },
+    {
+      "original": "reports/numerical_simulation_assets/target_snr_drop_adaptive_r.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets/target_snr_drop_adaptive_r.svg",
+      "bytes": 348731,
+      "sha256": "5656624e9c0c75b534440ff872d5f312ea158a12a5a953dcda23c42053e0b773"
+    },
+    {
+      "original": "reports/numerical_simulation_assets_png/target_snr_drop_adaptive_r.png",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_assets/reports/numerical_simulation_assets_png/target_snr_drop_adaptive_r.png",
+      "bytes": 54858,
+      "sha256": "289b507f334fe9409362140fb359b18f200dddcffce36c260261a3b67f170be0"
+    },
+    {
+      "original": "simulation/outputs/phase1_validation/beta_bootstrap_diagnostics.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_validation/beta_bootstrap_diagnostics.csv",
+      "bytes": 5308,
+      "sha256": "b8b4aeaccb87ac7605655dae6ea38e0536951d691e0ce7b6ec0ed75f6d648dd3"
+    },
+    {
+      "original": "simulation/outputs/phase1_validation/feasibility_gates.json",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_validation/feasibility_gates.json",
+      "bytes": 1093,
+      "sha256": "1c091589b1195cea7e5415d4e95b8ccf79401c212d1e547e887915f0e87670e3"
+    },
+    {
+      "original": "simulation/outputs/phase1_validation/frontend_aoa_diagnostics.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_validation/frontend_aoa_diagnostics.csv",
+      "bytes": 3645,
+      "sha256": "ab716ea48bfeb15e81fcb0332c1cd044f73ef850faa69b005c0c6931b0dac2b1"
+    },
+    {
+      "original": "simulation/outputs/phase1_validation/metrics.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_validation/metrics.csv",
+      "bytes": 11341,
+      "sha256": "16904dab937fc8c7e7d21e341403ec24a966edd5539bb8480de993f5a42c52f1"
+    },
+    {
+      "original": "simulation/outputs/phase1_validation/plots/aoa_error_bootstrap_beta_bootstrap.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_validation/plots/aoa_error_bootstrap_beta_bootstrap.svg",
+      "bytes": 61047,
+      "sha256": "bcda1243cdbf693b34ae0659fac791269fd192ed13d9ea594b5b3b04def33884"
+    },
+    {
+      "original": "simulation/outputs/phase1_validation/plots/aoa_error_bootstrap_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_validation/plots/aoa_error_bootstrap_displacement.svg",
+      "bytes": 47391,
+      "sha256": "4d8005c796a8557e3f432f830096a38d8fb2b113bde270cfc6165669b2cb25ca"
+    },
+    {
+      "original": "simulation/outputs/phase1_validation/plots/strong_wrapping_phase_correction.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_validation/plots/strong_wrapping_phase_correction.svg",
+      "bytes": 25740,
+      "sha256": "7a3b2c0fffcf372b533d94cfd6f4309a1787b475f6a8dc2f62e9f17541105fdd"
+    },
+    {
+      "original": "simulation/outputs/phase1_validation/plots/target_snr_drop_adaptive_r.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_validation/plots/target_snr_drop_adaptive_r.svg",
+      "bytes": 50123,
+      "sha256": "cbae5f855809f127b7a2c511397cbdb82d4f8130a1faee3bec475d0c30e1838c"
+    },
+    {
+      "original": "simulation/outputs/phase1_validation/summary.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_validation/summary.md",
+      "bytes": 9259,
+      "sha256": "e5845bebd451b865a827c2e108445eb42097434cea54717dc29d63f18659c529"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/aoa_error_bootstrap_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/aoa_error_bootstrap_frequency_acceleration.svg",
+      "bytes": 6429,
+      "sha256": "4f7f3f1f43f2f69e5d58871bd37cccb0845a2b7825e29f789e19a3ec03c5fd38"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/aoa_error_bootstrap_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/aoa_error_bootstrap_frequency_displacement.svg",
+      "bytes": 6426,
+      "sha256": "3555be9393e8400d83140f1f90c4ac7daed55900b6fa99741fc1b4e056227520"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/aoa_error_bootstrap_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/aoa_error_bootstrap_time_acceleration.svg",
+      "bytes": 11258,
+      "sha256": "626609a00e34ba495afc36d90d72859d8d3c628821ab0ad89c2e5cff02f0f0c9"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/aoa_error_bootstrap_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/aoa_error_bootstrap_time_displacement.svg",
+      "bytes": 11287,
+      "sha256": "410a30f2bc64100342bb6399b5a05b3ac5035e868011402dd17da2f3401f0dd6"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_maglev_modal_response_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_maglev_modal_response_frequency_acceleration.svg",
+      "bytes": 7137,
+      "sha256": "d43af40d925cc9d9867a5efc77d27e7ac5d6797d6c1154409604d9c7520e8ff6"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_maglev_modal_response_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_maglev_modal_response_frequency_displacement.svg",
+      "bytes": 7138,
+      "sha256": "29619ed84a51e1e126c2a1a575562ad00b11825e925e336c74b12c9236e980f7"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_maglev_modal_response_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_maglev_modal_response_time_acceleration.svg",
+      "bytes": 18292,
+      "sha256": "3124c858660cdeb839d3050248fd12a87c611c10eefd9e626e5f8411f5263e6b"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_maglev_modal_response_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_maglev_modal_response_time_displacement.svg",
+      "bytes": 18296,
+      "sha256": "689f92e24e1818b3edf12333bf7648a3df5b96034dab4b82d7d31f1e8d49779c"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmshm_adjacent_range_clutter_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmshm_adjacent_range_clutter_frequency_acceleration.svg",
+      "bytes": 6449,
+      "sha256": "221e355598b9e75cdb112b24d856662ec9388d01c3f3168af70e2141f8462125"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmshm_adjacent_range_clutter_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmshm_adjacent_range_clutter_frequency_displacement.svg",
+      "bytes": 6446,
+      "sha256": "8c2478b3392afdcbea89b499c69cfb10ba5f46aa145ecdaa75952e45a00618e6"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmshm_adjacent_range_clutter_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmshm_adjacent_range_clutter_time_acceleration.svg",
+      "bytes": 11278,
+      "sha256": "118bc6b1f9fd3b226fcb0349d1da4132d0a7fb932c4313e3ec7d8b7579a3a4e4"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmshm_adjacent_range_clutter_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmshm_adjacent_range_clutter_time_displacement.svg",
+      "bytes": 11307,
+      "sha256": "3bfd365ff648cc9e8b96fc23cdedeac8708bd210be5763e3f89b34ae3f45a3b2"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmwbats_same_range_aliasing_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmwbats_same_range_aliasing_frequency_acceleration.svg",
+      "bytes": 6448,
+      "sha256": "f502a57d3673573a34d56fc849ef043b5141e2ca2f2ad3e7cad6981d0230b729"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmwbats_same_range_aliasing_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmwbats_same_range_aliasing_frequency_displacement.svg",
+      "bytes": 6445,
+      "sha256": "e558b8b400244c1ea2dae93b1fe4cd43ab4e2b30c8cce162650f7f4137779ea5"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmwbats_same_range_aliasing_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmwbats_same_range_aliasing_time_acceleration.svg",
+      "bytes": 11277,
+      "sha256": "7159f2f0ea8f66d964fee3c05ebcc636f4d412595963c6914d849f89c64ab086"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmwbats_same_range_aliasing_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/literature_mmwbats_same_range_aliasing_time_displacement.svg",
+      "bytes": 11306,
+      "sha256": "c9d48c52aa3dd6650e126696c792bd5c54f47df86d586e1da84ba6f92bb8c206"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/low_snr_multitarget_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/low_snr_multitarget_frequency_acceleration.svg",
+      "bytes": 6429,
+      "sha256": "b45d025479a6884d1f46aea0994d014a91637734225e8db2d078272bf99998ea"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/low_snr_multitarget_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/low_snr_multitarget_frequency_displacement.svg",
+      "bytes": 6426,
+      "sha256": "2ad6d689adadadb4b42fd63f957bf22c306731c8148f00bd55c4c0003bfc9611"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/low_snr_multitarget_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/low_snr_multitarget_time_acceleration.svg",
+      "bytes": 11258,
+      "sha256": "0a17d5d1a8b60c79768aa78eb597956d2805f5521e89faa1c5df79896899991b"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/low_snr_multitarget_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/low_snr_multitarget_time_displacement.svg",
+      "bytes": 11287,
+      "sha256": "2b8f37f1c33eb561a5b58d4f5210aacd981cecb6aadcee4edf4288368ebfc475"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/ma2023_balanced_good_targets_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/ma2023_balanced_good_targets_frequency_acceleration.svg",
+      "bytes": 6438,
+      "sha256": "e993b672a9885a730b5107164e3afe54bd9dbc4554c1d98b582ab5a1432fdf33"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/ma2023_balanced_good_targets_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/ma2023_balanced_good_targets_frequency_displacement.svg",
+      "bytes": 6435,
+      "sha256": "2b7ff997cb79dd05237972266346bb14f2f6a049df781d3eccb40def4e5fc2d1"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/ma2023_balanced_good_targets_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/ma2023_balanced_good_targets_time_acceleration.svg",
+      "bytes": 11308,
+      "sha256": "a9de9fb8dadead07a39d6e719e33aaf66248e75ad953ba42fdf39fd891b2c64c"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/ma2023_balanced_good_targets_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/ma2023_balanced_good_targets_time_displacement.svg",
+      "bytes": 11274,
+      "sha256": "f8b33f03283908eb6421568e5a698fded35a7147fb0f8ac65a257efc1738910f"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/measured_bridge_point4_transverse_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/measured_bridge_point4_transverse_frequency_acceleration.svg",
+      "bytes": 7141,
+      "sha256": "47dd0f9461f331fc228fe89cbd1e692de41d749e7e30c3b01c1d4b02c97c9eee"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/measured_bridge_point4_transverse_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/measured_bridge_point4_transverse_frequency_displacement.svg",
+      "bytes": 7138,
+      "sha256": "206aacfa85eb6178505da35a1d8c170f0885b222c6ee5971a4d039aece6ae21c"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/measured_bridge_point4_transverse_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/measured_bridge_point4_transverse_time_acceleration.svg",
+      "bytes": 9915,
+      "sha256": "de7f8917903d27126bfbd3ed689e773131c58e553604e4c4337fec828ff668bc"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/measured_bridge_point4_transverse_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/measured_bridge_point4_transverse_time_displacement.svg",
+      "bytes": 9857,
+      "sha256": "b95f6a3a84580ee14dc8c70c60cfea9bb5b37ef52cdc1776bded99c196d758a9"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/mixed_scatterer_rangebin_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/mixed_scatterer_rangebin_frequency_acceleration.svg",
+      "bytes": 6434,
+      "sha256": "a348eeb194b1dcf0ff27c6fbf55ee3e39ebc2cb307e1ac69e644ed4ed505472b"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/mixed_scatterer_rangebin_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/mixed_scatterer_rangebin_frequency_displacement.svg",
+      "bytes": 6431,
+      "sha256": "289a0745e566d9d6214ee3d6890fc1128e3663ac60b872f435527adb3af7685e"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/mixed_scatterer_rangebin_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/mixed_scatterer_rangebin_time_acceleration.svg",
+      "bytes": 11263,
+      "sha256": "11c39e8d73e920fc2a6ff1e2be40e60f3c3d64ee83e59279e9bd4104a9c18726"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/mixed_scatterer_rangebin_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/mixed_scatterer_rangebin_time_displacement.svg",
+      "bytes": 11292,
+      "sha256": "2e163ba27655808d310ffb2671b35a3a77029763a3422f1b50b2397e26c5dab7"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/nominal_multifrequency_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/nominal_multifrequency_frequency_acceleration.svg",
+      "bytes": 6432,
+      "sha256": "5cfd6b9578ec1e441011dc968ae8939c40489e09424088cd48d0c3f4f4f7279c"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/nominal_multifrequency_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/nominal_multifrequency_frequency_displacement.svg",
+      "bytes": 6429,
+      "sha256": "cd56b16b16ea0737ea76b2efeb4d471bc27a64bbe5844a5a38cda3bcfdc2bf3e"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/nominal_multifrequency_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/nominal_multifrequency_time_acceleration.svg",
+      "bytes": 11261,
+      "sha256": "37a2bf6088e0ec3a5f3ba209caa5a6e09fcfd1ada36b01cfdf3fe782b9db5f79"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/nominal_multifrequency_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/nominal_multifrequency_time_displacement.svg",
+      "bytes": 11290,
+      "sha256": "1b1ac0cb9c100ea8e5eb67396a588bb6a87f572369f518aa44a2149a436f4a0c"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/same_range_far_angles_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/same_range_far_angles_frequency_acceleration.svg",
+      "bytes": 6431,
+      "sha256": "c6bd9565ccf253fc8793d781085e290a3b278500f1f611d27a4fb41ddab32ab3"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/same_range_far_angles_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/same_range_far_angles_frequency_displacement.svg",
+      "bytes": 6428,
+      "sha256": "e1e6b9ca0c49b50e536523b079ea832d8c27d884766cc283c72f972b0addb9de"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/same_range_far_angles_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/same_range_far_angles_time_acceleration.svg",
+      "bytes": 11261,
+      "sha256": "ad63b95e47d4b891b174cd4147fa196b7dee0cc253150c814cf462b146fdfaa6"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/same_range_far_angles_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/same_range_far_angles_time_displacement.svg",
+      "bytes": 11289,
+      "sha256": "6650e109b1e5b81a28d04d84e4523be0a3977a514bec2cedf3b98fc85baabcca"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/strong_wrapping_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/strong_wrapping_frequency_acceleration.svg",
+      "bytes": 6421,
+      "sha256": "4db26db528bb6d5063b8f93a5ddfb03f953fc2cd2313b5c699776a3c0f8bb953"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/strong_wrapping_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/strong_wrapping_frequency_displacement.svg",
+      "bytes": 6420,
+      "sha256": "6026b3341082b3a5c599d7da8bbf9295b09fb71ae8a6b3c3be729f50c41c412d"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/strong_wrapping_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/strong_wrapping_time_acceleration.svg",
+      "bytes": 11266,
+      "sha256": "8cdd58feef95c8c532ad070515b294002b9725234090f87e6a15fde4e46adaf6"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/strong_wrapping_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/strong_wrapping_time_displacement.svg",
+      "bytes": 11290,
+      "sha256": "4e97742dbe6da9b7ff9a7729f3a8144036a264f969f54c311c8acc8ee3cff852"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/target_dropout_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/target_dropout_frequency_acceleration.svg",
+      "bytes": 6424,
+      "sha256": "35f2d77f7368e726eddb6d845b1bfc4f0326c8079cfa9a51f9322fe5c5c26c7f"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/target_dropout_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/target_dropout_frequency_displacement.svg",
+      "bytes": 6421,
+      "sha256": "8fe16e8a1f489aeda03a24f4797bff24f3eb7711b3c195b7c4439bd3f217ca22"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/target_dropout_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/target_dropout_time_acceleration.svg",
+      "bytes": 11253,
+      "sha256": "cf58d9a942ae0d72290d10ce03c96e6ff416f0176e0efa5e28b93e897de32bb9"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/target_dropout_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/target_dropout_time_displacement.svg",
+      "bytes": 11282,
+      "sha256": "55ec570b64e904c723c439c6b829f08f60e9fcad453c71e1d1054a9d6e922fac"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/target_snr_drop_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/target_snr_drop_frequency_acceleration.svg",
+      "bytes": 6425,
+      "sha256": "e56b7493c28f2cd51e3a347261b5c1690e33536683b37f4c4b75b6ee7e3c8498"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/target_snr_drop_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/target_snr_drop_frequency_displacement.svg",
+      "bytes": 6422,
+      "sha256": "4efeb748d28ceda0aab9750b8ebb83f5cba7e1d4177c05bc9241d994b8cfbfda"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/target_snr_drop_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/target_snr_drop_time_acceleration.svg",
+      "bytes": 11254,
+      "sha256": "4cfd6a0803accf9a07059c6d9ae3e1ed083e4a2684bf2aa3f6c2da648d2d2f86"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/target_snr_drop_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/target_snr_drop_time_displacement.svg",
+      "bytes": 11283,
+      "sha256": "cbb8725bb8eb7344d717ffdb743c971cb268673922ee2e4ab84d67c93003e44d"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/vehicle_event_nonstationary_frequency_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/vehicle_event_nonstationary_frequency_acceleration.svg",
+      "bytes": 6437,
+      "sha256": "120a2ff26cc887d0b9244abb03c94a8f65af3346b084fb07cd431efd153813d8"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/vehicle_event_nonstationary_frequency_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/vehicle_event_nonstationary_frequency_displacement.svg",
+      "bytes": 6434,
+      "sha256": "1bf42dcfed9099e2b47d13b54f6e7393bf598b892ed09c7541450fde9c1814a3"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/vehicle_event_nonstationary_time_acceleration.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/vehicle_event_nonstationary_time_acceleration.svg",
+      "bytes": 11302,
+      "sha256": "9a1046107347294075239661d63ca23bda5567ef6fa630eb360e40d24c89ffa6"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/plots/vehicle_event_nonstationary_time_displacement.svg",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/plots/vehicle_event_nonstationary_time_displacement.svg",
+      "bytes": 11315,
+      "sha256": "f916bfcf9e495e4a87c4b92e33112b8b3be0fe13ce5b94e7aeb0f87e10f8dc29"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/scenario_parameters.csv",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/scenario_parameters.csv",
+      "bytes": 5086,
+      "sha256": "9390d1af517fd313e91bac161c81e980d40a0dcdb619cdf3e386aff663bbf014"
+    },
+    {
+      "original": "simulation/outputs/phase1_scenario_diagnostics/summary.md",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_scenario_diagnostics/summary.md",
+      "bytes": 5735,
+      "sha256": "7cd0d8304f7986c01b3c70173e8ebf743bf069ecbb2c6f626e4b77ffc595bf53"
+    },
+    {
+      "original": "simulation/outputs/phase1_multifrequency.npz",
+      "archived": "archive/2026-09-14-pre-direct-aoa/legacy_outputs/simulation/outputs/phase1_multifrequency.npz",
+      "bytes": 116764,
+      "sha256": "b61bbf4204faaec5c1845beebd2e0284d573b352efb43e2b74dbe3b739b69ed5"
+    }
+  ]
+}

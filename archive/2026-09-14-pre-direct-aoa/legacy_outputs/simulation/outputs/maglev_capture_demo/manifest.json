@@ -1,0 +1,296 @@
+{
+  "algorithm_contract": {
+    "cold_start_duration_s": 0.2,
+    "displacement_reference": "cold_start_mean",
+    "truth_evaluation": "cold_start_relative_displacement"
+  },
+  "algorithm_ready": false,
+  "arrays": {
+    "radar_adc_sample_monotonic_ns": {
+      "axes": [
+        "radar_frame"
+      ],
+      "dtype": "int64",
+      "file": "radar_adc_sample_monotonic_ns.npy",
+      "shape": [
+        400
+      ]
+    },
+    "radar_reference_monotonic_ns": {
+      "axes": [
+        "radar_frame"
+      ],
+      "dtype": "int64",
+      "file": "radar_reference_monotonic_ns.npy",
+      "shape": [
+        400
+      ]
+    },
+    "truth_acceleration_mps2": {
+      "axes": [
+        "adxl_sample"
+      ],
+      "dtype": "float64",
+      "file": "truth_acceleration_mps2.npy",
+      "shape": [
+        4000
+      ]
+    },
+    "truth_adxl_time_ns": {
+      "axes": [
+        "adxl_sample"
+      ],
+      "dtype": "int64",
+      "file": "truth_adxl_time_ns.npy",
+      "shape": [
+        4000
+      ]
+    },
+    "truth_displacement_m": {
+      "axes": [
+        "radar_frame"
+      ],
+      "dtype": "float64",
+      "file": "truth_displacement_m.npy",
+      "shape": [
+        400
+      ]
+    },
+    "truth_time_ns": {
+      "axes": [
+        "radar_frame"
+      ],
+      "dtype": "int64",
+      "file": "truth_time_ns.npy",
+      "shape": [
+        400
+      ]
+    }
+  },
+  "files": {
+    "adxl355_algorithm_input_manifest": "adxl355/algorithm_input/manifest.json",
+    "radar_algorithm_input_manifest": "radar/algorithm_input/manifest.json"
+  },
+  "fusion_ready": false,
+  "hardware_validated": false,
+  "packet_integrity": "synthetic_payload_integrity",
+  "rates_hz": {
+    "adxl355": 1000,
+    "radar": 100
+  },
+  "scenario": "measured_bridge_point4_transverse",
+  "schema": "mmwavecapture.simulation-fusion-input",
+  "schema_version": 1,
+  "seed": 2026,
+  "simulation_ready": true,
+  "source_provenance": {
+    "adxl_drdy_timestamps": {
+      "classification": "synthetic",
+      "measured_drdy": false,
+      "quality": "synthetic_monotonic_schedule"
+    },
+    "adxl_other_axes": {
+      "axes": [
+        "y",
+        "z"
+      ],
+      "classification": "synthetic"
+    },
+    "adxl_structural_axis": {
+      "axis": "x",
+      "classification": "derived",
+      "hardware_error_model": {
+        "adc_bits": 20,
+        "datasheet": "ADXL354/ADXL355 Data Sheet",
+        "datasheet_revision": "Rev. D",
+        "datasheet_specifications": {
+          "cross_axis_sensitivity_percent": 1.0,
+          "digital_filter_group_delay_ms_at_1khz_odr": 1.78,
+          "nonlinearity_percent_full_scale": 0.1,
+          "offset_temperature_max_mg_per_deg_c": 0.15,
+          "sensitivity_lsb_per_g_at_2g": {
+            "maximum": 276480.0,
+            "minimum": 235520.0,
+            "typical": 256000.0
+          },
+          "sensitivity_temperature_percent_per_deg_c": 0.01,
+          "zero_g_offset_mg": {
+            "minimum_maximum_absolute": 75.0,
+            "typical_absolute": 25.0
+          }
+        },
+        "device": "ADXL355",
+        "manufacturer": "Analog Devices",
+        "noise": {
+          "axis_noise_independent": true,
+          "bandwidth_approximation": "engineering rectangular ENBW approximation at ODR/4; the datasheet specifies -1.93 dB at ODR/4, not an exact ENBW",
+          "density_ug_per_sqrt_hz": 22.5,
+          "enabled": true,
+          "equivalent_bandwidth_hz": 250.0,
+          "rms_formula": "density_ug_per_sqrt_hz * 1e-6 * g * sqrt(bandwidth_hz)",
+          "target_rms_mps2": 0.0034887768993101514,
+          "type": "deterministic_fft_band_limited_gaussian"
+        },
+        "not_injected": {
+          "cross_axis_sensitivity": "calibrated before capture",
+          "digital_filter_group_delay": "not injected into the synthetic timeline; the capture manifest declares it uncalibrated and real hardware must measure and compensate this delay before strict fusion",
+          "initial_zero_bias": "calibrated before capture",
+          "nonlinearity": "excluded from the calibrated typical-noise profile",
+          "sensitivity_tolerance": "calibrated before capture",
+          "temperature_drift": "25 degC constant-temperature profile"
+        },
+        "odr_hz": 1000.0,
+        "profile": "datasheet_typical_calibrated_25c",
+        "quantization": {
+          "enabled": true,
+          "mps2_per_lsb": 3.83072265625e-05,
+          "rounding": "nearest_lsb",
+          "signed_code_max": 524287,
+          "signed_code_min": -524288
+        },
+        "range_g": 2,
+        "schema_version": 1,
+        "seed": 2529,
+        "sensitivity_lsb_per_g": 256000.0
+      },
+      "method": "0.2-40 Hz band-limited laser displacement, FFT second derivative, then package-writer ADXL355 hardware model",
+      "noise_classification": "synthetic",
+      "physical_acceleration_bias_mps2": 0.0,
+      "physical_acceleration_drift_mps2": 0.0,
+      "physical_acceleration_noise_std_mps2": 0.0
+    },
+    "laser_displacement": {
+      "channel": "卡3激光位移/3-4",
+      "classification": "measured",
+      "displacement_status": "derived_with_unvalidated_voltage_to_displacement_scale",
+      "event_window_s": [
+        15.33,
+        19.33
+      ],
+      "file": "datafile/20250320test12.tdms",
+      "measured_quantity": "raw_voltage_waveform",
+      "pre_downsample_filter_hz": [
+        0.2,
+        40.0
+      ],
+      "scale_calibrated": false,
+      "scale_m_per_v": 0.001,
+      "sha256": "5d91f8d505f35f63bf5df0f50c6f81ea7f22c893100d83b326a1d2aeac5e84a3",
+      "source_sample_rate_hz": 3000.075001875047
+    },
+    "radar_adc_iq": {
+      "aoa_deg": [
+        5.0,
+        15.0,
+        25.0,
+        35.0,
+        45.0
+      ],
+      "classification": "synthetic",
+      "hardware_error_model": {
+        "channel_mismatch": {
+          "enabled": false,
+          "gain_bound_db": 0.5,
+          "phase_bound_deg": 3.0,
+          "reason": "default profile assumes channel calibration before capture"
+        },
+        "datasheet": "IWR1843 single-chip 76-to-81-GHz FMCW radar sensor data sheet",
+        "datasheet_revision": "Rev. B (SWRS228B)",
+        "dca1000": {
+          "noise_injected": false,
+          "packet_integrity": "complete_or_fail_closed"
+        },
+        "device": "IWR1843",
+        "manufacturer": "Texas Instruments",
+        "profile": "datasheet_typical_calibrated_25c",
+        "quantization": {
+          "enabled": true,
+          "full_scale_mapping": "observed_package_peak_to_positive_full_scale",
+          "i_bits": 12,
+          "pre_quantization_value_per_code": 0.0024220237829442825,
+          "q_bits": 12,
+          "rounding": "nearest_code",
+          "signed_code_max": 2047,
+          "signed_code_min": -2048,
+          "stored_values": "signed_integer_codes_in_complex64"
+        },
+        "receiver_noise": {
+          "component_std": 0.3309662388248747,
+          "enabled": true,
+          "injection_layers": 1,
+          "noise_figure_db_at_77_to_81_ghz": 15.0,
+          "noise_figure_limitation": "NF alone cannot determine ADC SNR without RCS, received power, bandwidth, gain chain, and ADC full-scale mapping",
+          "noise_power": 0.219077302483768,
+          "noise_power_formula": "sum(amplitude^2 / 10^(target_snr_db/10))",
+          "noise_power_semantics": "one common ADC receiver-AWGN power derived from the scenario link-budget assumptions",
+          "target_snr_db": [
+            20.0,
+            17.0,
+            14.0,
+            11.0,
+            8.0
+          ],
+          "target_snr_semantics": "scenario link-budget assumption; not a manufacturer error specification",
+          "type": "complex_receiver_awgn"
+        },
+        "schema_version": 1,
+        "seed": 2727
+      },
+      "inter_tx_skew_modeled": false,
+      "loop_to_loop_motion_modeled": true,
+      "model": "phase1 range-angle ADC frontend",
+      "noise_injection_layers": 1,
+      "snr_db": [
+        20.0,
+        17.0,
+        14.0,
+        11.0,
+        8.0
+      ],
+      "target_range_bins": [
+        8,
+        24,
+        40,
+        56,
+        72
+      ],
+      "within_frame_tdm_motion_compensation": false
+    },
+    "radar_configuration": {
+      "adc_sample_rate_hz": 5209000.0,
+      "adc_samples_per_chirp": 256,
+      "chirp_loops_per_frame": 16,
+      "classification": "configured",
+      "file": "capture_program/examples/configs/iwr1843_hardware_trigger.cfg",
+      "frequency_slope_hz_per_s": 70000000000000.0,
+      "idle_time_s": 7e-05,
+      "minimum_frame_period_s": 0.009,
+      "ramp_end_time_s": 5.714e-05,
+      "rx_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "sha256": "859f68156ce39942b7f5d195ac83bc658ccf54d1b0829178d86d9e878d4b56e8",
+      "start_frequency_hz": 77000000000.0,
+      "trigger_select": 2,
+      "tx_indices": [
+        0,
+        2
+      ]
+    },
+    "radar_timestamps": {
+      "classification": "synthetic",
+      "coherent_aperture_center_offset_ns": 1907100,
+      "effective_observation": "coherent_aperture_center",
+      "measured_adc_time": false,
+      "measured_gpio": false,
+      "quality": "synthetic_coherent_aperture_center",
+      "reference_quality": "synthetic_monotonic_schedule"
+    }
+  },
+  "status": "complete",
+  "sync_mode": "simulation",
+  "timestamp_quality": "synthetic_coherent_aperture_center"
+}

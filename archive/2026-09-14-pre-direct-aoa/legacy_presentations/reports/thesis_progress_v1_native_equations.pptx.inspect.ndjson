@@ -1,0 +1,614 @@
+{"kind":"deck","id":"pr/qg8tka","name":"Deck"}
+{"kind":"layout","layoutId":"/ppt/slideMasters/slideMaster1.xml","name":"","type":"master"}
+{"kind":"layout","layoutId":"/ppt/slideLayouts/slideLayout1.xml","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/2x4nap4r","slide":1,"title":"硕士论文阶段汇报","textShapes":6}
+{"kind":"shape","id":"sh/cvixczed","slide":1,"name":"矩形 1","bbox":[0,0,1280,118]}
+{"kind":"shape","id":"sh/5gbq1ory","slide":1,"name":"矩形 2","bbox":[0,118,1280,7]}
+{"kind":"textbox","id":"sh/udg7adsj","slide":1,"name":"矩形 3","text":"硕士论文阶段汇报","textPreview":"硕士论文阶段汇报","textChars":8,"textLines":1,"bbox":[155,29,360,38]}
+{"kind":"textbox","id":"sh/nyd0z610","slide":1,"name":"矩形 4","text":"基于多源数据融合的\n磁浮轨道振动监测方法研究","textPreview":"基于多源数据融合的 | 磁浮轨道振动监测方法研究","textChars":22,"textLines":2,"bbox":[86,238.6,920,130]}
+{"kind":"shape","id":"sh/cj6tovah","slide":1,"name":"矩形 5","bbox":[95.67,372,520,4]}
+{"kind":"shape","id":"sh/nyd0z610","slide":1,"name":"圆角矩形 9","bbox":[752.27,314.6,170,68]}
+{"kind":"textbox","id":"sh/udg7adsj","slide":1,"name":"矩形 10","text":"倒挂式雷达","textPreview":"倒挂式雷达","textChars":5,"textLines":1,"bbox":[762.27,330.6,150,52]}
+{"kind":"shape","id":"sh/54zidony","slide":1,"name":"圆角矩形 11","bbox":[962.27,314.6,170,68]}
+{"kind":"textbox","id":"sh/cj6tovah","slide":1,"name":"矩形 12","text":"静止散射体","textPreview":"静止散射体","textChars":5,"textLines":1,"bbox":[972.27,330.6,150,52]}
+{"kind":"shape","id":"sh/nap4r65w","slide":1,"name":"右箭头 13","bbox":[917.27,334.6,42,28]}
+{"kind":"shape","id":"sh/upwb2hwf","slide":1,"name":"圆角矩形 14","bbox":[752.27,432.6,170,68]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":1,"name":"矩形 15","text":"加速度预测","textPreview":"加速度预测","textChars":5,"textLines":1,"bbox":[762.27,452.6,150,52]}
+{"kind":"shape","id":"sh/cvixczed","slide":1,"name":"圆角矩形 16","bbox":[962.27,432.6,170,68]}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":1,"name":"矩形 17","text":"结构主相位","textPreview":"结构主相位","textChars":5,"textLines":1,"bbox":[972.27,452.6,150,52]}
+{"kind":"shape","id":"sh/u18jqh0f","slide":1,"name":"右箭头 18","bbox":[917.27,452.6,42,28]}
+{"kind":"image","id":"im/90je9cvi","slide":1,"name":"图片 22","bbox":[62,24,74,74]}
+{"kind":"notes","id":"nt/2x4nap4r","slide":1,"text":""}
+{"kind":"slide","id":"sl/pg3ex0nu","slide":2,"title":"汇报内容","textShapes":15}
+{"kind":"shape","id":"sh/5o7qpg3e","slide":2,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/g3ex0nux","slide":2,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":2,"name":"矩形 3","text":"汇报内容","textPreview":"汇报内容","textChars":4,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/ylc7u54z","slide":2,"name":"矩形 4","text":"目录","textPreview":"目录","textChars":2,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":2,"name":"矩形 5","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/gr2p8nqx","slide":2,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/rytsvu9k","slide":2,"name":"椭圆 7","bbox":[136.33,193.67,78,78]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":2,"name":"矩形 8","text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[136.33,213.67,78,36]}
+{"kind":"shape","id":"sh/wb2hwfyx","slide":2,"name":"右箭头 9","bbox":[236.33,218.67,78,34]}
+{"kind":"textbox","id":"sh/lwval87e","slide":2,"name":"矩形 10","text":"研究背景与问题定义","textPreview":"研究背景与问题定义","textChars":9,"textLines":1,"bbox":[98.33,313.67,154,56]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":2,"name":"矩形 11","text":"从静态参考点依赖引出倒挂式毫米波雷达测振需求","textPreview":"从静态参考点依赖引出倒挂式毫米波雷达测振需求","textChars":22,"textLines":1,"bbox":[82.33,390.67,186,90]}
+{"kind":"shape","id":"sh/3q5o7qpg","slide":2,"name":"椭圆 12","bbox":[428.33,193.67,78,78]}
+{"kind":"textbox","id":"sh/w3m94fu1","slide":2,"name":"矩形 13","text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[428.33,213.67,78,36]}
+{"kind":"shape","id":"sh/loj2t83i","slide":2,"name":"右箭头 14","bbox":[528.33,218.67,78,34]}
+{"kind":"textbox","id":"sh/ex0nuxc3","slide":2,"name":"矩形 15","text":"毫米波雷达位移测量原理","textPreview":"毫米波雷达位移测量原理","textChars":11,"textLines":1,"bbox":[390.33,313.67,154,56]}
+{"kind":"textbox","id":"sh/3itgfmlk","slide":2,"name":"矩形 16","text":"FMCW 测距、相位微位移、Range-Angle Map","textPreview":"FMCW 测距、相位微位移、Range-Angle Map","textChars":29,"textLines":1,"bbox":[374.33,390.67,186,90]}
+{"kind":"shape","id":"sh/szqtcj6t","slide":2,"name":"椭圆 17","bbox":[720.33,193.67,78,78]}
+{"kind":"textbox","id":"sh/lkjm1cfa","slide":2,"name":"矩形 18","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[720.33,213.67,78,36]}
+{"kind":"shape","id":"sh/lc7u54zi","slide":2,"name":"右箭头 19","bbox":[820.33,218.67,78,34]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":2,"name":"矩形 20","text":"本文方法与关键创新","textPreview":"本文方法与关键创新","textChars":9,"textLines":1,"bbox":[682.33,313.67,154,56]}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":2,"name":"矩形 21","text":"多目标参考点、结构主相位 Kalman、转换系数自举","textPreview":"多目标参考点、结构主相位 Kalman、转换系数自举","textChars":26,"textLines":1,"bbox":[666.33,390.67,186,90]}
+{"kind":"shape","id":"sh/eloj2t83","slide":2,"name":"椭圆 22","bbox":[1012.33,193.67,78,78]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":2,"name":"矩形 23","text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1012.33,213.67,78,36]}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":2,"name":"矩形 24","text":"数据仿真验证","textPreview":"数据仿真验证","textChars":6,"textLines":1,"bbox":[974.33,313.67,154,56]}
+{"kind":"textbox","id":"sh/7u54zido","slide":2,"name":"矩形 25","text":"主场景、对比方法、RMSE 表格与关键图像","textPreview":"主场景、对比方法、RMSE 表格与关键图像","textChars":21,"textLines":1,"bbox":[958.33,390.67,186,90]}
+{"kind":"notes","id":"nt/pg3ex0nu","slide":2,"text":""}
+{"kind":"slide","id":"sl/s72x4nap","slide":3,"title":"研究背景：高精度结构位移监测需要安装在静态参考点","textShapes":19}
+{"kind":"shape","id":"sh/o7qpg3ex","slide":3,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/dsji5sne","slide":3,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/6dcbulwv","slide":3,"name":"矩形 3","text":"研究背景：高精度结构位移监测需要安装在静态参考点","textPreview":"研究背景：高精度结构位移监测需要安装在静态参考点","textChars":24,"textLines":1,"bbox":[58,36,970.2,54]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":3,"name":"矩形 4","text":"研究背景","textPreview":"研究背景","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":3,"name":"矩形 5","text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/d4vmtwra","slide":3,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"textbox","id":"sh/6hcrmhk3","slide":3,"name":"矩形 7","text":"桥梁与磁浮轨道梁位移响应","textPreview":"桥梁与磁浮轨道梁位移响应","textChars":12,"textLines":1,"bbox":[82,135,420,42]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":3,"name":"矩形 8","text":"动态位移直接反映结构刚度、车辆荷载响应与服役状态 \n","textPreview":"动态位移直接反映结构刚度、车辆荷载响应与服役状态  |","textChars":26,"textLines":2,"bbox":[90,196,470,180]}
+{"kind":"shape","id":"sh/vy90je9c","slide":3,"name":"圆角矩形 9","bbox":[645,132,566.8,366]}
+{"kind":"textbox","id":"sh/6dcbulwv","slide":3,"name":"矩形 10","text":"传统位移测量的现场约束","textPreview":"传统位移测量的现场约束","textChars":11,"textLines":1,"bbox":[680,160,430,32]}
+{"kind":"shape","id":"sh/d4vmtwra","slide":3,"name":"矩形 11","bbox":[680,215,125,56]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":3,"name":"矩形 12","text":"方法","textPreview":"方法","textChars":2,"textLines":1,"bbox":[688,223,109,44]}
+{"kind":"shape","id":"sh/vmtwra5g","slide":3,"name":"矩形 13","bbox":[805,215,150,56]}
+{"kind":"textbox","id":"sh/61032lsz","slide":3,"name":"矩形 14","text":"主要依赖","textPreview":"主要依赖","textChars":4,"textLines":1,"bbox":[813,223,134,44]}
+{"kind":"shape","id":"sh/dsji5sne","slide":3,"name":"矩形 15","bbox":[955,215,205,56]}
+{"kind":"textbox","id":"sh/o7qpg3ex","slide":3,"name":"矩形 16","text":"现场局限","textPreview":"现场局限","textChars":4,"textLines":1,"bbox":[963,223,189,44]}
+{"kind":"shape","id":"sh/vahoza1g","slide":3,"name":"矩形 17","bbox":[680,271,125,56]}
+{"kind":"textbox","id":"sh/6tovahoz","slide":3,"name":"矩形 18","text":"激光/LVDT","textPreview":"激光/LVDT","textChars":7,"textLines":1,"bbox":[688,279,109,44]}
+{"kind":"shape","id":"sh/epkzupwb","slide":3,"name":"矩形 19","bbox":[805,271,150,56]}
+{"kind":"textbox","id":"sh/7adsji5s","slide":3,"name":"矩形 20","text":"稳定基准","textPreview":"稳定基准","textChars":4,"textLines":1,"bbox":[813,279,134,44]}
+{"kind":"shape","id":"sh/wval87ed","slide":3,"name":"矩形 21","bbox":[955,271,205,56]}
+{"kind":"textbox","id":"sh/pg3ex0nu","slide":3,"name":"矩形 22","text":"布设空间与安全约束","textPreview":"布设空间与安全约束","textChars":9,"textLines":1,"bbox":[963,279,189,44]}
+{"kind":"shape","id":"sh/e1w7mp0b","slide":3,"name":"矩形 23","bbox":[680,327,125,56]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":3,"name":"矩形 24","text":"视觉测量","textPreview":"视觉测量","textChars":4,"textLines":1,"bbox":[688,335,109,44]}
+{"kind":"shape","id":"sh/w7mp0bi9","slide":3,"name":"矩形 25","bbox":[805,327,150,56]}
+{"kind":"textbox","id":"sh/psfil0rq","slide":3,"name":"矩形 26","text":"固定相机/视线","textPreview":"固定相机/视线","textChars":7,"textLines":1,"bbox":[813,335,134,44]}
+{"kind":"shape","id":"sh/ed8bat47","slide":3,"name":"矩形 27","bbox":[955,327,205,56]}
+{"kind":"textbox","id":"sh/7u54zido","slide":3,"name":"矩形 28","text":"光照、遮挡与标靶","textPreview":"光照、遮挡与标靶","textChars":8,"textLines":1,"bbox":[963,335,189,44]}
+{"kind":"shape","id":"sh/twra5gbq","slide":3,"name":"矩形 29","bbox":[680,383,125,56]}
+{"kind":"textbox","id":"sh/4byhgn29","slide":3,"name":"矩形 30","text":"GNSS/组合","textPreview":"GNSS/组合","textChars":7,"textLines":1,"bbox":[688,391,109,44]}
+{"kind":"shape","id":"sh/bq1oryts","slide":3,"name":"矩形 31","bbox":[805,383,150,56]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":3,"name":"矩形 32","text":"开阔天空/多源","textPreview":"开阔天空/多源","textChars":7,"textLines":1,"bbox":[813,391,134,44]}
+{"kind":"shape","id":"sh/t83itgfm","slide":3,"name":"矩形 33","bbox":[955,383,205,56]}
+{"kind":"textbox","id":"sh/4nap4r65","slide":3,"name":"矩形 34","text":"精度与成本受限","textPreview":"精度与成本受限","textChars":7,"textLines":1,"bbox":[963,391,189,44]}
+{"kind":"shape","id":"sh/b2hwfyxo","slide":3,"name":"圆角矩形 35","bbox":[92,545,1010,70]}
+{"kind":"shape","id":"sh/mhk3q5o7","slide":3,"name":"矩形 36","bbox":[92,545,8,70]}
+{"kind":"textbox","id":"sh/tgfmlkjm","slide":3,"name":"矩形 37","text":"核心矛盾：高精度位移测量通常需要静态参考点，而桥梁现场恰恰难以稳定布设参考点。","textPreview":"核心矛盾：高精度位移测量通常需要静态参考点，而桥梁现场恰恰难以稳定布设参考点。","textChars":39,"textLines":1,"bbox":[112,565,978,50]}
+{"kind":"image","id":"im/byhgn29g","slide":3,"name":"图片 38","bbox":[88.13,295,537,207.93]}
+{"kind":"notes","id":"nt/s72x4nap","slide":3,"text":""}
+{"kind":"slide","id":"sl/val87ed8","slide":4,"title":"倒挂式毫米波雷达：关键挑战","textShapes":21}
+{"kind":"shape","id":"sh/qtcj6tov","slide":4,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/je9cvixc","slide":4,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":4,"name":"矩形 3","text":"倒挂式毫米波雷达：关键挑战","textPreview":"倒挂式毫米波雷达：关键挑战","textChars":13,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/xs72x4na","slide":4,"name":"矩形 4","text":"问题定义","textPreview":"问题定义","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/q1orytsv","slide":4,"name":"矩形 5","text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/fmlkjm1c","slide":4,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/8jqh0fep","slide":4,"name":"矩形 7","bbox":[96,170,420,38]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":4,"name":"矩形 8","text":"梁体 / 磁浮轨道梁","textPreview":"梁体 / 磁浮轨道梁","textChars":10,"textLines":1,"bbox":[110,176,390,28]}
+{"kind":"shape","id":"sh/1w7mp0bi","slide":4,"name":"圆角矩形 9","bbox":[238,218,140,60]}
+{"kind":"textbox","id":"sh/8bat47y1","slide":4,"name":"矩形 10","text":"雷达 +\n加速度计","textPreview":"雷达 + | 加速度计","textChars":9,"textLines":2,"bbox":[252,225,112,44]}
+{"kind":"shape","id":"sh/jqh0fepk","slide":4,"name":"等腰三角形 11","bbox":[58,276.73,494,290.93]}
+{"kind":"shape","id":"sh/q5o7qpg3","slide":4,"name":"椭圆 12","bbox":[135,500,52,52]}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":4,"name":"矩形 13","text":"T1","textPreview":"T1","textChars":2,"textLines":1,"bbox":[135,512,52,24]}
+{"kind":"shape","id":"sh/8nqxs72x","slide":4,"name":"椭圆 14","bbox":[270,458,52,52]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":4,"name":"矩形 15","text":"T2","textPreview":"T2","textChars":2,"textLines":1,"bbox":[270,470,52,24]}
+{"kind":"shape","id":"sh/qh0fepkz","slide":4,"name":"椭圆 16","bbox":[382.93,448,52,52]}
+{"kind":"textbox","id":"sh/1cfa9w3m","slide":4,"name":"矩形 17","text":"T3","textPreview":"T3","textChars":2,"textLines":1,"bbox":[382.93,460,52,24]}
+{"kind":"textbox","id":"sh/crmhk3q5","slide":4,"name":"矩形 18","text":"环境静止散射体作为参考目标","textPreview":"环境静止散射体作为参考目标","textChars":13,"textLines":1,"bbox":[96,575,430,34]}
+{"kind":"shape","id":"sh/sfil0rqd","slide":4,"name":"圆角矩形 19","bbox":[642,138,90,34]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":4,"name":"矩形 20","text":"挑战 1","textPreview":"挑战 1","textChars":4,"textLines":1,"bbox":[650,143.27,74,22]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":4,"name":"矩形 21","text":"同 range bin 多角度混合","textPreview":"同 range bin 多角度混合","textChars":17,"textLines":1,"bbox":[755,137,350,30]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":4,"name":"矩形 22","text":"复数相量叠加后相位再通过拟合得到的LOS转换系数适配性差，导致精度降低。","textPreview":"复数相量叠加后相位再通过拟合得到的LOS转换系数适配性差，导致精度降低。","textChars":36,"textLines":1,"bbox":[755,174,400,51.8]}
+{"kind":"shape","id":"sh/orytsvu9","slide":4,"name":"圆角矩形 23","bbox":[642,250,90,34]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":4,"name":"矩形 24","text":"挑战 2","textPreview":"挑战 2","textChars":4,"textLines":1,"bbox":[650,255.27,74,22]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":4,"name":"矩形 25","text":"target 丢失或退化","textPreview":"target 丢失或退化","textChars":12,"textLines":1,"bbox":[755,249,350,30]}
+{"kind":"textbox","id":"sh/z61032ls","slide":4,"name":"矩形 26","text":"遮挡、低 SNR、移动干扰\n导致精度降低、监测不连续","textPreview":"遮挡、低 SNR、移动干扰 | 导致精度降低、监测不连续","textChars":26,"textLines":2,"bbox":[755,286,400,38]}
+{"kind":"shape","id":"sh/oza1gvy9","slide":4,"name":"圆角矩形 27","bbox":[642,365.53,90,34]}
+{"kind":"textbox","id":"sh/hk3q5o7q","slide":4,"name":"矩形 28","text":"挑战 3","textPreview":"挑战 3","textChars":4,"textLines":1,"bbox":[650,369,74,22]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":4,"name":"矩形 29","text":"phase wrapping","textPreview":"phase wrapping","textChars":14,"textLines":1,"bbox":[755,361,350,30]}
+{"kind":"textbox","id":"sh/e1w7mp0b","slide":4,"name":"矩形 30","text":"毫米级强响应会导致相位跨越多个周期，传统方法无法解决强包裹问题，现有方法的解缠步骤割裂，没能实现处理流程闭环一体化。","textPreview":"毫米级强响应会导致相位跨越多个周期，传统方法无法解决强包裹问题，现有方法的解缠步骤割裂，没能实现处理流程闭环一体化。","textChars":58,"textLines":1,"bbox":[755,398,400,38]}
+{"kind":"shape","id":"sh/psfil0rq","slide":4,"name":"圆角矩形 31","bbox":[642,488.8,90,34]}
+{"kind":"textbox","id":"sh/w7mp0bi9","slide":4,"name":"矩形 32","text":"挑战 4","textPreview":"挑战 4","textChars":4,"textLines":1,"bbox":[650,495.8,74,22]}
+{"kind":"textbox","id":"sh/7adsji5s","slide":4,"name":"矩形 33","text":"LOS转换系数需人工标定","textPreview":"LOS转换系数需人工标定","textChars":12,"textLines":1,"bbox":[755,487.8,350,30]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":4,"name":"矩形 34","text":"传统用法要求target必须垂直于雷达，否则需要自己测量LOS的角度，安装使用非常不方便。","textPreview":"传统用法要求target必须垂直于雷达，否则需要自己测量LOS的角度，安装使用非常不方便。","textChars":45,"textLines":1,"bbox":[755,524.8,400,38]}
+{"kind":"notes","id":"nt/val87ed8","slide":4,"text":""}
+{"kind":"slide","id":"sl/mlkjm1cf","slide":5,"title":"从问题约束引出本文的三组创新设计","textShapes":16}
+{"kind":"shape","id":"sh/ovahoza1","slide":5,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/dg7adsji","slide":5,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/6hcrmhk3","slide":5,"name":"矩形 3","text":"从问题约束引出本文的三组创新设计","textPreview":"从问题约束引出本文的三组创新设计","textChars":16,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":5,"name":"矩形 4","text":"创新点总览","textPreview":"创新点总览","textChars":5,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":5,"name":"矩形 5","text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/d8v6psfi","slide":5,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/6dcbulwv","slide":5,"name":"矩形 7","bbox":[80,150,405,68]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":5,"name":"矩形 8","text":"现场问题","textPreview":"现场问题","textChars":4,"textLines":1,"bbox":[98,162,369,44]}
+{"kind":"shape","id":"sh/nuxc3ylc","slide":5,"name":"矩形 9","bbox":[485,150,395,68]}
+{"kind":"textbox","id":"sh/y90je9cv","slide":5,"name":"矩形 10","text":"本文处理","textPreview":"本文处理","textChars":4,"textLines":1,"bbox":[503,162,359,44]}
+{"kind":"shape","id":"sh/5wjudg7a","slide":5,"name":"矩形 11","bbox":[880,150,245,68]}
+{"kind":"textbox","id":"sh/gbq1oryt","slide":5,"name":"矩形 12","text":"对应创新","textPreview":"对应创新","textChars":4,"textLines":1,"bbox":[898,162,209,44]}
+{"kind":"shape","id":"sh/n29gr2p8","slide":5,"name":"矩形 13","bbox":[80,218,405,104]}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":5,"name":"矩形 14","text":"同一距离单元多角度散射体混合，\ntarget 退化或丢失（挑战 1、2）","textPreview":"同一距离单元多角度散射体混合， | target 退化或丢失（挑战 1、2）","textChars":36,"textLines":2,"bbox":[98,230,369,80]}
+{"kind":"shape","id":"sh/58z25kb6","slide":5,"name":"矩形 15","bbox":[485,218,395,104]}
+{"kind":"textbox","id":"sh/gn29gr2p","slide":5,"name":"矩形 16","text":"Range-Angle 在线参考 target\n提取、筛选与维护","textPreview":"Range-Angle 在线参考 target | 提取、筛选与维护","textChars":32,"textLines":2,"bbox":[503,230,359,80]}
+{"kind":"shape","id":"sh/neloj2t8","slide":5,"name":"矩形 17","bbox":[880,218,245,104]}
+{"kind":"textbox","id":"sh/ytsvu9kn","slide":5,"name":"矩形 18","text":"创新点 1","textPreview":"创新点 1","textChars":5,"textLines":1,"bbox":[898,230,209,80]}
+{"kind":"shape","id":"sh/2x4nap4r","slide":5,"name":"矩形 19","bbox":[80,322,405,104]}
+{"kind":"textbox","id":"sh/vixczed8","slide":5,"name":"矩形 20","text":"强响应相位分支易错，\n单目标 LoS 状态难融多 target（挑战 3）","textPreview":"强响应相位分支易错， | 单目标 LoS 状态难融多 target（挑战 3）","textChars":37,"textLines":2,"bbox":[98,334,369,80]}
+{"kind":"shape","id":"sh/k3q5o7qp","slide":5,"name":"矩形 21","bbox":[485,322,395,104]}
+{"kind":"textbox","id":"sh/donyd0z6","slide":5,"name":"矩形 22","text":"结构主相位多 target Kalman 融合\n+ 预测辅助相位校正","textPreview":"结构主相位多 target Kalman 融合 | + 预测辅助相位校正","textChars":34,"textLines":2,"bbox":[503,334,359,80]}
+{"kind":"shape","id":"sh/6psfil0r","slide":5,"name":"矩形 23","bbox":[880,322,245,104]}
+{"kind":"textbox","id":"sh/val87ed8","slide":5,"name":"矩形 24","text":"创新点 2","textPreview":"创新点 2","textChars":5,"textLines":1,"bbox":[898,334,209,80]}
+{"kind":"shape","id":"sh/kre1w7mp","slide":5,"name":"矩形 25","bbox":[80,426,405,104]}
+{"kind":"textbox","id":"sh/dcbulwva","slide":5,"name":"矩形 26","text":"LoS 转换系数依赖人工测角/标定，\n现场安装与 target 切换不便（挑战 4）","textPreview":"LoS 转换系数依赖人工测角/标定， | 现场安装与 target 切换不便（挑战 4）","textChars":42,"textLines":2,"bbox":[98,438,369,80]}
+{"kind":"shape","id":"sh/2lszqtcj","slide":5,"name":"矩形 27","bbox":[485,426,395,104]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":5,"name":"矩形 28","text":"AoA 几何初值\n+ 转换系数在线自举修正","textPreview":"AoA 几何初值 | + 转换系数在线自举修正","textChars":21,"textLines":2,"bbox":[503,438,359,80]}
+{"kind":"shape","id":"sh/h4byhgn2","slide":5,"name":"矩形 29","bbox":[880,426,245,104]}
+{"kind":"textbox","id":"sh/sji5snel","slide":5,"name":"矩形 30","text":"创新点 3","textPreview":"创新点 3","textChars":5,"textLines":1,"bbox":[898,438,209,80]}
+{"kind":"shape","id":"sh/3ylc7u54","slide":5,"name":"圆角矩形 31","bbox":[145,596,940,56]}
+{"kind":"shape","id":"sh/adsji5sn","slide":5,"name":"矩形 32","bbox":[145,596,8,56]}
+{"kind":"textbox","id":"sh/lszqtcj6","slide":5,"name":"矩形 33","text":"注：逐目标观测权重、自适应观测噪声等机制并入多目标 Kalman 融合框架中展开。","textPreview":"注：逐目标观测权重、自适应观测噪声等机制并入多目标 Kalman 融合框架中展开。","textChars":41,"textLines":1,"bbox":[175,610,880,28]}
+{"kind":"notes","id":"nt/mlkjm1cf","slide":5,"text":""}
+{"kind":"slide","id":"sl/58z25kb6","slide":6,"title":"毫米波雷达位移测量基本原理","textShapes":14}
+{"kind":"shape","id":"sh/ylc7u54z","slide":6,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/r65wjudg","slide":6,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":6,"name":"矩形 3","text":"毫米波雷达位移测量基本原理","textPreview":"毫米波雷达位移测量基本原理","textChars":13,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":6,"name":"矩形 4","text":"基础原理","textPreview":"基础原理","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":6,"name":"矩形 5","text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/nih4byhg","slide":6,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/g7adsji5","slide":6,"name":"圆角矩形 7","bbox":[80,145,325,275]}
+{"kind":"shape","id":"sh/9s36hcrm","slide":6,"name":"椭圆 8","bbox":[198,172,88,88]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":6,"name":"矩形 9","text":"1","textPreview":"1","textChars":1,"textLines":1,"bbox":[198,193,88,40]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":6,"name":"矩形 10","text":"FMCW 测距","textPreview":"FMCW 测距","textChars":7,"textLines":1,"bbox":[114,285,260,34]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":6,"name":"矩形 11","text":"发射线性调频信号，回波拍频用于估计距离单元","textPreview":"发射线性调频信号，回波拍频用于估计距离单元","textChars":21,"textLines":1,"bbox":[114,336,260,56]}
+{"kind":"shape","id":"sh/6hcrmhk3","slide":6,"name":"圆角矩形 12","bbox":[460,145,325,275]}
+{"kind":"shape","id":"sh/dg7adsji","slide":6,"name":"椭圆 13","bbox":[578,172,88,88]}
+{"kind":"textbox","id":"sh/ovahoza1","slide":6,"name":"矩形 14","text":"2","textPreview":"2","textChars":1,"textLines":1,"bbox":[578,193,88,40]}
+{"kind":"textbox","id":"sh/vahoza1g","slide":6,"name":"矩形 15","text":"相位微位移","textPreview":"相位微位移","textChars":5,"textLines":1,"bbox":[494,285,260,34]}
+{"kind":"textbox","id":"sh/6tovahoz","slide":6,"name":"矩形 16","text":"同一目标的斜距微小变化会引起回波相位变化","textPreview":"同一目标的斜距微小变化会引起回波相位变化","textChars":20,"textLines":1,"bbox":[494,336,260,56]}
+{"kind":"shape","id":"sh/dsji5sne","slide":6,"name":"圆角矩形 17","bbox":[840,145,325,275]}
+{"kind":"shape","id":"sh/o7qpg3ex","slide":6,"name":"椭圆 18","bbox":[958,172,88,88]}
+{"kind":"textbox","id":"sh/kjm1cfa9","slide":6,"name":"矩形 19","text":"3","textPreview":"3","textChars":1,"textLines":1,"bbox":[958,193,88,40]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":6,"name":"矩形 20","text":"相位缠绕","textPreview":"相位缠绕","textChars":4,"textLines":1,"bbox":[874,285,260,34]}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":6,"name":"矩形 21","text":"雷达输出主值相位存在周期限制，大位移需要解缠","textPreview":"雷达输出主值相位存在周期限制，大位移需要解缠","textChars":22,"textLines":1,"bbox":[874,336,260,56]}
+{"kind":"shape","id":"sh/r2p8nqxs","slide":6,"name":"圆角矩形 22","bbox":[218,480,844,78]}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":6,"name":"矩形 24","text":"77 GHz 波长约 3.9 mm，\n毫米级位移可能跨越多个相位周期。","textPreview":"77 GHz 波长约 3.9 mm， | 毫米级位移可能跨越多个相位周期。","textChars":35,"textLines":2,"bbox":[610,499,390,46]}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":6,"name":"native-equation-6","text":"Δφ = (4π / λ)Δd","textPreview":"Δφ = (4π / λ)Δd","textChars":15,"textLines":1,"bbox":[330,488,190,50]}
+{"kind":"notes","id":"nt/58z25kb6","slide":6,"text":""}
+{"kind":"slide","id":"sl/0z61032l","slide":7,"title":"ADC 到 Range-Angle Map：多目标参考","textShapes":9}
+{"kind":"shape","id":"sh/x4nap4r6","slide":7,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/8jqh0fep","slide":7,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":7,"name":"矩形 3","text":"ADC 到 Range-Angle Map：多目标参考","textPreview":"ADC 到 Range-Angle Map：多目标参考","textChars":27,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":7,"name":"矩形 4","text":"基础原理","textPreview":"基础原理","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/xczed8v6","slide":7,"name":"矩形 5","text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/8v6psfil","slide":7,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/je9cvixc","slide":7,"name":"圆角矩形 7","bbox":[76,165,160,70]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":7,"name":"矩形 8","text":"ADC cube","textPreview":"ADC cube","textChars":8,"textLines":1,"bbox":[86,175,140,54]}
+{"kind":"shape","id":"sh/svu9knih","slide":7,"name":"右箭头 9","bbox":[242,185,44,28]}
+{"kind":"shape","id":"sh/hgn29gr2","slide":7,"name":"圆角矩形 10","bbox":[286,165,160,70]}
+{"kind":"textbox","id":"sh/ap4r65wj","slide":7,"name":"矩形 11","text":"Range FFT","textPreview":"Range FFT","textChars":9,"textLines":1,"bbox":[296,175,140,54]}
+{"kind":"shape","id":"sh/za1gvy90","slide":7,"name":"右箭头 12","bbox":[452,185,44,28]}
+{"kind":"shape","id":"sh/s36hcrmh","slide":7,"name":"圆角矩形 13","bbox":[496,165,160,70]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":7,"name":"矩形 14","text":"Angle FFT / DBF","textPreview":"Angle FFT / DBF","textChars":15,"textLines":1,"bbox":[506,175,140,54]}
+{"kind":"shape","id":"sh/a1gvy90j","slide":7,"name":"右箭头 15","bbox":[662,185,44,28]}
+{"kind":"shape","id":"sh/zidonyd0","slide":7,"name":"圆角矩形 16","bbox":[706,165,160,70]}
+{"kind":"textbox","id":"sh/s72x4nap","slide":7,"name":"矩形 17","text":"Range-Angle Map","textPreview":"Range-Angle Map","textChars":15,"textLines":1,"bbox":[716,175,140,54]}
+{"kind":"textbox","id":"sh/lszqtcj6","slide":7,"name":"矩形 18","text":"传统 range-bin 方法只保留距离维度，容易混合同距离不同角度散射体\nRange-Angle Map 在距离和角度二维空间检测候选 target\n后续 Kalman 接收的是筛选后的 target wrapped phase，而不是理想真值相位","textPreview":"传统 range-bin 方法只保留距离维度，容易混合同距离不同角度散射体 | Range-Angle Map 在距离和角度二维空间检测候选 target | 后续 Kalman 接收的是筛选后的 target wrapped phase，而不是理想真值相位","textChars":125,"textLines":3,"bbox":[82,295,460,190]}
+{"kind":"shape","id":"sh/pg3ex0nu","slide":7,"name":"圆角矩形 19","bbox":[610,244.73,560,390]}
+{"kind":"textbox","id":"sh/wval87ed","slide":7,"name":"矩形 20","text":"示例：vehicle event 场景下的二维 Range-Angle Map 与候选 target","textPreview":"示例：vehicle event 场景下的二维 Range-Angle Map 与候选 target","textChars":50,"textLines":1,"bbox":[625,600.73,530,34]}
+{"kind":"image","id":"im/cj6tovah","slide":7,"name":"图片 41","bbox":[624,276.81,532,325.85]}
+{"kind":"notes","id":"nt/0z61032l","slide":7,"text":""}
+{"kind":"slide","id":"sl/fu18jqh0","slide":8,"title":"转换系数为何要在 Range-Angle target 上估计","textShapes":19}
+{"kind":"shape","id":"sh/u9knih4b","slide":8,"name":"矩形 1","bbox":[0,0,1280,720]}
+{"kind":"shape","id":"sh/judg7ads","slide":8,"name":"矩形 2","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/c7u54zid","slide":8,"name":"矩形 3","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/1orytsvu","slide":8,"name":"矩形 4","text":"转换系数为何要在 Range-Angle target 上估计","textPreview":"转换系数为何要在 Range-Angle target 上估计","textChars":31,"textLines":1,"bbox":[58,36,900,54]}
+{"kind":"textbox","id":"sh/u18jqh0f","slide":8,"name":"矩形 5","text":"前置理论","textPreview":"前置理论","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":8,"name":"矩形 6","text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/cvixczed","slide":8,"name":"矩形 7","bbox":[58,95,1140,1.2]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":8,"text":"range bin 总相位可能由多个散射体叠加而成；直接拟合得到的转换系数可能只是混合等效系数。","textPreview":"range bin 总相位可能由多个散射体叠加而成；直接拟合得到的转换系数可能只是混合等效系数。","textChars":48,"textLines":1,"bbox":[82,122,1060,34]}
+{"kind":"shape","id":"sh/18jqh0fe","slide":8,"bbox":[78,182,345,250]}
+{"kind":"shape","id":"sh/8nqxs72x","slide":8,"bbox":[78,182,7,250]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":8,"text":"1 复合散射响应","textPreview":"1 复合散射响应","textChars":8,"textLines":1,"bbox":[104,202,293,30]}
+{"kind":"textbox","id":"sh/1w7mp0bi","slide":8,"text":"同一观测单元内的多个散射体具有不同 LoS 投影系数 ηℓ，总相位不是单一物理点相位。","textPreview":"同一观测单元内的多个散射体具有不同 LoS 投影系数 ηℓ，总相位不是单一物理点相位。","textChars":43,"textLines":1,"bbox":[108,348,275,58]}
+{"kind":"shape","id":"sh/8bat47y1","slide":8,"bbox":[458,182,345,250]}
+{"kind":"shape","id":"sh/jqh0fepk","slide":8,"bbox":[458,182,7,250]}
+{"kind":"textbox","id":"sh/q5o7qpg3","slide":8,"text":"2 稳定等效条件","textPreview":"2 稳定等效条件","textChars":8,"textLines":1,"bbox":[484,202,293,30]}
+{"kind":"textbox","id":"sh/c3ylc7u5","slide":8,"text":"角度接近或单一散射体占主导时，观测单元可以作为等效 target 使用，固定转换系数近似有效。","textPreview":"角度接近或单一散射体占主导时，观测单元可以作为等效 target 使用，固定转换系数近似有效。","textChars":47,"textLines":1,"bbox":[488,348,275,58]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":8,"text":"Range-Angle 处理规则","textPreview":"Range-Angle 处理规则","textChars":16,"textLines":1,"bbox":[838,180,330,34]}
+{"kind":"shape","id":"sh/hcrmhk3q","slide":8,"bbox":[838,228,330,84]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":8,"text":"角度近","textPreview":"角度近","textChars":3,"textLines":1,"bbox":[860,240,286,25]}
+{"kind":"textbox","id":"sh/z61032ls","slide":8,"text":"合并为一个等效 angle cluster","textPreview":"合并为一个等效 angle cluster","textChars":21,"textLines":1,"bbox":[860,270,286,34]}
+{"kind":"shape","id":"sh/sfil0rqd","slide":8,"bbox":[838,326,330,84]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":8,"text":"角度远","textPreview":"角度远","textChars":3,"textLines":1,"bbox":[860,338,286,25]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":8,"text":"在 range-angle map 中拆开","textPreview":"在 range-angle map 中拆开","textChars":21,"textLines":1,"bbox":[860,368,286,34]}
+{"kind":"shape","id":"sh/zupwb2hw","slide":8,"bbox":[838,424,330,84]}
+{"kind":"textbox","id":"sh/obm58z25","slide":8,"text":"仍不稳定","textPreview":"仍不稳定","textChars":4,"textLines":1,"bbox":[860,436,286,25]}
+{"kind":"textbox","id":"sh/hwfyxobm","slide":8,"text":"后续质量检查中降权或剔除","textPreview":"后续质量检查中降权或剔除","textChars":12,"textLines":1,"bbox":[860,466,286,34]}
+{"kind":"shape","id":"sh/7u54zido","slide":8,"bbox":[145,548,990,74]}
+{"kind":"shape","id":"sh/ed8bat47","slide":8,"bbox":[145,548,8,74]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":8,"text":"推导结论","textPreview":"推导结论","textChars":4,"textLines":1,"bbox":[173,568,130,30]}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":8,"text":"转换系数不再直接作用于整个 range bin，而应作用于筛选后的 range-angle target。","textPreview":"转换系数不再直接作用于整个 range bin，而应作用于筛选后的 range-angle target。","textChars":53,"textLines":1,"bbox":[310,562,790,40]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":8,"name":"native-equation-8","text":"z_(T)(q) = Σc_(l)exp( - jγη_(l)q),γ = 4π / λ","textPreview":"z_(T)(q) = Σc_(l)exp( - jγη_(l)q),γ = 4π / λ","textChars":44,"textLines":1,"bbox":[100,248,305,70]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":8,"name":"native-equation-8","text":"η₁≈⋯≈η_(L)≈η_(eq)⇒β_(eq)≈1 / η_(eq)","textPreview":"η₁≈⋯≈η_(L)≈η_(eq)⇒β_(eq)≈1 / η_(eq)","textChars":35,"textLines":1,"bbox":[482,252,300,66]}
+{"kind":"notes","id":"nt/fu18jqh0","slide":8,"text":""}
+{"kind":"slide","id":"sl/qh0fepkz","slide":9,"title":"为什么不能只用单 range bin 相位","textShapes":12}
+{"kind":"shape","id":"sh/ovahoza1","slide":9,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/dg7adsji","slide":9,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/6hcrmhk3","slide":9,"name":"矩形 3","text":"为什么不能只用单 range bin 相位","textPreview":"为什么不能只用单 range bin 相位","textChars":21,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":9,"name":"矩形 4","text":"问题动机","textPreview":"问题动机","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":9,"name":"矩形 5","text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/d8v6psfi","slide":9,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/6dcbulwv","slide":9,"name":"圆角矩形 7","bbox":[95,193.8,430,365]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":9,"name":"矩形 8","text":"同一 range bin 内的相干混合","textPreview":"同一 range bin 内的相干混合","textChars":19,"textLines":1,"bbox":[125,221.8,370,36]}
+{"kind":"shape","id":"sh/nuxc3ylc","slide":9,"name":"矩形 9","bbox":[160,276.8,300,46]}
+{"kind":"textbox","id":"sh/y90je9cv","slide":9,"name":"矩形 10","text":"range bin 12","textPreview":"range bin 12","textChars":12,"textLines":1,"bbox":[160,286.8,300,28]}
+{"kind":"shape","id":"sh/5wjudg7a","slide":9,"name":"椭圆 11","bbox":[165,390.33,64,64]}
+{"kind":"textbox","id":"sh/gbq1oryt","slide":9,"name":"矩形 12","text":"0°","textPreview":"0°","textChars":2,"textLines":1,"bbox":[165,408.33,64,24]}
+{"kind":"shape","id":"sh/n29gr2p8","slide":9,"name":"右箭头 13","bbox":[188,354.87,22,23.93]}
+{"kind":"shape","id":"sh/yhgn29gr","slide":9,"name":"椭圆 14","bbox":[260,392.6,64,64]}
+{"kind":"textbox","id":"sh/58z25kb6","slide":9,"name":"矩形 15","text":"25°","textPreview":"25°","textChars":3,"textLines":1,"bbox":[260,410.6,64,24]}
+{"kind":"shape","id":"sh/gn29gr2p","slide":9,"name":"右箭头 16","bbox":[283,353.27,22,28]}
+{"kind":"shape","id":"sh/neloj2t8","slide":9,"name":"椭圆 17","bbox":[355,390.33,64,64]}
+{"kind":"textbox","id":"sh/ytsvu9kn","slide":9,"name":"矩形 18","text":"45°","textPreview":"45°","textChars":3,"textLines":1,"bbox":[355,408.33,64,24]}
+{"kind":"shape","id":"sh/2x4nap4r","slide":9,"name":"右箭头 19","bbox":[381.27,352.53,22,27.93]}
+{"kind":"textbox","id":"sh/vixczed8","slide":9,"name":"矩形 20","text":"单 bin 复数相位来自多个 LoS 投影相位的相干叠加","textPreview":"单 bin 复数相位来自多个 LoS 投影相位的相干叠加","textChars":28,"textLines":1,"bbox":[125,476.73,370,35]}
+{"kind":"textbox","id":"sh/k3q5o7qp","slide":9,"name":"矩形 21","text":"带来的后果","textPreview":"带来的后果","textChars":5,"textLines":1,"bbox":[650,150,260,36]}
+{"kind":"textbox","id":"sh/donyd0z6","slide":9,"name":"矩形 22","text":"最强 range bin 不一定对应稳定物理 target\n同距离不同角度目标会形成 pseudo target\n等效转换系数随散射状态漂移\n强 wrapping 或 target 退化时误差被放大","textPreview":"最强 range bin 不一定对应稳定物理 target | 同距离不同角度目标会形成 pseudo target | 等效转换系数随散射状态漂移 | 强 wrapping 或 target 退化时误差被放大","textChars":99,"textLines":4,"bbox":[660,212,455,220]}
+{"kind":"shape","id":"sh/6psfil0r","slide":9,"name":"圆角矩形 23","bbox":[650,405.33,455,70]}
+{"kind":"shape","id":"sh/val87ed8","slide":9,"name":"矩形 24","bbox":[650,405.33,8,70]}
+{"kind":"textbox","id":"sh/kre1w7mp","slide":9,"name":"矩形 25","text":"因此本文先在 Range-Angle 维度分离 target，再进入结构主相位融合。","textPreview":"因此本文先在 Range-Angle 维度分离 target，再进入结构主相位融合。","textChars":42,"textLines":1,"bbox":[670,412.87,423,50]}
+{"kind":"notes","id":"nt/qh0fepkz","slide":9,"text":""}
+{"kind":"slide","id":"sl/29gr2p8n","slide":10,"title":"创新点 1：Range-Angle 多目标提取与筛选","textShapes":11}
+{"kind":"shape","id":"sh/9gr2p8nq","slide":10,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/gvy90je9","slide":10,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/r2p8nqxs","slide":10,"name":"矩形 3","text":"创新点 1：Range-Angle 多目标提取与筛选","textPreview":"创新点 1：Range-Angle 多目标提取与筛选","textChars":26,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":10,"name":"矩形 4","text":"本文方法","textPreview":"本文方法","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/94fu18jq","slide":10,"name":"矩形 5","text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/kjm1cfa9","slide":10,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/rqd4vmtw","slide":10,"name":"圆角矩形 7","bbox":[70,150,150,70]}
+{"kind":"textbox","id":"sh/25kb6xkf","slide":10,"name":"矩形 8","text":"2D peak\n检测","textPreview":"2D peak | 检测","textChars":10,"textLines":2,"bbox":[80,160,130,54]}
+{"kind":"shape","id":"sh/4fu18jqh","slide":10,"name":"右箭头 9","bbox":[228,172,45,26]}
+{"kind":"shape","id":"sh/x0nuxc3y","slide":10,"name":"圆角矩形 10","bbox":[285,150,150,70]}
+{"kind":"textbox","id":"sh/m94fu18j","slide":10,"name":"矩形 11","text":"近角度\n合并","textPreview":"近角度 | 合并","textChars":6,"textLines":2,"bbox":[295,160,130,54]}
+{"kind":"shape","id":"sh/fu18jqh0","slide":10,"name":"右箭头 12","bbox":[443,172,45,26]}
+{"kind":"shape","id":"sh/83itgfml","slide":10,"name":"圆角矩形 13","bbox":[500,150,150,70]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":10,"name":"矩形 14","text":"远角度\n分离","textPreview":"远角度 | 分离","textChars":6,"textLines":2,"bbox":[510,160,130,54]}
+{"kind":"shape","id":"sh/qxs72x4n","slide":10,"name":"右箭头 15","bbox":[658,172,45,26]}
+{"kind":"shape","id":"sh/fil0rqd4","slide":10,"name":"圆角矩形 16","bbox":[715,150,150,70]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":10,"name":"矩形 17","text":"presence / SNR\n频带筛选","textPreview":"presence / SNR | 频带筛选","textChars":19,"textLines":2,"bbox":[725,160,130,54]}
+{"kind":"shape","id":"sh/xkf6dcbu","slide":10,"name":"右箭头 18","bbox":[873,172,45,26]}
+{"kind":"shape","id":"sh/xczed8v6","slide":10,"name":"圆角矩形 19","bbox":[930,150,150,70]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":10,"name":"矩形 20","text":"selected\ntargets","textPreview":"selected | targets","textChars":16,"textLines":2,"bbox":[940,160,130,54]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":10,"name":"矩形 21","text":"同 range bin 且角度接近的 peak 合并为等效 target\n同 range bin 但角度差较大的 peak 保留为不同 target\n通过 presence、SNR 与结构频带一致性剔除不稳定 target","textPreview":"同 range bin 且角度接近的 peak 合并为等效 target | 同 range bin 但角度差较大的 peak 保留为不同 target | 通过 presence、SNR 与结构频带一致性剔除不稳定 target","textChars":111,"textLines":3,"bbox":[82,260,450,155]}
+{"kind":"shape","id":"sh/qpg3ex0n","slide":10,"name":"圆角矩形 22","bbox":[585,260,580,280]}
+{"kind":"textbox","id":"sh/x4nap4r6","slide":10,"name":"矩形 23","text":"车辆事件场景：候选 target 的在线选择状态","textPreview":"车辆事件场景：候选 target 的在线选择状态","textChars":24,"textLines":1,"bbox":[600,548,550,28]}
+{"kind":"shape","id":"sh/8jqh0fep","slide":10,"name":"圆角矩形 24","bbox":[116,585,950,54]}
+{"kind":"shape","id":"sh/fyxobm58","slide":10,"name":"矩形 25","bbox":[116,585,8,54]}
+{"kind":"textbox","id":"sh/qd4vmtwr","slide":10,"name":"矩形 26","text":"目标筛选目的是过滤掉坏 target 防止进入 Kalman 滤波框架，污染主状态。","textPreview":"目标筛选目的是过滤掉坏 target 防止进入 Kalman 滤波框架，污染主状态。","textChars":42,"textLines":1,"bbox":[136,599,918,34]}
+{"kind":"image","id":"im/e1w7mp0b","slide":10,"name":"图片 50","bbox":[652.78,275,444.44,250]}
+{"kind":"notes","id":"nt/29gr2p8n","slide":10,"text":""}
+{"kind":"slide","id":"sl/re1w7mp0","slide":11,"title":"从单目标 LoS 相位到结构主相位","textShapes":11}
+{"kind":"shape","id":"sh/6tovahoz","slide":11,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/vahoza1g","slide":11,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":11,"name":"矩形 3","text":"从单目标 LoS 相位到结构主相位","textPreview":"从单目标 LoS 相位到结构主相位","textChars":17,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":11,"name":"矩形 4","text":"本文方法","textPreview":"本文方法","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/6hcrmhk3","slide":11,"name":"矩形 5","text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/z25kb6xk","slide":11,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/oj2t83it","slide":11,"name":"圆角矩形 7","bbox":[88,155,470,355]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":11,"name":"矩形 8","text":"Ma-family baseline","textPreview":"Ma-family baseline","textChars":18,"textLines":1,"bbox":[118,185,410,34]}
+{"kind":"textbox","id":"sh/sji5snel","slide":11,"name":"矩形 10","text":"状态表示单个 target 的 LoS 连续相位\n加速度需要映射到该 target 的 LoS 方向\n多 target 需要围绕某一个目标状态组织","textPreview":"状态表示单个 target 的 LoS 连续相位 | 加速度需要映射到该 target 的 LoS 方向 | 多 target 需要围绕某一个目标状态组织","textChars":73,"textLines":3,"bbox":[135,340,360,120]}
+{"kind":"shape","id":"sh/3ylc7u54","slide":11,"name":"圆角矩形 11","bbox":[722,155,470,355]}
+{"kind":"textbox","id":"sh/adsji5sn","slide":11,"name":"矩形 12","text":"本文方法","textPreview":"本文方法","textChars":4,"textLines":1,"bbox":[752,185,410,34]}
+{"kind":"textbox","id":"sh/s72x4nap","slide":11,"name":"矩形 14","text":"状态表示结构主振动方向连续相位\n加速度直接预测结构主相位\n各 target 差异进入观测矩阵 H","textPreview":"状态表示结构主振动方向连续相位 | 加速度直接预测结构主相位 | 各 target 差异进入观测矩阵 H","textChars":48,"textLines":3,"bbox":[770,340,360,120]}
+{"kind":"shape","id":"sh/3m94fu18","slide":11,"name":"右箭头 15","bbox":[584,290,105,42]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":11,"name":"矩形 16","text":"状态物理含义提升","textPreview":"状态物理含义提升","textChars":8,"textLines":1,"bbox":[555,345,160,28]}
+{"kind":"shape","id":"sh/hoza1gvy","slide":11,"name":"圆角矩形 17","bbox":[190,585,900,54]}
+{"kind":"shape","id":"sh/s36hcrmh","slide":11,"name":"矩形 18","bbox":[190,585,8,54]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":11,"name":"矩形 19","text":"关键转变：状态不再依附某个单一 target，而是表示所有 target 共同观测的结构主相位。","textPreview":"关键转变：状态不再依附某个单一 target，而是表示所有 target 共同观测的结构主相位。","textChars":48,"textLines":1,"bbox":[210,599,868,34]}
+{"kind":"textbox","id":"sh/fepkzupw","slide":11,"name":"native-equation-11","text":"x^(Ma) = [φ,(dφ)⁄(dt)]^(T)","textPreview":"x^(Ma) = [φ,(dφ)⁄(dt)]^(T)","textChars":26,"textLines":1,"bbox":[142,252,360,58]}
+{"kind":"textbox","id":"sh/4r65wjud","slide":11,"name":"native-equation-11","text":"x = [Θ,(dΘ)⁄(dt)]^(T)","textPreview":"x = [Θ,(dΘ)⁄(dt)]^(T)","textChars":21,"textLines":1,"bbox":[782,252,360,58]}
+{"kind":"notes","id":"nt/re1w7mp0","slide":11,"text":""}
+{"kind":"slide","id":"sl/4fu18jqh","slide":12,"title":"创新点 2：结构主相位多目标 Kalman 融合","textShapes":13}
+{"kind":"shape","id":"sh/s72x4nap","slide":12,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/lszqtcj6","slide":12,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/adsji5sn","slide":12,"name":"矩形 3","text":"创新点 2：结构主相位多目标 Kalman 融合","textPreview":"创新点 2：结构主相位多目标 Kalman 融合","textChars":24,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/3ylc7u54","slide":12,"name":"矩形 4","text":"本文方法","textPreview":"本文方法","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/sji5snel","slide":12,"name":"矩形 5","text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/h4byhgn2","slide":12,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"textbox","id":"sh/ap4r65wj","slide":12,"name":"矩形 7","text":"多个 target 是同一结构状态的多通道观测","textPreview":"多个 target 是同一结构状态的多通道观测","textChars":23,"textLines":1,"bbox":[90,135,650,34]}
+{"kind":"shape","id":"sh/za1gvy90","slide":12,"name":"圆角矩形 8","bbox":[90,200,495,260]}
+{"kind":"shape","id":"sh/orytsvu9","slide":12,"name":"椭圆 12","bbox":[720,190,70,70]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":12,"name":"矩形 13","text":"T1","textPreview":"T1","textChars":2,"textLines":1,"bbox":[720,212,70,26]}
+{"kind":"shape","id":"sh/a9w3m94f","slide":12,"name":"右箭头 14","bbox":[810,210,86,28]}
+{"kind":"shape","id":"sh/h0fepkzu","slide":12,"name":"椭圆 15","bbox":[720,295,70,70]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":12,"name":"矩形 16","text":"T2","textPreview":"T2","textChars":2,"textLines":1,"bbox":[720,317,70,26]}
+{"kind":"shape","id":"sh/zqtcj6to","slide":12,"name":"右箭头 17","bbox":[810,315,86,28]}
+{"kind":"shape","id":"sh/65wjudg7","slide":12,"name":"椭圆 18","bbox":[720,400,70,70]}
+{"kind":"textbox","id":"sh/ed8bat47","slide":12,"name":"矩形 19","text":"T3","textPreview":"T3","textChars":2,"textLines":1,"bbox":[720,422,70,26]}
+{"kind":"shape","id":"sh/7u54zido","slide":12,"name":"右箭头 20","bbox":[810,420,86,28]}
+{"kind":"shape","id":"sh/wfyxobm5","slide":12,"name":"圆角矩形 21","bbox":[925,270,210,105]}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":12,"name":"矩形 22","text":"结构主相位\nKalman","textPreview":"结构主相位 | Kalman","textChars":12,"textLines":2,"bbox":[946,291,168,64]}
+{"kind":"textbox","id":"sh/eloj2t83","slide":12,"name":"矩形 23","text":"逐目标观测权重位于这里：根据观测质量调整每个 target 的更新权重","textPreview":"逐目标观测权重位于这里：根据观测质量调整每个 target 的更新权重","textChars":35,"textLines":1,"bbox":[685,492,490,48]}
+{"kind":"shape","id":"sh/36hcrmhk","slide":12,"name":"圆角矩形 24","bbox":[158,585,940,54]}
+{"kind":"shape","id":"sh/wra5gbq1","slide":12,"name":"矩形 25","bbox":[158,585,8,54]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":12,"name":"矩形 26","text":"不是多个 target 各自反算位移后平均，而是在相位状态层统一融合。","textPreview":"不是多个 target 各自反算位移后平均，而是在相位状态层统一融合。","textChars":35,"textLines":1,"bbox":[178,599,908,34]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":12,"name":"native-equation-12","text":"z_(i,k) = βᵢΘ_(k) + bᵢ + v_(i,k)","textPreview":"z_(i,k) = βᵢΘ_(k) + bᵢ + v_(i,k)","textChars":32,"textLines":1,"bbox":[118,238,440,66]}
+{"kind":"textbox","id":"sh/bat47y1k","slide":12,"name":"native-equation-12","text":"Hᵢ = [βᵢ,0]","textPreview":"Hᵢ = [βᵢ,0]","textChars":11,"textLines":1,"bbox":[185,326,310,50]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":12,"name":"native-equation-12","text":"Θ_(k) = (4π / λ)δq_(k)","textPreview":"Θ_(k) = (4π / λ)δq_(k)","textChars":22,"textLines":1,"bbox":[198,390,290,48]}
+{"kind":"notes","id":"nt/4fu18jqh","slide":12,"text":""}
+{"kind":"slide","id":"sl/lwval87e","slide":13,"title":"预测辅助相位校正：解决强 wrapping 下的分支选择","textShapes":9}
+{"kind":"shape","id":"sh/l0rqd4vm","slide":13,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/wfyxobm5","slide":13,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/36hcrmhk","slide":13,"name":"矩形 3","text":"预测辅助相位校正：解决强 wrapping 下的分支选择","textPreview":"预测辅助相位校正：解决强 wrapping 下的分支选择","textChars":28,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/eloj2t83","slide":13,"name":"矩形 4","text":"本文方法","textPreview":"本文方法","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":13,"name":"矩形 5","text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/wra5gbq1","slide":13,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/7adsji5s","slide":13,"name":"圆角矩形 7","bbox":[72,138,440,390]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":13,"name":"矩形 8","text":"校正思想","textPreview":"校正思想","textChars":4,"textLines":1,"bbox":[105,168,360,34]}
+{"kind":"textbox","id":"sh/qd4vmtwr","slide":13,"name":"矩形 11","text":"加速度驱动的结构主相位预测先映射到每个 target 的 LoS 相位，再选择 wrapped phase 的最近分支。","textPreview":"加速度驱动的结构主相位预测先映射到每个 target 的 LoS 相位，再选择 wrapped phase 的最近分支。","textChars":60,"textLines":1,"bbox":[112,430,345,62]}
+{"kind":"shape","id":"sh/fyxobm58","slide":13,"name":"圆角矩形 12","bbox":[565,138,600,390]}
+{"kind":"textbox","id":"sh/8v6psfil","slide":13,"name":"矩形 13","text":"strong wrapping 场景：wrapped phase、校正相位与真实 LoS phase 对比","textPreview":"strong wrapping 场景：wrapped phase、校正相位与真实 LoS phase 对比","textChars":53,"textLines":1,"bbox":[590,540,550,28]}
+{"kind":"shape","id":"sh/xczed8v6","slide":13,"name":"圆角矩形 14","bbox":[145,600,990,50]}
+{"kind":"shape","id":"sh/qpg3ex0n","slide":13,"name":"矩形 15","bbox":[145,600,8,50]}
+{"kind":"textbox","id":"sh/fa9w3m94","slide":13,"name":"矩形 16","text":"结果层面：本文方法在 strong wrapping 场景 RMSE 为 0.0143 mm，解缠错误率为 0。","textPreview":"结果层面：本文方法在 strong wrapping 场景 RMSE 为 0.0143 mm，解缠错误率为 0。","textChars":56,"textLines":1,"bbox":[165,614,958,30]}
+{"kind":"textbox","id":"sh/w3m94fu1","slide":13,"name":"native-equation-13","text":"φ_(i,k)⁻ = βᵢΘ_(k)⁻ + bᵢ","textPreview":"φ_(i,k)⁻ = βᵢΘ_(k)⁻ + bᵢ","textChars":24,"textLines":1,"bbox":[105,226,360,62]}
+{"kind":"textbox","id":"sh/3itgfmlk","slide":13,"name":"native-equation-13","text":"z_(i,k)^(corr) = ψ_(i,k) + 2πround((φ_(i,k)⁻ - ψ_(i,k)) / (2π))","textPreview":"z_(i,k)^(corr) = ψ_(i,k) + 2πround((φ_(i,k)⁻ - ψ_(i,k)) / (2π))","textChars":63,"textLines":1,"bbox":[96,300,380,110]}
+{"kind":"image","id":"im/re1w7mp0","slide":13,"name":"图片 30","bbox":[580,168.13,570,327.75]}
+{"kind":"notes","id":"nt/lwval87e","slide":13,"text":""}
+{"kind":"slide","id":"sl/25kb6xkf","slide":14,"title":"创新点 3：AoA 冷启动与转换系数在线自举","textShapes":11}
+{"kind":"shape","id":"sh/kre1w7mp","slide":14,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/dcbulwva","slide":14,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/2x4nap4r","slide":14,"name":"矩形 3","text":"创新点 3：AoA 冷启动与转换系数在线自举","textPreview":"创新点 3：AoA 冷启动与转换系数在线自举","textChars":22,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/vixczed8","slide":14,"name":"矩形 4","text":"本文方法","textPreview":"本文方法","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/k3q5o7qp","slide":14,"name":"矩形 5","text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/donyd0z6","slide":14,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/29gr2p8n","slide":14,"name":"圆角矩形 7","bbox":[75,155,160,74]}
+{"kind":"shape","id":"sh/3ylc7u54","slide":14,"name":"右箭头 9","bbox":[243,178,48,28]}
+{"kind":"shape","id":"sh/adsji5sn","slide":14,"name":"圆角矩形 10","bbox":[295,155,160,74]}
+{"kind":"shape","id":"sh/sji5snel","slide":14,"name":"右箭头 12","bbox":[463,178,48,28]}
+{"kind":"shape","id":"sh/3m94fu18","slide":14,"name":"圆角矩形 13","bbox":[515,155,160,74]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":14,"name":"矩形 14","text":"短窗口 LS\n更新转换系数","textPreview":"短窗口 LS | 更新转换系数","textChars":13,"textLines":2,"bbox":[525,165,140,58]}
+{"kind":"textbox","id":"sh/lszqtcj6","slide":14,"name":"矩形 15","text":"AoA 只提供可启动的几何初值，不作为最终固定转换系数\n校正后的目标观测同时用于 Kalman 更新与转换系数自举\n转换系数不确定时降低对应 target 的观测权重","textPreview":"AoA 只提供可启动的几何初值，不作为最终固定转换系数 | 校正后的目标观测同时用于 Kalman 更新与转换系数自举 | 转换系数不确定时降低对应 target 的观测权重","textChars":83,"textLines":3,"bbox":[80,270,560,150]}
+{"kind":"shape","id":"sh/s72x4nap","slide":14,"name":"圆角矩形 16","bbox":[690,135,500,380]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":14,"name":"矩形 17","text":"AoA 初值误差场景：转换系数在线估计逐步收敛","textPreview":"AoA 初值误差场景：转换系数在线估计逐步收敛","textChars":23,"textLines":1,"bbox":[710,530,460,28]}
+{"kind":"shape","id":"sh/a1gvy90j","slide":14,"name":"圆角矩形 18","bbox":[125,600,1030,50]}
+{"kind":"shape","id":"sh/ylc7u54z","slide":14,"name":"矩形 19","bbox":[125,600,8,50]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":14,"name":"矩形 20","text":"在 AoA 初值误差场景，固定转换系数基线 RMSE 为 0.0540 mm；本文方法 RMSE 为 0.0153 mm。","textPreview":"在 AoA 初值误差场景，固定转换系数基线 RMSE 为 0.0540 mm；本文方法 RMSE 为 0.0153 mm。","textChars":61,"textLines":1,"bbox":[145,614,998,30]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":14,"text":"AoA cold start","textPreview":"AoA cold start","textChars":14,"textLines":1,"bbox":[85,169,140,22]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":14,"text":"预测校正相位","textPreview":"预测校正相位","textChars":6,"textLines":1,"bbox":[305,169,140,22]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":14,"name":"native-equation-14","text":"β_(i,0) = cosθᵢ","textPreview":"β_(i,0) = cosθᵢ","textChars":15,"textLines":1,"bbox":[86,188,138,36]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":14,"name":"native-equation-14","text":"z_(i,k)^(corr)","textPreview":"z_(i,k)^(corr)","textChars":14,"textLines":1,"bbox":[307,188,138,36]}
+{"kind":"image","id":"im/nap4r65w","slide":14,"name":"图片 38","bbox":[705,192.81,470,264.38]}
+{"kind":"notes","id":"nt/25kb6xkf","slide":14,"text":""}
+{"kind":"slide","id":"sl/7y1kre1w","slide":15,"title":"完整算法流程框图","textShapes":18}
+{"kind":"shape","id":"sh/yd0z6103","slide":15,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/rytsvu9k","slide":15,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":15,"name":"矩形 3","text":"完整算法流程框图","textPreview":"完整算法流程框图","textChars":8,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":15,"name":"矩形 4","text":"本文方法","textPreview":"本文方法","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":15,"name":"矩形 5","text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/rmhk3q5o","slide":15,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/g3ex0nux","slide":15,"name":"圆角矩形 7","bbox":[60,140,145,75]}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":15,"name":"矩形 8","text":"Radar ADC","textPreview":"Radar ADC","textChars":9,"textLines":1,"bbox":[70,150,125,59]}
+{"kind":"shape","id":"sh/5gbq1ory","slide":15,"name":"右箭头 9","bbox":[211,164,34,25]}
+{"kind":"shape","id":"sh/cvixczed","slide":15,"name":"圆角矩形 10","bbox":[245,140,145,75]}
+{"kind":"textbox","id":"sh/nap4r65w","slide":15,"name":"矩形 11","text":"Range FFT\nAngle FFT / DBF","textPreview":"Range FFT | Angle FFT / DBF","textChars":25,"textLines":2,"bbox":[255,150,125,59]}
+{"kind":"shape","id":"sh/upwb2hwf","slide":15,"name":"右箭头 12","bbox":[396,164,34,25]}
+{"kind":"shape","id":"sh/54zidony","slide":15,"name":"圆角矩形 13","bbox":[430,140,145,75]}
+{"kind":"textbox","id":"sh/cj6tovah","slide":15,"name":"矩形 14","text":"2D peak\nRange-Angle targets","textPreview":"2D peak | Range-Angle targets","textChars":27,"textLines":2,"bbox":[440,150,125,59]}
+{"kind":"shape","id":"sh/nyd0z610","slide":15,"name":"右箭头 15","bbox":[581,164,34,25]}
+{"kind":"shape","id":"sh/udg7adsj","slide":15,"name":"圆角矩形 16","bbox":[615,140,145,75]}
+{"kind":"textbox","id":"sh/1032lszq","slide":15,"name":"矩形 17","text":"Target selection\npresence / SNR / band","textPreview":"Target selection | presence / SNR / band","textChars":38,"textLines":2,"bbox":[625,150,125,59]}
+{"kind":"shape","id":"sh/cfa9w3m9","slide":15,"name":"右箭头 18","bbox":[766,164,34,25]}
+{"kind":"shape","id":"sh/obm58z25","slide":15,"name":"圆角矩形 19","bbox":[800,140,145,75]}
+{"kind":"shape","id":"sh/65wjudg7","slide":15,"name":"右箭头 21","bbox":[951,164,34,25]}
+{"kind":"shape","id":"sh/zqtcj6to","slide":15,"name":"圆角矩形 22","bbox":[985,140,145,75]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":15,"name":"矩形 23","text":"Structural-main-phase\nKalman","textPreview":"Structural-main-phase | Kalman","textChars":28,"textLines":2,"bbox":[995,150,125,59]}
+{"kind":"shape","id":"sh/hk3q5o7q","slide":15,"name":"圆角矩形 24","bbox":[300,330,190,70]}
+{"kind":"shape","id":"sh/zed8v6ps","slide":15,"name":"圆角矩形 26","bbox":[550,330,190,70]}
+{"kind":"textbox","id":"sh/orytsvu9","slide":15,"name":"矩形 27","text":"Prediction-aided\nphase correction","textPreview":"Prediction-aided | phase correction","textChars":33,"textLines":2,"bbox":[560,340,170,54]}
+{"kind":"shape","id":"sh/hcrmhk3q","slide":15,"name":"圆角矩形 28","bbox":[800,330,190,70]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":15,"name":"矩形 29","text":"转换系数在线自举\n逐目标观测权重","textPreview":"转换系数在线自举 | 逐目标观测权重","textChars":16,"textLines":2,"bbox":[810,340,170,54]}
+{"kind":"shape","id":"sh/ih4byhgn","slide":15,"name":"圆角矩形 30","bbox":[1015,330,170,70]}
+{"kind":"shape","id":"sh/0nuxc3yl","slide":15,"name":"右箭头 32","bbox":[488,350,55,28]}
+{"kind":"shape","id":"sh/7ed8bat4","slide":15,"name":"右箭头 33","bbox":[738,350,55,28]}
+{"kind":"shape","id":"sh/itgfmlkj","slide":15,"name":"右箭头 34","bbox":[992,350,30,28]}
+{"kind":"shape","id":"sh/pkzupwb2","slide":15,"name":"矩形 35","bbox":[1070,215,2,112]}
+{"kind":"shape","id":"sh/0z61032l","slide":15,"name":"矩形 36","bbox":[645,215,2,112]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":15,"name":"矩形 37","text":"Kalman 闭环：预测、分支校正、更新、转换系数与观测权重更新","textPreview":"Kalman 闭环：预测、分支校正、更新、转换系数与观测权重更新","textChars":32,"textLines":1,"bbox":[322,450,710,34]}
+{"kind":"shape","id":"sh/i5sneloj","slide":15,"name":"圆角矩形 38","bbox":[182,520,910,70]}
+{"kind":"textbox","id":"sh/ahoza1gv","slide":15,"name":"矩形 39","text":"Phase 1 验证重点：synthetic ADC / Range-Angle 前端 + selected targets + 结构主相位融合的完整算法闭环","textPreview":"Phase 1 验证重点：synthetic ADC / Range-Angle 前端 + selected targets + 结构主相位融合的完整算法闭环","textChars":79,"textLines":1,"bbox":[220,540,840,30]}
+{"kind":"textbox","id":"sh/32lszqtc","slide":15,"text":"AoA cold start","textPreview":"AoA cold start","textChars":14,"textLines":1,"bbox":[810,154,125,22]}
+{"kind":"textbox","id":"sh/l87ed8ba","slide":15,"text":"Acceleration input","textPreview":"Acceleration input","textChars":18,"textLines":1,"bbox":[310,344,170,22]}
+{"kind":"textbox","id":"sh/3ex0nuxc","slide":15,"text":"Displacement output","textPreview":"Displacement output","textChars":19,"textLines":1,"bbox":[1025,344,150,22]}
+{"kind":"textbox","id":"sh/3itgfmlk","slide":15,"name":"native-equation-15","text":"β_(i,0)","textPreview":"β_(i,0)","textChars":7,"textLines":1,"bbox":[812,180,122,28]}
+{"kind":"textbox","id":"sh/tovahoza","slide":15,"name":"native-equation-15","text":"x⁻ = Ax + Ba","textPreview":"x⁻ = Ax + Ba","textChars":12,"textLines":1,"bbox":[310,365,170,28]}
+{"kind":"textbox","id":"sh/032lszqt","slide":15,"name":"native-equation-15","text":"δq = (λ / (4π))Θ","textPreview":"δq = (λ / (4π))Θ","textChars":16,"textLines":1,"bbox":[1025,365,150,28]}
+{"kind":"notes","id":"nt/7y1kre1w","slide":15,"text":""}
+{"kind":"slide","id":"sl/8z25kb6x","slide":16,"title":"Phase 1 仿真实验设计","textShapes":26}
+{"kind":"shape","id":"sh/pg3ex0nu","slide":16,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/wval87ed","slide":16,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/7mp0bi9s","slide":16,"name":"矩形 3","text":"Phase 1 仿真实验设计","textPreview":"Phase 1 仿真实验设计","textChars":14,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/e1w7mp0b","slide":16,"name":"矩形 4","text":"仿真验证","textPreview":"仿真验证","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/psfil0rq","slide":16,"name":"矩形 5","text":"16","textPreview":"16","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/w7mp0bi9","slide":16,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"textbox","id":"sh/7u54zido","slide":16,"name":"矩形 7","text":"六个主实验场景","textPreview":"六个主实验场景","textChars":7,"textLines":1,"bbox":[80,132,410,34]}
+{"kind":"shape","id":"sh/ed8bat47","slide":16,"name":"圆角矩形 8","bbox":[80,185,250,78]}
+{"kind":"textbox","id":"sh/onyd0z61","slide":16,"name":"矩形 9","text":"文献主频磁浮梁","textPreview":"文献主频磁浮梁","textChars":7,"textLines":1,"bbox":[96,199,218,24]}
+{"kind":"textbox","id":"sh/d8v6psfi","slide":16,"name":"矩形 10","text":"7.7737 / 11.5742 / 26.5642 Hz","textPreview":"7.7737 / 11.5742 / 26.5642 Hz","textChars":29,"textLines":1,"bbox":[96,228,218,22]}
+{"kind":"shape","id":"sh/6hcrmhk3","slide":16,"name":"圆角矩形 11","bbox":[365,185,250,78]}
+{"kind":"textbox","id":"sh/z25kb6xk","slide":16,"name":"矩形 12","text":"强相位缠绕","textPreview":"强相位缠绕","textChars":5,"textLines":1,"bbox":[381,199,218,24]}
+{"kind":"textbox","id":"sh/ovahoza1","slide":16,"name":"矩形 13","text":"约 5 mm 峰值位移","textPreview":"约 5 mm 峰值位移","textChars":11,"textLines":1,"bbox":[381,228,218,22]}
+{"kind":"shape","id":"sh/dg7adsji","slide":16,"name":"圆角矩形 14","bbox":[80,290,250,78]}
+{"kind":"textbox","id":"sh/6tovahoz","slide":16,"name":"矩形 15","text":"同 range 远角度","textPreview":"同 range 远角度","textChars":11,"textLines":1,"bbox":[96,304,218,24]}
+{"kind":"textbox","id":"sh/vahoza1g","slide":16,"name":"矩形 16","text":"验证 angle-bin 分离","textPreview":"验证 angle-bin 分离","textChars":15,"textLines":1,"bbox":[96,333,218,22]}
+{"kind":"shape","id":"sh/o7qpg3ex","slide":16,"name":"圆角矩形 17","bbox":[365,290,250,78]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":16,"name":"矩形 18","text":"AoA 初值误差","textPreview":"AoA 初值误差","textChars":8,"textLines":1,"bbox":[381,304,218,24]}
+{"kind":"textbox","id":"sh/hk3q5o7q","slide":16,"name":"矩形 19","text":"验证转换系数自举","textPreview":"验证转换系数自举","textChars":8,"textLines":1,"bbox":[381,333,218,22]}
+{"kind":"shape","id":"sh/oza1gvy9","slide":16,"name":"圆角矩形 20","bbox":[80,395,250,78]}
+{"kind":"textbox","id":"sh/zed8v6ps","slide":16,"name":"矩形 21","text":"target SNR drop","textPreview":"target SNR drop","textChars":15,"textLines":1,"bbox":[96,409,218,24]}
+{"kind":"textbox","id":"sh/6xkf6dcb","slide":16,"name":"矩形 22","text":"验证坏目标降权","textPreview":"验证坏目标降权","textChars":7,"textLines":1,"bbox":[96,438,218,22]}
+{"kind":"shape","id":"sh/hwfyxobm","slide":16,"name":"圆角矩形 23","bbox":[365,395,250,78]}
+{"kind":"textbox","id":"sh/obm58z25","slide":16,"name":"矩形 24","text":"车辆非平稳事件","textPreview":"车辆非平稳事件","textChars":7,"textLines":1,"bbox":[381,409,218,24]}
+{"kind":"textbox","id":"sh/zqtcj6to","slide":16,"name":"矩形 25","text":"验证完整闭环运行","textPreview":"验证完整闭环运行","textChars":8,"textLines":1,"bbox":[381,438,218,22]}
+{"kind":"textbox","id":"sh/65wjudg7","slide":16,"name":"矩形 26","text":"默认主对比方法","textPreview":"默认主对比方法","textChars":7,"textLines":1,"bbox":[725,132,370,34]}
+{"kind":"shape","id":"sh/h0fepkzu","slide":16,"name":"圆角矩形 27","bbox":[725,188,415,58]}
+{"kind":"textbox","id":"sh/sfil0rqd","slide":16,"name":"矩形 28","text":"Range-bin Itoh","textPreview":"Range-bin Itoh","textChars":14,"textLines":1,"bbox":[744,198,380,20]}
+{"kind":"textbox","id":"sh/ixczed8v","slide":16,"name":"矩形 29","text":"传统 range-bin phase + Itoh unwrap","textPreview":"传统 range-bin phase + Itoh unwrap","textChars":32,"textLines":1,"bbox":[744,222,380,20]}
+{"kind":"shape","id":"sh/bi9s36hc","slide":16,"name":"圆角矩形 30","bbox":[725,271,415,58]}
+{"kind":"textbox","id":"sh/032lszqt","slide":16,"name":"矩形 31","text":"Ma2026 reproduction","textPreview":"Ma2026 reproduction","textChars":19,"textLines":1,"bbox":[744,281,380,20]}
+{"kind":"textbox","id":"sh/tovahoza","slide":16,"name":"矩形 32","text":"正式 Ma-family staged baseline","textPreview":"正式 Ma-family staged baseline","textChars":28,"textLines":1,"bbox":[744,305,380,20]}
+{"kind":"shape","id":"sh/i9s36hcr","slide":16,"name":"圆角矩形 33","bbox":[725,354,415,58]}
+{"kind":"textbox","id":"sh/bulwval8","slide":16,"name":"矩形 34","text":"Selected AoA fixed coefficient","textPreview":"Selected AoA fixed coefficient","textChars":30,"textLines":1,"bbox":[744,364,380,20]}
+{"kind":"textbox","id":"sh/0fepkzup","slide":16,"name":"矩形 35","text":"筛选 target + 固定 AoA 转换系数","textPreview":"筛选 target + 固定 AoA 转换系数","textChars":23,"textLines":1,"bbox":[744,388,380,20]}
+{"kind":"shape","id":"sh/p0bi9s36","slide":16,"name":"圆角矩形 36","bbox":[725,437,415,58]}
+{"kind":"textbox","id":"sh/idonyd0z","slide":16,"name":"矩形 37","text":"Proposed full pipeline","textPreview":"Proposed full pipeline","textChars":22,"textLines":1,"bbox":[744,447,380,20]}
+{"kind":"textbox","id":"sh/byhgn29g","slide":16,"name":"矩形 38","text":"本文完整链路","textPreview":"本文完整链路","textChars":6,"textLines":1,"bbox":[744,471,380,20]}
+{"kind":"shape","id":"sh/fil0rqd4","slide":16,"name":"圆角矩形 39","bbox":[155,600,970,50]}
+{"kind":"shape","id":"sh/qxs72x4n","slide":16,"name":"矩形 40","bbox":[155,600,8,50]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":16,"name":"矩形 41","text":"边界：当前为算法级 synthetic ADC / Range-Angle 验证，不声称完成真实 IWR1843 ADC 实测闭环。","textPreview":"边界：当前为算法级 synthetic ADC / Range-Angle 验证，不声称完成真实 IWR1843 ADC 实测闭环。","textChars":66,"textLines":1,"bbox":[175,614,938,30]}
+{"kind":"notes","id":"nt/8z25kb6x","slide":16,"text":""}
+{"kind":"slide","id":"sl/54zidony","slide":17,"title":"实验结果：主场景 RMSE 对比","textShapes":40}
+{"kind":"shape","id":"sh/x0nuxc3y","slide":17,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/4fu18jqh","slide":17,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/fil0rqd4","slide":17,"name":"矩形 3","text":"实验结果：主场景 RMSE 对比","textPreview":"实验结果：主场景 RMSE 对比","textChars":16,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/qxs72x4n","slide":17,"name":"矩形 4","text":"仿真验证","textPreview":"仿真验证","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":17,"name":"矩形 5","text":"17","textPreview":"17","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/83itgfml","slide":17,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/fepkzupw","slide":17,"name":"矩形 7","bbox":[78,145,310,61]}
+{"kind":"textbox","id":"sh/mtwra5gb","slide":17,"name":"矩形 8","text":"场景","textPreview":"场景","textChars":2,"textLines":1,"bbox":[86,153,294,49]}
+{"kind":"shape","id":"sh/oj2t83it","slide":17,"name":"矩形 9","bbox":[388,145,160,61]}
+{"kind":"textbox","id":"sh/d4vmtwra","slide":17,"name":"矩形 10","text":"range-bin","textPreview":"range-bin","textChars":9,"textLines":1,"bbox":[396,153,144,49]}
+{"kind":"shape","id":"sh/6dcbulwv","slide":17,"name":"矩形 11","bbox":[548,145,160,61]}
+{"kind":"textbox","id":"sh/vy90je9c","slide":17,"name":"矩形 12","text":"Ma2026","textPreview":"Ma2026","textChars":6,"textLines":1,"bbox":[556,153,144,49]}
+{"kind":"shape","id":"sh/o7qpg3ex","slide":17,"name":"矩形 13","bbox":[708,145,160,61]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":17,"name":"矩形 14","text":"fixed coefficient","textPreview":"fixed coefficient","textChars":17,"textLines":1,"bbox":[716,153,144,49]}
+{"kind":"shape","id":"sh/61032lsz","slide":17,"name":"矩形 15","bbox":[868,145,180,61]}
+{"kind":"textbox","id":"sh/vmtwra5g","slide":17,"name":"矩形 16","text":"本文方法","textPreview":"本文方法","textChars":4,"textLines":1,"bbox":[876,153,164,49]}
+{"kind":"shape","id":"sh/ovahoza1","slide":17,"name":"矩形 17","bbox":[78,206,310,61]}
+{"kind":"textbox","id":"sh/dg7adsji","slide":17,"name":"矩形 18","text":"文献主频磁浮梁","textPreview":"文献主频磁浮梁","textChars":7,"textLines":1,"bbox":[86,214,294,49]}
+{"kind":"shape","id":"sh/1kre1w7m","slide":17,"name":"矩形 19","bbox":[388,206,160,61]}
+{"kind":"textbox","id":"sh/c3ylc7u5","slide":17,"name":"矩形 20","text":"0.0136","textPreview":"0.0136","textChars":6,"textLines":1,"bbox":[396,214,144,49]}
+{"kind":"shape","id":"sh/ji5snelo","slide":17,"name":"矩形 21","bbox":[548,206,160,61]}
+{"kind":"textbox","id":"sh/uxc3ylc7","slide":17,"name":"矩形 22","text":"0.0122","textPreview":"0.0122","textChars":6,"textLines":1,"bbox":[556,214,144,49]}
+{"kind":"shape","id":"sh/1cfa9w3m","slide":17,"name":"矩形 23","bbox":[708,206,160,61]}
+{"kind":"textbox","id":"sh/crmhk3q5","slide":17,"name":"矩形 24","text":"0.0589","textPreview":"0.0589","textChars":6,"textLines":1,"bbox":[716,214,144,49]}
+{"kind":"shape","id":"sh/j6tovaho","slide":17,"name":"矩形 25","bbox":[868,206,180,61]}
+{"kind":"textbox","id":"sh/ulwval87","slide":17,"name":"矩形 26","text":"0.0087","textPreview":"0.0087","textChars":6,"textLines":1,"bbox":[876,214,164,49]}
+{"kind":"shape","id":"sh/18jqh0fe","slide":17,"name":"矩形 27","bbox":[78,267,310,61]}
+{"kind":"textbox","id":"sh/8nqxs72x","slide":17,"name":"矩形 28","text":"强相位缠绕","textPreview":"强相位缠绕","textChars":5,"textLines":1,"bbox":[86,275,294,49]}
+{"kind":"shape","id":"sh/mhk3q5o7","slide":17,"name":"矩形 29","bbox":[388,267,160,61]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":17,"name":"矩形 30","text":"5.5477","textPreview":"5.5477","textChars":6,"textLines":1,"bbox":[396,275,144,49]}
+{"kind":"shape","id":"sh/4nap4r65","slide":17,"name":"矩形 31","bbox":[548,267,160,61]}
+{"kind":"textbox","id":"sh/t83itgfm","slide":17,"name":"矩形 32","text":"0.0341","textPreview":"0.0341","textChars":6,"textLines":1,"bbox":[556,275,144,49]}
+{"kind":"shape","id":"sh/m58z25kb","slide":17,"name":"矩形 33","bbox":[708,267,160,61]}
+{"kind":"textbox","id":"sh/bq1oryts","slide":17,"name":"矩形 34","text":"12.3861","textPreview":"12.3861","textChars":7,"textLines":1,"bbox":[716,275,144,49]}
+{"kind":"shape","id":"sh/4byhgn29","slide":17,"name":"矩形 35","bbox":[868,267,180,61]}
+{"kind":"textbox","id":"sh/twra5gbq","slide":17,"name":"矩形 36","text":"0.0143","textPreview":"0.0143","textChars":6,"textLines":1,"bbox":[876,275,164,49]}
+{"kind":"shape","id":"sh/m1cfa9w3","slide":17,"name":"矩形 37","bbox":[78,328,310,61]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":17,"name":"矩形 38","text":"同距离远角度","textPreview":"同距离远角度","textChars":6,"textLines":1,"bbox":[86,336,294,49]}
+{"kind":"shape","id":"sh/vixczed8","slide":17,"name":"矩形 39","bbox":[388,328,160,61]}
+{"kind":"textbox","id":"sh/2x4nap4r","slide":17,"name":"矩形 40","text":"0.0745","textPreview":"0.0745","textChars":6,"textLines":1,"bbox":[396,336,144,49]}
+{"kind":"shape","id":"sh/donyd0z6","slide":17,"name":"矩形 41","bbox":[548,328,160,61]}
+{"kind":"textbox","id":"sh/k3q5o7qp","slide":17,"name":"矩形 42","text":"0.0906","textPreview":"0.0906","textChars":6,"textLines":1,"bbox":[556,336,144,49]}
+{"kind":"shape","id":"sh/val87ed8","slide":17,"name":"矩形 43","bbox":[708,328,160,61]}
+{"kind":"textbox","id":"sh/6psfil0r","slide":17,"name":"矩形 44","text":"0.0514","textPreview":"0.0514","textChars":6,"textLines":1,"bbox":[716,336,144,49]}
+{"kind":"shape","id":"sh/dcbulwva","slide":17,"name":"矩形 45","bbox":[868,328,180,61]}
+{"kind":"textbox","id":"sh/kre1w7mp","slide":17,"name":"矩形 46","text":"0.0140","textPreview":"0.0140","textChars":6,"textLines":1,"bbox":[876,336,164,49]}
+{"kind":"shape","id":"sh/v6psfil0","slide":17,"name":"矩形 47","bbox":[78,389,310,61]}
+{"kind":"textbox","id":"sh/2lszqtcj","slide":17,"name":"矩形 48","text":"AoA 初值误差","textPreview":"AoA 初值误差","textChars":8,"textLines":1,"bbox":[86,397,294,49]}
+{"kind":"shape","id":"sh/gbq1oryt","slide":17,"name":"矩形 49","bbox":[388,389,160,61]}
+{"kind":"textbox","id":"sh/5wjudg7a","slide":17,"name":"矩形 50","text":"0.0167","textPreview":"0.0167","textChars":6,"textLines":1,"bbox":[396,397,144,49]}
+{"kind":"shape","id":"sh/y90je9cv","slide":17,"name":"矩形 51","bbox":[548,389,160,61]}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":17,"name":"矩形 52","text":"0.0386","textPreview":"0.0386","textChars":6,"textLines":1,"bbox":[556,397,144,49]}
+{"kind":"shape","id":"sh/gn29gr2p","slide":17,"name":"矩形 53","bbox":[708,389,160,61]}
+{"kind":"textbox","id":"sh/58z25kb6","slide":17,"name":"矩形 54","text":"0.0540","textPreview":"0.0540","textChars":6,"textLines":1,"bbox":[716,397,144,49]}
+{"kind":"shape","id":"sh/yhgn29gr","slide":17,"name":"矩形 55","bbox":[868,389,180,61]}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":17,"name":"矩形 56","text":"0.0153","textPreview":"0.0153","textChars":6,"textLines":1,"bbox":[876,397,164,49]}
+{"kind":"shape","id":"sh/czed8v6p","slide":17,"name":"矩形 57","bbox":[78,450,310,61]}
+{"kind":"textbox","id":"sh/5kb6xkf6","slide":17,"name":"矩形 58","text":"target SNR 下降","textPreview":"target SNR 下降","textChars":13,"textLines":1,"bbox":[86,458,294,49]}
+{"kind":"shape","id":"sh/9cvixcze","slide":17,"name":"矩形 59","bbox":[388,450,160,61]}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":17,"name":"矩形 60","text":"2.4951","textPreview":"2.4951","textChars":6,"textLines":1,"bbox":[396,458,144,49]}
+{"kind":"shape","id":"sh/r65wjudg","slide":17,"name":"矩形 61","bbox":[548,450,160,61]}
+{"kind":"textbox","id":"sh/ylc7u54z","slide":17,"name":"矩形 62","text":"0.1777","textPreview":"0.1777","textChars":6,"textLines":1,"bbox":[556,458,144,49]}
+{"kind":"shape","id":"sh/5o7qpg3e","slide":17,"name":"矩形 63","bbox":[708,450,160,61]}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":17,"name":"矩形 64","text":"0.0773","textPreview":"0.0773","textChars":6,"textLines":1,"bbox":[716,458,144,49]}
+{"kind":"shape","id":"sh/nih4byhg","slide":17,"name":"矩形 65","bbox":[868,450,180,61]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":17,"name":"矩形 66","text":"0.0604","textPreview":"0.0604","textChars":6,"textLines":1,"bbox":[876,458,164,49]}
+{"kind":"shape","id":"sh/9s36hcrm","slide":17,"name":"矩形 67","bbox":[78,511,310,61]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":17,"name":"矩形 68","text":"车辆事件","textPreview":"车辆事件","textChars":4,"textLines":1,"bbox":[86,519,294,49]}
+{"kind":"shape","id":"sh/ap4r65wj","slide":17,"name":"矩形 69","bbox":[388,511,160,61]}
+{"kind":"textbox","id":"sh/za1gvy90","slide":17,"name":"矩形 70","text":"0.0224","textPreview":"0.0224","textChars":6,"textLines":1,"bbox":[396,519,144,49]}
+{"kind":"shape","id":"sh/svu9knih","slide":17,"name":"矩形 71","bbox":[548,511,160,61]}
+{"kind":"textbox","id":"sh/hgn29gr2","slide":17,"name":"矩形 72","text":"0.0354","textPreview":"0.0354","textChars":6,"textLines":1,"bbox":[556,519,144,49]}
+{"kind":"shape","id":"sh/a1gvy90j","slide":17,"name":"矩形 73","bbox":[708,511,160,61]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":17,"name":"矩形 74","text":"0.0295","textPreview":"0.0295","textChars":6,"textLines":1,"bbox":[716,519,144,49]}
+{"kind":"shape","id":"sh/s36hcrmh","slide":17,"name":"矩形 75","bbox":[868,511,180,61]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":17,"name":"矩形 76","text":"0.0143","textPreview":"0.0143","textChars":6,"textLines":1,"bbox":[876,519,164,49]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":17,"name":"矩形 77","text":"单位：mm；数值越小表示相对位移估计误差越低。","textPreview":"单位：mm；数值越小表示相对位移估计误差越低。","textChars":23,"textLines":1,"bbox":[86,590,580,26]}
+{"kind":"shape","id":"sh/3m94fu18","slide":17,"name":"圆角矩形 78","bbox":[650,575,520,66]}
+{"kind":"shape","id":"sh/r65wjudg","slide":17,"name":"矩形 79","bbox":[650,575,8,66]}
+{"kind":"textbox","id":"sh/ylc7u54z","slide":17,"name":"矩形 80","text":"观察：本文方法在强 wrapping、同 range 远角度、AoA 初值误差和车辆事件等关键场景均保持低误差。","textPreview":"观察：本文方法在强 wrapping、同 range 远角度、AoA 初值误差和车辆事件等关键场景均保持低误差。","textChars":56,"textLines":1,"bbox":[675,593,470,36]}
+{"kind":"notes","id":"nt/54zidony","slide":17,"text":""}
+{"kind":"slide","id":"sl/m58z25kb","slide":18,"title":"仿真数据：时域与频域响应","textShapes":8}
+{"kind":"shape","id":"sh/t83itgfm","slide":18,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/4nap4r65","slide":18,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/bq1oryts","slide":18,"name":"矩形 3","text":"仿真数据：时域与频域响应","textPreview":"仿真数据：时域与频域响应","textChars":12,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":18,"name":"矩形 4","text":"仿真验证","textPreview":"仿真验证","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/twra5gbq","slide":18,"name":"矩形 5","text":"18","textPreview":"18","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/4byhgn29","slide":18,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"textbox","id":"sh/bm58z25k","slide":18,"name":"矩形 7","text":"车辆非平稳事件场景","textPreview":"车辆非平稳事件场景","textChars":9,"textLines":1,"bbox":[82,132,520,34]}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":18,"name":"矩形 8","text":"用于检查真值位移是否具有静止起始、弱振动起振、车辆事件主响应和非平稳频谱特征。","textPreview":"用于检查真值位移是否具有静止起始、弱振动起振、车辆事件主响应和非平稳频谱特征。","textChars":39,"textLines":1,"bbox":[82,174,850,28]}
+{"kind":"shape","id":"sh/cfa9w3m9","slide":18,"name":"圆角矩形 9","bbox":[82,225,530,300]}
+{"kind":"shape","id":"sh/1032lszq","slide":18,"name":"圆角矩形 10","bbox":[665,225,530,300]}
+{"kind":"textbox","id":"sh/judg7ads","slide":18,"name":"矩形 12","text":"时域位移：由静止段逐步进入车辆事件响应","textPreview":"时域位移：由静止段逐步进入车辆事件响应","textChars":19,"textLines":1,"bbox":[105,540,480,25]}
+{"kind":"textbox","id":"sh/c7u54zid","slide":18,"name":"矩形 13","text":"频域位移：主响应频带与非平稳包络共同形成谱峰/泄漏","textPreview":"频域位移：主响应频带与非平稳包络共同形成谱峰/泄漏","textChars":25,"textLines":1,"bbox":[688,540,480,25]}
+{"kind":"shape","id":"sh/1orytsvu","slide":18,"name":"圆角矩形 14","bbox":[172,610,935,48]}
+{"kind":"shape","id":"sh/u18jqh0f","slide":18,"name":"矩形 15","bbox":[172,610,8,48]}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":18,"name":"矩形 16","text":"这页只展示仿真输入数据形态；算法效果在下一页通过退化场景诊断图和 RMSE 表体现。","textPreview":"这页只展示仿真输入数据形态；算法效果在下一页通过退化场景诊断图和 RMSE 表体现。","textChars":42,"textLines":1,"bbox":[192,624,903,28]}
+{"kind":"image","id":"im/re1w7mp0","slide":18,"name":"图片 29","bbox":[96,260.57,502,224.85]}
+{"kind":"image","id":"im/2t83itgf","slide":18,"name":"图片 30","bbox":[679,260.57,502,224.85]}
+{"kind":"notes","id":"nt/m58z25kb","slide":18,"text":""}
+{"kind":"slide","id":"sl/bat47y1k","slide":19,"title":"关键场景图像结果","textShapes":8}
+{"kind":"shape","id":"sh/qtcj6tov","slide":19,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/je9cvixc","slide":19,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/87ed8bat","slide":19,"name":"矩形 3","text":"关键场景图像结果","textPreview":"关键场景图像结果","textChars":8,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/xs72x4na","slide":19,"name":"矩形 4","text":"仿真验证","textPreview":"仿真验证","textChars":4,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/q1orytsv","slide":19,"name":"矩形 5","text":"19","textPreview":"19","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/fmlkjm1c","slide":19,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"shape","id":"sh/8jqh0fep","slide":19,"name":"圆角矩形 7","bbox":[75,130,515,205]}
+{"kind":"shape","id":"sh/x4nap4r6","slide":19,"name":"圆角矩形 8","bbox":[645,130,515,205]}
+{"kind":"shape","id":"sh/1w7mp0bi","slide":19,"name":"圆角矩形 9","bbox":[75,390,515,205]}
+{"kind":"shape","id":"sh/8bat47y1","slide":19,"name":"圆角矩形 10","bbox":[645,390,515,205]}
+{"kind":"textbox","id":"sh/8nqxs72x","slide":19,"name":"矩形 14","text":"强 wrapping：预测辅助相位校正","textPreview":"强 wrapping：预测辅助相位校正","textChars":19,"textLines":1,"bbox":[75,340,515,25]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":19,"name":"矩形 15","text":"AoA 误差：转换系数自举收敛","textPreview":"AoA 误差：转换系数自举收敛","textChars":15,"textLines":1,"bbox":[645,340,515,25]}
+{"kind":"textbox","id":"sh/qh0fepkz","slide":19,"name":"矩形 16","text":"target SNR drop：观测权重调整","textPreview":"target SNR drop：观测权重调整","textChars":22,"textLines":1,"bbox":[75,600,515,25]}
+{"kind":"textbox","id":"sh/1cfa9w3m","slide":19,"name":"矩形 17","text":"车辆事件：位移估计对比","textPreview":"车辆事件：位移估计对比","textChars":11,"textLines":1,"bbox":[645,600,515,25]}
+{"kind":"textbox","id":"sh/crmhk3q5","slide":19,"name":"矩形 18","text":"第一版先保留核心诊断图，后续可按老师反馈替换为更论文风格的统一制图。","textPreview":"第一版先保留核心诊断图，后续可按老师反馈替换为更论文风格的统一制图。","textChars":34,"textLines":1,"bbox":[180,672,920,20]}
+{"kind":"image","id":"im/fa9w3m94","slide":19,"name":"图片 33","bbox":[179.46,145,306.09,176]}
+{"kind":"image","id":"im/qpg3ex0n","slide":19,"name":"图片 34","bbox":[749.46,145,306.09,176]}
+{"kind":"image","id":"im/xczed8v6","slide":19,"name":"图片 35","bbox":[179.46,405,306.09,176]}
+{"kind":"image","id":"im/8v6psfil","slide":19,"name":"图片 36","bbox":[749.46,405,306.09,176]}
+{"kind":"notes","id":"nt/bat47y1k","slide":19,"text":""}
+{"kind":"slide","id":"sl/j2t83itg","slide":20,"title":"阶段结论与下一步工作","textShapes":8}
+{"kind":"shape","id":"sh/mhk3q5o7","slide":20,"name":"矩形 1","bbox":[0,0,1280,12]}
+{"kind":"shape","id":"sh/b2hwfyxo","slide":20,"name":"矩形 2","bbox":[0,12,1280,5]}
+{"kind":"textbox","id":"sh/4byhgn29","slide":20,"name":"矩形 3","text":"阶段结论与下一步工作","textPreview":"阶段结论与下一步工作","textChars":10,"textLines":1,"bbox":[58,36,880,54]}
+{"kind":"textbox","id":"sh/twra5gbq","slide":20,"name":"矩形 4","text":"总结","textPreview":"总结","textChars":2,"textLines":1,"bbox":[1010,44,210,28]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":20,"name":"矩形 5","text":"20","textPreview":"20","textChars":2,"textLines":1,"bbox":[1192,672,48,24]}
+{"kind":"shape","id":"sh/bq1oryts","slide":20,"name":"矩形 6","bbox":[58,95,1140,1.2]}
+{"kind":"textbox","id":"sh/47y1kre1","slide":20,"name":"矩形 7","text":"当前已完成","textPreview":"当前已完成","textChars":5,"textLines":1,"bbox":[92,140,430,34]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":20,"name":"矩形 8","text":"synthetic ADC / Range-Angle frontend 完整接入\nRange-Angle target selection 与同 range 远角度分离已实现\n结构主相位 Kalman、预测辅助解缠、转换系数在线自举已形成闭环\n默认 validation feasibility gates：12/12 passed","textPreview":"synthetic ADC / Range-Angle frontend 完整接入 | Range-Angle target selection 与同 range 远角度分离已实现 | 结构主相位 Kalman、预测辅助解缠、转换系数在线自举已形成闭环 | 默认 valid...","textChars":167,"textLines":4,"bbox":[100,198,500,250]}
+{"kind":"textbox","id":"sh/90je9cvi","slide":20,"name":"矩形 9","text":"后续工作","textPreview":"后续工作","textChars":4,"textLines":1,"bbox":[715,140,430,34]}
+{"kind":"textbox","id":"sh/gfmlkjm1","slide":20,"name":"矩形 10","text":"接入真实 IWR1843 raw ADC 文件解析\n开展天线幅相标定与 TDM-MIMO 相位补偿\n建立雷达、加速度、激光参考的时间同步流程\n推进实桥/磁浮轨道梁场景下的同步实测验证","textPreview":"接入真实 IWR1843 raw ADC 文件解析 | 开展天线幅相标定与 TDM-MIMO 相位补偿 | 建立雷达、加速度、激光参考的时间同步流程 | 推进实桥/磁浮轨道梁场景下的同步实测验证","textChars":91,"textLines":4,"bbox":[725,198,500,250]}
+{"kind":"shape","id":"sh/rytsvu9k","slide":20,"name":"圆角矩形 11","bbox":[190,520,900,88]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":20,"name":"矩形 12","text":"当前结论来自 Phase 1\n合成仿真与实测位移驱动半实测仿真，尚不替代真实毫米波雷达现场验证。","textPreview":"当前结论来自 Phase 1 | 合成仿真与实测位移驱动半实测仿真，尚不替代真实毫米波雷达现场验证。","textChars":48,"textLines":2,"bbox":[225,542,830,54]}
+{"kind":"notes","id":"nt/j2t83itg","slide":20,"text":""}

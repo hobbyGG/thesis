@@ -1,0 +1,144 @@
+{
+  "arrays": {
+    "acceleration_mps2": {
+      "axes": [
+        "sample",
+        "axis"
+      ],
+      "dtype": "float64",
+      "file": "acceleration_mps2.npy",
+      "shape": [
+        4000,
+        3
+      ]
+    },
+    "acceleration_raw": {
+      "axes": [
+        "sample",
+        "axis"
+      ],
+      "dtype": "int32",
+      "file": "acceleration_raw.npy",
+      "shape": [
+        4000,
+        3
+      ]
+    },
+    "drdy_monotonic_ns": {
+      "axes": [
+        "sample"
+      ],
+      "dtype": "uint64",
+      "file": "drdy_monotonic_ns.npy",
+      "shape": [
+        4000
+      ]
+    },
+    "estimated_sample_monotonic_ns": {
+      "axes": [
+        "sample"
+      ],
+      "dtype": "int64",
+      "file": "estimated_sample_monotonic_ns.npy",
+      "shape": [
+        4000
+      ]
+    },
+    "sample_times_s": {
+      "axes": [
+        "sample"
+      ],
+      "dtype": "float64",
+      "file": "sample_times_s.npy",
+      "shape": [
+        4000
+      ]
+    }
+  },
+  "capture": {
+    "complete": true,
+    "group_delay_calibrated": false,
+    "group_delay_ns": 0,
+    "native_summary": {
+      "group_delay_source": null,
+      "mock": true,
+      "samples": 4000,
+      "simulation": true
+    },
+    "odr_hz_nominal": 1000.0,
+    "range_g": 2,
+    "samples": 4000
+  },
+  "conversion": {
+    "calibration_applied": true,
+    "sensitivity_lsb_per_g": 256000.0,
+    "standard_gravity_mps2": 9.80665
+  },
+  "hardware_error_model": {
+    "adc_bits": 20,
+    "datasheet": "ADXL354/ADXL355 Data Sheet",
+    "datasheet_revision": "Rev. D",
+    "datasheet_specifications": {
+      "cross_axis_sensitivity_percent": 1.0,
+      "digital_filter_group_delay_ms_at_1khz_odr": 1.78,
+      "nonlinearity_percent_full_scale": 0.1,
+      "offset_temperature_max_mg_per_deg_c": 0.15,
+      "sensitivity_lsb_per_g_at_2g": {
+        "maximum": 276480.0,
+        "minimum": 235520.0,
+        "typical": 256000.0
+      },
+      "sensitivity_temperature_percent_per_deg_c": 0.01,
+      "zero_g_offset_mg": {
+        "minimum_maximum_absolute": 75.0,
+        "typical_absolute": 25.0
+      }
+    },
+    "device": "ADXL355",
+    "manufacturer": "Analog Devices",
+    "noise": {
+      "axis_noise_independent": true,
+      "bandwidth_approximation": "engineering rectangular ENBW approximation at ODR/4; the datasheet specifies -1.93 dB at ODR/4, not an exact ENBW",
+      "density_ug_per_sqrt_hz": 22.5,
+      "enabled": true,
+      "equivalent_bandwidth_hz": 250.0,
+      "rms_formula": "density_ug_per_sqrt_hz * 1e-6 * g * sqrt(bandwidth_hz)",
+      "target_rms_mps2": 0.0034887768993101514,
+      "type": "deterministic_fft_band_limited_gaussian"
+    },
+    "not_injected": {
+      "cross_axis_sensitivity": "calibrated before capture",
+      "digital_filter_group_delay": "not injected into the synthetic timeline; the capture manifest declares it uncalibrated and real hardware must measure and compensate this delay before strict fusion",
+      "initial_zero_bias": "calibrated before capture",
+      "nonlinearity": "excluded from the calibrated typical-noise profile",
+      "sensitivity_tolerance": "calibrated before capture",
+      "temperature_drift": "25 degC constant-temperature profile"
+    },
+    "odr_hz": 1000.0,
+    "profile": "datasheet_typical_calibrated_25c",
+    "quantization": {
+      "enabled": true,
+      "mps2_per_lsb": 3.83072265625e-05,
+      "rounding": "nearest_lsb",
+      "signed_code_max": 524287,
+      "signed_code_min": -524288
+    },
+    "range_g": 2,
+    "schema_version": 1,
+    "seed": 2529,
+    "sensitivity_lsb_per_g": 256000.0
+  },
+  "schema": "mmwavecapture.adxl355-input",
+  "schema_version": 1,
+  "source": {
+    "kind": "simulation",
+    "native_raw_file": null,
+    "other_axes": "ADXL355 hardware-model noise around zero physical acceleration",
+    "structural_axis": "physical laser-derived acceleration plus ADXL355 hardware model"
+  },
+  "timing": {
+    "clock": "synthetic_monotonic_schedule",
+    "drdy_monotonic_ns_semantics": "synthetic nominal DRDY schedule",
+    "estimated_sample_monotonic_ns_semantics": "same synthetic schedule; no measured delay"
+  }
+}

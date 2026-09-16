@@ -1,0 +1,190 @@
+{
+  "arrays": {
+    "adc_cube": {
+      "axes": [
+        "frame",
+        "virtual_antenna",
+        "adc_sample"
+      ],
+      "dtype": "complex64",
+      "file": "adc_cube.npy",
+      "shape": [
+        400,
+        8,
+        256
+      ]
+    },
+    "chirp_cube": {
+      "axes": [
+        "frame",
+        "chirp_loop",
+        "virtual_antenna",
+        "adc_sample"
+      ],
+      "dtype": "complex64",
+      "file": "chirp_cube.npy",
+      "shape": [
+        400,
+        16,
+        8,
+        256
+      ]
+    },
+    "frame_times_s": {
+      "axes": [
+        "frame"
+      ],
+      "dtype": "float64",
+      "file": "frame_times_s.npy",
+      "shape": [
+        400
+      ]
+    }
+  },
+  "packet_integrity": {
+    "complete": true,
+    "mode": "synthetic_payload_integrity",
+    "payload_bytes": 52428800,
+    "warning": "No PCAP, Ethernet reception, or DCA1000 packet stream exists."
+  },
+  "processing": {
+    "chirp_cube_construction": "16 independently noised synthetic loop observations sampled at their within-frame loop-start times",
+    "coherent_aperture_center_offset_s": 0.0019070999999999997,
+    "complex_convention": "I+jQ",
+    "frame_level_chirp_aggregation": "coherent_mean",
+    "hardware_error_model": {
+      "channel_mismatch": {
+        "enabled": false,
+        "gain_bound_db": 0.5,
+        "phase_bound_deg": 3.0,
+        "reason": "default profile assumes channel calibration before capture"
+      },
+      "datasheet": "IWR1843 single-chip 76-to-81-GHz FMCW radar sensor data sheet",
+      "datasheet_revision": "Rev. B (SWRS228B)",
+      "dca1000": {
+        "noise_injected": false,
+        "packet_integrity": "complete_or_fail_closed"
+      },
+      "device": "IWR1843",
+      "manufacturer": "Texas Instruments",
+      "profile": "datasheet_typical_calibrated_25c",
+      "quantization": {
+        "enabled": true,
+        "full_scale_mapping": "observed_package_peak_to_positive_full_scale",
+        "i_bits": 12,
+        "pre_quantization_value_per_code": 0.0024220237829442825,
+        "q_bits": 12,
+        "rounding": "nearest_code",
+        "signed_code_max": 2047,
+        "signed_code_min": -2048,
+        "stored_values": "signed_integer_codes_in_complex64"
+      },
+      "receiver_noise": {
+        "component_std": 0.3309662388248747,
+        "enabled": true,
+        "injection_layers": 1,
+        "noise_figure_db_at_77_to_81_ghz": 15.0,
+        "noise_figure_limitation": "NF alone cannot determine ADC SNR without RCS, received power, bandwidth, gain chain, and ADC full-scale mapping",
+        "noise_power": 0.219077302483768,
+        "noise_power_formula": "sum(amplitude^2 / 10^(target_snr_db/10))",
+        "noise_power_semantics": "one common ADC receiver-AWGN power derived from the scenario link-budget assumptions",
+        "target_snr_db": [
+          20.0,
+          17.0,
+          14.0,
+          11.0,
+          8.0
+        ],
+        "target_snr_semantics": "scenario link-budget assumption; not a manufacturer error specification",
+        "type": "complex_receiver_awgn"
+      },
+      "schema_version": 1,
+      "seed": 2727
+    },
+    "loop_start_interval_s": 0.00025427999999999996,
+    "tdm_motion_compensation": false,
+    "warning": "Loop-to-loop motion is modeled, but the TX0-to-TX2 time skew inside each virtual array observation is not modeled or compensated."
+  },
+  "radar": {
+    "adc_sample_rate_hz": 5209000.0,
+    "adc_samples_per_chirp": 256,
+    "chirp_loops_per_frame": 16,
+    "external_trigger_period_s": 0.01,
+    "frame_period_s": 0.009,
+    "frame_rate_hz": 111.11111111111111,
+    "frames": 400,
+    "frequency_slope_hz_per_s": 70000000000000.0,
+    "idle_time_s": 7e-05,
+    "minimum_frame_period_s": 0.009,
+    "physical_chirps_per_frame": 32,
+    "quadrature_in_lsb": true,
+    "ramp_end_time_s": 5.714e-05,
+    "range_resolution_m": 0.043571956298046874,
+    "rx_indices": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "start_frequency_hz": 77000000000.0,
+    "tx_chirps_per_loop": 2,
+    "tx_indices": [
+      0,
+      2
+    ],
+    "tx_sequence": [
+      0,
+      2
+    ],
+    "virtual_antennas": 8,
+    "virtual_channels": [
+      {
+        "synthetic": true,
+        "virtual_index": 0
+      },
+      {
+        "synthetic": true,
+        "virtual_index": 1
+      },
+      {
+        "synthetic": true,
+        "virtual_index": 2
+      },
+      {
+        "synthetic": true,
+        "virtual_index": 3
+      },
+      {
+        "synthetic": true,
+        "virtual_index": 4
+      },
+      {
+        "synthetic": true,
+        "virtual_index": 5
+      },
+      {
+        "synthetic": true,
+        "virtual_index": 6
+      },
+      {
+        "synthetic": true,
+        "virtual_index": 7
+      }
+    ]
+  },
+  "schema": "mmwavecapture.algorithm-input",
+  "schema_version": 1,
+  "source": {
+    "dca_receive_timestamps": null,
+    "kind": "simulation",
+    "pcap_file": null,
+    "scenario": "measured_bridge_point4_transverse"
+  },
+  "timing": {
+    "frame_times_s": {
+      "clock": "synthetic_monotonic_schedule",
+      "is_measured_frame_start": false,
+      "semantics": "configured minimum relative frame schedule; actual synthetic trigger references are stored in the root package"
+    }
+  }
+}
