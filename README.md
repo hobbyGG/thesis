@@ -69,6 +69,7 @@ python3 -m algorithm.run \
 - [`innovation_points/`](/Users/umep/thesis/innovation_points/)：创新点说明。
 - [`docs/algorithm_chain_review.md`](/Users/umep/thesis/docs/algorithm_chain_review.md)：当前代码链路审查。
 - [`docs/current_research_data_flow.md`](/Users/umep/thesis/docs/current_research_data_flow.md)：从雷达发射、树莓派采集到最终位移结果的完整数据流和公式。
+- [`docs/measured_phase_jump_analysis.md`](/Users/umep/thesis/docs/measured_phase_jump_analysis.md)：基于 TDMS 激光位移数据的 frame/chirp 相位跳变分析。
 
 检查代码和运行链路：
 
