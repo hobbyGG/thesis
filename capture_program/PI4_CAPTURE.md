@@ -453,12 +453,11 @@ Run the complete offline path from the repository root after copying the
 finished capture (or directly on the Pi):
 
 ```bash
-PYTHONPATH=capture_program/src \
-  capture_program/.venv/bin/python -m simulation.phase1.run_captured \
-  "$run" --adxl-axis x --adxl-sign 1
+python3 -m algorithm.run \
+  --input "$run" --output /tmp/algorithm_result.npz
 ```
 
-This writes `algorithm/phase1_result.npz` plus a JSON provenance summary. Use
+This writes `algorithm_result.npz` plus a JSON provenance summary. Use
 the ADXL axis matching the installed sensor orientation and set
 `--adxl-sign -1` if its positive direction is opposite to the chosen positive
 structural-displacement direction. Add

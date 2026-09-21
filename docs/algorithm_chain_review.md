@@ -1,78 +1,80 @@
-# Phase 1 Algorithm Chain Review
+# 当前代码链路审查
 
-> **Current mainline revision (2026-09-14):** The authoritative workflow is now [Direct AoA overall architecture](</Users/umep/thesis/idea/overall_processing_architecture.md>). The main method is `direct_aoa_fixed_beta`: FFT coarse gating -> local MUSIC -> local ML/NLS continuous target angle -> geometry-derived frozen beta -> structural-main-phase Kalman. Kalman posterior and displacement estimates do not update beta. The beta pre-calibration/online-bootstrap descriptions retained in the tables below are historical legacy/ablation records and must not be presented as the current main method.
+这份审查只描述当前保留的三层代码，不再记录已删除的多场景仿真、Ma 复现和旧 baseline。
 
-本文档用于对照理论方法链条与当前代码实现。结论是：当前已实现完整合成仿真链路，但真实 IWR1843 ADC 文件解析、真实天线幅相标定、实测桥梁多径验证仍未实现，属于后续实测阶段。
+## 三层边界
 
-默认 `run_validation` 输出论文实验方法和论文主场景。当前主方法口径是：FFT 粗筛 → 局部 MUSIC → 局部 ML/NLS 连续角度估计 → 几何关系得到并冻结 beta → 结构主相位 Kalman。历史输出中仍保留 `proposed_full_pipeline_beta_confidence`、`aoa_error_bootstrap` 等名称，以便复现实验表和图；这些名称所对应的 beta 预校准或 online beta bootstrap 解释现在只属于 legacy/ablation，不再代表当前主方法。其余早期版本、消融方法和附录/诊断场景仍可通过 `run_validation --method-set all`, `run_validation --scenario-set all` 或 extended validation 显式运行，但不进入主结论。其中 `itoh_ls` 仅作为理想 target-level 单目标诊断参考保留，`range_bin_only_mixed_phase` 仅作为同 range-bin 混合相位机制消融保留。
-
-## 方法-代码追踪表
-
-| ID | 理论模块 | 文档依据 | 算法不变量 / 必须满足 | 代码入口 | 测试证据 | 输出证据 | 状态 | 缺口 |
-|---|---|---|---|---|---|---|---|---|
-| M1 | ADC 到 range-angle map | `idea/overall_processing_architecture.md` | synthetic ADC cube 经 Range FFT 与 Angle FFT/DBF 得到 `Y_k(b,p)`；`sample_rate_hz` 仅表示 100 Hz 慢时间 frame/Kalman 率，ADC 快时间由 6 MHz、256 samples/chirp、60 us chirp、4 chirps/frame 单独描述 | `simulation/phase1/frontend.py`, `simulation/phase1/config.py` | `test_adc_cube_shape_axes_and_reproducibility`, `test_range_axis_maps_bin_centered_target`, `test_angle_fft_maps_bin_centered_target`, `test_frontend_adc_defaults_match_iwr_like_profile`, `test_default_phase_sample_rate_is_iwr_like_slow_time_not_adc_rate` | `vehicle_event_nonstationary_range_angle_frame.svg` | 已实现 | 真实 IWR1843 ADC 文件解析未实现 |
-| M2 | 2D peak detection | `idea/overall_processing_architecture.md` | peak 必须是 2D local maximum，且超过 robust threshold | `simulation/phase1/selection.py` | `test_peak_detection_uses_2d_local_max_and_relative_threshold` | `detected_peaks` artifact | 已实现 | 真实 clutter map 阈值仍需实测调参 |
-| M3 | 同 rangeBin 近角度合并 | `idea/overall_processing_architecture.md` | `|range_i-range_j|<=1` 且 `|angle_i-angle_j|<15 deg` 合并 | `simulation/phase1/selection.py` | `test_angle_merge_same_range_within_15deg` | `merged_peaks` artifact | 已实现 | 合并后复数权重仍是第一版 |
-| M3b | same rangeBin far-angle separation | `idea/overall_processing_architecture.md` | 同一 range bin 内若 AoA 相差超过 15 deg，不能按 Ma-style range-bin 观测混合处理，必须保留为不同 angle-bin target；`same_range_far_angles` 将主要 scatterers 全部放在同一 range bin，从而强制 range-bin-only baseline 面对混合相位 | `simulation/phase1/frontend.py`, `simulation/phase1/scenario_inputs.py`, `simulation/phase1/scenarios/same_range_far_angles.py` | `test_same_range_different_angles_are_separated`, `test_same_range_far_angles_full_pipeline_separates_targets_before_kalman` | `same_range_far_angles_full_pipeline_selects_two_same_range_targets` | 已实现 | 真实阵列角分辨率和旁瓣抑制仍需实测标定 |
-| M3c | traditional range-bin Itoh baseline | `simulation/phase1/README.md` | 按基本毫米波雷达相位测量流程执行：ADC 经 range FFT 后，按 range profile 选最强 range bin，在该 bin 内选幅值最强的 virtual RX slow-time IQ，取 `angle(IQ)` 得到 wrapped phase，Itoh unwrap 后用 measured/equivalent `beta` 换算位移；禁止直接使用仿真 target-level phase 或 true conversion factor | `simulation/phase1/scenario_inputs.py`, `simulation/phase1/baselines.py`, `simulation/phase1/method_registry.py` | `test_basic_phase_baseline_uses_range_bin_input_not_target_truth`, `test_basic_range_bin_baseline_selects_strongest_adc_range_bin`, `test_paper_scenarios_keep_targets_inside_frontend_range_fft`, `test_default_method_specs_use_clean_paper_method_set`, `test_strong_wrapping_challenges_traditional_unwrap` | default `metrics.csv` 中 `range_bin_itoh` row | 已实现 | `itoh_ls` 仅保留为理想 target-level 诊断参考，不进入默认主实验表 |
-| M3d | range-bin-only mixed phase baseline (Kalman variant) | `simulation/phase1/README.md` | 使用同一个 range-FFT range-bin slow-time IQ 作为单个 pseudo-target，再进入 Kalman 类后端，用于模拟未做 angle-bin target 分离时的 range-bin-only 观测 | `simulation/phase1/scenario_inputs.py`, `simulation/phase1/baselines.py` | `test_same_range_far_angles_full_pipeline_separates_targets_before_kalman` | extended/diagnostic validation 中的 `range_bin_only_mixed_phase` rows | 已实现 | 该 baseline 是针对性消融，不是 Ma 等人完整方法复现；不进入默认主结果表 |
-| M3e | Ma-style iterative beta baseline | `ref_papers/00_primary_references/README.md`, `ref_papers/01_AoA/README.md` | 在 range-bin-only mixed phase 上用加速度参考辅助选取相位分支，并迭代 LS 拟合一个等效 `beta`；若同 bin 远角度目标混合，该 `beta` 是混合等效系数而非任一物理 target 的稳定 LOS 转换系数 | `simulation/phase1/baselines.py`, `simulation/phase1/scenario_inputs.py` | `test_same_range_far_angles_full_pipeline_separates_targets_before_kalman` | extended/diagnostic validation 中的 `ma_style_iterative_beta_range_bin`, `beta_history` | 已实现 | 诊断消融方法，不进入默认主实验表；仍是 Phase 1 合成复现，不包含 Ma 原文所有离线参数标定细节 |
-| M3f | Ma 2026 reproduction baseline | Ma 2026 Kalman fusion paper Sections 3.1-3.3 | `ma2026_target` 是原文 target-specific LoS phase Kalman 方法：状态为 `[phi, dot phi]`，加速度输入为 `4*pi*a/(beta*lambda)`；固定连续测量噪声参数 `R=1` 并按原文离散化为 `R_d=R/T_a`；以 Eq. (16) corrected/unwrapped measurement phase `z_corr` energy 选择 `Q=10^j`；alpha/beta 由 band-pass phase linear fit 给出，默认实验频带为 `[0.5 Hz, 3 Hz]`，仿真 adapter 按原文规则把上限提高到覆盖场景主频。`ma2026_reproduction` 外层只负责从 Range FFT range-bin candidate 中取距离谱第一个候选并送入单 target 方法；合成仿真中 alpha fit 使用 true continuous LoS phase 作为 corrected/unwrapped phase 输入，无法唯一绑定 range-bin candidate 时退化为普通 unwrap 输入 adapter。该 baseline 不使用 beta-grid target selection，也不使用 angle-bin 选择或 Range-Angle frontend 增强 | `simulation/phase1/ma2026/`, `simulation/phase1/scenario_inputs.py`, `simulation/phase1/method_registry.py` | `test_phase1_ma2026_reproduction`, `test_ma2026_formal_adapter_uses_range_fft_slow_time_not_range_angle_bins`, `test_ma2026_reproduction_uses_first_rangebin_candidate_without_beta_grid`, `test_alpha_calibration_phase_source_is_marked_as_adapter_not_paper_algorithm`, `test_estimate_ma2026_target_is_paper_target_method_not_rangebin_adapter`, `test_scenario_adapter_alpha_band_covers_configured_structural_frequencies`, `test_phase1_ma2026_convergence`, `test_phase1_ma2026_spec`, `test_ma2026_kalman_uses_paper_discrete_measurement_covariance`, `test_evaluate_scenario_returns_metrics_for_paper_methods_by_default` | `ma2026_reproduction` rows in default `metrics.csv`, `target_adapter`, `alpha_calibration.phase_source`, `selected_beta`, `selected_q`, `convergence_time_s` diagnostics | 已实现 | 仍是基于合成 ADC/Range FFT 输入的算法复现，不是 Ma 原始实测数据 replay；真实论文中的人工 Target 1/2 指定在仿真中由 adapter 近似为距离谱候选输入 |
-| M4 | 滑动窗口稳定性 | `idea/overall_processing_architecture.md` | `R_T>=0.70`，低 presence 目标不作为稳定主目标 | `simulation/phase1/selection.py` | `test_sliding_window_appearance_rate_rejects_intermittent_target` | `SelectionDiagnostics.tracks` | 已实现 | dropout 目标可作为间歇辅助目标，非主稳定目标 |
-| M5 | 结构频带一致性筛选 | `idea/overall_processing_architecture.md` | frontend slow-time IQ 频谱与 measured acceleration 的结构频带一致 | `simulation/phase1/selection.py` | `test_band_consistency_uses_measured_acceleration_and_complex_iq` | `SelectionDiagnostics.band_energy_ratio` | 已实现 | 当前为合成数据谱评分，实测频带需验证 |
-| M6 | AoA 初始化与独立 beta 预校准 | `idea/overall_processing_architecture.md` | AoA 经 geometry adapter 得到逐 target `measured_beta` 初值；在任何 Kalman 递推之前，仅用原始 target 相位、AoA 和原生 ADXL 动力学信息估计静态候选。公共 AoA 偏差只作辅助诊断/消融，不进入正式拟合先验；实际逐目标路径由双时间折 rank-1 共同运动估计相对投影，ADXL 提供动力学相干、绝对投影和公共时延。未验证或缺失验证标志的记录预先选择原始 AoA 锚定相对模式，`validated` 记录预先选择 ADXL 绝对模式；不在 holdout 上择优切换。每折参考集合只由本折训练段确定，对侧 holdout 仅验证。全局门失败时整组回退，逐目标门失败时只回退对应 AoA 初值 | `simulation/phase1/frontend.py`, `simulation/phase1/radar.py`, `simulation/phase1/beta_calibration.py`, `simulation/phase1/algorithm.py`, `simulation/phase1/run_captured.py` | `test_angle_axis_uses_spatial_frequency`, `test_aoa_error_changes_measured_beta_but_not_true_beta`, `test_phase1_beta_calibration`, `test_phase1_run_captured`, `test_phase1_maglev_capture_simulator` | `initial_beta`, absolute/relative `candidate_beta`, `accepted_mask`, `reason_by_target`, `delay_s`, ADXL coherence, rank-1 fraction, conditional holdout improvement | 已接入正式 `adaptive_beta` 入口 | 真实安装姿态/时延数据的门限仍需实测标定；相对模式不识别公共绝对尺度；rank-1 的投影解释要求同一刚体运动自由度 |
-| M7 | prediction-aided phase correction | `innovation_points/multi_target_phase_kalman_fusion.md` | 用结构主相位预测映射到 target LoS phase 后选取 wrapped phase 分支 | `simulation/phase1/algorithm.py` | `test_prediction_correct_wrapped_phase_selects_nearest_branch`, `test_proposed_full_pipeline_uses_only_selected_targets` | `strong_wrapping_phase_correction.svg` | 已实现 | 极端低 SNR 下仍依赖 confidence-aware target-wise R |
-| M8 | multi-target observation model | `innovation_points/multi_target_phase_kalman_fusion.md` | 论文正文和当前代码主模型均为结构方向观测：`y_i=beta_i(phi_i^LOS,corr-b_i)`, `H_i=[1,0]` | `simulation/phase1/algorithm.py` | `test_multitarget_fixed_beta_recovers_clean_multitarget_case` | `metrics.csv` | 已实现 | 当前观测噪声为对角 R，未建模相关误差 |
-| M9 | calibrated Q + posterior-residual / quality-gated target-wise R | `innovation_points/multi_target_phase_kalman_fusion.md`; `Adaptive Adjustment of Noise Covariance in Kalman Filter for Dynamic State Estimation`; Mehra adaptive filtering; Li et al. redundant measurement-noise covariance estimation | 主方法使用固定/标定过程噪声 `Q=q^\star Q_0` 与目标级结构方向测量噪声 `R_i,k^Theta`。`q^\star` 属于全局离线或初始段标定参数；`R_i,0` 由目标初始质量/SNR 给出，并在冻结 beta 改变结构方向坐标尺度时按 beta 平方同步缩放；在线只由 posterior residual、后验协方差投影与 target quality gate 更新各 target 的 `R_i,k^Theta`。预校准方差用于接受门控和诊断，不当作每帧独立白噪声重复注入；beta 在进入 Kalman 前已经接受或回退并冻结 | `simulation/phase1/algorithm.py` | `test_quality_gated_r_suppresses_growth_for_high_quality_target`, `test_quality_gated_r_allows_growth_for_low_quality_target`, `test_beta_confidence_compatibility_alias_uses_frozen_precalibrated_beta` | `base_r_theta_history`, `base_r_update_gate_history`, `target_quality_history`, `beta_calibration_initial_r_before/after` | 已实现并接入主入口 | adaptive Q / sliding-window q 仅作为展望；预校准不确定度不从 Kalman 后验递推更新 |
-| M10 | Kalman 前静态 beta 预校准 | `idea/overall_processing_architecture.md` | 校准器不得读取 truth、Kalman corrected phase 或 Kalman posterior。双时间折估计候选 beta/公共时延；相对模式还要求至少 3 个 ADXL 相干参考 target 和两折 rank-1 占比门。逐目标 leave-one-out holdout 在同一潜在运动下比较候选系数与 AoA 系数。接受目标采用候选，失败目标精确回退 AoA，然后冻结整组 beta 并从第 0 帧运行正式 Kalman。历史 `online beta bootstrap`、`beta_history` 与对应图仅作为 legacy/ablation 对照 | `simulation/phase1/beta_calibration.py`, `simulation/phase1/algorithm.py`, `simulation/phase1/run_captured.py`; legacy online code remains in `simulation/phase1/algorithm.py` for ablation | `test_phase1_beta_calibration`, `test_phase1_run_captured`, `test_phase1_maglev_capture_simulator`; legacy tests retained for reproducibility | `accepted` 保持“全部通过”的兼容语义，partial 消费者读取 `any_accepted`、`accepted_mask/reason_by_target`；另含 absolute/relative candidate、variance/confidence、delay/ADXL-coherence/rank-1/holdout diagnostics 与冻结 `beta_history` | 已接入 `adaptive_beta` 主入口 | 真实数据门限仍需现场标定；不得再把旧 online bootstrap 写成主方法 |
-| M11 | relative displacement output | `simulation/phase1/README.md` | 输出相对 cold-start reference 的位移 | `simulation/phase1/algorithm.py`, `simulation/phase1/run_phase1.py` | `test_run_phase1_writes_cold_start_relative_reference_fields` | `phase1_multifrequency.npz`, `summary.md` | 已实现 | 绝对静态零位不在 Phase 1 范围 |
-| M12 | literature-driven maglev modal scenario | `simulation/phase1/README.md` | 默认正式验证不再依赖本地 TDMS；使用文献给出的磁浮轨道梁竖向主频 `7.7737/11.5742/26.5642 Hz`、quiet-start vehicle-event 包络、200 Hz slow-time 和 1-2 mm 位移峰值，构造可解释的非平稳桥梁响应；有限窗和包络使频谱表现为主峰凸起及邻域泄漏，而不是理想单线正弦 | `simulation/phase1/scenarios/literature_maglev_modal_response.py`, `simulation/phase1/truth.py` | `test_literature_maglev_modal_response_uses_reported_main_frequencies`, `test_literature_maglev_modal_response_has_broadened_modal_bands`, `test_phase1_scenarios_cover_required_innovation_cases` | `literature_maglev_modal_response` rows in `metrics.csv`; scenario diagnostics SVG | 已实现 | 主频来自文献，幅值/target/SNR 仍为合成设定；不替代实测 radar ADC 验证 |
-| M12b | optional semi-measured bridge diagnostic | `simulation/phase1/README.md` | 实测激光位移采用事件窗口、重采样到 100 Hz 雷达 slow-time、单位换算和 cold-start 相对零位；默认不对激光 truth 做带通或工频陷波。由于本地 TDMS 通道存在未解决的低频/准静态和工频污染问题，该场景不纳入默认正式验证，仅通过 `--include-measured-bridge` 作为诊断入口保留 | `simulation/phase1/measured_bridge.py`, `simulation/phase1/scenarios/measured_bridge_point4_transverse.py` | `test_frequency_domain_differentiation_recovers_harmonic_acceleration`, `test_laser_derived_acceleration_source_uses_laser_truth_with_seeded_noise`, `test_default_measured_bridge_scenario_uses_radar_slow_time_rate`, `test_measured_bridge_runs_key_methods` | optional `measured_bridge_point4_transverse` rows | 可选实现 | 不是完整实测雷达验证；真实 mmWave ADC 与现场多径仍未实现 |
-| M13 | weak-to-strong synthetic event profile | `simulation/phase1/README.md` | 默认合成场景不允许一开始就是满幅振动：0-0.2 s quiet，0.2-0.8 s weak calibration vibration，0.8-1.4 s smooth ramp，1.4 s 后进入主要响应 | `simulation/phase1/truth.py`, `simulation/phase1/scenarios/__init__.py` | `test_default_synthetic_scenarios_start_weak_before_full_response` | scenario truth peak diagnostics | 已实现 | 真实车辆接近过程仍需实测统计标定 |
-
-## 接口与防泄漏表
-
-| 边界 | 允许输入 | 禁止输入 | 当前数据结构 | 验收方式 |
-|---|---|---|---|---|
-| Frontend -> Selection | range-angle magnitude/complex map、merged peak bins、frontend slow-time IQ、wrapped phase、available mask、measured beta、measured acceleration | truth displacement、true LoS phase、Kalman corrected phase | `DetectedPeak`, `MergedPeak`, `FrontendTargetObservation`, `SelectedTargetSet` | `test_selection_input_has_no_truth_or_kalman_fields`, `test_full_pipeline_kalman_input_comes_from_frontend_targets` |
-| Selection -> beta 预校准 | selected target 原始 wrapped/连续片段、AoA 初值、原生 ADXL 时间戳与加速度、质量权重 | truth、Kalman corrected phase、Kalman posterior | `simulation/phase1/beta_calibration.py` | `test_phase1_beta_calibration` |
-| beta 预校准 -> Kalman | accepted frozen beta；失败时为原 AoA beta；静态 beta variance/confidence 诊断、缩放后 initial R、selected wrapped phase | candidate fitting state、holdout 数据标签、truth、动态 beta update | `BetaCalibrationResult`, `RadarAlgorithmInput` | fail-closed、冻结 beta、采集入口与诊断落盘聚焦测试 |
-| Kalman -> Evaluation | estimated displacement、corrected phase、冻结的 beta、R history；evaluation-only reference matching | none; evaluation may use truth only for scoring, not for candidate selection、beta 校准或 Kalman input | `simulation/phase1/scenario_inputs.py`, `simulation/phase1/evaluation.py`, `MethodResult`, `target_reference_indices` artifact | `test_validation_rows_include_full_pipeline_selection_metrics`, `test_frontend_candidate_bins_do_not_accept_truth_metadata` |
-| Evaluation -> Report | metrics rows、gates、diagnostic artifacts | estimator-internal truth leakage | `simulation/phase1/gates.py`, `simulation/phase1/reporting.py`, `metrics.csv`, `summary.md`, SVG plots | `test_reporting_csv_keeps_new_metric_headers` |
-
-## 创新点验证矩阵
-
-| 创新点 | 对应失败模式 | 场景 | baseline | proposed 应表现 | gate/指标 | 图 |
-|---|---|---|---|---|---|---|
-| 结构主相位状态 | Ma-style LoS 状态难以自然融合多个 target | nominal | `single_target_ma_style` | `proposed_full_pipeline` 保持低 RMSE | `nominal_full_pipeline_rmse_le_0p10mm` | displacement SVG |
-| prediction-aided phase correction | strong wrapping 下传统 range-bin 相位解缠和换算误差增大 | strong_wrapping | `range_bin_itoh` | `strong_wrapping` 具有 0-0.2 s quiet cold start、0.2-0.8 s micro-vibration calibration segment、0.8-1.4 s rapid ramp、1.4-3.2 s strong wrapping interval 和 3.2-5.0 s decay；full pipeline RMSE 显著低于传统 range-bin Itoh baseline | `strong_wrapping_full_pipeline_beats_range_bin_itoh`, `strong_wrapping_range_bin_itoh_rmse_ge_2x_full_pipeline`, `strong_wrapping_full_pipeline_rmse_le_reasonable_threshold` | `strong_wrapping_phase_correction.svg` |
-| AoA 初始化 + Kalman 前独立 beta 预校准 | 各 target 的 AoA 初值误差不同，导致转换系数分别偏差 | aoa_error_bootstrap；磁浮轨道梁采集仿真 | AoA-fixed；legacy online-bootstrap ablation | 原始多 target 相位的 rank-1 共同运动给出逐目标相对投影，native ADXL 提供独立动力学门控/绝对候选；模式按标定来源预选。双折和逐目标条件 holdout 通过才采用，否则只回退对应 AoA；旧 online bootstrap 指标和图只作历史对照 | target-wise beta error、公共 delta/delay、ADXL coherence、rank-1 fraction、conditional holdout improvement、any/all accepted mask/reason | 新预校准 diagnostics；`aoa_error_bootstrap_beta_bootstrap.svg` 标记为 legacy |
-| quality-gated target-wise R | 低 SNR / 退化 target 污染状态 | target_snr_drop, aoa_error_bootstrap | `selected_aoa_fixed_beta` | 低质量 target 由 posterior residual 和质量门控自动降权，不把 beta 的系统参数不确定度当作每帧白噪声 | `base_r_theta_history`, `base_r_update_gate_history`, `target_quality_history` | `target_snr_drop_adaptive_r.svg` |
-| calibrated Q + posterior-residual / quality-gated R | 同时在线调节 Q/R 会造成过程误差与观测误差归因不清；strong response 阶段 prediction innovation 可能主要来自预测模型误差而非 radar measurement noise | low_snr_multitarget, target_snr_drop, strong_wrapping, aoa_error_bootstrap | fixed-R or selected fixed-beta baselines | 候选 `Q` 通过 prediction innovation energy 离线/批量标定后固定使用；`R_i,0` 依据 SNR 初始化，冻结 beta 改变坐标尺度时按平方比同步缩放；在线阶段 `R_i,k` 只由 posterior residual 与 target quality gate 更新；strong response 且 target 质量正常时不应异常抬高 `R` | `calibrated_q`, `calibrated_q_metric_values`, `base_r_theta_history`, `base_r_update_gate_history`, `target_quality_history`, `beta_calibration_initial_r_before/after` | `sensitivity_snr.csv`, `target_snr_drop_adaptive_r.svg`, `metrics.csv` |
-| adaptive R residual comparison | prediction innovation 与 posterior residual 对 R 的估计归因不同 | strong_wrapping, same_range_far_angles, mixed_scatterer_rangebin, measured_bridge_point4_transverse | legacy prediction-innovation base-R variant | posterior residual / quality-gated R 应改善预测误差主导场景，同时通过 quality gate 避免污染 target 被低估测量噪声 | updated adaptive-R rows, `adaptive_r_mode` diagnostics | `metrics.csv`, `summary.md` |
-| available-mask 多目标融合 | 单 target dropout 中断观测 | target_dropout | `single_target_ma_style` | 选中可用辅助 target，状态不中断 | `--scenario-set all` 下的 `unwrap_error_rate`, RMSE row | appendix diagnostics |
-| mixed scatterer 鲁棒性 | 同 bin 复合散射相位畸变 | mixed_scatterer_rangebin | fixed-R baseline | 预校准失败时回退 AoA，在线 target-wise R 降低异常观测权重 | `--scenario-set all` 下的 `metrics.csv` | appendix diagnostics |
-| same rangeBin far-angle separation | Ma-style range-bin 转换系数拟合会混合不同 AoA 目标 | same_range_far_angles | `range_bin_itoh`, `ma2026_reproduction` | full pipeline 在 Kalman 前选中同 range、远角度的多个 frontend target，当前主验证中 displacement RMSE 低于严格 Ma 2026 reproduction baseline；`range_bin_only_mixed_phase` 和 `ma_style_iterative_beta_range_bin` 仅作为 `--method-set all`/extended validation 中的诊断消融保留 | `same_range_far_angles_full_pipeline_selects_two_same_range_targets`, `same_range_far_angles_full_pipeline_rmse_le_0p10mm` | `metrics.csv`, `summary.md` |
-| low SNR 多目标 | 单个 target 相位噪声大 | low_snr_multitarget | `single_target_ma_style` | 至少选择 2 个 target 并融合 | `--scenario-set all` 下的 `low_snr_full_pipeline_selects_at_least_2_targets` | appendix/sensitivity diagnostics |
-| vehicle event 前端筛选 | 大角度低 SNR target 诱发 unwrap 错误 | vehicle_event_nonstationary | `range_bin_itoh`, `ma2026_reproduction`, `selected_aoa_fixed_beta` | full pipeline 剔除 target4 且 unwrap rate 0；该场景只能说明 AoA 初值误差对位移估计影响被降低，不能证明 beta 预校准通过；旧 all-target/online-bootstrap proposed 仅作为 legacy 诊断保留，不进入主结论 | `vehicle_event_full_pipeline_excludes_target4` | `vehicle_event_nonstationary_paper_methods_displacement.svg` |
-| 文献主频驱动桥梁响应 | 纯 2/5/12 Hz 人工多频不能体现目标桥梁的实测/文献主频 | literature_maglev_modal_response | `ma2026_reproduction`, `selected_aoa_fixed_beta` | 基于文献主频和车辆事件包络验证完整链路在更贴近磁浮轨道梁动力特征的合成响应下可运行 | `metrics.csv`, `summary.md` | literature modal diagnostics |
-
-## 最终验收命令表
-
-| 命令 | 预期输出 | 必查文件 | 通过标准 |
+| 层 | 目录 | 输入 | 输出 |
 |---|---|---|---|
-| `PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover tests -v` | 所有 unittest 通过 | tests | 0 failure / 0 error |
-| `PYTHONDONTWRITEBYTECODE=1 python3 -m simulation.phase1.run_validation --output-dir simulation/outputs/phase1_validation` | 打印 metrics/gates/summary 路径和 gates passed | `simulation/outputs/phase1_validation/feasibility_gates.json` | failed gates 数量为 0；默认输出 5 个论文场景 × 5 个论文/参考方法 |
-| `PYTHONDONTWRITEBYTECODE=1 python3 -m simulation.phase1.run_validation --scenario-set all --output-dir /tmp/phase1_all_scenarios` | 显式写出全部 sanity/附录/诊断场景 | `/tmp/phase1_all_scenarios/metrics.csv` | 包含 `mixed_scatterer_rangebin`, `low_snr_multitarget` 等非默认场景 |
-| `PYTHONDONTWRITEBYTECODE=1 python3 -m simulation.phase1.run_validation --include-measured-bridge --output-dir /tmp/phase1_validation_with_measured_bridge` | 可选写出本地 TDMS 半实测诊断场景 | `/tmp/phase1_validation_with_measured_bridge/metrics.csv` | 包含 `measured_bridge_point4_transverse`，但该场景只作为诊断和边界检查 |
-| `PYTHONDONTWRITEBYTECODE=1 python3 -m simulation.phase1.run_extended_validation --output-dir simulation/outputs/phase1_extended_validation` | 写出 Monte Carlo、消融、AoA 敏感性、SNR 敏感性表 | `simulation/outputs/phase1_extended_validation/*.csv` | 输出 `monte_carlo_summary.csv`, `ablation_summary.csv`, `sensitivity_aoa.csv`, `sensitivity_snr.csv` |
-| `python3 -m simulation.phase1.run_phase1 --output simulation/outputs/phase1_multifrequency.npz` | 写出单次仿真 npz | `simulation/outputs/phase1_multifrequency.npz` | 包含 truth、wrapped phase、relative displacement 字段 |
-| `find simulation/outputs/phase1_validation/plots -type f -name '*.svg'` | 输出诊断图 | `plots/*.svg` | 输出包含 R diagnostics、phase correction 和主场景 displacement 图；已有 beta-bootstrap 图仅作 legacy/ablation 对照 |
+| 实测采集 | `capture_program/` | IWR1843/DCA1000、ADXL355、GPIO 时间轴 | `capture_root/radar/algorithm_input`、`adxl355/algorithm_input`、`sync` |
+| 实测桥梁半实测 | `measured_bridge_simulation/` | TDMS 激光位移 | 与采集程序相同的 `capture_root`，另附 `truth/` |
+| 论文算法 | `algorithm/` | 统一 `capture_root` | `algorithm_result.npz`、同名 JSON 摘要 |
 
-## 边界结论
+算法入口不再接收场景名、方法名或 baseline 开关。这样可以保证两种数据源只在“输入包生成”处有差异，后面的处理链完全相同。
 
-已实现：完整合成仿真链路，以及独立的 Kalman 前 beta 批量校准器。主方法的数据依赖顺序是“原始雷达/ADXL 数据预校准 → train/holdout 门控 → 接受候选或回退 AoA → 冻结 beta → 从第 0 帧运行 prediction-aided phase correction 与多 target Kalman”。在线仅执行相位分支校正和 target-wise `R` 更新，不存在 Kalman 后验回灌 beta 的主方法闭环。旧 online beta bootstrap 代码、`beta_history`、收敛图和相关 RMSE 行可为复现实验保留，但必须标记为 legacy/ablation，不能作为当前 beta 可辨识性的证据，也不改写既有数值。
+## 实际主链
 
-主方法边界：论文算法优化方向表述为 Kalman 前独立静态 beta 预校准 + calibrated `Q` + SNR-informed initial `R_i,0` + posterior-residual / quality-gated target-wise online `R_i,k^{eff}`。其中 `Q` 是结构主相位动力学模型的全局标定参数；`R_i,k^{eff}` 是在线观测权重，用于响应 SNR、遮挡、后验残差与 target quality。冻结 beta 变化时只按坐标变换同步缩放初始 R；校准方差用于门控和诊断，不按每帧白噪声注入。Ma 2026 中固定 `R=1` 后遍历 `Q=10^j` 的做法说明 Kalman 效果主要受 `Q/R` 相对权重影响，且该选择发生在离线或初始标定段，不构成在线 adaptive Q。Akhlaghi 等人的工作支撑 prediction innovation 与 measurement noise 的归因分工，Mehra 和 Li 等工作分别支撑 covariance matching 与多观测通道 measurement-noise covariance estimation。beta 已在 Kalman 前接受或回退并冻结，adaptive `Q` 或 sliding-window `q` 只作为后续扩展。
+```text
+capture_root
+  ├─ radar/algorithm_input/adc_cube.npy
+  ├─ adxl355/algorithm_input/acceleration_mps2.npy
+  └─ sync/radar_frame_monotonic_ns.npy
+        ↓
+algorithm.io.load_capture_package
+        ↓
+Range FFT + Angle DBF
+        ↓
+整段中位数幅值图 → 2D 峰值 → 近距离近角峰合并 → 动态范围保留
+        ↓
+局部 MUSIC/ML AoA → slow-time IQ → wrapped LoS phase
+        ↓
+beta = 1 / |cos(theta)|，整段冻结
+        ↓
+ADXL native timeline → 每个雷达区间的 Δv、Δq
+        ↓
+加速度预测 [Theta, Theta_dot] 的结构主相位 Kalman
+        ↓
+后验残差更新各目标 R → q_hat_m
+```
 
-未实现：真实 IWR1843 ADC 文件解析、真实天线幅相标定、真实 TDM-MIMO 相位补偿、实测桥梁环境多径建模、现场安装姿态标定、真实毫米波雷达 ADC 与 TDMS 同步采集验证和实测长期稳定性验证。
+## 代码对应
+
+| 步骤 | 入口 |
+|---|---|
+| 统一包读取 | `algorithm/io.py:load_capture_package` |
+| 算法输入构造 | `algorithm/io.py:build_algorithm_inputs` |
+| Range-Angle | `algorithm/frontend.py:range_angle_process` |
+| 局部 AoA | `algorithm/angle_estimation.py:estimate_local_music_ml` |
+| 峰值与目标保留 | `algorithm/selection.py` |
+| ADXL 预积分 | `algorithm/acceleration.py:preintegrate_acceleration_to_radar` |
+| 固定 beta Kalman | `algorithm/kalman.py:run_fixed_beta_kalman` |
+| CLI 和结果文件 | `algorithm/run.py:run` |
+| 半实测包生成 | `measured_bridge_simulation/package_builder.py:generate` |
+
+## 输入边界
+
+算法实际使用：
+
+```text
+adc_cube[F, V, S]
+frame_times_s[F]
+radar_frame_monotonic_ns[F]
+acceleration_mps2[N, 3] 的 x 轴
+estimated_sample_monotonic_ns[N]
+```
+
+算法不使用：
+
+```text
+truth/displacement_m.npy
+truth/acceleration_mps2.npy
+场景标签、目标真值角度、真值 beta
+```
+
+半实测真值只在输出摘要中与估计结果对齐计算 RMSE。真实采集没有 `truth/` 时，算法仍可正常输出位移，只是不计算 RMSE。
+
+## 当前实验边界
+
+当前保留的是一个实测桥梁位移驱动的半实测场景。雷达 ADC/IQ、ADXL 噪声和时间轴由场景生成器合成；激光位移来源于 TDMS。该实验用于验证“实测运动输入 + 统一采集格式 + 论文算法”这条链，不能直接替代真实雷达精度验收。
+
+真实采集使用同一算法入口，仍需后续补充阵列幅相标定、安装姿态标定、雷达到 ADC 延迟标定和 ADXL 轴向/群延迟标定。

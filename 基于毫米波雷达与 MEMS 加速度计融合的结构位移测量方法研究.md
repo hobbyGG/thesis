@@ -33,22 +33,25 @@
 
 ### 1.4 本阶段研究目标与技术路线概述
 
-本阶段研究目标是在无外部静态参考系条件下，利用倒挂式毫米波雷达与共址 MEMS 加速度计估计结构测点主振动方向相对位移。具体包括：
+本阶段研究目标是在无外部静态参考系条件下，利用倒挂式毫米波雷达与共址 MEMS 加速度计估计结构测点主振动方向的相对位移。当前论文主方法以代码中的 fixed_geometry_beta_structural_kalman 为准，研究链条必须按以下顺序理解：
 
-- 构建运动雷达观测环境静止散射体的相位观测模型。
-- 从 Range-Angle Map 中提取并维护多个候选 target，缓解单 range-bin 混合相位问题。
-- 建立多目标 wrapped phase 与加速度预测融合框架。
-- 将加速度作为 Kalman 状态预测输入，而不是直接积分为位移。
-- 通过数值仿真和实测位移驱动半实测仿真验证方法链路可行性。
+1. 对每条记录建立 Range-Angle 候选目标。前端先做 Range FFT，再按阵列配置使用 Angle FFT 或几何 DBF；在距离—角度幅值图上检测峰值，同一距离内的近角峰合并，远角峰保留为不同候选。
+2. 对候选的同一距离复数序列做局部 MUSIC/ML AoA 估计，并用局部估计结果重建每个候选的 slow-time IQ。这里的候选确定和局部 AoA 处理是记录级批处理，不是已经完成的全在线目标跟踪器。
+3. 用 AoA 与安装几何计算每个目标的转换系数初值
+   $$
+   \beta_{i,0}=1/\max(|\cos\hat\theta_i|,\epsilon_p),
+   $$
+   进入当前主方法后保持不变。独立 rank-1/ADXL beta 预校准、在线 beta 反馈和对应的 confidence-gated R 属于历史或消融路径，不是当前 fixed_geometry_beta_structural_kalman 的主链。
+4. 用加速度帧区间预积分和实际时间步长进行状态预测，把结构主相位映射到各目标的 LoS 相位，选择最接近的 wrapped-phase 分支；再将校正后的 LoS 相位乘以固定 beta，形成统一结构主相位观测。
+5. 对多个目标运行结构主相位 Kalman。当前 direct 主线包含后验残差驱动的观测噪声更新；没有启用额外的质量门控 R。没有有效目标时，滤波器保留预测分支。
 
-为解决上述问题，本文方法路线可以概括为：把传统“固定雷达观测运动结构目标”的问题，转化为“运动雷达观测环境静止散射体”的问题；把多个环境静止 target 看作同一结构位移在不同 LoS 方向上的投影观测；再通过加速度辅助预测和多目标相位融合恢复结构主振动方向相对位移。这里先给出方法模块，第 3 章补充基本原理，第 4 章再展开具体模型和算法。
+因此，论文的核心问题应表述为：如何在倒挂式、运动雷达观测环境静止散射体的条件下，从记录级距离—角度候选中得到稳定的多目标相位，并利用固定几何 beta、加速度预测和结构主相位 Kalman 解决相位缠绕与目标退化问题。当前实现可以形成“记录级前端 + 逐帧递推融合”的混合链路，不能表述为严格的端到端在线跟踪器。
 
-- Range-Angle 多目标提取：把同 range-bin 但远角度的散射体拆分为不同 target，降低混合相位风险[15-17]。
-- AoA 冷启动：利用目标角度为转换系数提供初始几何先验，使算法可以在线启动。
-- 结构主相位 Kalman 融合：状态变量定义为结构主振动方向位移对应的连续相位，而不是某个 target 的 LoS 相位，该递推估计框架以经典 Kalman 滤波为基础[18]。
-- prediction-aided phase correction：用加速度辅助的状态预测推断各 target 所在的相位分支，校正 wrapped phase[10]。
-- 独立 beta 预校准：先由 AoA 给出 $\beta_i$ 初值，再用原始多 target 相位形成公共角度偏差候选，并默认要求 native-timestamp ADXL 在独立 holdout 上完成验证；不通过则精确回退 AoA 初值。
-- adaptive R：根据 target 质量动态调整观测噪声，对 SNR drop、dropout 或异常相位 target 降权，其思想与自适应滤波中根据创新或观测质量调节测量噪声统计量的做法一致[19-20]。
+本阶段的三个主要研究抓手是：
+
+- 距离—角度参考目标构造：降低同 range 不同角度散射体混合造成的相位失真；
+- 直接 AoA 与固定几何 beta：给出可复现的冷启动观测几何，并避免主链内部的 beta 自反馈；
+- 结构主相位 Kalman：以结构方向主相位为状态，使用加速度预测、LoS 分支校正和多目标观测完成位移输出。
 
 ## 2. 本阶段主要贡献与方法依据
 
@@ -76,68 +79,44 @@ $$
 
 因此，本文提出的第一个贡献不是简单增加目标数量，而是先明确：倒挂式雷达中“target 的定义尺度”会直接影响转换系数拟合质量。当同 range-bin 内目标角度差较大时，range-bin 级 beta 拟合效果会变差，必须把 target 从 range-bin 层面进一步细化到 angle-bin 或 angle cluster 层面。
 
-### 2.2 基于 angle-bin 的多目标方案
+### 2.2 基于距离—角度图的多目标方案
 
-基于上述问题，本文提出基于 angle-bin 的多目标 reference target 方案。具体来说，前端不再只在 range profile 上选择一个最强反射点，而是在 Range-Angle Map 上提取候选散射体。对于同一 range-bin 内角度接近的 peaks，可以合并成一个等效 angle cluster；对于同一 range-bin 内角度差较大的 peaks，则保留为不同 target。
+当前前端的目标单元不是单独的 range-bin，也不是跨时间自动维护的 track，而是记录级距离—角度候选。capture_reader.py 对每条记录的 range-angle cube 取幅值统计量，进行二维峰值检测，再按距离和角度阈值合并近邻峰；候选数量受动态范围和最大候选数限制。这样，同一距离内的远角散射体可以保留为不同候选，同一物理散射体附近的重复峰则合并。
 
-候选 target 可定义为：
+候选确定后，frontend.py 对每个候选提取同一距离的阵列数据，使用 local_music 或 local_music_ml 在候选邻域内估计 AoA，并通过固定 steering matrix 重建 slow-time IQ。local_music_ml 在局部协方差和噪声子空间基础上，用变量投影/非线性最小二乘细化角度；如果候选数量超出局部处理能力，则回退到粗角度 FFT，保证整条记录仍能完成处理。
 
+因此，本研究的第一个创新点应写成“记录级距离—角度参考目标构造与局部 AoA 相位提取”。它解决的是同 range 多角度散射体的目标定义和相位分离问题，当前代码已经实现；后续仍需用实测数据验证角度轴、阵列误差和多径条件下的稳定性。
+
+### 2.3 直接 AoA 与固定几何转换系数
+
+当前主方法不在 Kalman 前执行独立 beta 预校准。AoA 先给出每个候选的几何投影，代码按
 $$
-T_i=(r_i,\mathcal{C}_i)
-$$
-
-其中 r_i 为 range-bin，C_i 为 angle-bin 或 angle cluster。这样做的意义有三点。
-
-第一，它直接解决前一节指出的同 range-bin 多角度散射体混合问题。角度差大的散射体不再被强行合成为一个 pseudo target，因此后续每个 target 的相位和转换系数具有更清晰的几何含义。range-angle 微动感知、全场毫米波振动测量和 MIMO-FMCW 角度处理研究为这种 range-angle component 级相位跟踪提供了依据[15-17]。
-
-第二，它天然提高了 target 丢失时的鲁棒性。倒挂场景中的自然散射体可能受遮挡、SNR 波动、多径或车辆干扰影响，单一 target 一旦失效，传统单目标方法容易中断；而 angle-bin 多目标方案保留多个可用环境 target，当某个 target 退化或短时丢失时，其他 target 仍可维持结构主相位估计。
-
-第三，当多个 target 信号质量都较好时，该方案可以最大程度利用冗余观测。多个 target 不是简单取平均，而是在统一结构主相位状态下形成多行观测，从而同时利用不同 LoS 方向提供的相位信息。
-
-### 2.3 转换系数的独立预校准与安全回退
-
-在获得 angle-bin 级 target 后，本文不再用当前 target 参与形成的 Kalman 后验反向监督同一 target 的 $\beta_i$。该旧方案存在自反馈：错误 $\beta_i$ 会先影响相位分支和结构主相位，随后又可能被误认为新的标定依据。现方案把 $\beta$ 决策移到 Kalman 之前，仅使用算法可见的原始测量。
-
-AoA 首先给出投影与转换系数初值：
-
-$$
-p_{i,0}=|\cos\hat\alpha_i|,
+p_i=|\cos\hat\theta_i|,
 \qquad
-\beta_{i,0}=1/\max(p_{i,0},\epsilon_p).
+\beta_i=1/\max(p_i,\epsilon_p)
 $$
+计算 LoS 位移到结构方向位移的转换系数。fixed_geometry_beta_structural_kalman 将该 beta 作为固定观测几何，整段记录内不再用 Kalman 后验或加速度数据反向更新。
 
-对多个 target 的原始 wrapped phase，只在连续有效且相邻相位步长不含歧义的区间内独立解缠。第一阶段只搜索一个所有 target 共享的角度偏差 $\delta$：
+这条路径的研究意义是提供一个可复现的、因果边界清楚的基线主方法：AoA 负责几何冷启动，Kalman 负责相位分支和结构主相位融合。它把阵列角度误差、安装姿态误差和真实 target 几何误差暴露为可单独评估的误差源，便于后续开展角度标定或 beta 消融。
 
-$$
-p_i(\delta)=\cos(\hat\alpha_i-\delta),
-$$
+rank-1/ADXL 独立 beta 预校准、公共角度偏差搜索、holdout 门控以及 beta-confidence 路径仍保留在代码中，可作为历史方案或消融对照；论文正文不能把它们写成当前 direct 主链已经使用的步骤。
 
-并利用多 target 相位比例一致性形成受几何约束的候选，而不允许每个 $\beta_i$ 自由漂移。第二阶段使用 ADXL355 原生时间戳与加速度作为独立尺度参考，在候选公共时延 $\tau$ 下拟合：
+### 2.4 固定几何下的结构主相位 Kalman 融合
 
-$$
-\phi_i(t)=c_{i,0}+c_{i,1}t+c_{i,2}t^2+c_{i,3}t^3
-+\frac{4\pi}{\lambda}p_i r_a(t-\tau)+\epsilon_i(t),
-$$
-
-其中 $r_a$ 为原生 ADXL 加速度的两次积分，低阶多项式只负责吸收未知积分初值、偏置和漂移，不作为最终位移输出。训练块确定候选 $p_i$、$\beta_i$ 和 $\tau$；不重叠 holdout 只评价候选能否相对 AoA 初值改善预测。默认配置下，公共 AoA 候选还必须通过 ADXL 独立验证；激励、相位步长、参数边界、相干性、跨折一致性、不确定度、最大相对改变量或 holdout 改善任一门控失败，均精确回退 $\beta_{i,0}$。
-
-### 2.4 预校准后冻结参数的 Kalman 融合框架
-
-最后，本文把 target 提取、独立 $\beta$ 预校准和在线 Kalman 融合串联起来。$\beta$ 的候选生成与接受/回退在 Kalman 运行前完成；作出决定后冻结 $\tilde\beta_i$，再从第 0 帧运行完整滤波。在线阶段不再更新 $\beta_i$，只进行预测辅助相位校正、结构主相位更新和 target-wise adaptive R 调整。
-
-该闭环的核心状态不是某一个 target 的 LoS 相位，而是结构主振动方向的连续相位：
-
+当前正式融合从记录第 0 帧开始运行。状态定义为结构主相位及其变化率：
 $$
 \mathbf{x}_k=
 \begin{bmatrix}
 \Theta_k\\
 \dot{\Theta}_k
-\end{bmatrix}
+\end{bmatrix}.
 $$
 
-加速度进入状态预测，用于提供短时动力学先验；多个 angle-bin target 的 wrapped phase 经预测辅助校正后，使用冻结的 $\tilde\beta_i$ 转换为结构方向主相位观测再进入 Kalman update；滤波后验残差和 target 质量指标用于 adaptive R，动态降低退化 target 的权重。
+每一帧先根据实际时间步长和加速度帧区间预积分得到短时预测，再把结构主相位预测值除以固定 beta，映射到各 target 的 LoS 相位。对 wrapped phase 选择最接近预测的 2π 分支后，校正后的 LoS 相位乘以同一个固定 beta，形成结构主相位观测并进入多目标 Kalman。
 
-因此，本文的第四个贡献是把前面三个模块组成具有明确因果边界的全流程方法：AoA 负责提供可启动的几何初值，独立批量校准负责产生并验证候选，冻结参数后的结构主相位 Kalman 负责在线融合，adaptive R 负责处理 target 质量变化。该顺序消除了“Kalman 结果反向证明自身 $\beta$”的循环，同时保留 target 丢失、SNR 下降和相位缠绕条件下的连续位移输出能力。
+当前主线的观测噪声更新来自滤波后验残差；Direct-AoA 配置关闭了额外的 quality-gated R，因此不能把当前方法描述成“按 SNR/质量门控主动删目标的在线自适应滤波”。目标集合在记录级前端确定，逐帧只使用 available mask 反映当前目标是否有有效观测。若当前帧没有有效目标，算法输出预测结果并等待后续观测恢复。
+
+这条链路的贡献在于把不同 LoS 方向的相位统一到结构主相位空间，并用加速度预测解决强相位缠绕下的分支选择。它的实时性边界也应明确：前端候选与若干方法选择使用整条记录统计量，只有 Kalman 更新部分是逐帧递推。
 
 ## 3. 基本原理
 
@@ -175,7 +154,7 @@ $$
 \phi_i^{\mathrm{LOS}}(t)=\frac{1}{\beta_i}\Theta(t)+b_i.
 $$
 
-其中 $b_i$ 为 target 的初始相位偏置。$\beta_i$ 表示 LoS 到结构主振动方向的 direction conversion factor，既与 AoA 几何有关，也受安装姿态、阵列误差和实际散射几何影响。既有倒挂式雷达研究已经把方向转换系数作为 LoS 位移到结构振动方向位移换算的关键标定量[11-14]；本文在正式 Kalman 运行前对 $\beta_i$ 作一次独立静态预校准和验收，通过后冻结为 target-wise 常数，不在同一滤波闭环中在线反馈修正。
+其中 $b_i$ 为 target 的初始相位偏置。$\beta_i$ 表示 LoS 到结构主振动方向的 direction conversion factor，既与 AoA 几何有关，也受安装姿态、阵列误差和实际散射几何影响。既有倒挂式雷达研究已经把方向转换系数作为 LoS 位移到结构振动方向位移换算的关键标定量[11-14]；当前主方法直接由局部 AoA 和几何关系计算 $\beta_i$，在正式 Kalman 运行前写入算法输入并冻结为 target-wise 常数，不在同一滤波闭环中在线反馈修正。独立静态预校准属于另一路 legacy/ablation。
 
 ### 3.4 加速度辅助预测原理
 
@@ -187,104 +166,34 @@ $$
 
 ### 4.1 方法总体框架
 
-本文方法总体框架对齐 `idea/overall_processing_architecture.md`。完整链路由三个顺序明确的阶段组成：不依赖相位解缠的 range-angle target 提取与筛选；不使用 Kalman 后验的 $\beta$ 独立预校准及接受/回退决策；以冻结 $\beta$ 从第 0 帧启动的结构主相位 Kalman 融合。流程图使用 Obsidian `Mehrmaid` 插件，代码块语言为 `mehrmaid`。
+当前代码对应的主链是“记录级候选构造与局部 AoA + 固定几何 beta + 逐帧结构主相位 Kalman”。它不是独立 beta 预校准后再进入 Kalman 的链路，也不是完整在线 track 管理器。
 
-实机系统采用单采集主机架构。Raspberry Pi 4 是唯一采集与时间戳主机：它通过 SPI 和 DRDY 接入 ADXL355，通过 USB 串口配置并控制 IWR1843BOOST，通过有线以太网控制 DCA1000EVM 并接收原始 ADC 数据；IWR1843BOOST 与 DCA1000EVM 通过 60-pin HD 接口传输 LVDS 数据。电脑只经 Wi-Fi/SSH 操作 Pi 4，并在采集结束后下载数据进行离线分析，不直接连接传感器、不接收实时采集流，也不参与同步时序。
+采集与离线处理的工程结构保持不变：Pi 4 负责雷达控制、DCA 抓包、ADXL 采样和时间戳记录，电脑在采集结束后下载数据并运行离线算法。算法侧可按下面的顺序阅读：
 
-```text
-电脑 ──Wi-Fi / SSH──→ Raspberry Pi 4
-                         ├──SPI + DRDY──→ ADXL355
-                         ├──USB─────────→ IWR1843BOOST
-                         └──Ethernet────→ DCA1000EVM
+~~~text
+ADC cube
+  -> Range FFT
+  -> Angle FFT 或 geometry DBF
+  -> 记录级 range-angle 幅值统计和二维峰值
+  -> 近角峰合并、远角峰保留、动态范围和候选数限制
+  -> 候选复数序列
+  -> local_music / local_music_ml AoA 与局部 steering 重建
+  -> beta_i = 1 / max(abs(cos(theta_i)), eps)
+  -> 加速度实际 dt 预积分
+  -> 结构主相位预测与 LoS 2pi 分支选择
+  -> beta 固定的多目标结构主相位 Kalman
+  -> 后验残差 R 更新与位移输出
+~~~
 
-IWR1843BOOST ←──60-pin HD / LVDS──→ DCA1000EVM
-```
+候选构造阶段使用整条记录的幅值统计量，并把 selected indices、calibration indices、initial_r 和 quality scores 传给算法；它应表述为记录级批处理。Kalman 阶段按帧更新状态，利用 available mask 处理目标缺失。论文中可以称为“记录级前端与逐帧递推融合”，不要称为严格端到端在线跟踪。
 
-因此，雷达控制、DCA 抓包、加速度采样和同步事件记录均由 Pi 4 本地协调。SSH 命令到达时间不作为传感器同步时间，电脑与 Pi 4 之间也不存在需要纳入数据融合的跨主机采集时钟。
+当前主方法的因果边界如下：
 
-第一部分是 target 提取与筛选。该阶段只使用 ADC 前端、range-angle 幅值/复数信息和加速度频带先验，不使用结构位移真值，也不依赖完整相位解缠或已知转换系数。
-
-```mehrmaid
-flowchart TD
-    SYS("共址安装<br/>倒挂毫米波雷达 + 加速度计") --> SYNC("同步采集")
-    SYNC --> ADC("雷达 ADC")
-    SYNC --> ACC("同步加速度")
-
-    ADC --> RA("Range FFT + Angle FFT 或 DBF")
-    RA --> MAP("复数距离角度图")
-    MAP --> AMP("幅值图")
-    AMP --> PEAK("二维峰值检测")
-
-    PEAK --> MERGE("同 range 近角合并")
-    MERGE --> SEP("同 range 远角保留")
-    SEP --> TRACK("滑动窗口维护")
-    TRACK --> PRES("出现率稳定性确认")
-
-    ACC --> SPEC("加速度频谱分析")
-    PRES --> BAND("频带一致性筛选")
-    SPEC --> BAND
-
-    BAND --> SET("可用 target 集合")
-    SET --> T1("Target 1<br/>复数序列 / 包裹相位 / AoA / 偏置")
-    SET --> T2("Target 2<br/>复数序列 / 包裹相位 / AoA / 偏置")
-    SET --> TM("Target m<br/>复数序列 / 包裹相位 / AoA / 偏置")
-```
-
-第二、三部分分别是 Kalman 前独立预校准和正式结构主相位融合。预校准只读取原始多 target 相位、AoA 和原生时间戳 ADXL 数据；正式滤波再用结构主相位预测为每个 target 选择 wrapped phase 分支。校正相位只进入结构方向观测和 adaptive R，不再反馈到 $\beta$。
-
-```mermaid
-flowchart TD
-    MT("可用 target 集合<br/>原始包裹相位 / AoA") --> AOA("AoA beta 初值")
-    MT --> RAW("连续有效原始相位段")
-    AOA --> CAND("AoA 锚定逐目标相对候选")
-    RAW --> CAND
-    ADXL("native-timestamp ADXL") --> VERIFY("ADXL 尺度/时延独立校准<br/>train + 不重叠 holdout")
-    CAND --> VERIFY
-    VERIFY --> GLOBAL{"全局门控通过?"}
-    GLOBAL -- "否" --> FALLBACK("整组精确回退 AoA 初值")
-    GLOBAL -- "是" --> TARGET{"逐目标门控"}
-    AOA --> FALLBACK
-    TARGET --> MIX("逐目标接受候选或回退 AoA")
-    MIX --> FREEZE("合成并冻结 beta*")
-    FALLBACK --> FREEZE
-    FREEZE --> H("固定观测几何")
-
-    ACC("同步加速度 / 帧区间预积分") --> PRED("状态预测")
-    XPREV("上一时刻后验") --> PRED
-    PRED --> BRANCH("LoS 分支预测")
-    H --> BRANCH
-    MT --> WRAP("包裹相位")
-    WRAP --> CORR("预测辅助相位校正")
-    BRANCH --> CORR
-
-    CORR --> ZC("校正相位")
-    ZC --> OBS("多目标观测模型")
-    H --> OBS
-    OBS --> KF("Kalman 更新")
-    KF --> OUT("结构主相位与位移")
-    OUT --> XPREV
-
-    KF --> RADAPT("target-wise adaptive R")
-    RADAPT --> OBS
-```
-
-压缩到汇报页时，可以保留下面的模块图：
-
-```mehrmaid
-flowchart LR
-    S("共址传感") --> RA("Range-Angle target 提取")
-    RA --> FS("稳定性与频带筛选")
-    FS --> CAL("AoA + ADXL 独立预校准<br/>接受或回退")
-    CAL --> FREEZE("冻结 beta")
-    FREEZE --> KF("结构主相位 Kalman")
-    KF --> PC("预测辅助相位校正")
-    PC --> KF
-    KF --> OUT("相对位移输出")
-    PC --> ADAPT("target-wise adaptive R")
-    ADAPT --> KF
-```
-
-因此，4.1 的框架应理解为“target 提取筛选 + 独立静态预校准 + 冻结参数 Kalman”三级结构。前端决定哪些环境散射体可作为 reference target；预校准阶段只在独立原始数据上决定接受候选还是回退 AoA；正式滤波解决 wrapped phase 分支校正、噪声自适应和位移输出，不再修改 $\beta$。
+- 前端负责定义候选目标和提供局部 AoA；
+- beta 只由当前记录的 AoA 和固定几何关系计算，不接受 Kalman 后验反馈；
+- 加速度只参与状态预测和相位分支选择，不直接作为最终位移；
+- 多目标观测先转换到结构主相位，再进入 Kalman；
+- 当前 Direct-AoA 的观测噪声更新使用后验残差；质量门控 R 与独立 beta 预校准属于 legacy/ablation。
 
 ### 4.2 Range-Angle 候选目标提取
 
@@ -306,17 +215,13 @@ $$
 
 其中 C_i 表示同一 range-bin 内的一个 angle-bin 或角度相近的 angle-bin cluster。同一 range-bin 内角度差小于约 15° 的 peaks 合并为一个等效 target；同一 range-bin 内角度差较大的 peaks 保留为不同 target。这样可以避免把同 range 但远角度的散射体强行混合成一个 pseudo target。
 
-### 4.3 目标稳定性与频带一致性筛选
+### 4.3 记录级候选筛选与逐帧可用性
 
-候选 target 需要经过动态筛选后才进入融合。筛选依据包括：
+当前 capture_reader.py 的候选筛选是记录级批处理。代码先对整条记录的 range-angle cube 计算幅值统计量，再执行二维峰值检测、动态范围限制、最大候选数限制和近邻峰合并。候选一旦传入算法，selected indices、calibration indices、initial_r 和 quality scores 就固定下来；当前主链没有按滑动窗口不断新增或删除目标的在线 track 管理。
 
-- presence gate：目标在滑动窗口内需要持续出现，避免短时噪声峰进入滤波。
-- SNR 或幅值稳定性：低 SNR、幅值剧烈波动或短时遮挡 target 应降低权重或剔除。
-- 几何约束：AoA 对应的投影方向不能退化到不可用状态。
-- 频带一致性：target 相位中的主要频带应与加速度观测的结构响应频带一致。
-- 数量约束：进入 Kalman 的 target 数量保持在有限范围内，避免低质量 target 过多稀释稳定观测。
+逐帧阶段只保留前端提供的 available mask。目标在某一帧没有有效复数观测时，该目标不参与当前 Kalman 更新；如果整帧没有有效目标，算法走预测分支。这里的“目标退化鲁棒性”来自记录级候选分离、逐帧可用性 mask、相位分支预测和后验残差 R 更新的组合，不能写成已实现滑动窗口 presence gate、在线频带筛选或质量分数驱动的目标重建。
 
-频带一致性中，加速度并不提供最终位移真值，而是提供结构响应的频域先验。既有雷达-加速度融合系统通常利用加速度辅助校准、频带选择或相位预测[11,14]；若某个 target 的相位主要能量与加速度响应频带明显不一致，则更可能来自噪声、多径或移动干扰。
+加速度在当前主链中主要作为预测输入，而不是前端目标筛选的硬门限。后续若要研究在线目标生命周期或频带一致性筛选，需要另设方法开关、延迟定义和独立验证。
 
 ### 4.4 结构主相位状态建模
 
@@ -395,7 +300,7 @@ Kalman 预测先给出结构主相位预测值，再映射到每个 target 的 L
 $$
 \hat{\phi}_{i,k}^{\mathrm{LOS},-}
 =
-\frac{\hat{\Theta}_k^-}{\hat{\beta}_{i,k}^{-}}+b_i
+\frac{\hat{\Theta}_k^-}{\beta_i}+b_i
 $$
 
 根据该预测值，对 wrapped phase 选择最接近的 2π 分支：
@@ -412,271 +317,54 @@ $$
 
 校正后的 $\phi^{\mathrm{LOS,corr}}_{i,k}$ 仍是 LoS 连续相位，需乘以 $\beta_i$ 后才成为结构方向主相位观测。相比直接 Itoh unwrap，这一处理利用了加速度辅助的结构主相位预测，因此更适合强 wrapping、噪声和目标质量波动场景[8-10]。
 
-### 4.7 转换系数独立预校准与冻结
+### 4.7 转换系数的直接 AoA 计算与冻结
 
-AoA 可为 $\beta_i$ 提供冷启动初值。若第 $i$ 个 target 的 AoA 与结构振动方向夹角为 $\theta_i$，先计算结构方向到 LoS 的投影初值：
+当前主方法中，AoA 是 beta 的唯一在线前端来源。对第 i 个候选，局部 MUSIC/ML 估计得到角度 theta_i 后，代码按
+$$
+\beta_i=\frac{1}{\max(|\cos\theta_i|,\epsilon_p)}
+$$
+计算固定转换系数。fixed_geometry_beta_structural_kalman 在正式滤波前把 beta 写入算法输入，之后整段记录保持不变。
+
+这里的“冻结”指不做以下操作：不做 rank-1 公共波形预校准、不读取 ADXL 做 beta 绝对尺度拟合、不用 holdout 门控选择 beta、不用 Kalman 后验重新估计 beta。这样可以清楚区分当前主方法与代码中保留的 beta-confidence、posterior-r 和 doc-strict 等旧/消融路径。
+
+当前结果应主要用于回答两个问题：局部 AoA 相比粗 FFT 是否改善了 beta 几何误差；固定 beta 的结构主相位融合能否在强缠绕、同 range 远角和目标 SNR 退化场景保持稳定。真实阵列幅相标定、角度轴校准和安装姿态误差仍需后续实验单独验证。
+
+### 4.8 后验残差驱动的观测噪声更新
+
+当前 Direct-AoA 路径在 Kalman 更新后，根据观测残差统计更新 target-wise 的观测噪声 R。它的作用是让残差较大的观测在后续更新中降低影响，同时保留固定的 beta 和记录级目标集合。
+
+需要区分两类机制：
+
+- 当前主链：后验残差驱动的 R 更新，Direct-AoA 配置中 use_quality_gated_r 为关闭；
+- 历史/消融路径：根据 SNR、幅值或质量分数启用额外 quality-gated R，或在前端在线增删目标。
+
+因此，目标退化实验可以检验固定目标集合、available mask 和后验残差 R 的组合鲁棒性，但不能把当前实现概括为“基于目标质量门控的在线目标管理器”。目标是否在某一帧可用由前端提供的 mask 决定，没有有效目标时滤波器只做预测。
+
+## 5. 实测桥梁半实测实验
+
+当前实验只保留实测桥梁位移驱动的半实测场景。`measured_bridge_simulation/` 读取 `datafile/20250320test12.tdms` 的 `卡3激光位移/3-4`，截取 15.33--19.33 s，生成与 `capture_program/` 相同的雷达、ADXL355 和同步输入目录。激光位移是实测输入，雷达 ADC/IQ、ADXL 噪声和时间轴是可复现实验变量。
+
+实验运行：
+
+```bash
+python3 -m measured_bridge_simulation --output /tmp/measured_bridge_capture --duration 4 --seed 2026 --overwrite
+python3 -m algorithm.run --input /tmp/measured_bridge_capture --output /tmp/measured_bridge_result.npz
+```
+
+算法链为：Range FFT 和 Angle DBF、记录级峰值检测、局部 MUSIC/ML AoA、冻结几何 beta、ADXL 原生时间轴预积分、加速度预测的结构主相位 Kalman，以及后验残差测量噪声更新。半实测 `truth/` 只用于输出 RMSE，不参与估计。
+
+评价对象为冷启动相对位移：
 
 $$
-\hat{p}_{i,0}=|\cos\theta_i|
+\delta q(t)=q(t)-\operatorname{mean}(q(t)\ \text{over\ cold-start\ window})
 $$
 
-再取其倒数作为 LoS 到结构方向的转换系数初值：
+当前结果用于验证输入契约和论文算法链的可运行性，不能替代真实雷达精度验收。真实采集仍需完成阵列幅相、安装姿态、雷达到 ADC 延迟和 ADXL 轴向/群延迟标定。
 
-$$
-\hat{\beta}_{i,0}=\frac{1}{\max(\hat{p}_{i,0},\epsilon_p)}
-$$
+## 6. 论文创新点
 
-但 AoA 只能提供几何先验，不能完全覆盖安装姿态、阵列误差和各实际散射点不同的角度偏差。MIMO 雷达角度估计依赖虚拟阵列孔径、通道幅相一致性和角度处理流程[17]。因此本文保留公共 AoA 偏差作为辅助诊断/消融候选，但不把它送入正式逐目标拟合先验；正式路径在两个不重叠时间折上对原始多 target 相位矩阵进行加权 rank-1 分解，估计每个 target 独立的相对投影，原生时间戳 ADXL 加速度进一步提供动力学相干、绝对投影尺度和公共时延拟合。
+1. **记录级多目标参考构造**：从统一雷达 ADC 输入中得到距离—角度候选，合并近邻峰并保留有效参考目标。
+2. **连续 AoA 驱动的固定转换因子**：用局部 MUSIC/ML 精修目标角度，按安装几何计算 `beta=1/|cos(theta)|` 并整段冻结。
+3. **异步加速度辅助的多目标结构主相位 Kalman**：保留雷达和 ADXL 原生时间轴，对 ADXL 做雷达区间预积分，利用多个目标共同更新结构主相位并按后验残差调整 `R`。
 
-模式由采集标定来源预先确定：轴向、灵敏度或夹具传递增益未验证（包括缺失验证标志）时采用原始 AoA 锚定的相对投影；上述量独立验证后采用 ADXL 绝对投影，不根据同一 holdout 的分数临时选支路。每折只使用本折训练段的 ADXL 相干性选择参考 target，对侧 holdout 不参与训练集合选择；最终相对模式至少需要三个训练/holdout 均与 ADXL 相干的参考 target，并要求两折第一奇异分量占比通过共同运动阈值。时间轴、激励、公共时延、参考数量或共同运动结构等全局门失败时整组回退；单个 target 的相位连续性、相干性、跨折一致性、候选边界或条件 holdout 改善失败时只回退该 target。所有接受值与精确回退值组成 $\tilde{\boldsymbol\beta}$，且不复用历史缓存，并在整段正式 Kalman 中冻结。这个数据依赖边界避免了“同一 Kalman 后验既生成又验证 $\beta$”的循环自证。rank-1 只验证共同波形；把逐目标系数解释为 AoA 投影还依赖所有参考 target 观察同一刚体测点/结构自由度，并需排除雷达转动、target-specific 散射增益、多径非线性和不同模态参与。
-
-### 4.8 自适应观测噪声调整
-
-不同 target 的质量会随时间变化。若某个 target 出现 SNR drop、dropout、幅值突变、相位残差变大或频带不一致，则应降低其对 Kalman update 的影响。本文通过 target-wise adaptive R 调整观测噪声。这一设计借鉴自适应滤波中根据观测统计特性更新测量噪声协方差的思想[19-20]：
-
-- target 稳定且残差小，则保持较小观测噪声，赋予较高权重。
-- target 质量下降或残差异常，则增大观测噪声，降低其更新权重。
-- target 长时间缺失或不满足筛选条件，则从当前目标集合中移除。
-
-因此，多目标融合不是把所有 target 无差别地平均，而是让稳定 target 主导更新，让退化 target 自动降权。
-
-## 5. 数值仿真设计
-
-### 5.1 仿真目标
-
-数值仿真的目标是验证算法链路是否闭环可行，并分析各关键模块对典型失效问题的作用。重点验证以下问题：
-
-- Range-Angle target 定义是否能缓解同 range-bin 多散射体混合。
-- prediction-aided phase correction 是否能改善强相位缠绕场景。
-- adaptive R 和 target screening 是否能处理目标质量退化和缺失。
-- 独立 $\beta$ 预校准能否在 AoA 初值误差下通过 holdout 验收，且在证据不足时能否精确回退。
-- 实测桥梁位移波形驱动下，完整链路是否仍可运行。
-
-需要强调，当前结果属于合成数值仿真与实测位移驱动的半实测仿真，不等同于真实 IWR1843 ADC 端到端实测验证。
-
-### 5.2 仿真数据生成流程
-
-仿真流程按统一链路组织：先构造结构位移真值，再由位移真值生成 target LoS 相位，并合成 IQ、wrapped phase 和 synthetic ADC cube；同时生成带噪声、偏置、漂移和同步误差的加速度观测；最后让各方法处理同一组观测，并与相对位移真值比较。
-
-评价对象为相对位移：
-
-$$
-\delta q(t)=q(t)-\operatorname{mean}\left(q(t)\ \mathrm{over\ cold\ start\ window}\right)
-$$
-
-雷达相位仿真模型为：
-
-$$
-\Theta(t)=\frac{4\pi}{\lambda}q(t)
-$$
-
-$$
-\Theta(t)=\beta_i\phi_i^{\mathrm{LOS}}(t)
-$$
-
-$$
-\phi_i^{\mathrm{LOS}}(t)=\frac{\Theta(t)}{\beta_i}+b_i
-$$
-
-$$
-IQ_i(t)=A_i\exp\left(j\phi_i^{\mathrm{LOS}}(t)\right)+n_i(t)
-$$
-
-$$
-\psi_i(t)=\angle IQ_i(t)
-$$
-
-当前代码与正文采用同一物理相位模型：$\beta_i$ 始终表示 LoS 到结构真实振动方向的转换系数；预测回 LoS 空间时使用 $\Theta(t)/\beta_i$。
-
-普通合成场景由位移真值生成加速度真值，再叠加噪声、偏置、漂移和同步误差得到加速度观测。实测位移驱动半实测场景使用 TDMS 激光位移通道 `卡3激光位移/3-4` 作为真实桥梁响应波形，经事件窗口、滤波和陷波后得到位移真值，再由位移二阶微分得到加速度并叠加 seeded noise。雷达观测仍由上述物理相位模型合成。
-
-### 5.3 场景设置
-
-| scenario | 位移来源/波形 | target 数 | target angles | target SNR | 退化条件 | 设计目的 |
-|---|---|---:|---|---|---|---|
-| `nominal_multifrequency` | 20/40/60 Hz 多频，0.08/0.04/0.02 mm | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | 无 | 基准多目标多频振动 |
-| `ma2023_balanced_good_targets` | 0.3/0.5/1.0 Hz，0.5/0.3/0.2 mm | 5 | 5/12/19/26/33 deg | 全 35 dB | 多个高质量 target | 文献友好条件对照 |
-| `strong_wrapping` | 振幅增至 0.45/0.25/0.12 mm | 5 | 10/25/40/55/70 deg | 30/25/20/15/10 dB | 强相位缠绕 | 压测相位分支校正 |
-| `aoa_error_bootstrap` | 默认多频 | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | AoA 初值误差 10 deg | 验证独立 beta 预校准、holdout 门控与安全回退（场景键名保留历史 bootstrap 字样） |
-| `target_snr_drop` | 默认多频 | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | target 0/1 在中段降 25 dB | 验证 adaptive R |
-| `target_dropout` | 默认多频 | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | target 0 中段 dropout | 验证目标缺失鲁棒性 |
-| `mixed_scatterer_rangebin` | 默认多频 | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | target 0 内含两散射体 | 验证 range-bin 混合散射风险 |
-| `same_range_far_angles` | 0.32/0.15/0.075 mm | 4 | 5/45/25/35 deg | 32/32/24/22 dB | 前两个 target 同 range 远角度 | 验证 Range-Angle 分离 |
-| `low_snr_multitarget` | 默认多频 | 5 | 10/25/40/55/70 deg | 12/10/8/6/4 dB | 整体低 SNR | 验证低信噪比融合 |
-| `vehicle_event_nonstationary` | 非平稳车辆事件包络 | 5 | 10/25/40/55/70 deg | 25/20/15/10/5 dB | 静止启动后非平稳事件 | 验证非平稳响应 |
-| `measured_bridge_point4_transverse` | TDMS 激光位移 3-4 | 5 | 5/15/25/35/45 deg | 26/24/22/20/18 dB | 激光位移驱动、雷达相位合成 | 验证真实桥梁波形下链路可运行 |
-
-### 5.4 对比方法与评价指标
-
-| 方法                         | 基本思路                                            | 作用                   |
-| -------------------------- | ----------------------------------------------- | -------------------- |
-| `itoh_ls`                  | 对多 target 相位做 Itoh unwrap 后进行最小二乘换算             | 传统相位解缠 baseline      |
-| `single_target_ma_style`   | 单 target Ma-style Kalman，相位状态为 target LoS phase | 对比单目标加速度辅助方法         |
-| `ma2026_reproduction`      | 基于公开论文公式与流程实现的 Ma-family baseline               | 文献方法族对照，不是 Ma 官方源码复现 |
-| `selected_aoa_fixed_beta` | 使用筛选 target 和 AoA 固定 $\beta$ | 验证固定几何先验的局限          |
-| `proposed`                 | 历史在线 $\beta$ 自举实现 | 仅作 legacy/ablation 对照             |
-| `proposed_full_pipeline_beta_confidence`   | Range-Angle 前端 + 独立 $\beta$ 预校准/回退 + 冻结参数 Kalman + adaptive R | 当前主方案                |
-
-主要评价指标包括 RMSE、MAE、最大误差、结构主相位误差、unwrap error、selected target 数量、corrected observation 数量和转换系数相对误差；当前代码输出 $\beta$ 的相对误差诊断。半实测场景还通过激光通道时域、频谱和动态相关性图说明所选桥梁位移波形的有效性。
-
-## 6. 仿真结果与分析
-
-### 6.1 总体误差结果
-
-下表给出各 scenario 下不同方法的历史 RMSE，对应单位为 mm。这组数值生成于旧的在线 $\beta$ 自举实现，只用于保留方法演进记录，不得作为当前独立预校准方案的验证证据。正式表格需在新主方法的场景级验收完成后重新生成，不在本次聚焦测试中直接改写历史数字。
-
-| 场景 | `itoh_ls` | `single_target_ma_style` | `ma2026_reproduction` | `selected_aoa_fixed_beta` | `proposed` | `proposed_full_pipeline` |
-|---|---:|---:|---:|---:|---:|---:|
-| `nominal_multifrequency` | 0.013007 | 0.008483 | 0.053692 | 0.022540 | 0.007366 | 0.007265 |
-| `ma2023_balanced_good_targets` | 0.004053 | 0.001460 | 0.037064 | 0.016383 | 0.001109 | 0.001205 |
-| `strong_wrapping` | 0.007302 | 0.049198 | 0.220250 | 0.055089 | 0.039386 | 0.038741 |
-| `aoa_error_bootstrap` | 0.013007 | 0.008483 | 0.053692 | 0.022540 | 0.008644 | 0.007267 |
-| `target_snr_drop` | 9.148472 | 0.018043 | 0.299926 | 0.028316 | 0.008539 | 0.009899 |
-| `target_dropout` | 0.012921 | 1.274598 | 0.053692 | 0.027775 | 0.007503 | 0.008592 |
-| `mixed_scatterer_rangebin` | 0.026781 | 0.016109 | 0.049107 | 0.023389 | 0.009160 | 0.007109 |
-| `same_range_far_angles` | 0.005664 | 0.031874 | 0.127338 | 0.036103 | 0.026568 | 0.025306 |
-| `low_snr_multitarget` | 0.059297 | 0.016939 | 0.047153 | 0.031592 | 0.011296 | 0.013590 |
-| `vehicle_event_nonstationary` | 0.012959 | 0.004710 | 0.016125 | 0.019849 | 0.004721 | 0.004474 |
-| `measured_bridge_point4_transverse` | 0.011141 | 0.002967 | 0.616525 | 0.013626 | 0.007445 | 0.003400 |
-
-从总体结果看，proposed full pipeline 在 target SNR drop、target dropout、same range far angles、AoA 初值误差、车辆非平稳事件和半实测场景中保持较低 RMSE。这说明当前方法对典型退化问题具有可行性，但并不意味着在任意条件下都必然优于所有 baseline。例如文献友好条件下，单 target 方法本身也可能表现较好。
-
-### 6.2 强相位缠绕场景分析
-
-strong wrapping 场景用于检验相位分支校正。该场景中，单 target Ma-family baseline 的 RMSE 为 0.220250 mm，selected AoA fixed beta 为 0.055089 mm，proposed full pipeline 为 0.038741 mm。
-
-![[reports/numerical_simulation_assets_png/strong_wrapping_phase_correction.png]]
-
-图中对比了 wrapped phase、prediction-aided corrected phase 和真实 LoS phase。结果说明，在相位跨越 2π 分支时，仅依赖相邻相位差或单目标趋势容易产生分支错误；引入加速度辅助的结构主相位预测后，可以更稳定地选择相位分支。
-
-### 6.3 同 range 远角度目标场景分析
-
-same range far angles 场景用于验证 Range-Angle target 定义的必要性。两个 target 位于相同 range-bin 但角度差较大，如果采用 range-bin-only 方法，会把多个散射体的复数相量混合在一起，导致相位不再对应单一物理 target。
-
-![[reports/numerical_simulation_assets_png/vehicle_event_nonstationary_range_angle_frame.png]]
-
-该图展示了 Range-Angle 前端能够在二维空间中定位候选散射体。虽然图示来自车辆非平稳事件场景，但其作用是说明当前前端不是只读取单个 range-bin，而是在 range-angle 平面上定义 target。same range far angles 场景的 RMSE 中，ma2026_reproduction 为 0.127338 mm，selected AoA fixed beta 为 0.036103 mm，proposed full pipeline 为 0.025306 mm，说明同 range 远角度散射体应在 Kalman 前被分离。
-
-### 6.4 目标退化与缺失场景分析
-
-target SNR drop 和 target dropout 场景用于检验动态降权和目标筛选能力。target SNR drop 中，target 0 和 target 1 在中段发生明显 SNR 下降。该场景下 ma2026_reproduction 为 0.299926 mm，selected AoA fixed beta 为 0.028316 mm，proposed full pipeline 为 0.009899 mm。
-
-![[reports/numerical_simulation_assets_png/target_snr_drop_adaptive_r.png]]
-
-该图展示目标质量退化时 target-wise adaptive R 的变化。低质量 target 的观测噪声被动态增大，从而降低其 Kalman 更新权重。
-
-![[reports/numerical_simulation_assets_png/vehicle_event_nonstationary_target_selection_timeline.png]]
-
-target selection 时间线展示了候选 target 的在线维护过程。full pipeline 不是固定使用所有 target，而是根据稳定性和频带一致性保留可用 target，从而降低坏 target 对结构主相位估计的影响。
-
-![[reports/numerical_simulation_assets_png/vehicle_event_nonstationary_selected_vs_all_targets_displacement.png]]
-
-该图对比了 all-target proposed 与 full pipeline 目标筛选后的位移估计结果，用于说明目标筛选可以提高复杂事件中的鲁棒性。
-
-### 6.5 AoA 初值误差场景分析
-
-`aoa_error_bootstrap` 场景键名为了输出兼容而保留，当前应用它检验独立 $\beta$ 预校准的可识别性、holdout 泛化和失败回退，而不是检验在线收敛。上表的 0.053692 mm、0.022540 mm 和 0.007267 mm 属于旧实现输出，不证明新预校准策略有效。
-
-![[reports/numerical_simulation_assets_png/aoa_error_bootstrap_beta_bootstrap.png]]
-
-上图同样是旧 online bootstrap 的 legacy 诊断图，不应解读为当前方法中 $\beta_i$ 随时间收敛。当前聚焦回归结果为：显式关闭 ADXL 验证的公共 AoA 候选实验中，人工 $4^\circ$ 共享角度偏差将 RMSE 由 0.03535 mm 降至 0.00162 mm；在默认、必须 ADXL 独立验证的磁浮轨道梁采集仿真中，校准证据未过门限，系统精确回退 AoA，RMSE 为 0.000502 mm 且滤波期间 $\beta$ 漂移为 0。这两项只是聚焦机制检查，仍需新方法的完整场景验收。
-
-### 6.6 非平稳车辆事件场景分析
-
-vehicle event nonstationary 场景模拟 quiet start 后出现的非平稳车辆事件。该场景下，ma2026_reproduction 为 0.016125 mm，selected AoA fixed beta 为 0.019849 mm，proposed full pipeline 为 0.004474 mm。
-
-非平稳响应对方法提出两个要求：一是冷启动阶段需要建立 target、$\beta_i$ 和相位偏置的初始状态；二是事件发生后，目标筛选和 adaptive R 需要持续抑制异常 target。仿真结果说明，当前链路在非平稳车辆事件中可以保持连续位移输出。
-
-### 6.7 实测位移驱动半实测场景分析
-
-measured bridge point4 transverse 场景使用 TDMS 激光位移通道 `卡3激光位移/3-4` 作为真实桥梁响应波形来源。该波形经事件窗口选择、滤波和陷波处理后作为位移真值，再生成加速度观测和雷达相位观测。
-
-![[reports/numerical_simulation_assets_png/laser_time_channels.png]]
-
-该图展示 TDMS 激光位移多通道时域响应，用于说明半实测场景所用真实桥梁位移波形来源。
-
-![[reports/numerical_simulation_assets_png/laser_spectrum_channels.png]]
-
-该图展示激光通道频谱特性，用于支撑分析频带和工频陷波设置。
-
-![[reports/numerical_simulation_assets_png/laser_dynamic_correlation.png]]
-
-该图展示激光通道动态成分相关性，说明所选桥梁响应波形具有一定通道一致性基础。
-
-在该半实测场景中，ma2026_reproduction 为 0.616525 mm，selected AoA fixed beta 为 0.013626 mm，proposed full pipeline 为 0.003400 mm。该结果说明真实桥梁位移波形下当前算法链路可运行。但必须强调：这里雷达观测仍由物理相位模型合成，不是完整毫米波雷达实测，也不能替代真实雷达 ADC 与参考传感器同步采集后的端到端验证。
-
-## 7. 阶段性结论与后续工作
-
-### 7.1 阶段性结论
-
-本阶段已经建立倒挂式毫米波雷达与 MEMS 加速度计融合的结构位移估计框架。方法上，本文将环境静止散射体视为运动雷达的相对参考 target，并通过 Range-Angle 多目标提取、目标稳定性筛选、Kalman 前独立 $\beta$ 预校准与安全回退、冻结参数结构主相位 Kalman、prediction-aided phase correction 和 target-wise adaptive R 形成完整算法链路。代码实现与正文统一采用 $\beta$ 作为 LoS 到结构方向的转换系数，且不再使用 Kalman 后验反向更新它。
-
-数值仿真表明，该方法在强相位缠绕、target SNR drop、target dropout、AoA 初值误差、同 range 远角度散射体、低 SNR 多目标和非平稳车辆事件等场景下具有可行性。实测位移驱动半实测仿真进一步说明，在真实桥梁位移波形下，当前链路可以完成相对位移估计。
-
-### 7.2 当前研究边界
-
-当前研究仍有明确边界。
-
-- 尚未完成真实 IWR1843 ADC 端到端实测验证。
-- 真实阵列幅相误差、TDM-MIMO 相位补偿和角度轴校准尚未纳入实测链路。
-- Pi 4 本地的雷达帧与 ADXL355 DRDY 同步采集程序已实现，并可输出同一 `CLOCK_MONOTONIC` 时间轴上的 ADXL DRDY 与雷达软件估计/硬件触发参考；目前仅完成无硬件聚焦测试，仍需在真实系统中验证 SPI 持续采样、`SYNC_IN` 波形、帧对应关系、时延和时钟漂移。后续若接入激光参考传感器，其接口和参考事件对齐方式仍需另行定义，但不改变 Pi 4 作为唯一采集主机的架构。
-- 加速度计灵敏度、安装方向、bias、重力分量和测点对应关系仍需标定。
-- 现场多径、旁瓣、相干散射体、安装姿态变化和长期稳定性仍需进一步实验验证。
-- 当前半实测场景只能说明真实桥梁位移波形下链路可运行，不是完整实测毫米波雷达验证。
-
-### 7.3 下一阶段工作
-
-| 工作项 | 当前状态 | 下一步 |
-|---|---|---|
-| 真实 IWR1843 ADC 文件解析 | 软件实现完成、实机待验证 | 用真实 Pi/DCA 文件验证 PCAP 连续性、LVDS/IQ、帧结构和通道组织 |
-| 天线幅相与角度轴标定 | 未完成 | 建立 RX/TX 通道幅相、阵列误差和角度轴校准流程 |
-| TDM-MIMO 相位补偿 | 未完成 | 处理多 TX 时序导致的相位差 |
-| 雷达/加速度/参考位移同步 | Pi 统一采集软件完成、实机待验证 | 实测雷达触发与 ADXL DRDY 对齐、时延和漂移，再定义外部参考位移接口 |
-| 加速度计标定 | 未完成 | 标定灵敏度、方向、bias、重力分量和测点对应关系 |
-| 实验梁或真实桥梁验证 | 未完成 | 开展毫米波雷达、激光位移和加速度同步采集 |
-| 多径与长期稳定性分析 | 未完成 | 分析桥下多径、移动干扰、target 生命周期和长期漂移 |
-| 论文方法章节整理 | 进行中 | 将模型、算法流程和消融实验固化为论文表述 |
-
-下一阶段应优先完成 Pi 4 上的真实 IWR1843/DCA1000/ADXL355 采集台架验证、天线幅相与角度轴标定、同步时延与漂移测量，并在实验梁或真实桥梁上开展毫米波雷达、参考位移传感器和加速度计的端到端同步验证。
-
-## 参考文献
-
-[1] MA Z, CHOI J, SOHN H. Structural displacement sensing techniques for civil infrastructure: A review[J]. Journal of Infrastructure Intelligence and Resilience, 2023, 2: 100041.
-
-[2] WU R T, JAHANSHAHI M R. Data fusion approaches for structural health monitoring and system identification: Past, present, and future[J]. Structural Health Monitoring, 2020, 19(2): 552-586.
-
-[3] GINDY M, VACCARO R, NASSIF H, et al. A state-space approach for deriving bridge displacement from acceleration[J]. Computer-Aided Civil and Infrastructure Engineering, 2008, 23: 281-290.
-
-[4] CHO S, PARK J W, PALANISAMY R P, et al. Reference-free displacement estimation of bridges using Kalman filter-based multimetric data fusion[J]. Journal of Sensors, 2016, 2016: 3791856.
-
-[5] LI C, CHEN W, LIU G, et al. A noncontact FMCW radar sensor for displacement measurement in structural health monitoring[J]. Sensors, 2015, 15(4): 7412-7433.
-
-[6] GUO J, HE Y, JIANG C, et al. Measuring micrometer-level vibrations with mmWave radar[J]. IEEE Transactions on Mobile Computing, 2023, 22(4): 2248-2261.
-
-[7] TAKAMATSU H, HINOHARA N, SUZUKI K, et al. Experimental analysis of accuracy and precision in displacement measurement using millimeter-wave FMCW radar[J]. Applied Sciences, 2025, 15(6): 3316.
-
-[8] LIU J, LI Y, GU C. Solving phase ambiguity in interferometric displacement measurement with millimeter-wave FMCW radar sensors[J]. IEEE Sensors Journal, 2022, 22(9): 8482-8489.
-
-[9] MA Z, HAI L, ZHANG T, et al. Accurate structural displacement measurement via enhanced millimeter-wave radar interferometry using multi-chirp-based adaptive phase unwrapping[J]. Measurement, 2026, 262: 120029.
-
-[10] MA Z, ZHANG T, ZHU Y, et al. Acceleration-aided Kalman filtering for joint phase denoising and unwrapping in FMCW radar-based displacement monitoring[J]. Mechanical Systems and Signal Processing, 2026, 248: 113991.
-
-[11] MA Z, CHOI J, YANG L, et al. Structural displacement estimation using accelerometer and FMCW millimeter wave radar[J]. Mechanical Systems and Signal Processing, 2023, 182: 109582.
-
-[12] MA Z, CHOI J, SOHN H. Continuous bridge displacement estimation using millimeter-wave radar, strain gauge and accelerometer[J]. Mechanical Systems and Signal Processing, 2023, 197: 110408.
-
-[13] MA Z, CHOI J, LEE J, et al. Accelerometer-aided millimeter-wave radar interferometry for uninterrupted bridge displacement estimation considering intermittent radar target occlusion[J]. Mechanical Systems and Signal Processing, 2025, 223: 111888.
-
-[14] MA Z, HAN K, CHOI J, et al. Development and field deployment validation of a low-cost and high-precision displacement sensing system by fusing millimeter-wave radar and accelerometer[J]. Engineering Structures, 2024, 321: 118926.
-
-[15] XIONG Y, LI S, GU C, et al. Millimeter-wave bat for mapping and quantifying micromotions in full field of view[J]. Research, 2021, 2021: 9787484.
-
-[16] LI S, XIONG Y, SHEN X, et al. Multi-scale and full-field vibration measurement via millimetre-wave sensing[J]. Mechanical Systems and Signal Processing, 2022, 177: 109178.
-
-[17] RAO S. MIMO Radar[R]. Dallas: Texas Instruments, 2018.
-
-[18] KALMAN R E. A new approach to linear filtering and prediction problems[J]. Transactions of the ASME-Journal of Basic Engineering, 1960, 82: 35-45.
-
-[19] MEHRA R K. Approaches to adaptive filtering[J]. IEEE Transactions on Automatic Control, 1972, 17(5): 693-698.
-
-[20] LI Z, ZHANG H, ZHOU Q, et al. An adaptive low-cost INS/GNSS tightly-coupled integration architecture based on redundant measurement noise covariance estimation[J]. Sensors, 2017, 17(9): 2032.
+Ma、旧多场景、online beta 和扩展 baseline 不属于当前主方法。

@@ -274,13 +274,12 @@ repository root. Without a calibration file it uses the selected nominal ADXL
 axis and half-wavelength array geometry and records explicit warnings:
 
 ```bash
-PYTHONPATH=capture_program/src \
-  capture_program/.venv/bin/python -m simulation.phase1.run_captured \
-  example_synchronized_dataset/capture_00000/synchronized \
-  --adxl-axis x --adxl-sign 1
+python3 -m algorithm.run \
+  --input example_synchronized_dataset/capture_00000/synchronized \
+  --output /tmp/algorithm_result.npz
 ```
 
-The command writes `algorithm/phase1_result.npz` and a JSON provenance summary.
+The command writes `algorithm_result.npz` and a JSON provenance summary.
 Use `--adxl-sign -1` when the selected sensor axis points opposite to the
 positive structural-displacement direction.
 Add `--require-calibrated` only when the stricter `fusion_ready` gate is needed.
