@@ -29,11 +29,9 @@ def detect_target_bins(range_angle_cube: np.ndarray, angle_axis_deg: np.ndarray,
     )
 
 
-def select_targets(targets, acceleration_mps2: np.ndarray, sample_rate_hz: float):
+def select_targets(targets):
     quality = np.mean(targets.available_mask, axis=1)
     selected = np.flatnonzero(quality > 0.5)
-    if selected.size == 0:
-        selected = np.arange(targets.measured_beta.size, dtype=int)
     scores = np.asarray(quality, dtype=float)
     initial_r = np.full(targets.measured_beta.shape, 9.0, dtype=float)
     return selected, initial_r, scores

@@ -100,10 +100,8 @@ def _adxl_package(root: Path, acceleration: np.ndarray, seed: int) -> None:
     })
 
 
-def generate(output: str | Path, *, duration_s: float = 4.0, seed: int = 2026, overwrite: bool = False) -> Path:
+def generate(output: str | Path, *, duration_s: float = 4.0, seed: int = 2026) -> Path:
     output = Path(output)
-    if output.exists() and not overwrite:
-        raise FileExistsError(output)
     t, displacement, acceleration = load_bridge_record()
     count = round(duration_s * RADAR_RATE_HZ)
     if count < 2 or count > round(t[-1] * RADAR_RATE_HZ) + 1:

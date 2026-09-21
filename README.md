@@ -21,14 +21,15 @@ capture_root/
 
 `capture_program/` 保留 IWR1843、DCA1000、ADXL355、GPIO 时间轴和算法输入导出。它不调用论文算法。实测包交给算法时，算法只读取 `radar/algorithm_input`、`adxl355/algorithm_input` 和 `sync`。
 
+代码性质已经按用途分开：`algorithm/` 和 `measured_bridge_simulation/` 是离线学术实验代码，保持直接的数组处理和公式实现，不加入服务化、重试或泛化防御框架；`capture_program/` 是硬件采集边界，保留设备生命周期、数据完整性和输出契约检查，因为它负责把真实设备数据变成可用的实验输入。
+
 半实测场景只使用 `datafile/20250320test12.tdms` 的 `卡3激光位移/3-4` 通道。它将实测激光位移作为桥梁运动，合成雷达 ADC/IQ、ADXL355 结构轴和同步时间轴，再写成与采集程序相同的输入目录：
 
 ```bash
 python3 -m measured_bridge_simulation \
   --output /tmp/measured_bridge_capture \
   --duration 4.0 \
-  --seed 2026 \
-  --overwrite
+  --seed 2026
 ```
 
 算法只有一个入口，没有 method、scenario、Ma 或 baseline 参数：
@@ -77,3 +78,5 @@ python3 -m algorithm.run --input /tmp/measured_bridge_capture --output /tmp/meas
 ```
 
 历史多场景仿真、Ma 复现、扩展实验和旧报告输出已从当前代码树删除；需要追溯时看 `archive/`，不要把其中内容当作当前实现。
+
+每个代码区的局部约束见对应的 [`AGENTS.md`](/Users/umep/thesis/AGENTS.md)、[`algorithm/AGENTS.md`](/Users/umep/thesis/algorithm/AGENTS.md)、[`measured_bridge_simulation/AGENTS.md`](/Users/umep/thesis/measured_bridge_simulation/AGENTS.md) 和 [`capture_program/AGENTS.md`](/Users/umep/thesis/capture_program/AGENTS.md)。

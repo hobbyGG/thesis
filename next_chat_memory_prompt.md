@@ -15,7 +15,7 @@ python3 -m algorithm.run --input /path/to/capture_root --output /tmp/result.npz
 半实测包入口：
 
 ```bash
-python3 -m measured_bridge_simulation --output /tmp/capture --duration 4 --seed 2026 --overwrite
+python3 -m measured_bridge_simulation --output /tmp/capture --duration 4 --seed 2026
 ```
 
 当前论文文档：

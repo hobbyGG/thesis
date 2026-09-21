@@ -65,7 +65,7 @@ def build_algorithm_inputs(capture: CapturePackage):
     interval_average = preintegration.delta_v_mps / preintegration.duration_s
     measured = np.r_[interval_average[0], interval_average]
     acceleration = AccelerationInput(capture.adxl_time_ns, structural_accel, measured, preintegration)
-    selected, initial_r, scores = select_targets(targets, measured, radar_rate)
+    selected, initial_r, scores = select_targets(targets)
     radar = RadarInput(targets.measured_beta, targets.wrapped_phase_rad, targets.available_mask, selected, initial_r, scores, {
         "angle_deg": targets.angle_deg,
         "range_bins": targets.range_bins,

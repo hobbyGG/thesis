@@ -347,7 +347,7 @@ $$
 实验运行：
 
 ```bash
-python3 -m measured_bridge_simulation --output /tmp/measured_bridge_capture --duration 4 --seed 2026 --overwrite
+python3 -m measured_bridge_simulation --output /tmp/measured_bridge_capture --duration 4 --seed 2026
 python3 -m algorithm.run --input /tmp/measured_bridge_capture --output /tmp/measured_bridge_result.npz
 ```
 
