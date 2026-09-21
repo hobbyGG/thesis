@@ -68,6 +68,7 @@ python3 -m algorithm.run \
 - [`thesis_idea_overview.md`](/Users/umep/thesis/thesis_idea_overview.md)：主要研究思路。
 - [`innovation_points/`](/Users/umep/thesis/innovation_points/)：创新点说明。
 - [`docs/algorithm_chain_review.md`](/Users/umep/thesis/docs/algorithm_chain_review.md)：当前代码链路审查。
+- [`docs/current_research_data_flow.md`](/Users/umep/thesis/docs/current_research_data_flow.md)：从雷达发射、树莓派采集到最终位移结果的完整数据流和公式。
 
 检查代码和运行链路：
 
