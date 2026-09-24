@@ -74,6 +74,21 @@ q_i=\frac{\lambda}{4\pi\cos\varphi_i}\,\Delta\phi_i,
 
 它还演示了多人生命体征和多个声源的分离，但本质仍是“空间分离后逐目标输出”，没有加速度或应变传感器参与。
 
+### 1.5 IQ 级多目标信号融合
+
+**Measuring Micrometer-Level Vibrations With mmWave Radar**（IEEE Transactions on Mobile Computing，2023）把“多传感器”理解为多 chirp、多接收通道和多目标信号的雷达内部融合，而不是雷达与外部加速度计融合：
+
+- 用 chirp-group generation（CGG）和多接收通道提高有效信噪比；
+- 在 range FFT/angle FFT 热图中迭代寻找局部峰，得到目标的距离和角度；
+- 对每个 chirp 的复数 IQ 轨迹做圆拟合，估计静态反射造成的圆心偏移；
+- 将不同通道的 IQ 轨迹平移、缩放到公共圆后进行 IQ aggregation，再提取相位；
+- 对每个目标分别做相位解调和位移输出；
+- 用目标角度修正 LOS 位移到已知振动方向的投影。
+
+它解决的是“弱微动、静态杂波和多通道相位质量”问题。多个通道被合成为一个更干净的雷达观测，仍然没有建立多个目标共享的结构状态。
+
+**Development of a high-precision nano millimeter-wave radar system for non-contact bridge displacement monitoring**（Scientific Reports，2025）采用慢时间均值抵消静止目标能量、Hamming 窗抑制旁瓣，再在多个距离单元用 FFT/all-phase FFT 提取目标相位。实验中可同时看到多个角反射器，但目标主要按距离分离，各目标仍输出自己的 LOS 位移；径向到竖向的转换因子需要安装几何配置，不属于多目标状态融合。
+
 ### 1.5 当前项目和这些多目标方法的差异
 
 当前代码的处理位置介于上述两类方法之间：
@@ -146,6 +161,17 @@ q_i=\frac{\lambda}{4\pi\cos\varphi_i}\,\Delta\phi_i,
 
 它解决的是“雷达自身在动时如何估计平台运动”，不是结构位移的多 LOS 反演。对当前倒挂雷达场景，它是潜在的自运动补偿方向，但当前代码还没有实现平台位姿估计。
 
+### 2.5 动态几何和相位跳变处理
+
+**Measurement Refinements of Ground-Based Radar Interferometry in Bridge Load Test Monitoring**（Remote Sensing，2024）主要讨论地基雷达的单源处理，但对多方向解释有两个重要做法：
+
+- 用滑动均值或异常值判据检测被车辆等目标造成的相位跳变，删除异常点后用 Akima 插值，再做一维解缠和平滑；
+- 不把结构几何固定成初始 LOS，而是把目标变形后的 LOS/竖向距离带入投影关系，同时保留慢变趋势。
+
+它不是多目标共同 Kalman，也没有外部传感器融合，但说明当结构变形或遮挡改变反射几何时，固定投影系数可能失效。
+
+早期的 **Radar-based multipoint displacement measurements of a 1200-m-long suspension bridge** 通过多个距离单元同时观察桥梁梁、塔和缆索，并用三个参考距离单元估计参考点/基座运动，再对目标 LOS 位移做几何补偿。**Ground-based radar interferometry for monitoring the dynamic performance of a multitrack steel truss high-speed railway bridge** 则用多个距离单元和不同雷达视角观察不同轨道，借助激光点云解释几何关系；雷达和加速度计主要做模态结果对照，不是同一状态方程中的融合。
+
 ## 3. 多传感器融合：融合发生在不同层次
 
 ### 3.1 雷达位移与加速度的 FIR 频带互补
@@ -208,6 +234,14 @@ q_i=\frac{\lambda}{4\pi\cos\varphi_i}\,\Delta\phi_i,
 
 论文提出进一步利用已有通信光纤做 Rayleigh/OFDR 分布式应变测量，以提供长桥空间连续信息，但这部分属于未来扩展，不应说成已经完成的雷达—光纤实时融合算法。
 
+### 3.7 融合后再估计结构加速度
+
+**Improved structural acceleration estimation using low-cost MEMS accelerometer and FMCW millimeter-wave radar**（Measurement，2026）与当前项目的方向相反：它先用短时校准选择雷达目标并估计转换因子，得到雷达位移；然后将雷达位移二阶差分的低频部分与 MEMS 加速度的高频部分通过滑动窗口 FIR 互补融合，最终输出结构加速度。它不是多目标共同相位 Kalman，也不解决当前项目的在线 AoA 转换因子问题。
+
+### 3.8 加速度与应变的状态估计
+
+**Bridge Displacement Estimation Using a Co-Located Acceleration and Strain** 先根据 Euler–Bernoulli 梁关系把应变变成伪静态位移，再用共址加速度的二阶差分做无参考尺度校准，最后在自适应 Kalman 中以加速度作为输入、应变位移作为观测，递推估计位移和速度。它说明“传感器进入状态方程”与“频带互补 FIR”是两种不同的融合方式，但没有雷达相位和 AoA。
+
 ### 3.6 磁浮系统级多传感器监测
 
 **Online Monitoring System for Short Stator Maglev Train**和**Technology Innovation in Developing the Health Monitoring Cloud Platform for Maglev Vehicle-Suspension-Guideway Coupling System**展示的是系统层融合：
@@ -215,7 +249,7 @@ q_i=\frac{\lambda}{4\pi\cos\varphi_i}\,\Delta\phi_i,
 - 车体加速度、悬浮间隙、电磁铁电流、轨道梁加速度、FBG 应变、位移和温度等多类数据；
 - 车载和轨旁系统按统一时间组织数据；
 - 做清洗、同步、区段化分析和异常识别；
-- 云平台进一步加入数据融合、虚拟传感器和可视化。
+- 云平台进一步加入数据融合、虚拟传感器和可视化；部分方案还使用 Probabilistic Data Association 关联同一测点数据，用 Particle Filter、协方差一致性和 Bayesian/BDLM 预测做状态诊断。
 
 它们的融合目标是车辆—悬浮—导轨耦合系统状态监控，不是毫米波相位解缠。对当前研究可借鉴的是同步数据组织和结构响应验证，不能直接把云平台或多传感器监控层塞进论文算法核心。
 
