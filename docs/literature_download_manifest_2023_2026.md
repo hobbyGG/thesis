@@ -2,7 +2,7 @@
 
 本文件对应 [`literature_inventory_2023_2026.md`](literature_inventory_2023_2026.md) 中原先没有本地全文的 39 条记录。`已下载` 表示全文已经保存到 `ref_papers/02_recent_uncollected/`；其他条目提供 DOI、出版社或机构仓储入口。出版社链接可能需要学校订阅。
 
-**统计：原未收录 39 篇；本次已下载 10 篇；仍未保存到本地 29 篇。**
+**统计：原未收录 39 篇；本次已下载 9 篇；仍未保存到本地 30 篇。**
 
 | 编号 | 层 | 论文 | 状态 | 本地文件/下载入口 |
 |---:|:---:|---|---|---|
@@ -43,5 +43,5 @@
 | 48 | C | Online Monitoring System for Short Stator Maglev Train，IWSHM 2023 | 已下载 | [C02_Online_Monitoring_System_for_Short_Stator_Maglev_Train.pdf](/Users/umep/thesis/ref_papers/02_recent_uncollected/C02_Online_Monitoring_System_for_Short_Stator_Maglev_Train.pdf) |
 | 49 | C | Technology Innovation in Developing the Health Monitoring Cloud Platform for Maglev Vehicle-Suspension-Guideway Coupling System，IWSHM 2023 | 已下载 | [C03_Technology_Innovation_in_Developing_the_Health_Monitoring_Cloud_Platform_for_Maglev_Vehicle-Suspension-Guideway_Coupling_System.pdf](/Users/umep/thesis/ref_papers/02_recent_uncollected/C03_Technology_Innovation_in_Developing_the_Health_Monitoring_Cloud_Platform_for_Maglev_Vehicle-Suspension-Guideway_Coupling_System.pdf) |
 | 51 | C | Portable Radar-Based Measurement System for Vibration Analysis of Large Infrastructures，SMSI 2025 | 已下载 | [C05_Portable_Radar-Based_Measurement_System_for_Vibration_Analysis_of_Large_Infrastructures.pdf](/Users/umep/thesis/ref_papers/02_recent_uncollected/C05_Portable_Radar-Based_Measurement_System_for_Vibration_Analysis_of_Large_Infrastructures.pdf) |
-| 52 | C | Contactless Micron-Level Vibration Measurement with Millimeter Wave Radar，APSIPA | 已下载 | [C06_Contactless_Micron-Level_Vibration_Measurement_with_Millimeter_Wave_Radar.pdf](/Users/umep/thesis/ref_papers/02_recent_uncollected/C06_Contactless_Micron-Level_Vibration_Measurement_with_Millimeter_Wave_Radar.pdf) |
+| 52 | C | Contactless Micron-Level Vibration Measurement with Millimeter Wave Radar，APSIPA | 公开全文入口（当前站点拦截下载） | [打开下载/出版社页面](https://www.nowpublishers.com/article/OpenAccessDownload/SIP-2023-0073) |
 | 53 | C | Using Geometrical Information to Measure the Vibration of a Swaying Millimeter-wave Radar，arXiv | 已下载 | [C07_Using_Geometrical_Information_to_Measure_the_Vibration_of_a_Swaying_Millimeter-wave_Radar.pdf](/Users/umep/thesis/ref_papers/02_recent_uncollected/C07_Using_Geometrical_Information_to_Measure_the_Vibration_of_a_Swaying_Millimeter-wave_Radar.pdf) |
