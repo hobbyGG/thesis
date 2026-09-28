@@ -1,14 +1,14 @@
 # 近三年文献未收录清单与下载入口（2023—2026）
 
-本文件对应 [`literature_inventory_2023_2026.md`](literature_inventory_2023_2026.md) 中原先没有本地全文的 39 条记录。`已下载` 表示全文已经保存到 `ref_papers/02_recent_uncollected/`；其他条目提供 DOI、出版社或机构仓储入口。出版社链接可能需要学校订阅。
+本文件对应 [`literature_inventory_2023_2026.md`](literature_inventory_2023_2026.md) 中原先没有本地全文的 39 条记录。`已下载` 表示全文已经保存到 `ref_papers/02_recent_uncollected/`；其他条目提供 DOI、出版社或机构仓储入口。出版社链接可能需要学校订阅。Scopus 会话可用于读取记录和全文入口元数据，但不等于 Elsevier、IEEE 或其他出版社的 PDF 会话；每篇仍需按出版社链接实际验证。
 
-**统计：原未收录 39 篇；本次已下载 9 篇；仍未保存到本地 30 篇。**
+**统计：原未收录 39 篇；本次已下载 10 篇；仍未保存到本地 29 篇。**
 
 | 编号 | 层 | 论文 | 状态 | 本地文件/下载入口 |
 |---:|:---:|---|---|---|
 | 1 | A | Dynamic analysis and vibration control for a maglev vehicle-guideway coupling system with experimental verification | 未找到稳定公开全文直链 | [打开下载/出版社页面](https://doi.org/10.1016/j.ymssp.2022.109954) |
 | 2 | A | Measurement and numerical analysis on dynamic performance of the LMS maglev train-track-continuous girder coupled system with running speed-up state | 未找到稳定公开全文直链 | [打开下载/出版社页面](https://doi.org/10.1016/j.measurement.2023.113052) |
-| 3 | A | Dynamic Response Analysis of High-Speed Maglev-Guideway System | 可直接下载（出版社 PDF，若站点拦截可打开 DOI） | [打开下载/出版社页面](https://link.springer.com/content/pdf/10.1007/s42417-023-00995-5.pdf) |
+| 3 | A | Dynamic Response Analysis of High-Speed Maglev-Guideway System | 已下载 | [A03_Dynamic_Response_Analysis_of_High-Speed_Maglev-Guideway_System.pdf](/Users/umep/thesis/ref_papers/02_recent_uncollected/A03_Dynamic_Response_Analysis_of_High-Speed_Maglev-Guideway_System.pdf) |
 | 4 | A | Propagation characteristics of vibration induced by medium-low-speed maglev train running on subgrade | 未找到稳定公开全文直链 | [打开下载/出版社页面](https://doi.org/10.1016/j.trgeo.2023.100986) |
 | 5 | A | Random vibration analysis of the maglev vehicle-guideway system using a probability density evolution method with uncertain parameters | 未找到稳定公开全文直链 | [打开下载/出版社页面](https://doi.org/10.1016/j.istruc.2022.12.049) |
 | 6 | A | Real-Time Malfunction Detection of Maglev Suspension Controllers | 已下载 | [A06_Real-Time_Malfunction_Detection_of_Maglev_Suspension_Controllers.pdf](/Users/umep/thesis/ref_papers/02_recent_uncollected/A06_Real-Time_Malfunction_Detection_of_Maglev_Suspension_Controllers.pdf) |
