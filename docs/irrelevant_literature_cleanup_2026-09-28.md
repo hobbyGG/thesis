@@ -1,6 +1,8 @@
 # 99_irrelevant_literature 清理记录（2026-09-28）
 
-审查前：109 篇。移入 `03_future_references/`：28 篇；删除：81 篇；`99_irrelevant_literature/` 保留：0 篇。
+最终状态：审查前 109 篇；最终移入 03_future_references：9 篇；最终删除：100 篇；99_irrelevant_literature 保留：0 篇。
+
+第一轮清理曾暂存 28 篇、删除 81 篇；第二轮复核又从暂存目录删除 19 篇 PINN、神经网络结构求解、结构参数反演和泛化动力学建模文献。第一轮的迁移表保留为历史记录，最终保留文件以 ref_papers/03_future_references/README.md 为准。
 
 ## 移入未来参考目录的文献
 
@@ -120,3 +122,28 @@
 - `Wireless safety monitoring of a water pipeline construction site using LoRa comm(1).pdf`
 - `YOLO-Based Simultaneous Target Detection and Classification in Automotive FMCW Radar Systems.pdf`
 - `基于多传感器融合的交通场景三维目标检测方法研究.pdf`
+
+
+## 第二轮删除的 19 篇
+
+这些文献与当前的毫米波雷达位移、AoA 几何、加速度辅助 Kalman 相位解缠没有直接方法关系，删除理由是它们主要讨论 PINN、神经网络训练、结构参数反演或泛化动力学建模：
+
+- A transfer learning enhanced the physics-informed neural network model for vortex-induced vibration.pdf
+- Bayesian Parameter Estimation of Vibrating Systems via Physics-Based Biases from Neural Networks.pdf
+- Deep Autoencoder based Energy Method for the Bending, Vibration, and Buckling Analysis of Kirchhoff Plates.pdf
+- Deep learning for solution and inversion of structural mechanics and vibrations.pdf
+- Learning and correcting non-Gaussian model errors.pdf
+- Moving load induced dynamic response analysis of bridge based on physics-informed neural network.pdf
+- Neural modal ordinary differential equations: Integrating physics-based modeling with neural ordinary differential equations for modeling high-dimensional monitored structures.pdf
+- NeuralSI: Structural Parameter Identification in Nonlinear Dynamical Systems.pdf
+- Novel Physics-Informed Artificial Neural Network Architectures for System and Input Identification of Structural Dynamics PDEs.pdf
+- On spike-and-slab priors for Bayesian equation discovery of nonlinear dynamical systems via sparse linear regression.pdf
+- Parametric Neural Networks as Full-Field Surrogates for Material Model Calibration.pdf
+- Physics informed deep learning for computational elastodynamics without labeled data.pdf
+- PHYSICS-INFORMED NEURAL NETWORKS FOR ELASTIC PLATE PROBLEMS WITH BENDING AND WINKLER-TYPE CONTACT EFFECTS.pdf
+- Physics-Informed Neural Networks for Material Model Calibration from Full-Field Displacement Data.pdf
+- Physics-Informed Neural Networks for Solving Forward and Inverse Problems in Complex Beam Systems.pdf
+- Physics-informed neural networks for structural health monitoring: a case study for Kirchhoff–Love plates.pdf
+- Physics-Informed_Neural_Network_based_Damage_Ident.pdf
+- Real-Time Hybrid Simulation with Deep Learning Computational Substructures: System Validation Using Linear Specimens.pdf
+- Transfer learning based physics-informed neural networks for solving inverse problems in engineering structures under different loading scenarios.pdf

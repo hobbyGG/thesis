@@ -1,4 +1,7 @@
 # 参考文献相关性与方法说明
+
+> 说明：本文档保留的是初次批量筛选时的历史判断，部分路径和统计反映当时的暂存状态。当前文献目录以 `ref_papers/00_primary_references`、`ref_papers/01_AoA`、`ref_papers/02_recent_uncollected` 和 `ref_papers/03_future_references` 的 README 为准；PINN/神经网络结构求解类文献已从未来参考目录清除。
+
 本文档根据 `thesis_idea_overview.md` 的主线和 `ref_papers` 中 PDF 前三页/摘要抽取结果整理。判断标准不是“论文质量”，而是“是否能支撑倒挂式毫米波 FMCW 雷达结构位移测量、静止参考 target 选择、相位/IQ 处理、转换因子与多 target 融合”。
 ## 主攻领域确认
 当前论文主攻领域是：倒挂安装的毫米波 FMCW 雷达随结构测点运动时，如何利用环境静止反射体作为参考 target 恢复结构位移，并在线选择可靠 target。核心链路是 `Range FFT/候选峰 -> 静止参考 target 可靠性评价 -> IQ几何与结构频带一致性 -> 相位解缠/转换因子估计 -> 多 target 位移融合`。
