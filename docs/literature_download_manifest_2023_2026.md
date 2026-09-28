@@ -6,7 +6,7 @@
 
 | 编号 | 层 | 论文 | 状态 | 本地文件/下载入口 |
 |---:|:---:|---|---|---|
-| 1 | A | Dynamic analysis and vibration control for a maglev vehicle-guideway coupling system with experimental verification | 未找到稳定公开全文直链 | [打开下载/出版社页面](https://doi.org/10.1016/j.ymssp.2022.109954) |
+| 1 | A | Dynamic analysis and vibration control for a maglev vehicle-guideway coupling system with experimental verification | Scopus 有记录；ScienceDirect 显示需机构访问，当前 PDF 入口返回 403 | [ScienceDirect 记录](https://www.sciencedirect.com/science/article/pii/S0888327022010226) |
 | 2 | A | Measurement and numerical analysis on dynamic performance of the LMS maglev train-track-continuous girder coupled system with running speed-up state | 未找到稳定公开全文直链 | [打开下载/出版社页面](https://doi.org/10.1016/j.measurement.2023.113052) |
 | 3 | A | Dynamic Response Analysis of High-Speed Maglev-Guideway System | 已下载 | [A03_Dynamic_Response_Analysis_of_High-Speed_Maglev-Guideway_System.pdf](/Users/umep/thesis/ref_papers/02_recent_uncollected/A03_Dynamic_Response_Analysis_of_High-Speed_Maglev-Guideway_System.pdf) |
 | 4 | A | Propagation characteristics of vibration induced by medium-low-speed maglev train running on subgrade | 未找到稳定公开全文直链 | [打开下载/出版社页面](https://doi.org/10.1016/j.trgeo.2023.100986) |
