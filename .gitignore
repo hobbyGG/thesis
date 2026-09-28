@@ -5,7 +5,10 @@
 .pytest_cache/
 .obsidian/
 tmp/
-ref_papers/
+ref_papers/*
+!ref_papers/*/
+ref_papers/*/*
+!ref_papers/*/README.md
 Pasted image*.png
 datafile/*.tdms
 datafile/*.csv
