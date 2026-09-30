@@ -3,7 +3,7 @@
 ```text
 真实硬件采集 ───────────────┐
                             ├─ capture_root ─→ algorithm/ ─→ 位移结果
-TDMS 激光位移驱动半实测 ────┘
+A20 论文参数响应驱动仿真 ────┘
 ```
 
 两个数据源必须输出同一套目录：
@@ -22,7 +22,7 @@ capture_root/
 │   ├── radar_frame_monotonic_ns.npy
 │   ├── timeline.json
 │   └── manifest.json
-└── truth/                       # 半实测评价旁路，可选
+└── truth/                       # 仿真评价旁路，可选
 ```
 
 算法只读前三个目录。真值不进入估计器。
@@ -69,7 +69,7 @@ structural phase → displacement
 | 目录 | 只负责什么 |
 |---|---|
 | `capture_program/` | 硬件控制、原始数据解码、标准输入导出 |
-| `measured_bridge_simulation/` | TDMS 读取、雷达/ADXL 合成、标准输入导出 |
+| `paper_bridge_simulation/` | A20 response 读取、雷达/ADXL 合成、标准输入导出 |
 | `algorithm/` | 标准输入读取、前端、AoA、目标保留、预积分、Kalman |
 
 旧的多场景仿真、Ma、baseline 和扩展报告不再属于当前架构。

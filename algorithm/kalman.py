@@ -20,18 +20,58 @@ class AlgorithmResult:
     extra: dict = field(default_factory=dict)
 
 
-def _cold_start_count(config: AlgorithmConfig, samples: int) -> int:
+def _cold_start_count(radar: RadarInput, config: AlgorithmConfig, samples: int) -> int:
+    if "radar_time_ns" in radar.extra:
+        times = np.asarray(radar.extra["radar_time_ns"], dtype=np.int64)
+        elapsed_s = (times - times[0]).astype(float) * 1.0e-9
+        return max(1, int(np.searchsorted(elapsed_s, config.cold_start_duration_s, side="left")))
     return max(1, min(samples, round(config.cold_start_duration_s * config.sample_rate_hz)))
 
 
-def _target_biases(radar: RadarInput, config: AlgorithmConfig) -> np.ndarray:
-    count = _cold_start_count(config, radar.wrapped_phase_rad.shape[1])
+def _cold_start_statistics(radar: RadarInput, config: AlgorithmConfig) -> tuple[np.ndarray, np.ndarray]:
+    count = _cold_start_count(radar, config, radar.wrapped_phase_rad.shape[1])
     biases = np.zeros(radar.wrapped_phase_rad.shape[0], dtype=float)
+    initial_r = np.clip(
+        np.asarray(radar.initial_r, dtype=float).copy(),
+        config.min_measurement_variance,
+        config.max_measurement_variance,
+    )
+    if config.cold_start_r_mode != "residual":
+        for i, row in enumerate(radar.wrapped_phase_rad[:, :count]):
+            valid = np.isfinite(row)
+            if np.any(valid):
+                biases[i] = float(np.mean(itoh_unwrap(row[valid])))
+        return biases, initial_r
+
+    beta = np.asarray(radar.measured_beta, dtype=float)
+    structural_phase = np.full((radar.wrapped_phase_rad.shape[0], count), np.nan, dtype=float)
     for i, row in enumerate(radar.wrapped_phase_rad[:, :count]):
         valid = np.isfinite(row)
         if np.any(valid):
-            biases[i] = float(np.mean(itoh_unwrap(row[valid])))
-    return biases
+            unwrapped = itoh_unwrap(row[valid])
+            biases[i] = float(np.mean(unwrapped))
+            structural_phase[i, valid] = beta[i] * (unwrapped - biases[i])
+
+    selected = np.asarray(radar.selected_indices, dtype=int)
+    if selected.size < 2:
+        return biases, initial_r
+
+    common = np.full(count, np.nan, dtype=float)
+    for k in range(count):
+        values = structural_phase[selected, k]
+        values = values[np.isfinite(values)]
+        if values.size:
+            common[k] = float(np.median(values))
+    for i in selected:
+        residual = structural_phase[i] - common
+        residual = residual[np.isfinite(residual)]
+        if residual.size >= 2:
+            initial_r[i] = np.clip(
+                float(np.var(residual)),
+                config.min_measurement_variance,
+                config.max_measurement_variance,
+            )
+    return biases, initial_r
 
 
 def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, config: AlgorithmConfig) -> AlgorithmResult:
@@ -39,20 +79,20 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
 
     targets, samples = radar.wrapped_phase_rad.shape
     beta = np.asarray(radar.measured_beta, dtype=float).copy()
-    biases = _target_biases(radar, config)
+    biases, initial_r = _cold_start_statistics(radar, config)
     selected = np.asarray(radar.selected_indices, dtype=int)
-    selected_mask = np.zeros(targets, dtype=bool)
-    selected_mask[selected] = True
     x = np.array([0.0, 0.0], dtype=float)
     p = np.diag([config.initial_state_variance, config.initial_rate_variance])
-    r = np.clip(np.asarray(radar.initial_r, dtype=float), config.min_measurement_variance, config.max_measurement_variance)
+    r = initial_r.copy()
     theta = np.zeros(samples, dtype=float)
     rate = np.zeros(samples, dtype=float)
     corrected = np.full((targets, samples), np.nan, dtype=float)
     innovation = np.full((targets, samples), np.nan, dtype=float)
     r_history = np.full((targets, samples), np.nan, dtype=float)
     preintegration = acceleration.preintegration
+    reference_dt = float(radar.extra.get("frame_period_s", 1.0 / config.sample_rate_hz))
     for k in range(samples):
+        duration = reference_dt
         if k:
             duration = preintegration.duration_s[k - 1]
             delta_q = preintegration.delta_q_m[k - 1]
@@ -84,8 +124,11 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
                 innovation[i, k] = innovation_values[local]
                 posterior = observations[local] - x[0]
                 instant = posterior**2 + p[0, 0]
+                # Keep the same physical adaptation time across frame and
+                # burst-like loop observations: rho(dt) = rho_frame**(dt/T).
+                forgetting = config.adaptive_r_forgetting ** (duration / reference_dt)
                 r[i] = np.clip(
-                    config.adaptive_r_forgetting * r[i] + (1.0 - config.adaptive_r_forgetting) * instant,
+                    forgetting * r[i] + (1.0 - forgetting) * instant,
                     config.min_measurement_variance,
                     config.max_measurement_variance,
                 )
@@ -100,5 +143,11 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
         beta_hat=beta,
         r_theta_history=r_history,
         innovation_rad=innovation,
-        extra={"selected_indices": selected, "beta_source": "angle_geometry", "adaptive_r_mode": "posterior_residual"},
+        extra={
+            "selected_indices": selected,
+            "beta_source": "angle_geometry",
+            "adaptive_r_mode": "cold_start_residual_then_posterior",
+            "cold_start_r_mode": config.cold_start_r_mode,
+            "initial_r": initial_r,
+        },
     )

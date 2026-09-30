@@ -499,8 +499,18 @@ def _radar_layout(config: RadarCoreConfig, complex_count: int) -> Mapping[str, A
 
     frame_period_s = float(frame_cfg[4]) / 1000.0
     adc_sample_rate_hz = float(profile_cfg[10]) * 1000.0
+    idle_time_s = float(profile_cfg[2]) * 1.0e-6
     frequency_slope_hz_per_s = float(profile_cfg[7]) * 1.0e12
     ramp_end_time_s = float(profile_cfg[4]) * 1.0e-6
+    adc_start_time_s = float(profile_cfg[3]) * 1.0e-6
+    chirp_period_s = idle_time_s + ramp_end_time_s
+    loop_interval_s = len(tx_sequence) * chirp_period_s
+    # Nominal midpoint of the ADC apertures across the TXs in one TDM loop.
+    loop_reference_offset_s = (
+        idle_time_s + adc_start_time_s
+        + (samples - 1) / (2.0 * adc_sample_rate_hz)
+        + (len(tx_sequence) - 1) * chirp_period_s / 2.0
+    )
     start_frequency_hz = float(profile_cfg[1]) * 1.0e9
     speed_of_light_mps = 299_792_458.0
     range_resolution_m = (
@@ -523,6 +533,13 @@ def _radar_layout(config: RadarCoreConfig, complex_count: int) -> Mapping[str, A
         "frames": frames,
         "frame_period_s": frame_period_s,
         "frame_rate_hz": 1.0 / frame_period_s,
+        "idle_time_s": idle_time_s,
+        "adc_start_time_s": adc_start_time_s,
+        "loop_start_interval_s": loop_interval_s,
+        "loop_reference_offset_s": loop_reference_offset_s,
+        "coherent_aperture_center_offset_s": (
+            loop_reference_offset_s + (loops - 1) * loop_interval_s / 2.0
+        ),
         "chirp_loops_per_frame": loops,
         "tx_chirps_per_loop": len(tx_sequence),
         "physical_chirps_per_frame": loops * len(tx_sequence),

@@ -96,3 +96,37 @@ def extract_targets(
         angle_bins=angles,
         range_m=data.range_axis_m[ranges],
     )
+
+
+def extract_loop_targets(chirp_cube: np.ndarray, geometry: TargetData, config: FrontendConfig) -> TargetData:
+    """Project each loop onto the frozen frame-level range/angle targets.
+
+    Only target range bins are kept, avoiding a full loop x range x angle cube.
+    TDM channels retain their configured offsets; motion compensation is not
+    applied in this experiment.
+    """
+    frames, loops = chirp_cube.shape[:2]
+    slow = np.empty((geometry.range_bins.size, frames * loops), dtype=complex)
+    positions = virtual_array_positions(config)
+    bins = np.unique(geometry.range_bins)
+    weights = []
+    for r in bins:
+        indices = np.flatnonzero(geometry.range_bins == r)
+        steering = np.exp(2j * np.pi * positions[:, None]
+                          * np.sin(np.deg2rad(geometry.angle_deg[indices]))[None, :])
+        weights.append((indices, np.linalg.pinv(steering, rcond=1.0e-8)))
+    for start in range(0, frames, 32):
+        end = min(frames, start + 32)
+        spectrum = np.fft.fft(
+            np.asarray(chirp_cube[start:end], dtype=np.complex128),
+            n=config.num_range_bins,
+            axis=-1,
+        )
+        for r, (indices, weight) in zip(bins, weights):
+            snapshots = spectrum[..., r].reshape(-1, config.num_virtual_rx).T
+            slow[indices, start * loops:end * loops] = weight @ snapshots
+    available = np.isfinite(slow.real) & np.isfinite(slow.imag) & (np.abs(slow) > 0.0)
+    wrapped = np.angle(slow)
+    wrapped[~available] = np.nan
+    return TargetData(slow, wrapped, available, geometry.angle_deg, geometry.measured_beta,
+                      geometry.range_bins, geometry.angle_bins, geometry.range_m)

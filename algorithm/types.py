@@ -52,3 +52,5 @@ class CapturePackage:
     frontend: FrontendConfig
     truth_displacement_m: Optional[np.ndarray] = None
     truth_time_ns: Optional[np.ndarray] = None
+    chirp_cube: Optional[np.ndarray] = None
+    radar_metadata: dict[str, Any] = field(default_factory=dict)

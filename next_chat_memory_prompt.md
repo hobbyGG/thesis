@@ -3,7 +3,7 @@
 当前研究代码只保留三层：
 
 - `capture_program/`：实测 IWR1843/DCA1000 + ADXL355 采集，输出标准 `capture_root`；
-- `measured_bridge_simulation/`：读取 TDMS 激光桥梁位移，生成同样的 `capture_root`；
+- `paper_bridge_simulation/`：生成 A20 论文参数响应，生成同样的 `capture_root`；
 - `algorithm/`：只读取 `capture_root`，运行 Range-Angle、局部 MUSIC/ML、冻结几何 beta、异步加速度预积分和多目标结构主相位 Kalman。
 
 主算法入口：
@@ -12,10 +12,10 @@
 python3 -m algorithm.run --input /path/to/capture_root --output /tmp/result.npz
 ```
 
-半实测包入口：
+仿真包入口：
 
 ```bash
-python3 -m measured_bridge_simulation --output /tmp/capture --duration 4 --seed 2026
+python3 -m paper_bridge_simulation --output /tmp/capture --duration 4 --seed 2026
 ```
 
 当前论文文档：

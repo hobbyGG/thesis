@@ -1,0 +1,18 @@
+{
+  "schema": "thesis.algorithm-result",
+  "schema_version": 1,
+  "input_package": "/tmp/chirp_final_capture4",
+  "result_file": "chirp_comparison_frame.npz",
+  "method": "fixed_geometry_beta_structural_kalman",
+  "radar_mode": "frame",
+  "radar_samples": 800,
+  "radar_frames": 800,
+  "adxl_samples": 4000,
+  "selected_targets": 5,
+  "target_detection": {
+    "candidate_count": 5,
+    "strongest_magnitude": 0.9996066243665607
+  },
+  "truth_rmse_m": 2.8456409137939223e-06,
+  "truth_rmse_frame_grid_m": 2.8456409137939223e-06
+}

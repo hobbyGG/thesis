@@ -7,7 +7,7 @@
 | 层 | 目录 | 输入 | 输出 |
 |---|---|---|---|
 | 实测采集 | `capture_program/` | IWR1843/DCA1000、ADXL355、GPIO 时间轴 | `capture_root/radar/algorithm_input`、`adxl355/algorithm_input`、`sync` |
-| 实测桥梁半实测 | `measured_bridge_simulation/` | TDMS 激光位移 | 与采集程序相同的 `capture_root`，另附 `truth/` |
+| 论文参数仿真 | `paper_bridge_simulation/` | A20 论文参数响应 | 与采集程序相同的 `capture_root`，另附 `truth/` |
 | 论文算法 | `algorithm/` | 统一 `capture_root` | `algorithm_result.npz`、同名 JSON 摘要 |
 
 算法入口不再接收场景名、方法名或 baseline 开关。这样可以保证两种数据源只在“输入包生成”处有差异，后面的处理链完全相同。
@@ -49,7 +49,7 @@ ADXL native timeline → 每个雷达区间的 Δv、Δq
 | ADXL 预积分 | `algorithm/acceleration.py:preintegrate_acceleration_to_radar` |
 | 固定 beta Kalman | `algorithm/kalman.py:run_fixed_beta_kalman` |
 | CLI 和结果文件 | `algorithm/run.py:run` |
-| 半实测包生成 | `measured_bridge_simulation/package_builder.py:generate` |
+| 仿真包生成 | `paper_bridge_simulation/package_builder.py:generate` |
 
 ## 输入边界
 
@@ -71,10 +71,10 @@ truth/acceleration_mps2.npy
 场景标签、目标真值角度、真值 beta
 ```
 
-半实测真值只在输出摘要中与估计结果对齐计算 RMSE。真实采集没有 `truth/` 时，算法仍可正常输出位移，只是不计算 RMSE。
+仿真真值只在输出摘要中与估计结果对齐计算 RMSE。真实采集没有 `truth/` 时，算法仍可正常输出位移，只是不计算 RMSE。
 
 ## 当前实验边界
 
-当前保留的是一个实测桥梁位移驱动的半实测场景。雷达 ADC/IQ、ADXL 噪声和时间轴由场景生成器合成；激光位移来源于 TDMS。该实验用于验证“实测运动输入 + 统一采集格式 + 论文算法”这条链，不能直接替代真实雷达精度验收。
+当前保留的是一个 A20 论文参数驱动的仿真场景。`response.py` 以 3 kHz、4 s 生成 24.768 m 梁、300 km/h 工况的共同 `q(t), a(t)`，包含准静态通车挠度和六阶阻尼模态；随后按 IWR1843 的 100 Hz、16-loop TDM 配置生成物理一致的 chirp/ADC，并生成 1 kHz ADXL355 及噪声。该实验用于验证“论文参数响应 + 雷达链路 + 统一采集格式 + 论文算法”这条链，不能直接替代真实雷达精度验收。
 
 真实采集使用同一算法入口，仍需后续补充阵列幅相标定、安装姿态标定、雷达到 ADC 延迟标定和 ADXL 轴向/群延迟标定。

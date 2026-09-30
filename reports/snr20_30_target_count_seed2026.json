@@ -1,0 +1,355 @@
+{
+  "input_package": "/tmp/snr20_30_capture_2026",
+  "duration_s": 3.995,
+  "target_source": {
+    "kind": "paper_bridge_simulation",
+    "radar_adc_iq": "synthetic",
+    "target_range_bins": [
+      8,
+      24,
+      40,
+      56,
+      72
+    ],
+    "target_angles_deg": [
+      5.0,
+      15.0,
+      25.0,
+      35.0,
+      45.0
+    ],
+    "target_snr_db": [
+      30.0,
+      27.5,
+      25.0,
+      22.5,
+      20.0
+    ],
+    "snr_semantics": "per-target, per-TX, per-loop complex IQ before array projection and loop averaging"
+  },
+  "ranking": "ascending structural-phase variance in measured static first 0.2 s; no truth or supplied SNR used",
+  "evaluation": "same frame aperture times, same truth reference, same ADC/chirp and ADXL data for every target count",
+  "method": "unchanged fixed_geometry_beta_structural_kalman",
+  "rows": [
+    {
+      "mode": "frame",
+      "targets": 1,
+      "selected_range_bins": [
+        8
+      ],
+      "selected_angles_deg": [
+        4.94790859640545
+      ],
+      "cold_start_variance_rad2": [
+        1.8173504651304882e-05
+      ],
+      "initial_r_rad2": [
+        9.0
+      ],
+      "rmse_frame_grid_um": 1.011095313448681,
+      "rmse_after_cold_start_um": 0.9959854131871905,
+      "rmse_passage_um": 1.0202169915394725,
+      "median_r_rad2": [
+        0.0015405135763477754
+      ]
+    },
+    {
+      "mode": "frame",
+      "targets": 2,
+      "selected_range_bins": [
+        8,
+        24
+      ],
+      "selected_angles_deg": [
+        4.94790859640545,
+        15.032980097219575
+      ],
+      "cold_start_variance_rad2": [
+        1.8173504651304882e-05,
+        3.156404985322027e-05
+      ],
+      "initial_r_rad2": [
+        0.0001,
+        0.0001
+      ],
+      "rmse_frame_grid_um": 1.0265566509207054,
+      "rmse_after_cold_start_um": 1.0249386535668987,
+      "rmse_passage_um": 1.0276995596458023,
+      "median_r_rad2": [
+        0.0001,
+        0.0001
+      ]
+    },
+    {
+      "mode": "frame",
+      "targets": 3,
+      "selected_range_bins": [
+        8,
+        24,
+        40
+      ],
+      "selected_angles_deg": [
+        4.94790859640545,
+        15.032980097219575,
+        24.99252385050514
+      ],
+      "cold_start_variance_rad2": [
+        1.8173504651304882e-05,
+        3.156404985322027e-05,
+        6.407890621273272e-05
+      ],
+      "initial_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001
+      ],
+      "rmse_frame_grid_um": 1.0710349033393645,
+      "rmse_after_cold_start_um": 1.064867334205124,
+      "rmse_passage_um": 1.063839101517109,
+      "median_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001
+      ]
+    },
+    {
+      "mode": "frame",
+      "targets": 4,
+      "selected_range_bins": [
+        8,
+        24,
+        40,
+        56
+      ],
+      "selected_angles_deg": [
+        4.94790859640545,
+        15.032980097219575,
+        24.99252385050514,
+        35.01214085041076
+      ],
+      "cold_start_variance_rad2": [
+        1.8173504651304882e-05,
+        3.156404985322027e-05,
+        6.407890621273272e-05,
+        0.00015654898709371902
+      ],
+      "initial_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.00013144216544855566
+      ],
+      "rmse_frame_grid_um": 1.1381583637543968,
+      "rmse_after_cold_start_um": 1.1339610036017325,
+      "rmse_passage_um": 1.1338254612329044,
+      "median_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.00011147700579622658
+      ]
+    },
+    {
+      "mode": "frame",
+      "targets": 5,
+      "selected_range_bins": [
+        8,
+        24,
+        40,
+        56,
+        72
+      ],
+      "selected_angles_deg": [
+        4.94790859640545,
+        15.032980097219575,
+        24.99252385050514,
+        35.01214085041076,
+        45.03187078392833
+      ],
+      "cold_start_variance_rad2": [
+        1.8173504651304882e-05,
+        3.156404985322027e-05,
+        6.407890621273272e-05,
+        0.00015654898709371902,
+        0.00021445954282255678
+      ],
+      "initial_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.00013878505303739305,
+        0.00017389609732161468
+      ],
+      "rmse_frame_grid_um": 1.1582869475205118,
+      "rmse_after_cold_start_um": 1.155947849216035,
+      "rmse_passage_um": 1.1506521142449595,
+      "median_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.00011483819422362822,
+        0.00034493178253464866
+      ]
+    },
+    {
+      "mode": "chirp",
+      "targets": 1,
+      "selected_range_bins": [
+        8
+      ],
+      "selected_angles_deg": [
+        4.94790859640545
+      ],
+      "cold_start_variance_rad2": [
+        0.00027142180895388103
+      ],
+      "initial_r_rad2": [
+        9.0
+      ],
+      "rmse_frame_grid_um": 1.9846812381480585,
+      "rmse_after_cold_start_um": 2.024279812473136,
+      "rmse_passage_um": 2.0920596123325788,
+      "median_r_rad2": [
+        0.00022689442197333475
+      ]
+    },
+    {
+      "mode": "chirp",
+      "targets": 2,
+      "selected_range_bins": [
+        8,
+        24
+      ],
+      "selected_angles_deg": [
+        4.94790859640545,
+        15.032980097219575
+      ],
+      "cold_start_variance_rad2": [
+        0.00027142180895388103,
+        0.00046730641918662477
+      ],
+      "initial_r_rad2": [
+        0.0001831912633651317,
+        0.00018319126336513168
+      ],
+      "rmse_frame_grid_um": 1.8946160460264134,
+      "rmse_after_cold_start_um": 1.8773573249988083,
+      "rmse_passage_um": 1.8790756853267196,
+      "median_r_rad2": [
+        0.00023819021855200562,
+        0.0004615904780142496
+      ]
+    },
+    {
+      "mode": "chirp",
+      "targets": 3,
+      "selected_range_bins": [
+        8,
+        24,
+        40
+      ],
+      "selected_angles_deg": [
+        4.94790859640545,
+        15.032980097219575,
+        24.99252385050514
+      ],
+      "cold_start_variance_rad2": [
+        0.00027142180895388103,
+        0.00046730641918662477,
+        0.0009307330120775026
+      ],
+      "initial_r_rad2": [
+        0.00024722072779980624,
+        0.0003667664784284277,
+        0.0006879627463274781
+      ],
+      "rmse_frame_grid_um": 1.8016792103486625,
+      "rmse_after_cold_start_um": 1.7754572365296086,
+      "rmse_passage_um": 1.7688376768599858,
+      "median_r_rad2": [
+        0.00024055342839202065,
+        0.000466668714267401,
+        0.0009611447199867234
+      ]
+    },
+    {
+      "mode": "chirp",
+      "targets": 4,
+      "selected_range_bins": [
+        8,
+        24,
+        40,
+        56
+      ],
+      "selected_angles_deg": [
+        4.94790859640545,
+        15.032980097219575,
+        24.99252385050514,
+        35.01214085041076
+      ],
+      "cold_start_variance_rad2": [
+        0.00027142180895388103,
+        0.00046730641918662477,
+        0.0009307330120775026,
+        0.0019777280932917023
+      ],
+      "initial_r_rad2": [
+        0.00030066617566020307,
+        0.0003936166127242008,
+        0.0007002292714071854,
+        0.0016068646617229724
+      ],
+      "rmse_frame_grid_um": 1.7282104237921518,
+      "rmse_after_cold_start_um": 1.702939809003932,
+      "rmse_passage_um": 1.6991797034328442,
+      "median_r_rad2": [
+        0.00024282728582644735,
+        0.0004668967308014681,
+        0.000957937730137521,
+        0.0020896767236621167
+      ]
+    },
+    {
+      "mode": "chirp",
+      "targets": 5,
+      "selected_range_bins": [
+        8,
+        24,
+        40,
+        56,
+        72
+      ],
+      "selected_angles_deg": [
+        4.94790859640545,
+        15.032980097219575,
+        24.99252385050514,
+        35.01214085041076,
+        45.03187078392833
+      ],
+      "cold_start_variance_rad2": [
+        0.00027142180895388103,
+        0.00046730641918662477,
+        0.0009307330120775026,
+        0.0019777280932917023,
+        0.0051151465551624985
+      ],
+      "initial_r_rad2": [
+        0.0003823672960729045,
+        0.0004956366836608816,
+        0.0007645512147719907,
+        0.001657969387181136,
+        0.004548555447885129
+      ],
+      "rmse_frame_grid_um": 1.725324089204692,
+      "rmse_after_cold_start_um": 1.6987638099587041,
+      "rmse_passage_um": 1.6919090191724386,
+      "median_r_rad2": [
+        0.00024364132395861076,
+        0.00046698363471529597,
+        0.000959828104825849,
+        0.0020905899567524693,
+        0.005179104962900057
+      ]
+    }
+  ]
+}

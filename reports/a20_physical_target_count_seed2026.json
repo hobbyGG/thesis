@@ -1,0 +1,410 @@
+{
+  "input_package": "/tmp/a20_physical_capture",
+  "duration_s": 3.99,
+  "target_source": {
+    "kind": "paper_bridge_simulation",
+    "radar_adc_iq": "synthetic_if_chirp",
+    "seed": 2026,
+    "target_range_bins": [
+      230,
+      232,
+      238,
+      246,
+      253
+    ],
+    "target_ranges_m": [
+      10.013723459979209,
+      10.12465125788003,
+      10.352761804100831,
+      10.71144993637029,
+      11.033779189624918
+    ],
+    "target_angles_deg": [
+      3.0,
+      9.0,
+      15.0,
+      21.0,
+      25.0
+    ],
+    "target_geometry": {
+      "guideway_height_m": 10.0,
+      "target_state": "fixed_world_ground_or_tree_reference; radar follows guideway",
+      "target_x_m": [
+        0.5240777928304121,
+        1.5838444032453627,
+        2.679491924311227,
+        3.838640350354158,
+        4.663076581549986
+      ],
+      "baseline_range_m": [
+        10.013723459979209,
+        10.12465125788003,
+        10.352761804100831,
+        10.71144993637029,
+        11.033779189624918
+      ],
+      "radial_displacement_projection": "q(t) * cos(angle)",
+      "reference_target_range_m": 10.0
+    },
+    "target_snr_db": [
+      30.0,
+      27.5,
+      25.0,
+      22.5,
+      20.0
+    ],
+    "snr_semantics": "per-target, per-TX, per-loop complex scattering coefficient before array projection and loop averaging",
+    "range_fft_snr_db": [
+      44.621717154000144,
+      42.16678842014352,
+      39.95095279991773,
+      41.51987008656278,
+      39.5265626452036
+    ],
+    "scene": {
+      "guideway_height_m": 10.0,
+      "surface": "sandy soil with tree line",
+      "static_scatterers": [
+        {
+          "name": "sandy_ground",
+          "range_m": 10.82,
+          "angle_deg": -18.0,
+          "amplitude": 0.025
+        },
+        {
+          "name": "tree_line",
+          "range_m": 11.08,
+          "angle_deg": 28.0,
+          "amplitude": 0.01875
+        }
+      ],
+      "multipath_excess_path_m": 0.08,
+      "multipath_amplitude_ratio": 0.08
+    }
+  },
+  "ranking": "ascending structural-phase variance in measured static first 0.2 s; no truth or supplied SNR used",
+  "evaluation": "same frame aperture times, same truth reference, same ADC/chirp and ADXL data for every target count",
+  "method": "unchanged fixed_geometry_beta_structural_kalman",
+  "rows": [
+    {
+      "mode": "frame",
+      "targets": 1,
+      "selected_range_bins": [
+        230
+      ],
+      "selected_angles_deg": [
+        3.368066459856546
+      ],
+      "cold_start_variance_rad2": [
+        5.287919462058549e-06
+      ],
+      "initial_r_rad2": [
+        9.0
+      ],
+      "rmse_frame_grid_um": 28.875281205847184,
+      "rmse_after_cold_start_um": 29.625241902477427,
+      "rmse_passage_um": 30.867905394213825,
+      "median_r_rad2": [
+        0.05961974724707241
+      ]
+    },
+    {
+      "mode": "frame",
+      "targets": 2,
+      "selected_range_bins": [
+        230,
+        232
+      ],
+      "selected_angles_deg": [
+        3.368066459856546,
+        8.047846247311517
+      ],
+      "cold_start_variance_rad2": [
+        5.287919462058549e-06,
+        1.539816359261155e-05
+      ],
+      "initial_r_rad2": [
+        0.0001,
+        0.0001
+      ],
+      "rmse_frame_grid_um": 29.304147245430073,
+      "rmse_after_cold_start_um": 30.06480892302965,
+      "rmse_passage_um": 31.325172542925948,
+      "median_r_rad2": [
+        0.0001,
+        0.0001
+      ]
+    },
+    {
+      "mode": "frame",
+      "targets": 3,
+      "selected_range_bins": [
+        230,
+        232,
+        238
+      ],
+      "selected_angles_deg": [
+        3.368066459856546,
+        8.047846247311517,
+        15.032980097219575
+      ],
+      "cold_start_variance_rad2": [
+        5.287919462058549e-06,
+        1.539816359261155e-05,
+        4.887230370889808e-05
+      ],
+      "initial_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001
+      ],
+      "rmse_frame_grid_um": 29.238376154766097,
+      "rmse_after_cold_start_um": 29.997396349354283,
+      "rmse_passage_um": 31.255085753964142,
+      "median_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001
+      ]
+    },
+    {
+      "mode": "frame",
+      "targets": 4,
+      "selected_range_bins": [
+        230,
+        232,
+        238,
+        246
+      ],
+      "selected_angles_deg": [
+        3.368066459856546,
+        8.047846247311517,
+        15.032980097219575,
+        20.90840263648903
+      ],
+      "cold_start_variance_rad2": [
+        5.287919462058549e-06,
+        1.539816359261155e-05,
+        4.887230370889808e-05,
+        8.884690067179906e-05
+      ],
+      "initial_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.0001
+      ],
+      "rmse_frame_grid_um": 29.29053119803736,
+      "rmse_after_cold_start_um": 30.050948789153654,
+      "rmse_passage_um": 31.309736082648204,
+      "median_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.00010124189322679991
+      ]
+    },
+    {
+      "mode": "frame",
+      "targets": 5,
+      "selected_range_bins": [
+        230,
+        232,
+        238,
+        246,
+        253
+      ],
+      "selected_angles_deg": [
+        3.368066459856546,
+        8.047846247311517,
+        15.032980097219575,
+        20.90840263648903,
+        25.2298100169401
+      ],
+      "cold_start_variance_rad2": [
+        5.287919462058549e-06,
+        1.539816359261155e-05,
+        4.887230370889808e-05,
+        8.884690067179906e-05,
+        0.0002767878087810734
+      ],
+      "initial_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.0001,
+        0.00022261396909806176
+      ],
+      "rmse_frame_grid_um": 29.37741583690937,
+      "rmse_after_cold_start_um": 30.13965627185741,
+      "rmse_passage_um": 31.401884625678942,
+      "median_r_rad2": [
+        0.0001,
+        0.0001,
+        0.0001,
+        0.00010231793279756059,
+        0.00023747182613591798
+      ]
+    },
+    {
+      "mode": "chirp",
+      "targets": 1,
+      "selected_range_bins": [
+        230
+      ],
+      "selected_angles_deg": [
+        3.368066459856546
+      ],
+      "cold_start_variance_rad2": [
+        0.00021072003762995003
+      ],
+      "initial_r_rad2": [
+        9.0
+      ],
+      "rmse_frame_grid_um": 28.955603153316407,
+      "rmse_after_cold_start_um": 29.70762781878391,
+      "rmse_passage_um": 30.952956515768328,
+      "median_r_rad2": [
+        0.0027741389110619587
+      ]
+    },
+    {
+      "mode": "chirp",
+      "targets": 2,
+      "selected_range_bins": [
+        230,
+        232
+      ],
+      "selected_angles_deg": [
+        3.368066459856546,
+        8.047846247311517
+      ],
+      "cold_start_variance_rad2": [
+        0.00021072003762995003,
+        0.00036433513185122723
+      ],
+      "initial_r_rad2": [
+        0.00012794955929185619,
+        0.00012794955929185619
+      ],
+      "rmse_frame_grid_um": 29.441035616071506,
+      "rmse_after_cold_start_um": 30.201820854701687,
+      "rmse_passage_um": 31.458166013967773,
+      "median_r_rad2": [
+        0.0001948301027669961,
+        0.0003205442773648495
+      ]
+    },
+    {
+      "mode": "chirp",
+      "targets": 3,
+      "selected_range_bins": [
+        230,
+        232,
+        238
+      ],
+      "selected_angles_deg": [
+        3.368066459856546,
+        8.047846247311517,
+        15.032980097219575
+      ],
+      "cold_start_variance_rad2": [
+        0.00021072003762995003,
+        0.00036433513185122723,
+        0.0009366195511849769
+      ],
+      "initial_r_rad2": [
+        0.00016688840637674954,
+        0.0002732306111023975,
+        0.0007962184460173763
+      ],
+      "rmse_frame_grid_um": 29.38853333163307,
+      "rmse_after_cold_start_um": 30.149209995988972,
+      "rmse_passage_um": 31.40655879475993,
+      "median_r_rad2": [
+        0.00018983496703026524,
+        0.00033348182016778444,
+        0.001084979457146358
+      ]
+    },
+    {
+      "mode": "chirp",
+      "targets": 4,
+      "selected_range_bins": [
+        230,
+        232,
+        238,
+        246
+      ],
+      "selected_angles_deg": [
+        3.368066459856546,
+        8.047846247311517,
+        15.032980097219575,
+        20.90840263648903
+      ],
+      "cold_start_variance_rad2": [
+        0.00021072003762995003,
+        0.00036433513185122723,
+        0.0009366195511849769,
+        0.001564172966440077
+      ],
+      "initial_r_rad2": [
+        0.00021501623889866247,
+        0.0003216409892079604,
+        0.000742176243603796,
+        0.001256298490642587
+      ],
+      "rmse_frame_grid_um": 29.416250188040244,
+      "rmse_after_cold_start_um": 30.177931280855955,
+      "rmse_passage_um": 31.436956094856114,
+      "median_r_rad2": [
+        0.00019780617567706057,
+        0.0003317578308726885,
+        0.0010818894503206342,
+        0.0014513462237284815
+      ]
+    },
+    {
+      "mode": "chirp",
+      "targets": 5,
+      "selected_range_bins": [
+        230,
+        232,
+        238,
+        246,
+        253
+      ],
+      "selected_angles_deg": [
+        3.368066459856546,
+        8.047846247311517,
+        15.032980097219575,
+        20.90840263648903,
+        25.2298100169401
+      ],
+      "cold_start_variance_rad2": [
+        0.00021072003762995003,
+        0.00036433513185122723,
+        0.0009366195511849769,
+        0.001564172966440077,
+        0.003511511705466923
+      ],
+      "initial_r_rad2": [
+        0.00025855534794666876,
+        0.0003915116791158714,
+        0.0007846482343135869,
+        0.0014013548388069484,
+        0.0030272933295385834
+      ],
+      "rmse_frame_grid_um": 29.467525885652428,
+      "rmse_after_cold_start_um": 30.230618485681735,
+      "rmse_passage_um": 31.492532280260498,
+      "median_r_rad2": [
+        0.00020495519019262672,
+        0.0003280259964536849,
+        0.0010786944632721976,
+        0.0014477699264529647,
+        0.003387631669740628
+      ]
+    }
+  ]
+}

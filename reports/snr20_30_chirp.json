@@ -1,0 +1,18 @@
+{
+  "schema": "thesis.algorithm-result",
+  "schema_version": 1,
+  "input_package": "/tmp/snr20_30_capture_2026",
+  "result_file": "snr20_30_chirp.npz",
+  "method": "fixed_geometry_beta_structural_kalman",
+  "radar_mode": "chirp",
+  "radar_samples": 12800,
+  "radar_frames": 800,
+  "adxl_samples": 4000,
+  "selected_targets": 5,
+  "target_detection": {
+    "candidate_count": 5,
+    "strongest_magnitude": 0.9995728184470145
+  },
+  "truth_rmse_m": 1.9063314107849692e-06,
+  "truth_rmse_frame_grid_m": 1.725324089204692e-06
+}

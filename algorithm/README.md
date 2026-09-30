@@ -8,6 +8,26 @@
 python3 -m algorithm.run --input /path/to/capture_root --output /tmp/result.npz
 ```
 
+The default `frame` mode reads the frame-level coherent mean.  To run the
+experimental chirp-loop path on a package that contains `chirp_cube.npy`, use:
+
+```bash
+python3 -m algorithm.run \
+  --input /path/to/capture_root \
+  --output /tmp/chirp-result.npz \
+  --radar-mode chirp
+```
+
+In this mode each saved MIMO loop becomes one slow-time sample.  The loop
+timestamps are formed from `loop_start_interval_s` in the radar manifest, and
+the ADXL355 preintegration, Kalman update, truth alignment, and output time
+axis all use that expanded timeline.  The default frame path remains unchanged.
+This is a chirp-level experiment: it does not add TDM motion compensation,
+and its timestamps are burst-like rather than a uniform 3.9 kHz stream.
+Cold-start statistics use elapsed time; measurement-noise forgetting is scaled
+by each interval relative to the frame period so both modes use the same
+physical adaptation time.
+
 模块顺序固定为：
 
 1. `io.py` 读取雷达 ADC、ADXL 结构轴和同步时间轴。
@@ -17,4 +37,4 @@ python3 -m algorithm.run --input /path/to/capture_root --output /tmp/result.npz
 5. `acceleration.py` 将 native ADXL 样本预积分到雷达相邻帧区间。
 6. `kalman.py` 冻结 `beta=1/|cos(theta)|`，用加速度预测结构主相位并做多目标 Kalman 更新。
 
-算法不生成数据，也不读取 `truth/` 参与估计。`truth/` 只在 `run.py` 写结果摘要时计算半实测 RMSE。
+算法不生成数据，也不读取 `truth/` 参与估计。`truth/` 只在 `run.py` 写结果摘要时计算仿真 RMSE。

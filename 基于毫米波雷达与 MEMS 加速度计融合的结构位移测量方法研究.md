@@ -43,7 +43,7 @@
    $$
    进入当前主方法后保持不变。独立 rank-1/ADXL beta 预校准、在线 beta 反馈和对应的 confidence-gated R 属于历史或消融路径，不是当前 fixed_geometry_beta_structural_kalman 的主链。
 4. 用加速度帧区间预积分和实际时间步长进行状态预测，把结构主相位映射到各目标的 LoS 相位，选择最接近的 wrapped-phase 分支；再将校正后的 LoS 相位乘以固定 beta，形成统一结构主相位观测。
-5. 对多个目标运行结构主相位 Kalman。当前 direct 主线包含后验残差驱动的观测噪声更新；没有启用额外的质量门控 R。没有有效目标时，滤波器保留预测分支。
+5. 对多个目标运行结构主相位 Kalman。当前 direct 主线先在冷启动窗口用目标间结构主相位残差初始化各目标的观测噪声，再用后验残差递推更新；没有启用额外的质量门控 R。没有有效目标时，滤波器保留预测分支。
 
 因此，论文的核心问题应表述为：如何在倒挂式、运动雷达观测环境静止散射体的条件下，从记录级距离—角度候选中得到稳定的多目标相位，并利用固定几何 beta、加速度预测和结构主相位 Kalman 解决相位缠绕与目标退化问题。当前实现可以形成“记录级前端 + 逐帧递推融合”的混合链路，不能表述为严格的端到端在线跟踪器。
 
@@ -114,7 +114,7 @@ $$
 
 每一帧先根据实际时间步长和加速度帧区间预积分得到短时预测，再把结构主相位预测值除以固定 beta，映射到各 target 的 LoS 相位。对 wrapped phase 选择最接近预测的 2π 分支后，校正后的 LoS 相位乘以同一个固定 beta，形成结构主相位观测并进入多目标 Kalman。
 
-当前主线的观测噪声更新来自滤波后验残差；Direct-AoA 配置关闭了额外的 quality-gated R，因此不能把当前方法描述成“按 SNR/质量门控主动删目标的在线自适应滤波”。目标集合在记录级前端确定，逐帧只使用 available mask 反映当前目标是否有有效观测。若当前帧没有有效目标，算法输出预测结果并等待后续观测恢复。
+当前主线先用冷启动窗口的目标间结构主相位残差初始化观测噪声，再用滤波后验残差递推更新；Direct-AoA 配置关闭了额外的 quality-gated R，因此不能把当前方法描述成“按 SNR/质量门控主动删目标的在线自适应滤波”。目标集合在记录级前端确定，逐帧只使用 available mask 反映当前目标是否有有效观测。若当前帧没有有效目标，算法输出预测结果并等待后续观测恢复。
 
 这条链路的贡献在于把不同 LoS 方向的相位统一到结构主相位空间，并用加速度预测解决强相位缠绕下的分支选择。它的实时性边界也应明确：前端候选与若干方法选择使用整条记录统计量，只有 Kalman 更新部分是逐帧递推。
 
@@ -335,23 +335,23 @@ $$
 
 需要区分两类机制：
 
-- 当前主链：后验残差驱动的 R 更新，Direct-AoA 配置中 use_quality_gated_r 为关闭；
+- 当前主链：冷启动残差初始化后，再做后验残差驱动的 R 更新，Direct-AoA 配置中 use_quality_gated_r 为关闭；
 - 历史/消融路径：根据 SNR、幅值或质量分数启用额外 quality-gated R，或在前端在线增删目标。
 
 因此，目标退化实验可以检验固定目标集合、available mask 和后验残差 R 的组合鲁棒性，但不能把当前实现概括为“基于目标质量门控的在线目标管理器”。目标是否在某一帧可用由前端提供的 mask 决定，没有有效目标时滤波器只做预测。
 
-## 5. 实测桥梁半实测实验
+## 5. 论文参数仿真实验
 
-当前实验只保留实测桥梁位移驱动的半实测场景。`measured_bridge_simulation/` 读取 `datafile/20250320test12.tdms` 的 `卡3激光位移/3-4`，截取 15.33--19.33 s，生成与 `capture_program/` 相同的雷达、ADXL355 和同步输入目录。激光位移是实测输入，雷达 ADC/IQ、ADXL 噪声和时间轴是可复现实验变量。
+当前实验只保留 A20 论文参数驱动的仿真场景。`paper_bridge_simulation/response.py` 固定 24.768 m 梁、300 km/h、六阶频率与阻尼比，在 3 kHz、4 s 时间轴上生成准静态通车挠度和阻尼模态响应；总位移峰值与加速度由同一响应整体缩放到 1.712 mm，0.45 m/s² 仅是按论文图量级设置的假设参数。之后按 200 Hz 雷达和 1 kHz ADXL355 导出与 `capture_program/` 相同的输入目录。A20 响应真值只用于末端评价，雷达 ADC/IQ、ADXL 噪声和时间轴是可复现实验变量。
 
 实验运行：
 
 ```bash
-python3 -m measured_bridge_simulation --output /tmp/measured_bridge_capture --duration 4 --seed 2026
-python3 -m algorithm.run --input /tmp/measured_bridge_capture --output /tmp/measured_bridge_result.npz
+python3 -m paper_bridge_simulation --output /tmp/paper_bridge_capture --duration 4 --seed 2026
+python3 -m algorithm.run --input /tmp/paper_bridge_capture --output /tmp/paper_bridge_result.npz
 ```
 
-算法链为：Range FFT 和 Angle DBF、记录级峰值检测、局部 MUSIC/ML AoA、冻结几何 beta、ADXL 原生时间轴预积分、加速度预测的结构主相位 Kalman，以及后验残差测量噪声更新。半实测 `truth/` 只用于输出 RMSE，不参与估计。
+算法链为：Range FFT 和 Angle DBF、记录级峰值检测、局部 MUSIC/ML AoA、冻结几何 beta、ADXL 原生时间轴预积分、加速度预测的结构主相位 Kalman，以及后验残差测量噪声更新。仿真 `truth/` 只用于输出 RMSE，不参与估计。
 
 评价对象为冷启动相对位移：
 

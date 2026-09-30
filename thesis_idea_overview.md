@@ -9,8 +9,8 @@
 研究代码分成三个边界：
 
 1. `capture_program/` 负责真实 IWR1843/DCA1000 与 ADXL355 采集，并导出统一 `capture_root`。
-2. `measured_bridge_simulation/` 读取实测 TDMS 激光位移，生成雷达 ADC/IQ、ADXL355 和同步时间轴，也导出同一 `capture_root`。
-3. `algorithm/` 只读取 `capture_root`，不生成场景、不读取真值参与估计、不控制硬件。
+2. `paper_bridge_simulation/` 以 A20 论文公开参数合成结构响应，生成雷达 ADC/IQ、ADXL355 和同步时间轴，也导出同一 `capture_root`。
+3. `algorithm/` 只读取 `capture_root`，运行论文算法，不生成场景、不读取真值参与估计、不控制硬件。
 
 共同输入格式是：
 
@@ -21,7 +21,7 @@ adxl355/algorithm_input/estimated_sample_monotonic_ns.npy
 sync/radar_frame_monotonic_ns.npy
 ```
 
-半实测包额外保存 `truth/`，仅用于评价。
+仿真包额外保存 `truth/`，仅用于评价。
 
 ## 算法主链
 
@@ -91,12 +91,12 @@ z_{i,k}=\beta_i(\phi_{i,k}^{corr}-b_i),
 
 ## 实验设计
 
-当前实验只保留实测桥梁位移驱动的半实测场景：激光通道提供真实结构运动波形，雷达和 ADXL 观测按固定硬件参数合成，然后经过与实测采集相同的输入目录进入算法。实验重点是验证：
+当前实验只保留 A20 论文参数驱动的仿真场景：A20 论文参数提供可复现的结构响应波形，雷达和 ADXL 观测按固定硬件参数合成，然后经过与实测采集相同的输入目录进入算法。实验重点是验证：
 
-- 实测运动输入能否通过统一采集包进入算法；
+- 论文参数合成运动能否通过统一采集包进入算法；
 - Range-Angle 与连续 AoA 是否能给出稳定的 (\beta_i)；
 - 异步 ADXL 预测和多目标相位融合是否能恢复结构位移；
-- 输出结果是否可直接对照激光位移真值。
+- 输出结果是否可直接对照 A20 响应真值。
 
 ## 论文贡献口径
 

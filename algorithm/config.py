@@ -15,6 +15,7 @@ class AlgorithmConfig:
     max_measurement_variance: float = 25.0
     adaptive_r_forgetting: float = 0.95
     cold_start_duration_s: float = 0.20
+    cold_start_r_mode: str = "residual"
     radar_mount: str = "downward"
 
     def wavelength_m(self) -> float:

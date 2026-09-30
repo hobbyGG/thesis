@@ -4,7 +4,7 @@ This folder contains the single thesis estimator. It is academic experiment
 code, not production software.
 
 - Read the capture package produced by `capture_program/` or
-  `measured_bridge_simulation/`.
+  `paper_bridge_simulation/`.
 - Keep the current chain: Range FFT and angle processing, target selection,
   local MUSIC/ML angle refinement, frozen geometry beta, native-time ADXL
   preintegration, and the structural phase Kalman filter.

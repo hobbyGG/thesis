@@ -18,21 +18,21 @@ ADXL355 区间预积分与结构主相位 Kalman
 结构位移 q_hat_m
 ```
 
-`capture_program/` 是硬件采集边界，`measured_bridge_simulation/` 是用实测激光位移驱动的半实测输入包生成器，`algorithm/` 是离线论文算法。后两者都不做服务化运行；算法不直接接触 PCAP、LVDS、串口或 GPIO。
+`capture_program/` 是硬件采集边界，`paper_bridge_simulation/` 是用 A20 论文参数响应驱动的仿真输入包生成器，`algorithm/` 是离线论文算法。后两者都不做服务化运行；算法不直接接触 PCAP、LVDS、串口或 GPIO。
 
 ## 1. 研究对象和当前实验边界
 
 当前保留的实验目标是：利用毫米波雷达的多目标慢时间相位和 ADXL355 加速度，估计结构沿主方向的动态位移。
 
-当前代码真正跑通并用于回归测试的是“实测桥梁位移驱动的半实测场景”：
+当前代码真正跑通并用于回归测试的是“A20 论文参数仿真场景”。参数固定为 24.768 m 梁、300 km/h、六阶识别模态 10.35/13.41/27.10/43.84/52.93/84.44 Hz 和对应阻尼比。3 kHz、4 s 的响应先由 `response.py` 生成，再按 IWR1843 的 100 Hz、16-loop TDM 时序生成雷达 chirp/ADC 和 1 kHz ADXL355：
 
-1. 从 `datafile/20250320test12.tdms` 的 `卡3激光位移/3-4` 通道取一段实测桥梁位移。
-2. 用这段位移合成雷达复数 ADC/IQ、目标角度和噪声。
-3. 用位移的频域二阶导数合成 ADXL355 结构轴加速度，并加入采集噪声。
+1. 由准静态通车挠度和六阶阻尼模态响应合成位移与加速度；准静态包络假定 5 节编组、前 0.5 s 静止，随后用一个跨梁时间的平滑入场段，单位偏心测点模态参与系数为仿真假设。
+2. 将响应总位移峰值整体缩放到论文报告的 1.712 mm；模态加速度 0.45 m/s² 仅是按论文图量级设定的假设参数，并非额外实测标定。
+3. 用统一响应合成雷达复数 ADC/IQ、目标角度和噪声，同时按同一响应生成 ADXL355 结构轴加速度并加入采集噪声。
 4. 把合成结果写成与真实采集相同的 `capture_root`。
 5. 让 `algorithm/` 对这个输入包执行与真实采集完全相同的算法。
 
-因此，当前半实测实验验证的是“实测运动输入 + 统一采集格式 + 论文算法”这条链。雷达 ADC 和 ADXL355 数值在该场景中是合成的，不能把半实测结果直接表述为真实硬件精度验收。
+因此，当前仿真实验验证的是“A20 论文参数响应 + 统一采集格式 + 论文算法”这条链。六阶中 13.41/27.10/52.93 Hz 为扭转模态，响应中的模态参与系数和偏心测点是明确的仿真假设；低频总位移峰只能解释为通车/准静态响应，不能称为结构模态频率。雷达 ADC 和 ADXL355 数值是合成的，不能把仿真结果直接表述为真实硬件精度验收。
 
 ## 2. 实测硬件链路
 
@@ -189,7 +189,7 @@ $$
 
 ## 3. 统一输入包
 
-真实采集和半实测生成器最终都要产生同一类目录：
+真实采集和仿真生成器最终都要产生同一类目录：
 
 ```text
 capture_root/
@@ -209,7 +209,7 @@ capture_root/
 │   ├── radar_adc_sample_monotonic_ns.npy
 │   └── timeline.json
 ├── status.json                              # 实测采集包
-└── truth/                                   # 半实测评价用，可选
+└── truth/                                   # 仿真评价用，可选
 ```
 
 雷达算法输入导出器 `capture_program/src/mmwavecapture/algorithm_input.py` 将两路 LVDS 的 little-endian `int16` 组成复数：当前 `quadrature_in_lsb=true` 时，8 字节一组解释为 `[Q0,Q1,I0,I1]`，再组成 `I+jQ`。
@@ -240,7 +240,7 @@ $$
 adc_cube.shape = (frame, virtual_antenna, adc_sample)
 ```
 
-当前 `algorithm/` 主要使用 `adc_cube.npy`、ADXL 的 `acceleration_mps2.npy` 与 `estimated_sample_monotonic_ns.npy`，以及 `sync/timeline.json` 指向的雷达时间轴。`chirp_cube.npy` 和 `frame_receive_times_epoch_ns.npy` 被保留用于追溯，但当前位移算法不直接使用它们。
+默认帧模式使用 `adc_cube.npy`；实验性的 chirp 模式直接读取 `chirp_cube.npy`，并按 manifest 中的 loop 起始间隔展开雷达时间轴。两种模式都使用 ADXL 的 `acceleration_mps2.npy`、`estimated_sample_monotonic_ns.npy` 和 `sync/timeline.json`。帧模式的目标几何先由 `adc_cube` 确定，chirp 模式在同一几何上逐 loop 提取目标 IQ。
 
 ## 4. 算法从输入包到位移结果
 
@@ -269,7 +269,7 @@ sync radar time[F]                     雷达帧参考时间
 structural_accel = acceleration_mps2[:, 0]
 ```
 
-`truth/displacement_m.npy` 不参与任何候选检测、角度估计、beta 计算或 Kalman 更新；它只在最后的半实测 RMSE 统计中使用。
+`truth/displacement_m.npy` 不参与任何候选检测、角度估计、beta 计算或 Kalman 更新；它只在最后的仿真 RMSE 统计中使用。
 
 ### 4.2 距离 FFT
 
@@ -411,6 +411,8 @@ $$
 R_i=9.
 $$
 
+这个值是 `RadarInput` 提供的固定方差回退值。当前主线在正式递推前还会使用前 $0.2$ s 的有效 wrapped phase 做一次目标级冷启动估计：先将每个目标转换到结构主相位，再用当前有效目标的逐帧中位数作为临时公共轨迹，目标相对该轨迹的残差方差作为初始 $R_i$。只有选中目标数不少于 2 时才启用该估计；单目标或显式 `cold_start_r_mode="fixed"` 时保留 $R_i=9$。
+
 当前代码没有动态新增、删除和重关联目标的在线 tracker；目标集合在这一轮记录级检测后固定，某帧没有有效目标时只执行 Kalman 预测。
 
 ### 4.8 ADXL355 区间预积分
@@ -486,6 +488,20 @@ $$
 
 冷启动时长为 0.2 s。每个目标在冷启动阶段对有效包裹相位做 Itoh 解包并取平均，作为目标相位偏置 $b_i$。
 
+在当前默认 `cold_start_r_mode="residual"` 下，同一窗口内还计算：
+
+$$
+u_{i,k}=\beta_i\left(\operatorname{unwrap}(\phi_{i,k}^{\mathrm{wrap}})-b_i\right),
+$$
+
+$$
+\bar u_k=\operatorname{median}_{i\in\mathcal S}u_{i,k},
+\qquad
+R_{i,0}=\operatorname{clip}\left(\operatorname{var}_k(u_{i,k}-\bar u_k)\right).
+$$
+
+其中 $\mathcal S$ 是记录级保留的目标集合。该估计只使用冷启动窗口和雷达观测，不读取 truth 或注入的 SNR；它为目标级后验残差更新提供不同的初始权重。
+
 在第 $k$ 帧，使用预测相位选择包裹相位的最近整周：
 
 $$
@@ -515,12 +531,16 @@ $$
 观测矩阵为 $H=[1,0]$，然后执行标准 Kalman 更新。代码另外为每个目标记录相对预测值的 innovation，并用后验残差更新各自测量方差：
 
 $$
+\rho_k=0.95^{\Delta t_k/T_f},\qquad
 R_i\leftarrow \operatorname{clip}\left[
-0.95R_i+0.05\left((z_{i,k}-\Theta_{k|k})^2+P_{00,k|k}\right)
-\right].
+\rho_kR_i+(1-\rho_k)\left((z_{i,k}-\Theta_{k|k})^2+P_{00,k|k}\right)
+\right],
 $$
 
+其中 $T_f$ 是帧周期。这样 chirp 模式的帧内短间隔不会把测量噪声方差过快遗忘；冷启动窗口也按实际时间而不是样本数确定。
+
 方差限制为 $10^{-4}\le R_i\le25$。这只是各目标观测权重的自适应更新，不会改写 beta。
+当前默认链路是“冷启动残差初始化 + 后验残差递推”；固定 $R_i=9$ 保留为同方差消融模式。
 
 ### 4.11 相位转位移和输出
 
@@ -559,42 +579,28 @@ $$
 
 真实硬件采集没有 `truth/` 时仍然可以输出位移估计，只是不计算该 RMSE。
 
-## 5. 半实测场景如何生成输入
+## 5. 仿真场景如何生成输入
 
-`measured_bridge_simulation/tdms.py` 的实际处理是：
-
-1. 读取 TDMS 中 `卡3激光位移/3-4`。
-2. 截取 15.33 s 到 19.33 s 的事件窗口。
-3. 按 TDMS 波形时间步长插值到 1 kHz。
-4. 减去前 0.2 s 平均值。
-5. 以 `voltage × 1e-3` 转为米。
-6. 在频域只保留 0.2–40 Hz，再反变换得到处理后的位移。
-7. 用
-
-   $$
-   a(t)=\mathcal{F}^{-1}\{- (2\pi f)^2\mathcal{F}[q(t)]\}
-   $$
-
-   得到结构轴加速度。
+`paper_bridge_simulation/response.py` 生成 A20 参数化响应：输入为 24.768 m 梁、300 km/h、六阶频率和阻尼比，输出共同的 3 kHz 时间轴、位移 `q(t)` 与加速度 `a(t)`。准静态部分使用 5 节编组和 前 0.5 s 静止，随后用一个跨梁时间（0.297216 s）的 quintic 平滑入场包络；六阶模态含竖弯与扭转，按单位偏心测点参与。最终对 `q` 与 `a` 同步施加同一个缩放，使总位移峰值为 1.712 mm；0.45 m/s² 是图量级仿真假设。`q` 与 `a` 的来源保持一致，不再读取 TDMS 或激光通道。
 
 `package_builder.py` 再把它写成输入包：
 
-- 雷达帧率 100 Hz，雷达位移取 1 kHz 位移每 10 点抽样。
+- 雷达慢时间帧率 100 Hz，保留每帧 16 个 TDM loop，从 3 kHz 响应按实际 TX 时刻采样；ADXL355 采样率 1 kHz。
 - 5 个目标角度为 5°、15°、25°、35°、45°，距离 bin 为 8、24、40、56、72。
-- 目标慢时间相位使用
+- 地面/树丛参考散射点的慢时间相位使用
 
   $$
   \phi_i(t)=\frac{4\pi q(t)}{\lambda\beta_i}+b_i,
   \qquad \beta_i=1/|\cos\theta_i|.
   $$
 
-- 每个目标加入设定 SNR 的复高斯噪声，并叠加小幅 ADC 噪声。
-- 按目标角度生成虚拟阵元空间导向项，按距离 bin 生成快时间复指数，组成 `adc_cube`。
-- 将同一 `adc_cube` 沿 chirp loop 重复 16 次得到 `chirp_cube`。
-- ADXL 第 0 轴写入合成加速度加噪声，另外两轴为零。
+- 按目标 RCS 等效幅度和可追溯的注入 SNR 生成复散射系数，再加入接收机复噪声。
+- 用 FMCW 拍频、传播相位、TDM-MIMO 阵列导向项和距离衰减生成每个 ADC 采样点；弱多径、沙土/树丛散射、固定 RX 幅相误差、简化 PLL 公共相噪和 I/Q 量化随后作用于 `chirp_cube`。
+- 雷达随梁运动时，地面/树丛点的距离按结构位移在 LOS 上的投影变化；`adc_cube` 是 16 个 loop 的复数平均结果。
+- ADXL 第 0 轴写入带 1.78 ms 滤波延迟、22.5 µg/√Hz 噪声密度、偏置和比例误差的合成加速度，另外两轴保留小的交叉轴泄漏和噪声。
 - 写入 `truth/displacement_m.npy`、`truth/time_ns.npy` 和真值加速度，仅供末端评价。
 
-该生成器的作用是验证算法链路和输入契约；它没有模拟 IWR1843 的模拟射频、电路噪声、LVDS 传输误码或 DCA 网络时延。
+该生成器提供的是经过 IWR1843 配置约束的基带/ADC 级仿真，不是全波电磁或芯片晶体管级模型；绝对接收增益、PLL 相噪谱、连续地形 RCS 和 LVDS/DCA 网络时延仍需用户外静态数据校准。
 
 ## 6. 代码对应关系
 
@@ -604,8 +610,8 @@ $$
 | ADXL355 原始采集和导出 | `capture_program/native/adxl355_capture/`、`capture_program/src/mmwavecapture/capture/adxl355.py`、`adxl355_input.py` |
 | 雷达 PCAP/LVDS 解码和 reshape | `capture_program/src/mmwavecapture/algorithm_input.py` |
 | 采集同步和时间轴 | `capture_program/src/mmwavecapture/capture/synchronized.py` |
-| 半实测 TDMS 处理 | `measured_bridge_simulation/tdms.py` |
-| 半实测输入包生成 | `measured_bridge_simulation/package_builder.py` |
+| 仿真 A20 响应生成 | `paper_bridge_simulation/response.py` |
+| 仿真输入包生成 | `paper_bridge_simulation/package_builder.py` |
 | 输入包读取和预积分入口 | `algorithm/io.py` |
 | Range FFT、角度 DBF、目标 slow-time | `algorithm/frontend.py` |
 | 局部 MUSIC/最小二乘 AoA | `algorithm/angle_estimation.py` |
@@ -628,4 +634,3 @@ $$
 ```
 
 目前可以准确宣称的算法增量是：将目标级距离—角度观测、局部 MUSIC/最小二乘 AoA、冻结几何投影和 native-time 加速度预积分接入共享结构主相位 Kalman。不能把当前代码宣称为通用三维几何标定、在线目标跟踪、真实雷达 ADC 延迟校准或已完成实机计量验收。
-

@@ -5,8 +5,8 @@ This repository is an offline academic experiment, not a deployable service.
 The active data path has three parts:
 
 1. `capture_program/` acquires hardware data and exports the capture package.
-2. `measured_bridge_simulation/` uses the measured bridge displacement record to
-   produce the same capture package for repeatable semi-measured experiments.
+2. `paper_bridge_simulation/` uses the A20 paper-parameterized guideway response
+   to produce the same capture package for repeatable parameterized simulations.
 3. `algorithm/` reads either package and writes the displacement result.
 
 Keep these boundaries explicit. Do not reintroduce Ma, legacy scenario
