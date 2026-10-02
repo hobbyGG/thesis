@@ -1,0 +1,170 @@
+{
+  "schema": "p3_common_latent_structural_state_fusion_strict_followup",
+  "new_experiments": true,
+  "seed_values": [
+    20261001,
+    20261002
+  ],
+  "strata": [
+    "stationary",
+    "low_motion_0p005mm",
+    "low_motion_0p050mm"
+  ],
+  "score_rule": "frames 220:399 only",
+  "causal_gain_claim": false,
+  "groups": {
+    "stationary": {
+      "trial_count": 2,
+      "seeds": [
+        20261001,
+        20261002
+      ],
+      "single_rmse_m": [
+        1.5097376729347193e-06,
+        1.1893938385306952e-06
+      ],
+      "common_rmse_m": [
+        1.09769434617896e-06,
+        9.662268455926398e-07
+      ],
+      "independent_median_rmse_m": [
+        2.4763046740210925e-06,
+        2.044246403017289e-06
+      ],
+      "common_vs_single_reduction": [
+        0.27292378943873385,
+        0.1876308634772671
+      ],
+      "common_vs_independent_median_reduction": [
+        0.5567208035041612,
+        0.5273432575610759
+      ],
+      "common_innovation_corr_summary": [
+        {
+          "pair_count": 10,
+          "median": 0.5914509984979486,
+          "mean": 0.5606034888048297,
+          "min": 0.3972806318990091,
+          "max": 0.7264396136803087,
+          "absolute_median": 0.5914509984979486,
+          "absolute_max": 0.7264396136803087
+        },
+        {
+          "pair_count": 10,
+          "median": 0.6180833136996835,
+          "mean": 0.6337786992356369,
+          "min": 0.39404280596051655,
+          "max": 0.8809411044642549,
+          "absolute_median": 0.6180833136996835,
+          "absolute_max": 0.8809411044642549
+        }
+      ],
+      "common_weight_diversity_median": [
+        4.772326844405983,
+        4.923735286954095
+      ]
+    },
+    "low_motion_0p005mm": {
+      "trial_count": 2,
+      "seeds": [
+        20261001,
+        20261002
+      ],
+      "single_rmse_m": [
+        1.5112251943212554e-06,
+        1.2238962961168661e-06
+      ],
+      "common_rmse_m": [
+        1.1195223367836227e-06,
+        9.860697231471742e-07
+      ],
+      "independent_median_rmse_m": [
+        2.4891221041303107e-06,
+        2.0580804188675025e-06
+      ],
+      "common_vs_single_reduction": [
+        0.25919555802109306,
+        0.19431921946676323
+      ],
+      "common_vs_independent_median_reduction": [
+        0.5502340624728896,
+        0.5208789150767112
+      ],
+      "common_innovation_corr_summary": [
+        {
+          "pair_count": 10,
+          "median": 0.5914996732051916,
+          "mean": 0.5605695033210162,
+          "min": 0.39735955690162345,
+          "max": 0.726440666552911,
+          "absolute_median": 0.5914996732051916,
+          "absolute_max": 0.726440666552911
+        },
+        {
+          "pair_count": 10,
+          "median": 0.6183836114581185,
+          "mean": 0.6339416391695797,
+          "min": 0.39408414875350334,
+          "max": 0.8809568613893463,
+          "absolute_median": 0.6183836114581185,
+          "absolute_max": 0.8809568613893463
+        }
+      ],
+      "common_weight_diversity_median": [
+        4.772582778811396,
+        4.923785169265733
+      ]
+    },
+    "low_motion_0p050mm": {
+      "trial_count": 2,
+      "seeds": [
+        20261001,
+        20261002
+      ],
+      "single_rmse_m": [
+        2.073111104958753e-06,
+        2.0353096558617093e-06
+      ],
+      "common_rmse_m": [
+        1.919513523654864e-06,
+        1.8217892145127742e-06
+      ],
+      "independent_median_rmse_m": [
+        2.973117358228948e-06,
+        2.6102916081172512e-06
+      ],
+      "common_vs_single_reduction": [
+        0.07409037602301827,
+        0.10490808645947036
+      ],
+      "common_vs_independent_median_reduction": [
+        0.35437680643784064,
+        0.3020744468366917
+      ],
+      "common_innovation_corr_summary": [
+        {
+          "pair_count": 10,
+          "median": 0.5915595363495377,
+          "mean": 0.5605774189287862,
+          "min": 0.39755957610647386,
+          "max": 0.7263918390711259,
+          "absolute_median": 0.5915595363495377,
+          "absolute_max": 0.7263918390711259
+        },
+        {
+          "pair_count": 10,
+          "median": 0.6187837420541922,
+          "mean": 0.6343704854090981,
+          "min": 0.394239092362761,
+          "max": 0.8808528847531594,
+          "absolute_median": 0.6187837420541922,
+          "absolute_max": 0.8808528847531594
+        }
+      ],
+      "common_weight_diversity_median": [
+        4.774576373393382,
+        4.922226128773208
+      ]
+    }
+  }
+}
