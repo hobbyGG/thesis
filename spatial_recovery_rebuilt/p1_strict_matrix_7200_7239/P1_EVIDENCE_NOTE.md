@@ -31,6 +31,11 @@ test observation. The full manifest reports `guards_fixed_before_test=true`,
 `test_target_detection_executed=false`, `full_window_route_called=false`, and
 truth-free estimator copies.
 
+Geometry, angle, and beta are calibration-only. The frozen-test ADXL guard still
+checks frames 200–399, and rejected trials never enter the estimator. Therefore
+the 191/200 coverage and accepted-only RMSE are conditional on test-window
+quality screening; they are not test-free online performance.
+
 ## Evidence limits retained with the result
 
 - Every accepted trial starts a fresh retained Kalman state on test frames
@@ -40,9 +45,9 @@ truth-free estimator copies.
   they do not establish online unbiasedness or deployment behavior.
 - Retained adaptive `R` settings were not independently calibrated or
   identified by this matrix.
-- The current retained frontend defines beta as `1/abs(cos(theta))`, while the
-  calibration angles are positive. Signed-beta semantics therefore remain an
-  explicit caveat for the structural interpretation.
+- The current retained frontend defines beta as `1/abs(cos(theta))`. That is
+  numerically equivalent to signed beta only for the current positive-cos
+  angles (less than 25 degrees); the general mounting sign remains unvalidated.
 - The compact estimator copies are truth-free according to the manifest, but
   non-truth scratch files and estimator-copy provenance still need a separate
   audit before treating this as publication-ready evidence.
