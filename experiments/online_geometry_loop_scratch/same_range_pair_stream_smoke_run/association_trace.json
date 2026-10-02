@@ -1,0 +1,6018 @@
+[
+  {
+    "frame_index": 128,
+    "window_frame_range": [
+      109,
+      128
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.706295796676314,
+      1.545977487100239
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.801541370031152,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 129,
+    "window_frame_range": [
+      110,
+      129
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.722226827304147,
+      1.5450663878824626
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.817647969809434,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 130,
+    "window_frame_range": [
+      111,
+      130
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.6089440404274793,
+      1.4669030716199678
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.7040836939047717,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 131,
+    "window_frame_range": [
+      112,
+      131
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.4214721474041725,
+      1.3276086695661882
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 2.515531791687253,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 132,
+    "window_frame_range": [
+      113,
+      132
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.161456667470924,
+      1.1435774073606466
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 2.2514965167558283,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 133,
+    "window_frame_range": [
+      114,
+      133
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      1.8531560243264993,
+      0.9276771442112237
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 1.9389570918052628,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 134,
+    "window_frame_range": [
+      115,
+      134
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      1.5160303468751315,
+      0.6816141045380419
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 1.5956830428026185,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 135,
+    "window_frame_range": [
+      116,
+      135
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      1.1616393429182978,
+      0.4176816256834297
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 1.2351921845324472,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 136,
+    "window_frame_range": [
+      117,
+      136
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      0.8174848886646009,
+      0.17717193099891432
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 0.8833781256105896,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 137,
+    "window_frame_range": [
+      118,
+      137
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      0.5007708435009324,
+      -0.05134450967003858
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 0.5590323561540654,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 138,
+    "window_frame_range": [
+      119,
+      138
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      0.18072643563652938,
+      -0.277930875681031
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 0.22947084187331476,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 139,
+    "window_frame_range": [
+      120,
+      139
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.12064602005063994,
+      -0.4820789941757028
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.0810740027236115,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 140,
+    "window_frame_range": [
+      121,
+      140
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.38237230367425196,
+      -0.6911033199282688
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.34822535596143894,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 141,
+    "window_frame_range": [
+      122,
+      141
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.6298264483895631,
+      -0.8619749891339947
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.603839324853521,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 142,
+    "window_frame_range": [
+      123,
+      142
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.8757487794053409,
+      -1.0303447663144725
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.8585424266450047,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 143,
+    "window_frame_range": [
+      124,
+      143
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.0956170535032292,
+      -1.1865968461444163
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.085349686314341,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 144,
+    "window_frame_range": [
+      125,
+      144
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.3053155894487474,
+      -1.3402870900209105
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.301382241132329,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 145,
+    "window_frame_range": [
+      126,
+      145
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.5059590499602122,
+      -1.4898901676385914
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.5077700500383477,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 146,
+    "window_frame_range": [
+      127,
+      146
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.6713639046570907,
+      -1.6176867123950127
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.6773742453348202,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 147,
+    "window_frame_range": [
+      128,
+      147
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.828223101084121,
+      -1.7189647807902109
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.8404317065978768,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 148,
+    "window_frame_range": [
+      129,
+      148
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.9414114921813166,
+      -1.7912778048489733
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.9579565663980159,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 149,
+    "window_frame_range": [
+      130,
+      149
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.000179262032754,
+      -1.840373741317297
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -2.0178847468326313,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 150,
+    "window_frame_range": [
+      131,
+      150
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.9819698037642501,
+      -1.8319960058780747
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.99869220752885,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 151,
+    "window_frame_range": [
+      132,
+      151
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.904688115983044,
+      -1.7771086951312591
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.918631061681463,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 152,
+    "window_frame_range": [
+      133,
+      152
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.7336018947229355,
+      -1.654066765154773
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.742487660736527,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 153,
+    "window_frame_range": [
+      134,
+      153
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.4848603678959622,
+      -1.4698004746736217
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.4865237557723998,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 154,
+    "window_frame_range": [
+      135,
+      154
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.1254604667603516,
+      -1.214237189031607
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.115717068300579,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 155,
+    "window_frame_range": [
+      136,
+      155
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -0.695561947611131,
+      -0.9071641913103724
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -0.6726766074450283,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 156,
+    "window_frame_range": [
+      137,
+      156
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -0.1999130229926293,
+      -0.551782219999079
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -0.1625863866617018,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 157,
+    "window_frame_range": [
+      138,
+      157
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      0.33803997725451645,
+      -0.1675245445130849
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 0.39040047290224533,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 158,
+    "window_frame_range": [
+      139,
+      158
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      0.9135669406316027,
+      0.24254448897969752
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 0.9806164855992947,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 159,
+    "window_frame_range": [
+      140,
+      159
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      1.478675112048449,
+      0.654351775978604
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 1.5581010279729168,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 160,
+    "window_frame_range": [
+      141,
+      160
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      2.0101607707931772,
+      1.0434876834973374
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.0965673283468433,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 161,
+    "window_frame_range": [
+      142,
+      161
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      2.476355410716091,
+      1.3688108560750802
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.5690730083987425,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 162,
+    "window_frame_range": [
+      143,
+      162
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      2.847098368462965,
+      1.6366891003580086
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.943516121213745,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 163,
+    "window_frame_range": [
+      144,
+      163
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      3.102664878697121,
+      1.8252611253566349
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -3.0824636875059124,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 164,
+    "window_frame_range": [
+      145,
+      164
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -3.0686985515004874,
+      1.8983678989292498
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -2.969192222935657,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 165,
+    "window_frame_range": [
+      146,
+      165
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -3.1016964006488252,
+      1.8785062037176332
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -3.002872008049684,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 166,
+    "window_frame_range": [
+      147,
+      166
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      3.0129731480098823,
+      1.7506371178777032
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 3.1111963705873107,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 167,
+    "window_frame_range": [
+      148,
+      167
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.6914487264063083,
+      1.5316930092052323
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 2.7890041606394953,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 168,
+    "window_frame_range": [
+      149,
+      168
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.259149223708374,
+      1.2168837749310284
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 2.350344047283375,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 169,
+    "window_frame_range": [
+      150,
+      169
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      1.7215356927953893,
+      0.8315392062293133
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 1.805098438864413,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 170,
+    "window_frame_range": [
+      151,
+      170
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      1.12266946942415,
+      0.4068362161571949
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 1.195003464602753,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 171,
+    "window_frame_range": [
+      152,
+      171
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      0.492470389847668,
+      -0.05231290135543027
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 0.5499437381887109,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 172,
+    "window_frame_range": [
+      153,
+      172
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.13488970675322598,
+      -0.5002275676296646
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.09483476340680654,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 173,
+    "window_frame_range": [
+      154,
+      173
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.7411571643210249,
+      -0.9386530510721287
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.7192623573822283,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 174,
+    "window_frame_range": [
+      155,
+      174
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.2787379452334324,
+      -1.31886514670186
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.2742472911092804,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 175,
+    "window_frame_range": [
+      156,
+      175
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.729995013190154,
+      -1.6543443233251798
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.7385167539782118,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 176,
+    "window_frame_range": [
+      157,
+      176
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.075069509841316,
+      -1.8874508730220758
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -2.0961340363129617,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 177,
+    "window_frame_range": [
+      158,
+      177
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.308806958027829,
+      -2.0594794395996585
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -2.336182392029637,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 178,
+    "window_frame_range": [
+      159,
+      178
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.4200944738607637,
+      -2.141545227115265
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -2.451113511193853,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 179,
+    "window_frame_range": [
+      160,
+      179
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.4140867517750504,
+      -2.1340413263401183
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -2.444867112044877,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 180,
+    "window_frame_range": [
+      161,
+      180
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.3071689342907034,
+      -2.073330883794154
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -2.333084175969563,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 181,
+    "window_frame_range": [
+      162,
+      181
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.1131858912914065,
+      -1.9302856102619
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -2.1332355849284816,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 182,
+    "window_frame_range": [
+      163,
+      182
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.8575202471555108,
+      -1.7417129462651113
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.8703606793660599,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 183,
+    "window_frame_range": [
+      164,
+      183
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.5452806298301225,
+      -1.5259903481573753
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.5474237572872165,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 184,
+    "window_frame_range": [
+      165,
+      184
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.217504239382745,
+      -1.2754052449188202
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.2110582097396896,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 185,
+    "window_frame_range": [
+      166,
+      185
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -0.8636157210718138,
+      -1.0383206197936354
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -0.844423337228464,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 186,
+    "window_frame_range": [
+      167,
+      186
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -0.5202895464800908,
+      -0.7941927325897105
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -0.4908739652875991,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 187,
+    "window_frame_range": [
+      168,
+      187
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -0.18394813536716462,
+      -0.5441198035501249
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -0.1455303867475734,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 188,
+    "window_frame_range": [
+      169,
+      188
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      0.12130179693887264,
+      -0.3229148482164291
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 0.1684480223162715,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 189,
+    "window_frame_range": [
+      170,
+      189
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      0.4114742072069037,
+      -0.10998585984128514
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 0.4651373581589203,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 190,
+    "window_frame_range": [
+      171,
+      190
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      0.6851147216493423,
+      0.0791509297891119
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 0.7466829638834023,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 191,
+    "window_frame_range": [
+      172,
+      191
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      0.9393830113779194,
+      0.2664655168879607
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 1.0064745958403807,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 192,
+    "window_frame_range": [
+      173,
+      192
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      1.1763624600940317,
+      0.43937739898203504
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 1.2480602061984793,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 193,
+    "window_frame_range": [
+      174,
+      193
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      1.3915863823085908,
+      0.598039959920715
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 1.4672245647555895,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 194,
+    "window_frame_range": [
+      175,
+      194
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      1.610921028138369,
+      0.7336967240965991
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 1.6918874483280095,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 195,
+    "window_frame_range": [
+      176,
+      195
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      1.8084646066699102,
+      0.8752595784952267
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 1.8929738128302231,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 196,
+    "window_frame_range": [
+      177,
+      196
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      1.9797053986628992,
+      1.0116760562038363
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.0661513055249334,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 197,
+    "window_frame_range": [
+      178,
+      197
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      2.1352493141270217,
+      1.12093486357926
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.2238319534980855,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 198,
+    "window_frame_range": [
+      179,
+      198
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.238138696606191,
+      1.2003252825643353
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.32936814123932,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 199,
+    "window_frame_range": [
+      180,
+      199
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.2892296989105287,
+      1.236728599294407
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.3803120680891734,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 200,
+    "window_frame_range": [
+      181,
+      200
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.2897894658095947,
+      1.229825891540664
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.382302977614579,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 201,
+    "window_frame_range": [
+      182,
+      201
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.2018354087971392,
+      1.1739799088403216
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.2915150536074718,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 202,
+    "window_frame_range": [
+      183,
+      202
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.036492768009423,
+      1.0541916312593866
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 2.124645438941563,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 203,
+    "window_frame_range": [
+      184,
+      203
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      1.780655486633319,
+      0.8551606361860367
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 1.8663519492862983,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 204,
+    "window_frame_range": [
+      185,
+      204
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      1.4297202276574879,
+      0.619709506762534
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 1.507562069719004,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 205,
+    "window_frame_range": [
+      186,
+      205
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      1.0006473716688784,
+      0.3104784223810196
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 1.0703505932904684,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 206,
+    "window_frame_range": [
+      187,
+      206
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      0.49994171413076727,
+      -0.059873891712331824
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 0.5589133753689296,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 207,
+    "window_frame_range": [
+      188,
+      207
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.04634419710351017,
+      -0.4307961270693611
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.004731554562549723,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 208,
+    "window_frame_range": [
+      189,
+      208
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.6164732878896746,
+      -0.8546939169966352
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.5902589662699733,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 209,
+    "window_frame_range": [
+      190,
+      209
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.1754745154145678,
+      -1.260714733541385
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.1659031184161073,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 210,
+    "window_frame_range": [
+      191,
+      210
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.714997437532274,
+      -1.640879218696675
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.723345792467961,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 211,
+    "window_frame_range": [
+      192,
+      211
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.176013978823322,
+      -1.9697378502419642
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -2.19902594865799,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 212,
+    "window_frame_range": [
+      193,
+      212
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.547977499176058,
+      -2.2382592431353463
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -2.581607271042115,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 213,
+    "window_frame_range": [
+      194,
+      213
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.8053562776431873,
+      -2.4187618702233062
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -2.846759390882468,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 214,
+    "window_frame_range": [
+      195,
+      214
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.918745906701332,
+      -2.506836992610547
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -2.9629531330632375,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 215,
+    "window_frame_range": [
+      196,
+      215
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.88845570523694,
+      -2.4894284132784974
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -2.930745032635811,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 216,
+    "window_frame_range": [
+      197,
+      216
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.7082676254328866,
+      -2.354112477356739
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -2.7468709978033496,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 217,
+    "window_frame_range": [
+      198,
+      217
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -2.3988733674738234,
+      -2.126170724027002
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -2.4286039324366717,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 218,
+    "window_frame_range": [
+      199,
+      218
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.9645759005443408,
+      -1.8057695854105258
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.9822179396197017,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 219,
+    "window_frame_range": [
+      200,
+      219
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.4273295566541109,
+      -1.4234820353593218
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.427752172492791,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 220,
+    "window_frame_range": [
+      201,
+      220
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -0.8317484103821756,
+      -1.0017830551209135
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -0.8130594749565226,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 221,
+    "window_frame_range": [
+      202,
+      221
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -0.1962385721610318,
+      -0.5412038073456236
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -0.15893021458239667,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 222,
+    "window_frame_range": [
+      203,
+      222
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      0.43900725459302414,
+      -0.09311657547499655
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 0.4938752793812669,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 223,
+    "window_frame_range": [
+      204,
+      223
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      1.044710140237152,
+      0.3424151678442931
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 1.1141423412946623,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 224,
+    "window_frame_range": [
+      205,
+      224
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      1.5748960408905104,
+      0.7203816056914569
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 1.6549927305413432,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 225,
+    "window_frame_range": [
+      206,
+      225
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      2.025974908203459,
+      1.0465797182249688
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.1131016676410628,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 226,
+    "window_frame_range": [
+      207,
+      226
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      2.378493608451563,
+      1.293219607101217
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.4705886250187534,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 227,
+    "window_frame_range": [
+      208,
+      227
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      2.606905304716344,
+      1.4436171799694177
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.7018676245088007,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 228,
+    "window_frame_range": [
+      209,
+      228
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.7072193276956384,
+      1.541173169208282
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.8028098681276283,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 229,
+    "window_frame_range": [
+      210,
+      229
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.7193214524113247,
+      1.5426854346474586
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.8151899915215584,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 230,
+    "window_frame_range": [
+      211,
+      230
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.6131533636957216,
+      1.4576473475276492
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": 2.7086169685659987,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 231,
+    "window_frame_range": [
+      212,
+      231
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.421838465626542,
+      1.3220460719049318
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 2.5155066557857015,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 232,
+    "window_frame_range": [
+      213,
+      232
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      2.1653781662679275,
+      1.139358554094381
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 2.2571171873543747,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 233,
+    "window_frame_range": [
+      214,
+      233
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      1.8491297482795492,
+      0.9210094331626325
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 1.9345197841054003,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 234,
+    "window_frame_range": [
+      215,
+      234
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      1.5175447859192897,
+      0.6820157529162078
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 1.5973810110453242,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 235,
+    "window_frame_range": [
+      216,
+      235
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      1.1676791054049396,
+      0.43475660369211305
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 1.240809990627239,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 236,
+    "window_frame_range": [
+      217,
+      236
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      0.8248732936506568,
+      0.1810115855327249
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 0.8907911785431868,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 237,
+    "window_frame_range": [
+      218,
+      237
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      0.4908865446692339,
+      -0.06047477467099325
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 0.5485618879905562,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 238,
+    "window_frame_range": [
+      219,
+      238
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      0.17960575932231518,
+      -0.2695550663933203
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": 0.227835471637506,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 239,
+    "window_frame_range": [
+      220,
+      239
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.1101965486340281,
+      -0.4853452041948457
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.06953607316070164,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 240,
+    "window_frame_range": [
+      221,
+      240
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.3857373465902871,
+      -0.6813382985768666
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.3532514613304532,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 241,
+    "window_frame_range": [
+      222,
+      241
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.6363202522446946,
+      -0.8710233610158202
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.6100852314547038,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 242,
+    "window_frame_range": [
+      223,
+      242
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -0.8733370741518535,
+      -1.0306996006758458
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -0.855781525883052,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 243,
+    "window_frame_range": [
+      224,
+      243
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.1023108159393034,
+      -1.1929714486077176
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.0922275757177495,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 244,
+    "window_frame_range": [
+      225,
+      244
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.2993409590551752,
+      -1.3491517485381967
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.2936950257301856,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 245,
+    "window_frame_range": [
+      226,
+      245
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.4972127477908461,
+      -1.4934989286899292
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.4976263883343328,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 246,
+    "window_frame_range": [
+      227,
+      246
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.6787486426136276,
+      -1.6144505614432667
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.6860202174739773,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 247,
+    "window_frame_range": [
+      228,
+      247
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.0,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.0,
+      45.25
+    ],
+    "beta": [
+      1.0154266118857451,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.8177204500864583,
+      -1.7240870279807656
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.0,
+    "merge_beta": 1.0154266118857451,
+    "merge_phase_rad": -1.8281308517189627,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 248,
+    "window_frame_range": [
+      229,
+      248
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.9327393699162672,
+      -1.7946107810089356
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.9481982031313878,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 249,
+    "window_frame_range": [
+      230,
+      249
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.25
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.25
+    ],
+    "beta": [
+      1.016218132432817,
+      1.4204248366719263
+    ],
+    "phase_rad": [
+      -1.9907965104924354,
+      -1.8372300062719218
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -2.00798157605115,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 250,
+    "window_frame_range": [
+      231,
+      250
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.985805430684009,
+      -1.8365939235753703
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -2.002230308048251,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 251,
+    "window_frame_range": [
+      232,
+      251
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.8972383505191548,
+      -1.7717161113753774
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.91110366533449,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 252,
+    "window_frame_range": [
+      233,
+      252
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.737378111761028,
+      -1.6565828967721077
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.7463392435388603,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 253,
+    "window_frame_range": [
+      234,
+      253
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.4771446814984017,
+      -1.481805741634007
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.4766289687605265,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 254,
+    "window_frame_range": [
+      235,
+      254
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -1.1324458112159483,
+      -1.2163760950681068
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -1.1232080636256285,
+    "merge_available": true,
+    "range_bin": 0
+  },
+  {
+    "frame_index": 255,
+    "window_frame_range": [
+      236,
+      255
+    ],
+    "detected_angle_count": 2,
+    "raw_angles_deg": [
+      -10.25,
+      45.5
+    ],
+    "track_indices": [
+      0,
+      1
+    ],
+    "slot_keys": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "angle_deg": [
+      -10.25,
+      45.5
+    ],
+    "beta": [
+      1.016218132432817,
+      1.426718194399835
+    ],
+    "phase_rad": [
+      -0.7007064692845532,
+      -0.9155689954763571
+    ],
+    "available": [
+      true,
+      true
+    ],
+    "merge_angle_deg": -10.25,
+    "merge_beta": 1.016218132432817,
+    "merge_phase_rad": -0.6772582474192732,
+    "merge_available": true,
+    "range_bin": 0
+  }
+]

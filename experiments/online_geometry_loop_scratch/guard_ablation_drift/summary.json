@@ -1,0 +1,46 @@
+{
+  "schema": "online_geometry_loop_guard_ablation_summary",
+  "status": "completed",
+  "seed": 20261001,
+  "guard_thresholds": {
+    "aoa_jump_deg": 0.2,
+    "beta_relative_change": 0.005
+  },
+  "conditions": [
+    {
+      "condition": "post_200_phase_ramp",
+      "p1_frozen": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 1.1004644343581268e-06,
+        "rmse_mm": 0.001100464434358127,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "rolling_raw": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 0.00013652882874322145,
+        "rmse_mm": 0.13652882874322145,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "rolling_guarded": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 0.00013652752149079686,
+        "rmse_mm": 0.13652752149079686,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "guard_reject_count": 6,
+      "fallback_count": 6,
+      "abstain_count": 0
+    }
+  ],
+  "truth_q_proxy_or_paper_metadata_to_estimator": false,
+  "accuracy_claim": false
+}

@@ -1,0 +1,108 @@
+{
+  "schema": "online_geometry_loop_gauge_fix_angle_migration_multiseed_summary",
+  "status": "completed",
+  "seeds": [
+    20261001,
+    20261002,
+    20261003
+  ],
+  "condition": "angle_migration",
+  "accuracy_claim": false,
+  "truth_free_estimator_copy": true,
+  "routes": {
+    "fixed_reference": {
+      "rmse_mm_values": [
+        0.10023960223272649,
+        0.10021060328671268,
+        0.10386570462738301
+      ],
+      "rmse_mm_mean": 0.10143863671560738,
+      "rmse_mm_std": 0.002101952478291463,
+      "coverage_values": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "coverage_min": 1.0
+    },
+    "rolling_raw": {
+      "rmse_mm_values": [
+        0.01315192364601248,
+        0.014568286429408616,
+        0.014964054274448031
+      ],
+      "rmse_mm_mean": 0.014228088116623043,
+      "rmse_mm_std": 0.0009527620493308751,
+      "coverage_values": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "coverage_min": 1.0
+    },
+    "rolling_bias_transport": {
+      "rmse_mm_values": [
+        0.13323025696381893,
+        0.13511259735735623,
+        0.13325224244319145
+      ],
+      "rmse_mm_mean": 0.13386503225478888,
+      "rmse_mm_std": 0.0010804789929395842,
+      "coverage_values": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "coverage_min": 1.0
+    }
+  },
+  "fixed_reference_phase_bias": {
+    "mean_rad_values": [
+      0.39662876852328804,
+      0.40588911813707895,
+      0.410763878473323
+    ],
+    "mean_rad_mean": 0.40442725504456334,
+    "rms_rad_values": [
+      0.41027829648412395,
+      0.41933659013163715,
+      0.4250199933959107
+    ],
+    "rms_rad_mean": 0.4182116266705573
+  },
+  "rolling_raw_phase_bias": {
+    "mean_rad_values": [
+      0.012727337442524337,
+      0.023517974446741287,
+      0.023474707067810647
+    ],
+    "mean_rad_mean": 0.019906672985692087,
+    "rms_rad_values": [
+      0.04194944859952892,
+      0.0454979755151983,
+      0.047611666394136096
+    ],
+    "rms_rad_mean": 0.04501969683628778
+  },
+  "rolling_transported_phase_bias": {
+    "mean_rad_values": [
+      0.39429172281720287,
+      0.39959147944540624,
+      0.3948792370549219
+    ],
+    "mean_rad_mean": 0.39625414643917695,
+    "rms_rad_values": [
+      0.40767537108827273,
+      0.4126829124222216,
+      0.4081737827452373
+    ],
+    "rms_rad_mean": 0.4095106887519105
+  },
+  "interpretation": {
+    "fixed_reference_confounds_true_steering_change": true,
+    "rolling_raw_tracks_migration_better": true,
+    "centroid_transport_overcorrects": true,
+    "conclusion": "transport is local to abrupt bootstrap gauge transition; do not apply blindly to actual angle migration",
+    "accuracy_claim": false
+  }
+}

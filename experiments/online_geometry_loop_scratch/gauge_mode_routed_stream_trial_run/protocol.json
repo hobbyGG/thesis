@@ -1,0 +1,14 @@
+{
+  "schema": "online_geometry_loop_gauge_mode_routed_stream_trial_protocol",
+  "prefix_frames": [
+    200,
+    219
+  ],
+  "selected_route_first_frame": 220,
+  "route_rule": "prefix truth-free classifier: gauge_boundary_candidate -> rolling_bias_transport; otherwise rolling_raw",
+  "prefix_fallback": "rolling_raw; never retroactively replaced",
+  "route_states": "raw and transport states advanced causally in parallel; selected trace is emitted only after prefix decision",
+  "same_range_multi_target": "not evaluated; current association requires unique range bins",
+  "truth_or_q_proxy_used_by_estimator": false,
+  "accuracy_claim": false
+}

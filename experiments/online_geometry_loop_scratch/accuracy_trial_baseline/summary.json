@@ -1,0 +1,33 @@
+{
+  "schema": "online_geometry_loop_accuracy_trial_summary",
+  "status": "completed",
+  "seed": 20261001,
+  "conditions": [
+    "baseline_no_drift"
+  ],
+  "truth_q_proxy_or_paper_metadata_to_estimator": false,
+  "accuracy_claim": false,
+  "routes": [
+    {
+      "condition": "baseline_no_drift",
+      "p1_frozen": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 1.090955087695083e-06,
+        "rmse_mm": 0.001090955087695083,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "causal_rolling_stateful": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 2.666234403618748e-06,
+        "rmse_mm": 0.002666234403618748,
+        "abstain": false,
+        "abstain_reason": null
+      }
+    }
+  ]
+}

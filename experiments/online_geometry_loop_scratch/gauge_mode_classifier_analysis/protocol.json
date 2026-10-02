@@ -1,0 +1,21 @@
+{
+  "schema": "online_geometry_loop_gauge_mode_classifier_protocol",
+  "bootstrap_frames": [
+    200,
+    219
+  ],
+  "truth_free_features": [
+    "u_t",
+    "phase_residual_t",
+    "gauge_prediction_t",
+    "AoA step MAD",
+    "residual-gauge correlation"
+  ],
+  "pre_registered_thresholds": {
+    "gauge_rms_rad": 0.1,
+    "phase_rms_rad": 0.1,
+    "correlation": 0.7
+  },
+  "truth_or_q_proxy_used": false,
+  "accuracy_claim": false
+}

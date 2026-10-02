@@ -1,0 +1,133 @@
+{
+  "schema": "online_geometry_loop_gauge_fix_diagnostic",
+  "status": "completed",
+  "condition": "post_200_phase_ramp",
+  "seed": 20261003,
+  "radar_test_frames": [
+    200,
+    399
+  ],
+  "estimator_input": {
+    "truth_present": false,
+    "paper_response_metadata_present": false,
+    "capture_truth_loaded": false,
+    "q_proxy_present": false,
+    "truth_or_q_proxy_used_by_estimator": false
+  },
+  "protocol": {
+    "fixed_reference": "calibration frames 0:199 determine range/angle/phase reference; test frames use fixed steering and beta",
+    "rolling_transport": "20-frame causal rolling rows; current beta_t; bias transport from current angle only",
+    "gauge_assumption": "source phase gauge follows array centroid gamma(u)=2*pi*mean(p)*sin(angle)",
+    "truth_scoring": "post-run only after both routes complete",
+    "accuracy_claim": false
+  },
+  "truth_reference_post_run": {
+    "reference_m": 0.0,
+    "not_passed_to_estimator": true
+  },
+  "fixed_reference": {
+    "score": {
+      "sample_count": 200,
+      "finite_samples": 200,
+      "coverage": 1.0,
+      "rmse_m": 1.3573226074148753e-06,
+      "rmse_mm": 0.0013573226074148753,
+      "abstain": false,
+      "abstain_reason": null
+    },
+    "phase_bias": {
+      "finite_fraction": 1.0,
+      "mean_rad": -0.004201079960973074,
+      "rms_rad": 0.011569876390148877,
+      "sample_count": 995
+    },
+    "coverage": 1.0,
+    "target_count": 5
+  },
+  "rolling_bias_transport": {
+    "score": {
+      "sample_count": 200,
+      "finite_samples": 200,
+      "coverage": 1.0,
+      "rmse_m": 6.919163090227372e-06,
+      "rmse_mm": 0.006919163090227372,
+      "abstain": false,
+      "abstain_reason": null
+    },
+    "coverage": 1.0,
+    "target_slots": {
+      "slot_key": "range_bin (unique in this synthetic condition)",
+      "baseline_range_bins": [
+        230,
+        232,
+        246,
+        238,
+        253
+      ],
+      "range_slot_mismatch_rows": 0,
+      "target_count_first": 5,
+      "target_count_last": 5
+    },
+    "array_positions_wavelengths": [
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0,
+      2.5,
+      3.0,
+      3.5
+    ],
+    "array_centroid_wavelengths": 1.75,
+    "bootstrap_u": [
+      0.060625,
+      0.15437499999999998,
+      0.36187500000000006,
+      0.255625,
+      0.42250000000000015
+    ],
+    "gauge_delta_first_to_last_rad": [
+      -0.42607850364311545,
+      -0.4054618018539326,
+      -0.405461801853932,
+      -0.41920626971338826,
+      -0.42607850364311395
+    ],
+    "phase_bias_raw": {
+      "finite_fraction": 1.0,
+      "mean_rad": -0.41663450975874156,
+      "rms_rad": 0.42305506568667123,
+      "sample_count": 995
+    },
+    "phase_bias_after_transport": {
+      "finite_fraction": 1.0,
+      "mean_rad": -0.02095269106510525,
+      "rms_rad": 0.026529308182836137,
+      "sample_count": 995
+    },
+    "transport_assumption": "frontend coefficient gauge is -gamma(u), gamma(u)=2*pi*mean(position_wavelengths)*u; b_t=b_0-gamma(u_t)+gamma(u_0)"
+  },
+  "rolling_raw": {
+    "score": {
+      "sample_count": 200,
+      "finite_samples": 200,
+      "coverage": 1.0,
+      "rmse_m": 0.00013773922453816874,
+      "rmse_mm": 0.13773922453816875,
+      "abstain": false,
+      "abstain_reason": null
+    },
+    "coverage": 1.0
+  },
+  "accuracy_claim": false,
+  "condition_input": {
+    "enabled": true,
+    "frame_range": [
+      200,
+      399
+    ],
+    "delta_sin": 0.04,
+    "operation": "adc_virtual_rx *= exp(+2 pi j * position_wavelength * delta_sin)",
+    "truth_q_proxy_or_paper_metadata_modified": false
+  }
+}

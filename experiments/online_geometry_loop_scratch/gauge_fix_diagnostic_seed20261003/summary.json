@@ -1,0 +1,157 @@
+{
+  "schema": "online_geometry_loop_gauge_fix_diagnostic_summary",
+  "status": "completed",
+  "seed": 20261003,
+  "conditions": [
+    "baseline_no_drift",
+    "post_200_phase_ramp",
+    "pre_window_phase_ramp"
+  ],
+  "accuracy_claim": false,
+  "routes": [
+    {
+      "condition": "baseline_no_drift",
+      "fixed_reference": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 1.295555378563673e-06,
+        "rmse_mm": 0.001295555378563673,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "rolling_raw": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 1.4404599141505767e-06,
+        "rmse_mm": 0.0014404599141505767,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "rolling_bias_transport": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 1.2980704346774568e-06,
+        "rmse_mm": 0.0012980704346774567,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "fixed_reference_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": -0.002866972273896514,
+        "rms_rad": 0.010068524976464968,
+        "sample_count": 995
+      },
+      "rolling_raw_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": 0.0004770637041715308,
+        "rms_rad": 0.012655315325503973,
+        "sample_count": 995
+      },
+      "rolling_transported_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": -0.0026931427016023504,
+        "rms_rad": 0.00995197054210917,
+        "sample_count": 995
+      }
+    },
+    {
+      "condition": "post_200_phase_ramp",
+      "fixed_reference": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 1.3573226074148753e-06,
+        "rmse_mm": 0.0013573226074148753,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "rolling_raw": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 0.00013773922453816874,
+        "rmse_mm": 0.13773922453816875,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "rolling_bias_transport": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 6.919163090227372e-06,
+        "rmse_mm": 0.006919163090227372,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "fixed_reference_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": -0.004201079960973074,
+        "rms_rad": 0.011569876390148877,
+        "sample_count": 995
+      },
+      "rolling_raw_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": -0.41663450975874156,
+        "rms_rad": 0.42305506568667123,
+        "sample_count": 995
+      },
+      "rolling_transported_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": -0.02095269106510525,
+        "rms_rad": 0.026529308182836137,
+        "sample_count": 995
+      }
+    },
+    {
+      "condition": "pre_window_phase_ramp",
+      "fixed_reference": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 1.3512605114817005e-06,
+        "rmse_mm": 0.0013512605114817005,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "rolling_raw": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 1.2747625752256783e-06,
+        "rmse_mm": 0.0012747625752256783,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "rolling_bias_transport": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 1.3314967551607064e-06,
+        "rmse_mm": 0.0013314967551607063,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "fixed_reference_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": -0.004048661050685661,
+        "rms_rad": 0.011357141408714766,
+        "sample_count": 995
+      },
+      "rolling_raw_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": -0.0008542315865599267,
+        "rms_rad": 0.010377962517028164,
+        "sample_count": 995
+      },
+      "rolling_transported_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": -0.0027397791873796673,
+        "rms_rad": 0.009879349965196361,
+        "sample_count": 995
+      }
+    }
+  ]
+}

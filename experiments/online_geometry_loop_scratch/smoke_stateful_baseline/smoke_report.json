@@ -1,0 +1,47 @@
+{
+  "schema": "online_geometry_loop_stateful_kalman_smoke",
+  "status": "smoke_passed",
+  "scope": "state_continuity_and_units_only",
+  "seed": 20261001,
+  "window_frames": 20,
+  "first_output_frame": 19,
+  "sample_count": 20,
+  "estimator_input": {
+    "truth_present": false,
+    "paper_response_metadata_present": false,
+    "capture_truth_loaded": false,
+    "q_proxy_present": false
+  },
+  "causal_checks": {
+    "window_size_20": true,
+    "window_end_equals_current": true,
+    "future_frame_count_zero": true
+  },
+  "adapter": {
+    "state_sample_index": 20,
+    "state_continuous": true,
+    "beta_t_shape": [
+      5,
+      20
+    ],
+    "beta_t_max_abs_delta_vs_fixed": 0.0,
+    "phase_max_abs_wrapped_delta_vs_fixed_rad": 0.0,
+    "q_hat_units": "m",
+    "q_hat_first_three_fixed_m": [
+      -1.2353758582543222e-06,
+      9.575197085765185e-08,
+      -3.3911302852725228e-06
+    ],
+    "q_hat_first_three_stateful_m": [
+      -1.2353758582543222e-06,
+      9.575197085765185e-08,
+      -3.3911302852725228e-06
+    ],
+    "q_hat_first_three_allclose": true,
+    "q_hat_max_abs_delta_m": 0.0,
+    "q_hat_rmse_delta_m": 0.0,
+    "q_hat_allclose": true
+  },
+  "accuracy_claim": false,
+  "truth_or_q_proxy_used_by_estimator": false
+}

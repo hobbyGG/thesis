@@ -1,0 +1,59 @@
+{
+  "schema": "online_geometry_loop_gauge_fix_diagnostic_summary",
+  "status": "completed",
+  "seed": 20261001,
+  "conditions": [
+    "angle_migration"
+  ],
+  "accuracy_claim": false,
+  "routes": [
+    {
+      "condition": "angle_migration",
+      "fixed_reference": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 0.00010023960223272648,
+        "rmse_mm": 0.10023960223272649,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "rolling_raw": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 1.3151923646012481e-05,
+        "rmse_mm": 0.01315192364601248,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "rolling_bias_transport": {
+        "sample_count": 200,
+        "finite_samples": 200,
+        "coverage": 1.0,
+        "rmse_m": 0.00013323025696381893,
+        "rmse_mm": 0.13323025696381893,
+        "abstain": false,
+        "abstain_reason": null
+      },
+      "fixed_reference_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": 0.39662876852328804,
+        "rms_rad": 0.41027829648412395,
+        "sample_count": 995
+      },
+      "rolling_raw_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": 0.012727337442524337,
+        "rms_rad": 0.04194944859952892,
+        "sample_count": 995
+      },
+      "rolling_transported_phase_bias": {
+        "finite_fraction": 1.0,
+        "mean_rad": 0.39429172281720287,
+        "rms_rad": 0.40767537108827273,
+        "sample_count": 995
+      }
+    }
+  ]
+}

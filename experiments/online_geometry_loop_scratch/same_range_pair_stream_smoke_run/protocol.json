@@ -1,0 +1,12 @@
+{
+  "schema": "online_geometry_loop_same_range_pair_stream_smoke_protocol",
+  "data_source": "final_v2 separated_benign same-range IQ generator, seed-specific",
+  "same_range": true,
+  "causal_window": "IQ[frame-19:frame+1]",
+  "association_key": "(range_bin, angle_track)",
+  "split_route": "two same-range angle tracks with per-track beta_t",
+  "merge_route": "one selected angle track with one beta_t",
+  "stateful_adapter": "raw/split and merge routes each consume beta_t with persistent state",
+  "truth_or_q_proxy_used_by_estimator": false,
+  "accuracy_claim": false
+}

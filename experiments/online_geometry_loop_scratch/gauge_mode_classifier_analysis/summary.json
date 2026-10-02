@@ -1,0 +1,114 @@
+{
+  "schema": "online_geometry_loop_gauge_mode_classifier_summary",
+  "status": "diagnostic_only",
+  "seeds": [
+    20261001,
+    20261002,
+    20261003
+  ],
+  "conditions": [
+    "baseline_no_drift",
+    "post_200_phase_ramp",
+    "pre_window_phase_ramp",
+    "angle_migration"
+  ],
+  "records": 12,
+  "decision_counts": {
+    "gauge_boundary_candidate": 3,
+    "stable_or_no_geometry_change": 9
+  },
+  "truth_free_estimator_copy": true,
+  "thresholds_untuned": true,
+  "accuracy_claim": false,
+  "failure_boundary": "A ramp already settled before bootstrap and a genuinely smooth migration can both produce low phase residual; classifier must abstain without slope/context features.",
+  "by_condition": {
+    "baseline_no_drift": {
+      "decision_values": [
+        "stable_or_no_geometry_change",
+        "stable_or_no_geometry_change",
+        "stable_or_no_geometry_change"
+      ],
+      "decision_counts": {
+        "stable_or_no_geometry_change": 3
+      },
+      "feature_coverage_values": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "phase_rms_mean": 0.011236034849106603,
+      "gauge_rms_mean": 0.003260744824745792,
+      "correlation_values": [
+        0.2638416124063755,
+        null,
+        0.4464651415202652
+      ]
+    },
+    "post_200_phase_ramp": {
+      "decision_values": [
+        "gauge_boundary_candidate",
+        "gauge_boundary_candidate",
+        "gauge_boundary_candidate"
+      ],
+      "decision_counts": {
+        "gauge_boundary_candidate": 3
+      },
+      "feature_coverage_values": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "phase_rms_mean": 0.26187562718933677,
+      "gauge_rms_mean": 0.25425966276183815,
+      "correlation_values": [
+        0.9966326329193439,
+        0.9973030404742749,
+        0.9950666764115781
+      ]
+    },
+    "pre_window_phase_ramp": {
+      "decision_values": [
+        "stable_or_no_geometry_change",
+        "stable_or_no_geometry_change",
+        "stable_or_no_geometry_change"
+      ],
+      "decision_counts": {
+        "stable_or_no_geometry_change": 3
+      },
+      "feature_coverage_values": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "phase_rms_mean": 0.011240496878930977,
+      "gauge_rms_mean": 0.002338473616055721,
+      "correlation_values": [
+        null,
+        null,
+        0.573452517633419
+      ]
+    },
+    "angle_migration": {
+      "decision_values": [
+        "stable_or_no_geometry_change",
+        "stable_or_no_geometry_change",
+        "stable_or_no_geometry_change"
+      ],
+      "decision_counts": {
+        "stable_or_no_geometry_change": 3
+      },
+      "feature_coverage_values": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "phase_rms_mean": 0.07643986134997592,
+      "gauge_rms_mean": 0.053086347094191605,
+      "correlation_values": [
+        -0.7280763497250021,
+        -0.7871790311733481,
+        -0.6815246623811392
+      ]
+    }
+  }
+}

@@ -1,0 +1,553 @@
+{
+  "schema": "online_geometry_diagnostic_transfer_v2",
+  "packaged_date_utc": "2026-10-02",
+  "path_base": "thesis_repository_root",
+  "source_file_count": 87,
+  "source_byte_count": 1182442,
+  "source_suffix_counts": {
+    ".md": 2,
+    ".py": 11,
+    ".json": 74
+  },
+  "manifest_self_excluded": true,
+  "excluded": [
+    "raw ADC packages",
+    "*.npy",
+    "*.npz",
+    "caches",
+    "__pycache__",
+    "binaries",
+    "secrets",
+    "Git metadata"
+  ],
+  "files": [
+    {
+      "path": "TRANSFER_README.md",
+      "size_bytes": 4488,
+      "sha256": "cc44625bd624a80271169b8f769bfdbbe54198903df441b5c9326c1c293b3144",
+      "role": "transfer_readme"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/README.md",
+      "size_bytes": 4368,
+      "sha256": "54706cdd76396419bcb4352c8eed57cf4f3ecd25d0e844f8c936658f6fec2667",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/accuracy_trial.py",
+      "size_bytes": 15577,
+      "sha256": "ac2f5b1a99c9e4a330114ea2c83ee0b871d5e5c0d067e34b2e567d1f11766a6a",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/accuracy_trial_baseline/baseline_no_drift.json",
+      "size_bytes": 3005,
+      "sha256": "1bcf5e04a8e857b26b1b5629167504314f06f1f72b6ba94332259e846dfd6cb9",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/accuracy_trial_baseline/summary.json",
+      "size_bytes": 830,
+      "sha256": "c80a4cbf871a158a48e14c0175a2e1932a0bc5376ddfd45490ed0f1646e1c093",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/accuracy_trial_drift/post_200_phase_ramp.json",
+      "size_bytes": 3215,
+      "sha256": "960d46fabb3444437f2b7d431351acda9fe47345a5467cf9adaf69ab280de5bb",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/accuracy_trial_drift/summary.json",
+      "size_bytes": 835,
+      "sha256": "1661952c7e1c459923a0619c7174f791eac95144e36fce91a69a757b86a76e22",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/association_smoke.py",
+      "size_bytes": 10353,
+      "sha256": "3a5b8249f1871d9355f00460cd1b45747f23bad7a6ba7e01d81db29e1cb61e51",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_angle_migration_multiseed_protocol.json",
+      "size_bytes": 899,
+      "sha256": "950362b3ca5f57129694beeb66ed3ea5460573119c5716edb3e65843d78e1102",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_angle_migration_multiseed_summary.json",
+      "size_bytes": 2670,
+      "sha256": "387dcb10472dbbe56b1d2a59926626068474c9fc6caa4b6bc851f652c33cd47b",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_angle_migration_seed20261001/angle_migration.json",
+      "size_bytes": 3639,
+      "sha256": "e9dda15797d554be9a03623dac6d4de38bbaa88c652fa74b06932430686f73ab",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_angle_migration_seed20261001/protocol.json",
+      "size_bytes": 754,
+      "sha256": "cb7faa6ff4c4e203e1b9a1f9f039d10736bcfc44fe683b95d221e7e39cdf8d17",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_angle_migration_seed20261001/summary.json",
+      "size_bytes": 1601,
+      "sha256": "34faa2f91edae74d09994ef76e5eb7af9944fc70fc0d84abb0480b29abfb471d",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_angle_migration_seed20261002/angle_migration.json",
+      "size_bytes": 3639,
+      "sha256": "7473bd1fc062fadd517b3394137506be6431a2c99e9d9c74e6a605da6debd4b5",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_angle_migration_seed20261002/protocol.json",
+      "size_bytes": 754,
+      "sha256": "cb7faa6ff4c4e203e1b9a1f9f039d10736bcfc44fe683b95d221e7e39cdf8d17",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_angle_migration_seed20261002/summary.json",
+      "size_bytes": 1600,
+      "sha256": "ee66f34d26abe1d2ef189c6ef9834c52db2f135ec959d66ead4f8868d579828b",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_angle_migration_seed20261003/angle_migration.json",
+      "size_bytes": 3619,
+      "sha256": "23641299ad69e47129013f1983602a6108eb9927458bb6536ab976d897f233db",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_angle_migration_seed20261003/protocol.json",
+      "size_bytes": 754,
+      "sha256": "cb7faa6ff4c4e203e1b9a1f9f039d10736bcfc44fe683b95d221e7e39cdf8d17",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_angle_migration_seed20261003/summary.json",
+      "size_bytes": 1598,
+      "sha256": "5f7e9d30b033e8125fd03a32ae26a3e6200335080925a649fd7030da4b9dbea8",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic.py",
+      "size_bytes": 18994,
+      "sha256": "5311e8248db4c8af80a41cc97591751e0db69f08a897e2985b5221971c44fe61",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_multiseed_protocol.json",
+      "size_bytes": 977,
+      "sha256": "71e667632c1697ba461e73aaf7f30a7e04b32a49ea1844fefc11f7089fad6e44",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_multiseed_summary.json",
+      "size_bytes": 8147,
+      "sha256": "a0775639d62797e2f708a88b1c33642d99e049aeaf0ebf89c775f3b8cafd7cba",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261001/baseline_no_drift.json",
+      "size_bytes": 3301,
+      "sha256": "5b4ceeeb755a5bd1e11cfd3a98b0e6360d63b3abf7c31dee0d19d5e4890f6e56",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261001/post_200_phase_ramp.json",
+      "size_bytes": 3571,
+      "sha256": "36ba6f8e0a8e12e4df761e77c08b6a3fa92b10427064c56646a568734845237e",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261001/pre_window_phase_ramp.json",
+      "size_bytes": 3479,
+      "sha256": "1afb061e4f982292c4d296383e5f8ac388e59bedc6487e3f1554d17113901f41",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261001/protocol.json",
+      "size_bytes": 663,
+      "sha256": "4075c58fc970411aa888aec83de3bc56523460631398bbc4100af54ec2801730",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261001/summary.json",
+      "size_bytes": 4499,
+      "sha256": "a6135e9d938e59379fb9dd7bb493768917b42e7b9dd561b278bcb1c14e14b77a",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261002/baseline_no_drift.json",
+      "size_bytes": 3284,
+      "sha256": "abf2d39469db0ca628c0896bf45aefc5951f8995f26977b1f392710339fb38e7",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261002/post_200_phase_ramp.json",
+      "size_bytes": 3530,
+      "sha256": "c672b707ab855305d1c8e88f585e80848698b0f59e26f8f709c392c935f330ee",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261002/pre_window_phase_ramp.json",
+      "size_bytes": 3476,
+      "sha256": "f55ea1bd08af6f2db253da793c2541f52f94bd664bf0a3e256c4f02afaa59aff",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261002/protocol.json",
+      "size_bytes": 663,
+      "sha256": "4075c58fc970411aa888aec83de3bc56523460631398bbc4100af54ec2801730",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261002/summary.json",
+      "size_bytes": 4497,
+      "sha256": "c8302f9176dfb0bcbed3643f5bc64d2be387b914a826381e736ea5f8dcf0b081",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261003/baseline_no_drift.json",
+      "size_bytes": 3267,
+      "sha256": "978f88f63b005cd33fce541ce300ad84414ac0d427d952076611b8bd402633dc",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261003/post_200_phase_ramp.json",
+      "size_bytes": 3559,
+      "sha256": "46ce474e6f5250f96b3642979eeec8445721cc61387d8a4bf09764cf7291f16b",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261003/pre_window_phase_ramp.json",
+      "size_bytes": 3479,
+      "sha256": "a30158da6d04ca6a4284262493cb42409e20455f89572fade53a839cbd4b83da",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261003/protocol.json",
+      "size_bytes": 663,
+      "sha256": "4075c58fc970411aa888aec83de3bc56523460631398bbc4100af54ec2801730",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_fix_diagnostic_seed20261003/summary.json",
+      "size_bytes": 4502,
+      "sha256": "27b97a7147a011704929cf5c0325ae5243fac71516cd5eefbfca118325c80236",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis.py",
+      "size_bytes": 11458,
+      "sha256": "11c2bfebf2fec7cd17b21eaae34793d21d902eae8dabcfe04ca60352f75c0b5f",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261001_angle_migration.json",
+      "size_bytes": 11318,
+      "sha256": "198a010d2bff653d989a66542777ab661ef5b4612077654bd5fe159edc3de6d5",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261001_baseline_no_drift.json",
+      "size_bytes": 10021,
+      "sha256": "8c5d5d360a12c4eaa47a49549460e8e1804075510c8cec88b49b58eb0557010f",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261001_post_200_phase_ramp.json",
+      "size_bytes": 11342,
+      "sha256": "41c6eb6787cd84642e04daec61fd66d2792ce1eb8078afa1f3c096e06e7203e4",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261001_pre_window_phase_ramp.json",
+      "size_bytes": 9664,
+      "sha256": "30defa2efcf4e3e3bc73efd9def0aeed8b83430bd3c64924ccef8fbad59147c7",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261002_angle_migration.json",
+      "size_bytes": 11019,
+      "sha256": "a6f5f04844a551bd4c3863e69ec1ea42795c1dc27e6f99fd946fefe37a934c11",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261002_baseline_no_drift.json",
+      "size_bytes": 9872,
+      "sha256": "e1bc97ed34fd175a6459c2e1d0fd9c5d6a84de97cceb2c7d3ceb6ee4d8f73cd6",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261002_post_200_phase_ramp.json",
+      "size_bytes": 11250,
+      "sha256": "d50bb35e33581d0bc00a2a8cdc2f58bb639390b1361988e8be6db77bd724d4ef",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261002_pre_window_phase_ramp.json",
+      "size_bytes": 9634,
+      "sha256": "bb0b182d73a6796f91c02aa08b8e2af105f35603c54359dbbfae71b5e43301b3",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261003_angle_migration.json",
+      "size_bytes": 10896,
+      "sha256": "41a9fba91a848e2f81c194ec13a705e78c80790c7384d2b1f07caf421598e324",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261003_baseline_no_drift.json",
+      "size_bytes": 9713,
+      "sha256": "49eb81b9cc6e2b9efe89e15a4de31f817dd76d6b89262eaedf4df0ac5e7a4bde",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261003_post_200_phase_ramp.json",
+      "size_bytes": 11358,
+      "sha256": "93c6e08db088035c0ff35e57cd26ed55cd3a63f27fd5e28fbe96930651f3ecd1",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/20261003_pre_window_phase_ramp.json",
+      "size_bytes": 9955,
+      "sha256": "68ea5c7c085bf3d08ce3a3d7167b9c6e9a985eddbabf933e123d8c33861bcf78",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/protocol.json",
+      "size_bytes": 436,
+      "sha256": "ec2e5be971d6719e75042991a4fa00eb8836d7aebaaa858f3b4f3bd65277f063",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_analysis/summary.json",
+      "size_bytes": 2905,
+      "sha256": "acb4dbed13ecff1fdb7e23cbf918814b921b2ea189011f5947eaaddaa0d96d02",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_classifier_design.json",
+      "size_bytes": 4778,
+      "sha256": "cd221baebc3967fff08d48bef149bba0dcbf07309068be3dcd7846b641beae73",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_routed_diagnostic.py",
+      "size_bytes": 4574,
+      "sha256": "72fd5562835c31cb6779a0a85aa8bf729a298b113e84a18b77dd15d9d165021e",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_routed_diagnostic_run/protocol.json",
+      "size_bytes": 366,
+      "sha256": "d6ef0c80d4af98ea38d4b7ec3968f0ea98204fa0051d3574af04c45cd1ba0c83",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_routed_diagnostic_run/summary.json",
+      "size_bytes": 23811,
+      "sha256": "939124ad8ecca8a8e3080244e4e123d82e0d86fd78cea073a805e07974370be3",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_routed_stream_trial.py",
+      "size_bytes": 14366,
+      "sha256": "3886f81f8093f3f9bc9c168c200763edc760a8041c52c1bd7779f5b415d0f086",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_routed_stream_trial_run/angle_migration.json",
+      "size_bytes": 59854,
+      "sha256": "e139292bbbd59f3fdd726714a52f9b54d356db6bf14fb4501c96aa5848c8146b",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_routed_stream_trial_run/baseline_no_drift.json",
+      "size_bytes": 48125,
+      "sha256": "bc9f8e1af9906872e239e2c267af9793c7b60c8e6b6e8265dfd4d24826793ed8",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_routed_stream_trial_run/post_200_phase_ramp.json",
+      "size_bytes": 62530,
+      "sha256": "92106fee9c4f1bf3ccba2d12f9797aa17f71e7662c94fae96a3986941a8f9260",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_routed_stream_trial_run/protocol.json",
+      "size_bytes": 646,
+      "sha256": "0dbd364b920204169fe33eb88e645849c980f4a2dff54a611610e7088c2e3c19",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/gauge_mode_routed_stream_trial_run/summary.json",
+      "size_bytes": 200939,
+      "sha256": "0b6fd0989054d989460b46173b319b7e0a735f0b8110733af29de6313d5da25b",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/guard_ablation_baseline/baseline_no_drift.json",
+      "size_bytes": 52167,
+      "sha256": "59641c5a093c28827156c324eb4694edafe4fbb90b184cbbab6ed84a85106fbc",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/guard_ablation_baseline/summary.json",
+      "size_bytes": 1207,
+      "sha256": "606f9a85a481bd9b16043fc4e26d071792323af69eb225cdb53448460639d4cb",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/guard_ablation_drift/post_200_phase_ramp.json",
+      "size_bytes": 52077,
+      "sha256": "43ad6a761aebbca954084c82e0187c250158f58394c65c3b88fe260258b9afa4",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/guard_ablation_drift/summary.json",
+      "size_bytes": 1210,
+      "sha256": "b812d25e804b14bad387e569bb8dd87d1350537b616b27555d5b90cb15ffc567",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/guard_ablation_trial.py",
+      "size_bytes": 13194,
+      "sha256": "0d5624e2f3541ee5066d42d0cd9ee1e7f77b5392586a44919af7578733333dad",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/online_geometry_loop.py",
+      "size_bytes": 12956,
+      "sha256": "7e56ecbc05e1ba701c13fc9389ef67d987fc9f9f8c2ccae72cb9d0d8eac7ce89",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/protocol.json",
+      "size_bytes": 4378,
+      "sha256": "0ab087772b614c64063a3b0657b5bee22b5950ca60df8364fb30dee88f214dd7",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/same_range_pair_stream_smoke.py",
+      "size_bytes": 14175,
+      "sha256": "cd1afc9b044defb81048027458ba8face5938c34e5c21fd69fb68e9e482d40bd",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/same_range_pair_stream_smoke_run/association_trace.json",
+      "size_bytes": 93779,
+      "sha256": "5675432cf23e85e196c0e81ad9e6df060466acdf517ef31bf0e5398dc392dc54",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/same_range_pair_stream_smoke_run/protocol.json",
+      "size_bytes": 575,
+      "sha256": "28166e9c9cf2f7390ee8a777f967bfdf07625284e571d3f408059b0b4961ec32",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/same_range_pair_stream_smoke_run/smoke_report.json",
+      "size_bytes": 27063,
+      "sha256": "29fe0cf6f1ea0301fff929eefd5619336b3b067ff0f50b99ba646c5b5e8e61a3",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/same_range_pair_stream_smoke_run/stateful_route_trace.json",
+      "size_bytes": 22841,
+      "sha256": "5a45fd59e8063b2c9f035d8630dd8313ecf103d89d2c44f73e7fbfa60a19cace",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/smoke_association/association_trace.json",
+      "size_bytes": 53927,
+      "sha256": "9a6ebfb77c53aa1a8b3e230ee737d9913311c87721c437110f3cf0f2f05df7ea",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/smoke_association/smoke_report.json",
+      "size_bytes": 1900,
+      "sha256": "7bf57fe8441ddb2fa271b3a7612fc6c2e6a40e829dea9e2c8d72d88c0ef5c8f3",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/smoke_association/stable_beta_slots.json",
+      "size_bytes": 10578,
+      "sha256": "36b201fb3cde8c356c9987231f0ae8d807b29da728d46e7bd335efd977542f87",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/smoke_baseline/protocol.json",
+      "size_bytes": 2290,
+      "sha256": "26db710c7cad2c7c4892798ce18ea8f094f101cd71afc88fda4bfcbd1245cf9a",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/smoke_baseline/rolling_geometry.json",
+      "size_bytes": 22855,
+      "sha256": "a35dfd6f017c341f1145c1704ebd004f6584a42d9f68b32bb5a202228c1d1aed",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/smoke_baseline/smoke_report.json",
+      "size_bytes": 1512,
+      "sha256": "7b2d2b554346cbaf93ad9e2384712a2a3f0e57811d9faea5e3d6080b1dcdd8b9",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/smoke_perturbed/protocol.json",
+      "size_bytes": 2290,
+      "sha256": "26db710c7cad2c7c4892798ce18ea8f094f101cd71afc88fda4bfcbd1245cf9a",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/smoke_perturbed/rolling_geometry.json",
+      "size_bytes": 17947,
+      "sha256": "ce53005ef66baa31830089ba3b085ae912873692b6d4d7268fd6f892d3dbc4c7",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/smoke_perturbed/smoke_report.json",
+      "size_bytes": 1541,
+      "sha256": "437270f7c6bc99250736f73e7d3ef806f3665217dd9c969d21a4c0b918efe006",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/smoke_stateful_baseline/smoke_report.json",
+      "size_bytes": 1242,
+      "sha256": "925b81d6015de749dd1a2765105dc86eb605921990f5876720f2826077877b31",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/smoke_stateful_baseline/stateful_trace.json",
+      "size_bytes": 6728,
+      "sha256": "ce91bcb5d3ab8b130d49b9b1a193bfa76dc9ad5ba7b83c1f27a9e79ba8b7b9c9",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/stateful_kalman_adapter.py",
+      "size_bytes": 10746,
+      "sha256": "b5c804119cbc9b6cf6f17de8806930cdca371be50dc844e1e2052f8c9978889b",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "experiments/online_geometry_loop_scratch/stateful_kalman_smoke.py",
+      "size_bytes": 9938,
+      "sha256": "aa1b2b73fc9fa481c042315ba40df9ea9c9cfdc018f23bbe7c58ad10924d9cae",
+      "role": "source_snapshot"
+    },
+    {
+      "path": "manuscript_plan.md",
+      "size_bytes": 48235,
+      "sha256": "eaa61f81ece6cb29dca7dd965200c1a22efa6668663d3bd6c15c8de5e944aba6",
+      "role": "source_snapshot"
+    }
+  ]
+}

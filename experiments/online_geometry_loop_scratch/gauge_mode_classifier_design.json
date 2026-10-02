@@ -1,0 +1,118 @@
+{
+  "schema": "online_geometry_loop_gauge_mode_classifier_design",
+  "status": "design_only_no_classifier_run",
+  "accuracy_claim": false,
+  "truth_free_features": true,
+  "purpose": "Distinguish an abrupt steering-gauge boundary from a genuine smooth angle migration before applying centroid bias transport",
+  "bootstrap_features": {
+    "u_t": "sin(refined AoA_t)",
+    "gauge_prediction_t": "-2*pi*mean(array_position_wavelengths)*(u_t-u_0)",
+    "phase_residual_t": "angle(exp(1j*(phase_t-phase_0)))",
+    "aoa_step_consistency": "robust median and MAD of per-slot |u_t-u_{t-1}| over t=1..19",
+    "phase_rms": "RMS phase_residual_t over t=1..19",
+    "gauge_rms": "RMS gauge_prediction_t over t=1..19",
+    "residual_gauge_corr": "correlation(phase_residual_t,gauge_prediction_t) over t=1..19 when both vary",
+    "slope_curvature": "linear slope and residual curvature of u_t over first 20 outputs"
+  },
+  "provisional_decision_rule": {
+    "gauge_boundary_candidate": "gauge_rms>=0.10 rad AND phase_rms>=0.10 rad AND residual_gauge_corr>=0.70",
+    "tracked_or_settled_geometry_change": "gauge_rms>=0.10 rad AND phase_rms<0.10 rad; do not transport",
+    "stable_or_no_geometry_change": "gauge_rms<0.10 rad AND phase_rms<0.10 rad",
+    "ambiguous": "otherwise; abstain from transport and retain raw phase",
+    "threshold_status": "provisional engineering diagnostic, not fitted or validated"
+  },
+  "offline_existing_data_proxies": [
+    {
+      "condition": "baseline",
+      "source_files": "gauge_fix_diagnostic_seed{seed}/baseline_no_drift.json",
+      "full_horizon_proxies": [
+        {
+          "seed": 20261001,
+          "gauge_rms_full": 0.009220069334490962,
+          "phase_raw_rms_full": 0.015091831542499996
+        },
+        {
+          "seed": 20261002,
+          "gauge_rms_full": 0.0,
+          "phase_raw_rms_full": 0.009885028264038804
+        },
+        {
+          "seed": 20261003,
+          "gauge_rms_full": 0.0,
+          "phase_raw_rms_full": 0.012655315325503973
+        }
+      ]
+    },
+    {
+      "condition": "post_200",
+      "source_files": "gauge_fix_diagnostic_seed{seed}/post_200_phase_ramp.json",
+      "full_horizon_proxies": [
+        {
+          "seed": 20261001,
+          "gauge_rms_full": 0.42471295285970223,
+          "phase_raw_rms_full": 0.41751807833338256
+        },
+        {
+          "seed": 20261002,
+          "gauge_rms_full": 0.4192738600080328,
+          "phase_raw_rms_full": 0.4107037911756995
+        },
+        {
+          "seed": 20261003,
+          "gauge_rms_full": 0.41656169402041765,
+          "phase_raw_rms_full": 0.42305506568667123
+        }
+      ]
+    },
+    {
+      "condition": "pre_window",
+      "source_files": "gauge_fix_diagnostic_seed{seed}/pre_window_phase_ramp.json",
+      "full_horizon_proxies": [
+        {
+          "seed": 20261001,
+          "gauge_rms_full": 0.0,
+          "phase_raw_rms_full": 0.010904907791903727
+        },
+        {
+          "seed": 20261002,
+          "gauge_rms_full": 0.0,
+          "phase_raw_rms_full": 0.009607497517113876
+        },
+        {
+          "seed": 20261003,
+          "gauge_rms_full": 0.0,
+          "phase_raw_rms_full": 0.010377962517028164
+        }
+      ]
+    },
+    {
+      "condition": "angle_migration",
+      "source_files": "gauge_fix_angle_migration_seed{seed}/angle_migration.json",
+      "full_horizon_proxies": [
+        {
+          "seed": 20261001,
+          "gauge_rms_full": 0.4453292428049532,
+          "phase_raw_rms_full": 0.04194944859952892
+        },
+        {
+          "seed": 20261002,
+          "gauge_rms_full": 0.4398873939775645,
+          "phase_raw_rms_full": 0.0454979755151983
+        },
+        {
+          "seed": 20261003,
+          "gauge_rms_full": 0.4371734763014038,
+          "phase_raw_rms_full": 0.047611666394136096
+        }
+      ]
+    }
+  ],
+  "offline_separability_observed": "Full-horizon proxies separate post_200 (gauge~0.42, phase~0.42) from angle_migration (gauge~0.44, phase~0.045) and stable/pre_window (phase~0.01); first-20 AoA/correlation features were not persisted, so this is not a classifier result.",
+  "failure_boundaries": [
+    "A ramp completed before bootstrap (pre_window) is indistinguishable from a settled geometry change using first-window residual alone.",
+    "Target-specific angle migration or target association changes can mix gauge and physical angle effects.",
+    "Large AoA noise, phase wraps, or missing slots can make residual_gauge_corr undefined.",
+    "A real motion-induced phase change can correlate with geometry by coincidence; no truth input may resolve that."
+  ],
+  "next_minimal_recording": "Persist first-20 per-slot u_t, phase_residual_t, gauge_prediction_t, robust slope/MAD and correlation; then evaluate rule without truth."
+}

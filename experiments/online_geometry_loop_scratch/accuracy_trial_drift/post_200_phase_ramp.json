@@ -1,0 +1,124 @@
+{
+  "schema": "online_geometry_loop_accuracy_trial",
+  "status": "completed",
+  "condition": "post_200_phase_ramp",
+  "seed": 20261001,
+  "radar_test_frames": [
+    200,
+    399
+  ],
+  "estimator_input": {
+    "truth_present": false,
+    "paper_response_metadata_present": false,
+    "capture_truth_loaded": false,
+    "q_proxy_present": false,
+    "truth_used_by_estimator": false,
+    "q_proxy_used_by_estimator": false
+  },
+  "guard": {
+    "calibration_source_only": true,
+    "frozen_test": {
+      "test_frame_range": [
+        200,
+        399
+      ],
+      "test_adxl_sample_count": 2000,
+      "finite_test_capture_arrays": true,
+      "test_radar_time_monotonic": true,
+      "adc_within_frozen_limit": true,
+      "acceleration_within_frozen_limit": true,
+      "passed": true
+    }
+  },
+  "truth_reference_post_run": {
+    "reference_m": 0.0,
+    "sample_count": 200,
+    "not_passed_to_estimator": true
+  },
+  "p1_frozen": {
+    "route": "calibration frames 0:199; retained run_calibration_only on test 200:399",
+    "elapsed_s": 0.30167139299737755,
+    "score": {
+      "sample_count": 200,
+      "finite_samples": 200,
+      "coverage": 1.0,
+      "rmse_m": 1.1004644343581268e-06,
+      "rmse_mm": 0.001100464434358127,
+      "abstain": false,
+      "abstain_reason": null
+    },
+    "beta_source": "calibration-frozen angle geometry",
+    "target_count": 5
+  },
+  "causal_rolling_stateful": {
+    "route": "20-frame causal rolling geometry; stateful beta_t adapter on frames 200:399",
+    "elapsed_s": 10.54078327199386,
+    "score": {
+      "sample_count": 200,
+      "finite_samples": 200,
+      "coverage": 1.0,
+      "rmse_m": 0.00013652882874322145,
+      "rmse_mm": 0.13652882874322145,
+      "abstain": false,
+      "abstain_reason": null
+    },
+    "state_sample_index": 200,
+    "state_continuous": true,
+    "target_slots": {
+      "slot_key": "range_bin (unique in this synthetic condition)",
+      "baseline_range_bins": [
+        230,
+        246,
+        253,
+        238,
+        232
+      ],
+      "range_slot_mismatch_rows": 0,
+      "target_count_first": 5,
+      "target_count_last": 5
+    },
+    "beta_first": [
+      1.001042448096848,
+      1.0710380443840164,
+      1.105454372967133,
+      1.0380075481272053,
+      1.0140046153356903
+    ],
+    "beta_last": [
+      1.0035786895848204,
+      1.0894757356147737,
+      1.1295469744902076,
+      1.0506962764579546,
+      1.0214265146127974
+    ],
+    "beta_max_abs_change": 0.024092601523074686,
+    "angle_first_deg": [
+      2.615027733951205,
+      20.985090423763644,
+      25.2298100169401,
+      15.552723840863301,
+      9.533543904287853
+    ],
+    "angle_last_deg": [
+      4.840085898250221,
+      23.38296442684033,
+      27.710222049251563,
+      17.87100401890347,
+      11.75633502152017
+    ],
+    "angle_max_abs_change_deg": 2.480412032311463,
+    "rolling_target_count_min": 5,
+    "rolling_target_count_max": 5
+  },
+  "accuracy_claim": false,
+  "condition_input": {
+    "enabled": true,
+    "frame_range": [
+      200,
+      399
+    ],
+    "delta_sin": 0.04,
+    "operation": "adc_virtual_rx *= exp(+2 pi j * position_wavelength * delta_sin)",
+    "truth_q_proxy_or_paper_metadata_modified": false
+  }
+}

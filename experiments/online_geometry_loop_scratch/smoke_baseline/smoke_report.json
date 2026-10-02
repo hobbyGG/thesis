@@ -1,0 +1,59 @@
+{
+  "schema": "online_geometry_loop_scratch_report",
+  "status": "smoke_passed",
+  "scope": "geometry_and_beta_update_only",
+  "window_frames": 20,
+  "output_frames": 20,
+  "seed": 20261001,
+  "requested_rms_mm": 0.0,
+  "perturbation": {
+    "enabled": false
+  },
+  "first_output_frame": 19,
+  "estimator_input": {
+    "truth_present": false,
+    "paper_response_metadata_present": false,
+    "capture_truth_loaded": false,
+    "q_proxy_present": false,
+    "estimator_root_sha256": "bb46c4431bb40e8de39f9f24fda84c8f202ebabb3288615ffa95c99b774fd88f"
+  },
+  "causal_checks": {
+    "all_windows_size_20": true,
+    "all_windows_end_at_current_frame": true,
+    "future_frame_count_zero": true,
+    "first_frame": 19,
+    "last_frame": 38
+  },
+  "online_geometry": {
+    "geometry_updates": 20,
+    "geometry_hash_changes": 0,
+    "beta_first": [
+      1.001042448096848,
+      1.0702161574169302,
+      1.1043786570174754,
+      1.0374477035439045,
+      1.0136828235657447
+    ],
+    "beta_last": [
+      1.001042448096848,
+      1.0702161574169302,
+      1.1043786570174754,
+      1.0374477035439045,
+      1.0136828235657447
+    ],
+    "beta_abs_delta_first_to_last": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "max_beta_abs_delta": 0.0,
+    "all_beta_finite": true,
+    "all_current_phase_available_finite": true
+  },
+  "kalman": {
+    "run": false,
+    "reason": "tracked run_fixed_beta_kalman accepts one beta vector for a whole run; online beta_t requires a stateful step API"
+  }
+}
