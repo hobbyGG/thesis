@@ -1,0 +1,18 @@
+{
+  "schema": "thesis.algorithm-result",
+  "schema_version": 1,
+  "input_package": "spatial_recovery_rebuilt/validation_7200_7239/_work/low_motion_0p005mm__seed7229/capture",
+  "result_file": "algorithm_result.npz",
+  "method": "fixed_geometry_beta_structural_kalman",
+  "radar_mode": "frame",
+  "radar_samples": 400,
+  "radar_frames": 400,
+  "adxl_samples": 4000,
+  "selected_targets": 5,
+  "target_detection": {
+    "candidate_count": 5,
+    "strongest_magnitude": 0.23544542914207003
+  },
+  "truth_rmse_m": 1.1297851919466747e-06,
+  "truth_rmse_frame_grid_m": 1.1297851919466747e-06
+}

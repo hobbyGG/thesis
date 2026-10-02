@@ -1,0 +1,19 @@
+{
+  "stratum": "low_motion_0p020mm",
+  "seed": 7226,
+  "requested_q_true_rms_mm": 0.02,
+  "q_true_rms_m": 2e-05,
+  "q_proxy_rms_m": 1.931851652578137e-05,
+  "q_true_rms_mm": 0.02,
+  "q_proxy_rms_mm": 0.019318516525781367,
+  "q_true_rms_calibration_m": 2e-05,
+  "q_true_rms_test_m": 2e-05,
+  "q_proxy_rms_calibration_m": 1.931851652578137e-05,
+  "q_proxy_rms_test_m": 1.931851652578137e-05,
+  "q_true_max_abs_m": 2.8284271247461902e-05,
+  "q_proxy_max_abs_m": 2.7320508075688776e-05,
+  "reference_samples": 12000,
+  "radar_frames": 400,
+  "calibration_frames": 200,
+  "test_frames": 200
+}

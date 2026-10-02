@@ -1,0 +1,14 @@
+{
+  "radar_schema": true,
+  "radar_complete": true,
+  "radar_frames_400": true,
+  "adc_shape": true,
+  "adc_is_loop_mean": true,
+  "radar_rate_100_hz": true,
+  "frame_time_count": true,
+  "adxl_4000": true,
+  "adxl_time_monotonic": true,
+  "sync_time_monotonic": true,
+  "truth_reference_count": true,
+  "proxy_shape": true
+}

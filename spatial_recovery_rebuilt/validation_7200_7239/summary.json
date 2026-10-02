@@ -1,0 +1,73 @@
+{
+  "schema": "spatial_recovery_rebuilt.matrix_summary",
+  "protocol": "rebuilt_protocol",
+  "claims_parity_with_lost_workspace": false,
+  "seed_range": [
+    7200,
+    7239
+  ],
+  "strata": [
+    "stationary",
+    "low_motion_0p005mm",
+    "low_motion_0p010mm",
+    "low_motion_0p020mm",
+    "low_motion_0p050mm"
+  ],
+  "trial_count": 200,
+  "expected_trial_count": 200,
+  "accepted_trials": 191,
+  "rejected_or_error_trials": 9,
+  "acceptance_coverage": 0.955,
+  "sample_coverage_with_abstentions_as_zero": 0.955,
+  "accepted_only_rmse_m_pooled": 1.455937467663569e-06,
+  "accepted_only_rmse_m_mean_of_trials": 1.39963648565622e-06,
+  "abstention_as_failure_successes": 191,
+  "abstention_as_failure_success_rate": 0.955,
+  "rejection_reason_counts": {
+    "frozen_test_guard:RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}": 9
+  },
+  "by_stratum": {
+    "stationary": {
+      "trials": 40,
+      "accepted": 38,
+      "acceptance_coverage": 0.95,
+      "accepted_only_rmse_m_mean": 1.1290418804356915e-06,
+      "abstention_as_failure_success_rate": 0.95
+    },
+    "low_motion_0p005mm": {
+      "trials": 40,
+      "accepted": 38,
+      "acceptance_coverage": 0.95,
+      "accepted_only_rmse_m_mean": 1.149833703277957e-06,
+      "abstention_as_failure_success_rate": 0.95
+    },
+    "low_motion_0p010mm": {
+      "trials": 40,
+      "accepted": 38,
+      "acceptance_coverage": 0.95,
+      "accepted_only_rmse_m_mean": 1.196736620233651e-06,
+      "abstention_as_failure_success_rate": 0.95
+    },
+    "low_motion_0p020mm": {
+      "trials": 40,
+      "accepted": 38,
+      "acceptance_coverage": 0.95,
+      "accepted_only_rmse_m_mean": 1.3572886563684263e-06,
+      "abstention_as_failure_success_rate": 0.95
+    },
+    "low_motion_0p050mm": {
+      "trials": 40,
+      "accepted": 39,
+      "acceptance_coverage": 0.975,
+      "accepted_only_rmse_m_mean": 2.1456496427779592e-06,
+      "abstention_as_failure_success_rate": 0.975
+    }
+  },
+  "definition": {
+    "acceptance": "package contract and calibration-frozen observable-data guards pass; then retained algorithm completes",
+    "sample_coverage": "finite q_hat test samples divided by all possible test samples; rejected trials contribute zero",
+    "accepted_only_rmse": "pooled frozen-test RMSE over accepted trials after the algorithm's 0.20 s truth reference centering",
+    "abstention_as_failure_success": "accepted trial with finite frozen-test q_hat; every rejection/abstention counts as failure"
+  },
+  "completed_at": "2026-10-01T23:38:16.785484+00:00"
+}

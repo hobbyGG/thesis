@@ -1,0 +1,32 @@
+{
+  "schema": "spatial_recovery_rebuilt.artifact_manifest",
+  "status": "complete",
+  "claims_parity_with_lost_workspace": false,
+  "root": "/Users/umep/thesis/spatial_recovery_rebuilt/validation_7200_7239",
+  "trial_count": 200,
+  "accepted_count": 191,
+  "rejected_count": 9,
+  "retained_capture_packages": 0,
+  "retained_smoke_path": "/Users/umep/thesis/spatial_recovery_rebuilt/smoke",
+  "files": {
+    "run_manifest": "run_manifest.json",
+    "progress": "progress.json",
+    "protocol": "protocol.json",
+    "summary": "summary.json",
+    "metric_reference_audit": "metric_reference_audit.json",
+    "trial_metrics": "trial_metrics.csv",
+    "rejections": "rejections.json",
+    "provenance": "provenance.json",
+    "trial_records": "trials/*/trial.json",
+    "trial_rms_logs": "trials/*/rms_log.json",
+    "trial_guards": "trials/*/guards.json",
+    "trial_contracts": "trials/*/package_contract.json",
+    "trial_algorithm_summaries": "trials/*/algorithm_summary.json",
+    "trial_errors": "trials/*/test_errors.npy",
+    "trial_metrics_21frame": "trial_metrics_21frame.csv",
+    "summary_21frame_reference": "summary_21frame_reference.json",
+    "independent_audit_json": "independent_audit.json",
+    "independent_audit_csv": "independent_audit_by_stratum.csv",
+    "independent_audit_report": "independent_audit_report.md"
+  }
+}

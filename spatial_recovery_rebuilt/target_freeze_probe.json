@@ -1,0 +1,107 @@
+{
+  "schema": "spatial_recovery_rebuilt.target_freeze_probe",
+  "status": "completed",
+  "source_package": "/Users/umep/thesis/spatial_recovery_rebuilt/smoke/capture_low_motion_0p005mm_seed20261001",
+  "truth_present_in_estimator_copies": false,
+  "perturbation": {
+    "frames_changed": [
+      200,
+      399
+    ],
+    "frames_unchanged": [
+      0,
+      199
+    ],
+    "channel_steering_angle_deg": 40.0,
+    "amplitude_multiplier": 20.0,
+    "interpretation": "diagnostic-only post-test perturbation; not a physical model"
+  },
+  "first_200_exactly_unchanged": true,
+  "baseline_adc_sha256": "bb031cfb3153e37704e92b80ef9a0cff5f92f045b00c081345677760a1e0a354",
+  "perturbed_adc_sha256": "0c5034b4b4eb4dbde64840d9508c47b5df0c1553cff7b74edb1e3e8930d44a48",
+  "baseline_frontend": {
+    "candidate_count": 5,
+    "selected_indices": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "range_bins": [
+      230,
+      246,
+      253,
+      238,
+      232
+    ],
+    "angle_bins": [
+      34,
+      44,
+      46,
+      41,
+      37
+    ],
+    "angle_deg": [
+      2.615027733951205,
+      20.870073452494555,
+      25.111109363104106,
+      15.441241234313447,
+      9.424627128185314
+    ],
+    "measured_beta": [
+      1.001042448096848,
+      1.0702161574169304,
+      1.1043786570174754,
+      1.0374477035439045,
+      1.0136828235657447
+    ],
+    "target_count": 5
+  },
+  "perturbed_frontend": {
+    "candidate_count": 5,
+    "selected_indices": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "range_bins": [
+      230,
+      246,
+      246,
+      253,
+      232
+    ],
+    "angle_bins": [
+      54,
+      0,
+      63,
+      2,
+      58
+    ],
+    "angle_deg": [
+      43.432536557789774,
+      -56.51185449882848,
+      87.43744126687686,
+      -68.80501796916552,
+      53.79172452314434
+    ],
+    "measured_beta": [
+      1.3770607453181927,
+      1.812367602887074,
+      22.36627204212917,
+      2.7659233705831467,
+      1.6928430587590528
+    ],
+    "target_count": 5
+  },
+  "changed_frontend_fields": [
+    "range_bins",
+    "angle_bins",
+    "angle_deg",
+    "measured_beta"
+  ],
+  "conclusion": "target/angle/beta output changes after a test-half-only perturbation, so the current RA frontend is not frozen to calibration frames"
+}

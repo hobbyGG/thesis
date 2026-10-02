@@ -1,0 +1,70 @@
+{
+  "schema": "spatial_recovery_rebuilt.ro_allchannel_blocker",
+  "status": "blocked_missing_safe_reusable_implementation",
+  "audit_mode": "read_only",
+  "full_run_started": false,
+  "pair_smoke_started": false,
+  "design_only_input_isolation_smoke": {
+    "started": true,
+    "estimator_invoked": false,
+    "result": "blocked_missing_route",
+    "artifact": "spatial_recovery_rebuilt/ro_allchannel/input_isolation_smoke.json"
+  },
+  "tracked_source_modified": false,
+  "current_entrypoint": {
+    "file": "algorithm/run.py",
+    "lines": [14, 106],
+    "radar_modes": ["frame", "chirp"],
+    "method": "fixed_geometry_beta_structural_kalman"
+  },
+  "current_common_route": {
+    "file": "algorithm/io.py",
+    "lines": [98, 126],
+    "steps": [
+      "range_angle_process",
+      "angle-map target detection",
+      "target extraction",
+      "target selection",
+      "native-time ADXL preintegration"
+    ],
+    "ro_all_channel_present": false
+  },
+  "historical_candidates": [
+    {
+      "git_revision": "d47e800^",
+      "path": "simulation/phase1/ma2026/rangebin.py",
+      "symbol": "rangebin_input_from_range_fft",
+      "reason_rejected": "selects strongest single RX per range bin; not all-channel and no beta estimator"
+    },
+    {
+      "git_revision": "d47e800^",
+      "path": "simulation/phase1/scenario_inputs.py",
+      "symbol": "range_bin_only_mixed_input",
+      "reason_rejected": "selects one RX and derives beta from an angle map"
+    },
+    {
+      "git_revision": "d47e800^",
+      "path": "simulation/phase1/baselines.py",
+      "symbols": ["estimate_range_bin_itoh", "estimate_range_bin_only_mixed_phase"],
+      "reason_rejected": "deleted legacy RadarAlgorithmInput/Phase1Config and structural-Kalman contracts"
+    }
+  ],
+  "missing_contract": [
+    "all-virtual-channel range-only combine",
+    "range-only target selection and target-count semantics",
+    "beta source independent of angle geometry and truth/q_proxy",
+    "matched-backend phase/unwrap and measurement-variance equations",
+    "current capture-package adapter output shape and route entry point",
+    "strict metadata whitelist excluding source target bins/angles/SNR, array positions, and angle_bins",
+    "correlated eight-channel observation covariance or declared combine",
+    "calibration-only phase bias/initial-R policy and signed-beta provenance"
+  ],
+  "source_sha256": {
+    "algorithm/run.py": "d2712e2947e0a763215cd97990a7cf52ed3e54283362a2033f561bf99db6affe",
+    "algorithm/io.py": "3d4b96a1147b0cabfc19ec909eb422dcd439c85e00a23e8ddcf60f0fe1f317ab",
+    "algorithm/frontend.py": "c2e0b276951f7fb815a1ca841ad06a78f9381dea68281459fc0d93fc3cd855ec",
+    "algorithm/kalman.py": "d75ac341885eaad2935556d461da85f479723d551c895c6e0f3b49e458ac2ee4",
+    "paper_bridge_simulation/package_builder.py": "9b2305687120a76ed9cf2257e6c384a4f2fc8138e733a04c4bf232ae45880407"
+  },
+  "decision": "Do not create a scratch RO estimator or pair smoke until a real range-only all-channel implementation and its data contract are supplied; the design-only input isolation smoke may remain as a fence check."
+}

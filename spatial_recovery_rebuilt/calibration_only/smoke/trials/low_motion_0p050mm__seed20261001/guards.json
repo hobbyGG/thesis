@@ -1,0 +1,27 @@
+{
+  "guards": {
+    "source": "calibration_capture_arrays_only",
+    "frozen_before_test": true,
+    "calibration_frame_range": [
+      0,
+      199
+    ],
+    "calibration_adxl_sample_count": 2000,
+    "finite_calibration": true,
+    "adc_abs_limit": 1.2766489386558533,
+    "acceleration_abs_limit_mps2": 0.02570118123317602,
+    "time_monotonic_required": true
+  },
+  "frozen_test": {
+    "test_frame_range": [
+      200,
+      399
+    ],
+    "test_adxl_sample_count": 2000,
+    "finite_test_capture_arrays": true,
+    "test_radar_time_monotonic": true,
+    "adc_within_frozen_limit": true,
+    "acceleration_within_frozen_limit": true,
+    "passed": true
+  }
+}

@@ -1,0 +1,187 @@
+{
+  "schema": "spatial_recovery_rebuilt.calibration_only_trial",
+  "stratum": "low_motion_0p020mm",
+  "requested_q_true_rms_mm": 0.02,
+  "seed": 20261001,
+  "radar_frames": 400,
+  "calibration_frames": 200,
+  "test_frames": 200,
+  "estimator_input_audit": {
+    "truth_present": false,
+    "paper_response_metadata_present": false,
+    "truth_used_by_estimator": false,
+    "q_proxy_used_by_estimator": false
+  },
+  "score_reference": {
+    "definition": "truth interpolated on full physical radar frame grid; mean where elapsed <= 0.20 s",
+    "warm_reference_sample_count": 21,
+    "test_score_frames": [
+      200,
+      399
+    ],
+    "truth_used_post_run_only": true
+  },
+  "guards": {
+    "guards": {
+      "source": "calibration_capture_arrays_only",
+      "frozen_before_test": true,
+      "calibration_frame_range": [
+        0,
+        199
+      ],
+      "calibration_adxl_sample_count": 2000,
+      "finite_calibration": true,
+      "adc_abs_limit": 1.2767328321933746,
+      "acceleration_abs_limit_mps2": 0.025699898014647685,
+      "time_monotonic_required": true
+    },
+    "frozen_test": {
+      "test_frame_range": [
+        200,
+        399
+      ],
+      "test_adxl_sample_count": 2000,
+      "finite_test_capture_arrays": true,
+      "test_radar_time_monotonic": true,
+      "adc_within_frozen_limit": true,
+      "acceleration_within_frozen_limit": true,
+      "passed": true
+    }
+  },
+  "calibration_adc_sha256": "44803b60e285c39d6a712197a1cf4f580ec793457572c009e517f8f54b0c690a",
+  "calibration_adxl_sha256": "4a73cb32bb4d6cc6cf4c833be955f783bab7b74d351005261b8898fb0e6b9453",
+  "estimator_input_manifest": [
+    "radar/algorithm_input/adc_cube.npy",
+    "radar/algorithm_input/chirp_cube.npy",
+    "radar/algorithm_input/manifest.json",
+    "adxl355/algorithm_input/acceleration_mps2.npy",
+    "adxl355/algorithm_input/estimated_sample_monotonic_ns.npy",
+    "sync/manifest.json",
+    "sync/timeline.json",
+    "sync/*.npy"
+  ],
+  "full_window_route": {
+    "method": "fixed_geometry_beta_structural_kalman",
+    "geometry_source_frames": [
+      0,
+      399
+    ],
+    "kalman_input_frames": [
+      0,
+      399
+    ],
+    "geometry": {
+      "candidate_count": 5,
+      "target_count": 5,
+      "selected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "range_bins": [
+        230,
+        246,
+        253,
+        238,
+        232
+      ],
+      "angle_bins": [
+        34,
+        44,
+        46,
+        41,
+        37
+      ],
+      "angle_deg": [
+        2.615027733951205,
+        20.870073452494555,
+        25.111109363104106,
+        15.441241234313447,
+        9.424627128185314
+      ],
+      "measured_beta": [
+        1.001042448096848,
+        1.0702161574169304,
+        1.1043786570174754,
+        1.0374477035439045,
+        1.0136828235657447
+      ]
+    },
+    "test_rmse_m": 1.2979553295393069e-06,
+    "estimator_samples": 400
+  },
+  "calibration_only_route": {
+    "method": "fixed_geometry_beta_structural_kalman",
+    "geometry": {
+      "candidate_count": 5,
+      "target_count": 5,
+      "selected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "range_bins": [
+        230,
+        246,
+        253,
+        238,
+        232
+      ],
+      "angle_bins": [
+        34,
+        44,
+        46,
+        41,
+        37
+      ],
+      "angle_deg": [
+        2.615027733951205,
+        20.870073452494555,
+        25.111109363104106,
+        15.441241234313447,
+        9.424627128185314
+      ],
+      "measured_beta": [
+        1.001042448096848,
+        1.0702161574169304,
+        1.1043786570174754,
+        1.0374477035439045,
+        1.0136828235657447
+      ]
+    },
+    "geometry_source": "frames_0_199_only",
+    "test_observation_source": "frames_200_399_only",
+    "test_adxl_source": "samples_at_or_after_test_start_only",
+    "kalman_input_frames": [
+      200,
+      399
+    ],
+    "fresh_kalman_state": true,
+    "test_rmse_m": 1.2884583941499654e-06,
+    "estimator_samples": 200
+  },
+  "geometry_equal_between_routes": true,
+  "truth_used_by_estimator": false,
+  "q_proxy_used_by_estimator": false,
+  "trial_id": "low_motion_0p020mm__seed20261001",
+  "package_sha256": "2520c274664d07f8312196c1b075c7d7020c816950baa847cefea8636578a380",
+  "package_contract": {
+    "radar_schema": true,
+    "radar_complete": true,
+    "radar_frames_400": true,
+    "adc_shape": true,
+    "adc_is_loop_mean": true,
+    "radar_rate_100_hz": true,
+    "frame_time_count": true,
+    "adxl_4000": true,
+    "adxl_time_monotonic": true,
+    "sync_time_monotonic": true,
+    "truth_reference_count": true,
+    "proxy_shape": true
+  },
+  "frozen_test_guard_passed": true
+}

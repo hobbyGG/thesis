@@ -1,0 +1,41 @@
+{
+  "schema": "spatial_recovery_rebuilt.ro_input_isolation_smoke",
+  "status": "passed",
+  "estimator_executed": false,
+  "source_package": "/Users/umep/thesis/spatial_recovery_rebuilt/smoke/capture_low_motion_0p005mm_seed20261001",
+  "truth_present_in_estimator_copy": false,
+  "paper_response_metadata_present_in_estimator_copy": false,
+  "forbidden_truth_or_proxy_paths": [],
+  "raw_shapes": {
+    "adc_cube": [
+      400,
+      8,
+      256
+    ],
+    "chirp_cube": [
+      400,
+      16,
+      8,
+      256
+    ],
+    "adxl": [
+      4000,
+      3
+    ]
+  },
+  "raw_hashes": {
+    "adc_cube": "bb031cfb3153e37704e92b80ef9a0cff5f92f045b00c081345677760a1e0a354",
+    "chirp_cube": "4a75c7b4f431d09890b833a5471dddcdbc9891cae96296c9fc3420f54548c28d",
+    "adxl": "5bb8da0d6f70bc9333ad846deb17fcb4ca14115a2bba88cfffe4547497effbbd"
+  },
+  "source_sha256": {
+    "algorithm/io.py": "3d4b96a1147b0cabfc19ec909eb422dcd439c85e00a23e8ddcf60f0fe1f317ab",
+    "algorithm/types.py": "4e1a4e5ea2fe56679ad55ee43d43df2e6144eb31035c68fda0165bc397f40ea9",
+    "algorithm/acceleration.py": "123f5a2af2f9525d23fed4d591cd9a4cbabf2ac79968d19d44e600b06a9ee6b8",
+    "algorithm/kalman.py": "d75ac341885eaad2935556d461da85f479723d551c895c6e0f3b49e458ac2ee4",
+    "paper_bridge_simulation/package_builder.py": "9b2305687120a76ed9cf2257e6c384a4f2fc8138e733a04c4bf232ae45880407",
+    "spatial_recovery_rebuilt/rebuild_validation.py": "ea1f8ad6ad8f8774526aa9b966cece3c3158acbbf7bce2bf7a980280ad1b0203",
+    "spatial_recovery_rebuilt/ro_allchannel/RO_DESIGN.md": "fa3ed2d35691c8db1f801863bde959234e6a493072eba0e778a139fd7053ee5d"
+  },
+  "conclusion": "raw capture inputs are isolated from truth/q_proxy; RO estimator remains unimplemented"
+}

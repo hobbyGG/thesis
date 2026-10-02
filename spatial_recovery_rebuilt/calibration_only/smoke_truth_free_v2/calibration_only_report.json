@@ -1,0 +1,134 @@
+{
+  "schema": "spatial_recovery_rebuilt.calibration_only_report",
+  "status": "smoke_complete",
+  "git_status_before": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n",
+  "git_status_after": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n",
+  "trial_count": 10,
+  "expected_trial_count": 10,
+  "full_matrix_started": false,
+  "all_guards_passed": true,
+  "all_truth_q_proxy_input_checks_pass": true,
+  "probe": {
+    "status": "completed",
+    "first_200_exactly_unchanged": true,
+    "truth_present_in_estimator_copies": false,
+    "perturbation": {
+      "frames_changed": [
+        200,
+        399
+      ],
+      "channel_steering_angle_deg": 40.0,
+      "amplitude_multiplier": 20.0
+    },
+    "baseline_geometry": {
+      "candidate_count": 5,
+      "target_count": 5,
+      "selected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "range_bins": [
+        230,
+        246,
+        253,
+        238,
+        232
+      ],
+      "angle_bins": [
+        34,
+        44,
+        46,
+        41,
+        37
+      ],
+      "angle_deg": [
+        2.615027733951205,
+        20.870073452494555,
+        25.111109363104106,
+        15.441241234313447,
+        9.424627128185314
+      ],
+      "measured_beta": [
+        1.001042448096848,
+        1.0702161574169304,
+        1.1043786570174754,
+        1.0374477035439045,
+        1.0136828235657447
+      ]
+    },
+    "perturbed_geometry": {
+      "candidate_count": 5,
+      "target_count": 5,
+      "selected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "range_bins": [
+        230,
+        246,
+        253,
+        238,
+        232
+      ],
+      "angle_bins": [
+        34,
+        44,
+        46,
+        41,
+        37
+      ],
+      "angle_deg": [
+        2.615027733951205,
+        20.870073452494555,
+        25.111109363104106,
+        15.441241234313447,
+        9.424627128185314
+      ],
+      "measured_beta": [
+        1.001042448096848,
+        1.0702161574169304,
+        1.1043786570174754,
+        1.0374477035439045,
+        1.0136828235657447
+      ]
+    },
+    "changed_frozen_geometry_fields": [],
+    "test_observation_changed": true,
+    "calibration_adc_sha256": "e5664cf7eca935ce71fe70c7b01e5dee487c9b1a23881000dacf494a5c48d033",
+    "perturbed_calibration_adc_sha256": "e5664cf7eca935ce71fe70c7b01e5dee487c9b1a23881000dacf494a5c48d033",
+    "conclusion": "calibration-only target/angle/beta remains unchanged under test-only ADC perturbation"
+  },
+  "full_window_test_rmse_m": [
+    1.0886128409316128e-06,
+    1.0149291424884103e-06,
+    1.1152147440412594e-06,
+    1.0280588302466497e-06,
+    1.1605157643762048e-06,
+    1.0624010072361832e-06,
+    1.2979553295393069e-06,
+    1.1855723646397517e-06,
+    1.942259969241071e-06,
+    1.8189338555851146e-06
+  ],
+  "calibration_only_test_rmse_m": [
+    1.0909552073984757e-06,
+    1.0088313981264014e-06,
+    1.1139155084881802e-06,
+    1.0279512583179933e-06,
+    1.1561716767117931e-06,
+    1.0678942570838247e-06,
+    1.2884583941499654e-06,
+    1.2005166643310229e-06,
+    1.9243818774727786e-06,
+    1.848461605041799e-06
+  ],
+  "geometry_equal_count": 10,
+  "geometry_diff_count": 0,
+  "claims_parity_with_lost_workspace": false
+}

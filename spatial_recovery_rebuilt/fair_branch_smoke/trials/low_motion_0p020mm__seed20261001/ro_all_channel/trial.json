@@ -1,0 +1,80 @@
+{
+  "schema": "spatial_recovery_rebuilt.fair_branch_trial",
+  "trial_id": "low_motion_0p020mm__seed20261001",
+  "stratum": "low_motion_0p020mm",
+  "seed": 20261001,
+  "branch_id": "ro_all_channel",
+  "status": "blocked_missing_route",
+  "shared_package_sha256": "2520c274664d07f8312196c1b075c7d7020c816950baa847cefea8636578a380",
+  "adc_input_sha256": "487c899252647461bc134324180e1f09e82481766863dff918d60041640f29ba",
+  "adxl_input_sha256": "06b4e7d45fdfc94819029b074bdbf25c2c25623c55950a50b8fa415973f8ac06",
+  "guards_sha256": "e8fa5adba685c02797ff3f52ab169b3ac2bc4e75a0d170dc7e77d7ca666a14e1",
+  "package_contract": {
+    "radar_schema": true,
+    "radar_complete": true,
+    "radar_frames_400": true,
+    "adc_shape": true,
+    "adc_is_loop_mean": true,
+    "radar_rate_100_hz": true,
+    "frame_time_count": true,
+    "adxl_4000": true,
+    "adxl_time_monotonic": true,
+    "sync_time_monotonic": true,
+    "truth_reference_count": true,
+    "proxy_shape": true
+  },
+  "guard_result": {
+    "guards": {
+      "source": "calibration_capture_arrays_only",
+      "frozen_before_test": true,
+      "calibration_frame_range": [
+        0,
+        199
+      ],
+      "calibration_adxl_sample_count": 2000,
+      "finite_calibration": true,
+      "adc_abs_limit": 1.2767328321933746,
+      "acceleration_abs_limit_mps2": 0.025699898014647685,
+      "time_monotonic_required": true
+    },
+    "frozen_test": {
+      "test_frame_range": [
+        200,
+        399
+      ],
+      "test_adxl_sample_count": 2000,
+      "finite_test_capture_arrays": true,
+      "test_radar_time_monotonic": true,
+      "adc_within_frozen_limit": true,
+      "acceleration_within_frozen_limit": true,
+      "passed": true
+    }
+  },
+  "radar_frames": 400,
+  "radar_rate_hz": 100.0,
+  "calibration_frames": 200,
+  "frozen_test_frames": 200,
+  "adxl_samples": 4000,
+  "adxl_rate_hz": 1000.0,
+  "estimator_input_manifest": [
+    "radar/algorithm_input/adc_cube.npy",
+    "radar/algorithm_input/chirp_cube.npy",
+    "radar/algorithm_input/manifest.json",
+    "adxl355/algorithm_input/acceleration_mps2.npy",
+    "adxl355/algorithm_input/estimated_sample_monotonic_ns.npy",
+    "sync/manifest.json",
+    "sync/timeline.json",
+    "sync/*.npy"
+  ],
+  "truth_used_by_estimator": false,
+  "q_proxy_used_by_estimator": false,
+  "actual_route": null,
+  "beta_source": null,
+  "target_count": null,
+  "accepted": false,
+  "rmse_m": null,
+  "primary_success": false,
+  "coverage": false,
+  "abstention": true,
+  "blocker": "current checkout exposes no RO-all-channel estimator; no RA fallback was attempted"
+}

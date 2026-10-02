@@ -1,0 +1,103 @@
+{
+  "schema": "spatial_recovery_rebuilt.fair_branch_route_audit",
+  "expected_rows": 20,
+  "actual_rows": 20,
+  "expected_shared_packages": 10,
+  "pair_checks": [
+    {
+      "trial_id": "low_motion_0p005mm__seed20261001",
+      "same_shared_package": true,
+      "same_adc": true,
+      "same_adxl": true,
+      "same_guards": true,
+      "ro_has_no_ra_output": true,
+      "ra_not_labeled_ro": true
+    },
+    {
+      "trial_id": "low_motion_0p005mm__seed20261002",
+      "same_shared_package": true,
+      "same_adc": true,
+      "same_adxl": true,
+      "same_guards": true,
+      "ro_has_no_ra_output": true,
+      "ra_not_labeled_ro": true
+    },
+    {
+      "trial_id": "low_motion_0p010mm__seed20261001",
+      "same_shared_package": true,
+      "same_adc": true,
+      "same_adxl": true,
+      "same_guards": true,
+      "ro_has_no_ra_output": true,
+      "ra_not_labeled_ro": true
+    },
+    {
+      "trial_id": "low_motion_0p010mm__seed20261002",
+      "same_shared_package": true,
+      "same_adc": true,
+      "same_adxl": true,
+      "same_guards": true,
+      "ro_has_no_ra_output": true,
+      "ra_not_labeled_ro": true
+    },
+    {
+      "trial_id": "low_motion_0p020mm__seed20261001",
+      "same_shared_package": true,
+      "same_adc": true,
+      "same_adxl": true,
+      "same_guards": true,
+      "ro_has_no_ra_output": true,
+      "ra_not_labeled_ro": true
+    },
+    {
+      "trial_id": "low_motion_0p020mm__seed20261002",
+      "same_shared_package": true,
+      "same_adc": true,
+      "same_adxl": true,
+      "same_guards": true,
+      "ro_has_no_ra_output": true,
+      "ra_not_labeled_ro": true
+    },
+    {
+      "trial_id": "low_motion_0p050mm__seed20261001",
+      "same_shared_package": true,
+      "same_adc": true,
+      "same_adxl": true,
+      "same_guards": true,
+      "ro_has_no_ra_output": true,
+      "ra_not_labeled_ro": true
+    },
+    {
+      "trial_id": "low_motion_0p050mm__seed20261002",
+      "same_shared_package": true,
+      "same_adc": true,
+      "same_adxl": true,
+      "same_guards": true,
+      "ro_has_no_ra_output": true,
+      "ra_not_labeled_ro": true
+    },
+    {
+      "trial_id": "stationary__seed20261001",
+      "same_shared_package": true,
+      "same_adc": true,
+      "same_adxl": true,
+      "same_guards": true,
+      "ro_has_no_ra_output": true,
+      "ra_not_labeled_ro": true
+    },
+    {
+      "trial_id": "stationary__seed20261002",
+      "same_shared_package": true,
+      "same_adc": true,
+      "same_adxl": true,
+      "same_guards": true,
+      "ro_has_no_ra_output": true,
+      "ra_not_labeled_ro": true
+    }
+  ],
+  "all_shared_input_checks_pass": true,
+  "route_mixing_check_pass": true,
+  "truth_q_proxy_input_check_pass": true,
+  "ro_adapter_available": false,
+  "full_matrix_started": false
+}

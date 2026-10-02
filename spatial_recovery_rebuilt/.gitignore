@@ -1,0 +1,4 @@
+# Scratch raw captures and binary estimator outputs stay local.
+**/*.npy
+**/*.npz
+smoke/capture_*/

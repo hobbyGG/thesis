@@ -1,0 +1,206 @@
+{
+  "schema": "spatial_recovery_rebuilt.calibration_only_trial",
+  "stratum": "low_motion_0p010mm",
+  "requested_q_true_rms_mm": 0.01,
+  "seed": 20261002,
+  "realized_rms": {
+    "stratum": "low_motion_0p010mm",
+    "seed": 20261002,
+    "requested_q_true_rms_mm": 0.01,
+    "q_true_rms_m": 1e-05,
+    "q_proxy_rms_m": 9.659258262890684e-06,
+    "q_true_rms_mm": 0.01,
+    "q_proxy_rms_mm": 0.009659258262890684,
+    "q_true_rms_calibration_m": 1e-05,
+    "q_true_rms_test_m": 1e-05,
+    "q_proxy_rms_calibration_m": 9.659258262890684e-06,
+    "q_proxy_rms_test_m": 9.659258262890684e-06,
+    "q_true_max_abs_m": 1.4142135623730951e-05,
+    "q_proxy_max_abs_m": 1.3660254037844388e-05,
+    "reference_samples": 12000,
+    "radar_frames": 400,
+    "calibration_frames": 200,
+    "test_frames": 200
+  },
+  "radar_frames": 400,
+  "calibration_frames": 200,
+  "test_frames": 200,
+  "estimator_input_audit": {
+    "truth_present": false,
+    "paper_response_metadata_present": false,
+    "truth_used_by_estimator": false,
+    "q_proxy_used_by_estimator": false
+  },
+  "score_reference": {
+    "definition": "truth interpolated on full physical radar frame grid; mean where elapsed <= 0.20 s",
+    "warm_reference_sample_count": 21,
+    "test_score_frames": [
+      200,
+      399
+    ],
+    "truth_used_post_run_only": true
+  },
+  "guards": {
+    "guards": {
+      "source": "calibration_capture_arrays_only",
+      "frozen_before_test": true,
+      "calibration_frame_range": [
+        0,
+        199
+      ],
+      "calibration_adxl_sample_count": 2000,
+      "finite_calibration": true,
+      "adc_abs_limit": 1.289709210395813,
+      "acceleration_abs_limit_mps2": 0.023759563777807607,
+      "time_monotonic_required": true
+    },
+    "frozen_test": {
+      "test_frame_range": [
+        200,
+        399
+      ],
+      "test_adxl_sample_count": 2000,
+      "finite_test_capture_arrays": true,
+      "test_radar_time_monotonic": true,
+      "adc_within_frozen_limit": true,
+      "acceleration_within_frozen_limit": true,
+      "passed": true
+    }
+  },
+  "calibration_adc_sha256": "bbc0731bcae0e29d8a99f7396eec482cef0d0190937505aaaa359c7759b4ef3c",
+  "calibration_adxl_sha256": "e81595164495a6aaeafaa96e5cc6a05b3ce928bbbdf8406057dcfad77e14bd8e",
+  "estimator_input_manifest": [
+    "radar/algorithm_input/adc_cube.npy",
+    "radar/algorithm_input/chirp_cube.npy",
+    "radar/algorithm_input/manifest.json",
+    "adxl355/algorithm_input/acceleration_mps2.npy",
+    "adxl355/algorithm_input/estimated_sample_monotonic_ns.npy",
+    "sync/manifest.json",
+    "sync/timeline.json",
+    "sync/*.npy"
+  ],
+  "full_window_route": {
+    "method": "fixed_geometry_beta_structural_kalman",
+    "geometry_source_frames": [
+      0,
+      399
+    ],
+    "kalman_input_frames": [
+      0,
+      399
+    ],
+    "geometry": {
+      "candidate_count": 5,
+      "target_count": 5,
+      "selected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "range_bins": [
+        230,
+        232,
+        246,
+        238,
+        253
+      ],
+      "angle_bins": [
+        34,
+        37,
+        44,
+        40,
+        46
+      ],
+      "angle_deg": [
+        3.906300495619712,
+        9.098081241088552,
+        21.2153909243272,
+        15.144245648988116,
+        25.467560142472372
+      ],
+      "measured_beta": [
+        1.0023286163130736,
+        1.0127411929408285,
+        1.0727005331877952,
+        1.0359783115160361,
+        1.1076296005915018
+      ]
+    },
+    "test_rmse_m": 1.0624010072361832e-06,
+    "estimator_samples": 400
+  },
+  "calibration_only_route": {
+    "method": "fixed_geometry_beta_structural_kalman",
+    "geometry": {
+      "candidate_count": 5,
+      "target_count": 5,
+      "selected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "range_bins": [
+        230,
+        232,
+        246,
+        238,
+        253
+      ],
+      "angle_bins": [
+        34,
+        37,
+        44,
+        40,
+        46
+      ],
+      "angle_deg": [
+        3.906300495619712,
+        9.098081241088552,
+        21.2153909243272,
+        15.144245648988116,
+        25.467560142472372
+      ],
+      "measured_beta": [
+        1.0023286163130736,
+        1.0127411929408285,
+        1.0727005331877952,
+        1.0359783115160361,
+        1.1076296005915018
+      ]
+    },
+    "geometry_source": "frames_0_199_only",
+    "test_observation_source": "frames_200_399_only",
+    "test_adxl_source": "samples_at_or_after_test_start_only",
+    "kalman_input_frames": [
+      200,
+      399
+    ],
+    "fresh_kalman_state": true,
+    "test_rmse_m": 1.0678942506440748e-06,
+    "estimator_samples": 200
+  },
+  "geometry_equal_between_routes": true,
+  "truth_used_by_estimator": false,
+  "q_proxy_used_by_estimator": false,
+  "trial_id": "low_motion_0p010mm__seed20261002",
+  "package_sha256": "a744bab906fb70064c36800bbbb7b40357da5592478605e3404a859cc2810730",
+  "package_contract": {
+    "radar_schema": true,
+    "radar_complete": true,
+    "radar_frames_400": true,
+    "adc_shape": true,
+    "adc_is_loop_mean": true,
+    "radar_rate_100_hz": true,
+    "frame_time_count": true,
+    "adxl_4000": true,
+    "adxl_time_monotonic": true,
+    "sync_time_monotonic": true,
+    "truth_reference_count": true,
+    "proxy_shape": true
+  },
+  "frozen_test_guard_passed": true
+}

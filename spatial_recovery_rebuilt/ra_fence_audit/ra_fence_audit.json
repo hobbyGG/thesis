@@ -1,0 +1,106 @@
+{
+  "schema": "spatial_recovery_rebuilt.ra_fence_audit",
+  "source_package": "/Users/umep/thesis/spatial_recovery_rebuilt/smoke/capture_low_motion_0p005mm_seed20261001",
+  "truth_isolation": {
+    "estimator_copies_excluded": [
+      "truth/",
+      "paper_response_metadata.json"
+    ],
+    "baseline_truth_files_present": false,
+    "perturbed_truth_files_present": false
+  },
+  "frame_edit": {
+    "calibration_frames_unchanged": true,
+    "test_frames_changed": true,
+    "calibration_frame_hash_before": "6bdb60fb073e09e745d062973a69249d49ea63f82891658e1c74d0c3961c9e7b",
+    "calibration_frame_hash_after": "6bdb60fb073e09e745d062973a69249d49ea63f82891658e1c74d0c3961c9e7b",
+    "test_frame_hash_before": "5493d04035edd62e74fa2cac8ffde749451a8a119c1e212dcc0f0d6acf5bfcc4",
+    "test_frame_hash_after": "9bf4558dae9742c00921a8d879756b018e041d0a4bdc335f80660c8703f9144a",
+    "adc": {
+      "path": "/var/folders/bf/5cl0sl8118sdpk_7g_jn27jc0000gn/T/ra-fence-audit-rsona162/baseline/radar/algorithm_input/adc_cube.npy",
+      "shape": [
+        400,
+        8,
+        256
+      ],
+      "dtype": "complex64"
+    },
+    "diagnostic": "complex tone at FFT bin 100 added only to frames 200:400"
+  },
+  "baseline": {
+    "candidate_count": 5,
+    "selected_indices": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "range_bins": [
+      230,
+      246,
+      253,
+      238,
+      232
+    ],
+    "range_m": [
+      10.021549948550781,
+      10.718701249319531,
+      11.023704943405859,
+      10.370125598935156,
+      10.108693861146875
+    ],
+    "angle_deg": [
+      2.615027733951205,
+      20.870073452494555,
+      25.111109363104106,
+      15.441241234313447,
+      9.424627128185314
+    ],
+    "beta": [
+      1.001042448096848,
+      1.0702161574169304,
+      1.1043786570174754,
+      1.0374477035439045,
+      1.0136828235657447
+    ],
+    "radar_samples": 400,
+    "truth_files_present": false
+  },
+  "post_test_perturbed": {
+    "candidate_count": 1,
+    "selected_indices": [
+      0
+    ],
+    "range_bins": [
+      100
+    ],
+    "range_m": [
+      4.357195629804687
+    ],
+    "angle_deg": [
+      0.0
+    ],
+    "beta": [
+      1.0
+    ],
+    "radar_samples": 400,
+    "truth_files_present": false
+  },
+  "geometry_changed": {
+    "range_bins": true,
+    "range_m": true,
+    "angle_deg": true,
+    "beta": true,
+    "selected_indices": true
+  },
+  "post_test_data_affects_ra_geometry": true,
+  "interpretation": "Changing only ADC frames 200:400 changes detection, selected range bins, angles and beta; current RA geometry is therefore built from all 400 frames, not frozen from frames 0:200.",
+  "source_evidence": {
+    "algorithm/io.py": "98-115",
+    "algorithm/selection.py": "4-28,32-37",
+    "algorithm/frontend.py": "46-56,59-98",
+    "algorithm/angle_estimation.py": "24-38,55-71",
+    "algorithm/run.py": "14-18,50-62"
+  }
+}

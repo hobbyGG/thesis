@@ -1,0 +1,52 @@
+{
+  "schema": "spatial_recovery_rebuilt.trial",
+  "protocol": "rebuilt_protocol",
+  "claims_parity_with_lost_workspace": false,
+  "trial_id": "low_motion_0p020mm__seed7238",
+  "stratum": "low_motion_0p020mm",
+  "requested_q_true_rms_mm": 0.02,
+  "seed": 7238,
+  "radar_frames": 400,
+  "radar_rate_hz": 100.0,
+  "calibration_frames": 200,
+  "frozen_test_frames": 200,
+  "started_at": "2026-10-01T23:37:10.053170+00:00",
+  "realized_rms": {
+    "stratum": "low_motion_0p020mm",
+    "seed": 7238,
+    "requested_q_true_rms_mm": 0.02,
+    "q_true_rms_m": 2e-05,
+    "q_proxy_rms_m": 1.931851652578137e-05,
+    "q_true_rms_mm": 0.02,
+    "q_proxy_rms_mm": 0.019318516525781367,
+    "q_true_rms_calibration_m": 2e-05,
+    "q_true_rms_test_m": 2e-05,
+    "q_proxy_rms_calibration_m": 1.931851652578137e-05,
+    "q_proxy_rms_test_m": 1.931851652578137e-05,
+    "q_true_max_abs_m": 2.8284271247461902e-05,
+    "q_proxy_max_abs_m": 2.7320508075688776e-05,
+    "reference_samples": 12000,
+    "radar_frames": 400,
+    "calibration_frames": 200,
+    "test_frames": 200
+  },
+  "package_contract": "passed",
+  "frozen_guard": "rejected",
+  "accepted": false,
+  "rejection_reasons": [
+    "frozen_test_guard:RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}"
+  ],
+  "status": "rejected",
+  "metrics": {
+    "full_rmse_m": null,
+    "test_rmse_m": null,
+    "test_sample_count": 200,
+    "finite_test_samples": 0,
+    "test_sample_coverage": 0.0,
+    "accepted_finite_test": false,
+    "abstention_as_failure_success": false
+  },
+  "duration_s": 1.128016500000001,
+  "completed_at": "2026-10-01T23:37:11.181190+00:00",
+  "complete": true
+}

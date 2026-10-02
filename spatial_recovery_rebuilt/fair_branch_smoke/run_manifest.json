@@ -1,0 +1,72 @@
+{
+  "schema": "spatial_recovery_rebuilt.fair_branch_smoke_run",
+  "status": "completed",
+  "started_at": "2026-10-02T00:08:16.313095+00:00",
+  "protocol": "/Users/umep/thesis/spatial_recovery_rebuilt/fair_branch_protocol.json",
+  "scenarios": [
+    [
+      "stationary",
+      0.0
+    ],
+    [
+      "low_motion_0p005mm",
+      0.005
+    ],
+    [
+      "low_motion_0p010mm",
+      0.01
+    ],
+    [
+      "low_motion_0p020mm",
+      0.02
+    ],
+    [
+      "low_motion_0p050mm",
+      0.05
+    ]
+  ],
+  "seeds": [
+    20261001,
+    20261002
+  ],
+  "branches": [
+    "ro_all_channel",
+    "ra"
+  ],
+  "full_matrix_started": false,
+  "git_status_before": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n",
+  "protocol_sha256": "0a6b7c319a1b0d72386eb92d41c7060c5f20ad9180b3a66ef77262ed9009141e",
+  "source_sha256": {
+    "paper_bridge_simulation/package_builder.py": "9b2305687120a76ed9cf2257e6c384a4f2fc8138e733a04c4bf232ae45880407",
+    "paper_bridge_simulation/response.py": "11b7d52dc216de424088676237c8869c7f8123566084baa1c30e3753e775be5f",
+    "algorithm/io.py": "3d4b96a1147b0cabfc19ec909eb422dcd439c85e00a23e8ddcf60f0fe1f317ab",
+    "algorithm/run.py": "d2712e2947e0a763215cd97990a7cf52ed3e54283362a2033f561bf99db6affe",
+    "algorithm/frontend.py": "c2e0b276951f7fb815a1ca841ad06a78f9381dea68281459fc0d93fc3cd855ec",
+    "algorithm/selection.py": "b59d5972ff2be24b5b95896dd43058edcade55a29e95a4dc5cbd8be83cb15540",
+    "algorithm/kalman.py": "d75ac341885eaad2935556d461da85f479723d551c895c6e0f3b49e458ac2ee4",
+    "algorithm/angle_estimation.py": "270deaa6cdacb2f8fd169c8198280d229856ee43de83db0d57f3d3f17254a141",
+    "algorithm/config.py": "28bfca53e0a18bc47e749a4caca774c64a9eb9410328987a39be799ebc1cf674",
+    "algorithm/types.py": "4e1a4e5ea2fe56679ad55ee43d43df2e6144eb31035c68fda0165bc397f40ea9",
+    "algorithm/phase.py": "8eba8a75c151036dbb2212d47299813979c70305751a84ef6e6873492f10ccb3",
+    "algorithm/acceleration.py": "123f5a2af2f9525d23fed4d591cd9a4cbabf2ac79968d19d44e600b06a9ee6b8"
+  },
+  "source_hashes": {
+    "spatial_recovery_rebuilt/fair_branch_protocol.json": "0a6b7c319a1b0d72386eb92d41c7060c5f20ad9180b3a66ef77262ed9009141e",
+    "spatial_recovery_rebuilt/run_fair_branch_smoke.py": "0aaebc7eba76c1daa916971230fb83d823c571a74f43f2d421c576ec2760e6d6",
+    "spatial_recovery_rebuilt/rebuild_validation.py": "ea1f8ad6ad8f8774526aa9b966cece3c3158acbbf7bce2bf7a980280ad1b0203",
+    "algorithm/io.py": "3d4b96a1147b0cabfc19ec909eb422dcd439c85e00a23e8ddcf60f0fe1f317ab",
+    "algorithm/frontend.py": "c2e0b276951f7fb815a1ca841ad06a78f9381dea68281459fc0d93fc3cd855ec",
+    "algorithm/kalman.py": "d75ac341885eaad2935556d461da85f479723d551c895c6e0f3b49e458ac2ee4",
+    "algorithm/selection.py": "b59d5972ff2be24b5b95896dd43058edcade55a29e95a4dc5cbd8be83cb15540",
+    "algorithm/acceleration.py": "123f5a2af2f9525d23fed4d591cd9a4cbabf2ac79968d19d44e600b06a9ee6b8",
+    "algorithm/run.py": "d2712e2947e0a763215cd97990a7cf52ed3e54283362a2033f561bf99db6affe",
+    "paper_bridge_simulation/package_builder.py": "9b2305687120a76ed9cf2257e6c384a4f2fc8138e733a04c4bf232ae45880407",
+    "algorithm/angle_estimation.py": "270deaa6cdacb2f8fd169c8198280d229856ee43de83db0d57f3d3f17254a141",
+    "algorithm/config.py": "28bfca53e0a18bc47e749a4caca774c64a9eb9410328987a39be799ebc1cf674",
+    "algorithm/types.py": "4e1a4e5ea2fe56679ad55ee43d43df2e6144eb31035c68fda0165bc397f40ea9",
+    "algorithm/phase.py": "8eba8a75c151036dbb2212d47299813979c70305751a84ef6e6873492f10ccb3"
+  },
+  "completed_at": "2026-10-02T00:08:31.485489+00:00",
+  "git_status_after": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n",
+  "summary": "fair_branch_smoke_report.json"
+}

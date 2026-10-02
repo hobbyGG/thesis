@@ -1,0 +1,52 @@
+{
+  "schema": "spatial_recovery_rebuilt.calibration_only_run",
+  "status": "completed",
+  "started_at": "2026-10-02T01:00:44.845418+00:00",
+  "git_status_before": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n",
+  "git_head": "86bf1acde6cd6254e09aeb15ce27c9d17d215474",
+  "source_sha256": {
+    "algorithm/io.py": "3d4b96a1147b0cabfc19ec909eb422dcd439c85e00a23e8ddcf60f0fe1f317ab",
+    "algorithm/frontend.py": "c2e0b276951f7fb815a1ca841ad06a78f9381dea68281459fc0d93fc3cd855ec",
+    "algorithm/angle_estimation.py": "270deaa6cdacb2f8fd169c8198280d229856ee43de83db0d57f3d3f17254a141",
+    "algorithm/selection.py": "b59d5972ff2be24b5b95896dd43058edcade55a29e95a4dc5cbd8be83cb15540",
+    "algorithm/kalman.py": "d75ac341885eaad2935556d461da85f479723d551c895c6e0f3b49e458ac2ee4",
+    "algorithm/acceleration.py": "123f5a2af2f9525d23fed4d591cd9a4cbabf2ac79968d19d44e600b06a9ee6b8",
+    "paper_bridge_simulation/package_builder.py": "9b2305687120a76ed9cf2257e6c384a4f2fc8138e733a04c4bf232ae45880407",
+    "spatial_recovery_rebuilt/calibration_only/calibration_only_wrapper.py": "fa4bbd3247b39c6d2d703ac7c1133cbc3eb1a3dbf452747b241cf82d9d0dddfe",
+    "spatial_recovery_rebuilt/calibration_only/protocol.json": "e16c3097d81decdfe35e3c08a10101746ede78ae2b5e7de445599e69a4fa943f"
+  },
+  "calibration_frames": [
+    0,
+    199
+  ],
+  "test_frames": [
+    200,
+    399
+  ],
+  "seeds": [
+    20261001,
+    20261002
+  ],
+  "strata": [
+    "stationary",
+    "low_motion_0p005mm",
+    "low_motion_0p010mm",
+    "low_motion_0p020mm",
+    "low_motion_0p050mm"
+  ],
+  "full_matrix_started": false,
+  "truth_used_by_estimator": false,
+  "q_proxy_used_by_estimator": false,
+  "estimator_input_manifest": [
+    "radar/algorithm_input/adc_cube.npy",
+    "radar/algorithm_input/chirp_cube.npy",
+    "radar/algorithm_input/manifest.json",
+    "adxl355/algorithm_input/acceleration_mps2.npy",
+    "adxl355/algorithm_input/estimated_sample_monotonic_ns.npy",
+    "sync/manifest.json",
+    "sync/timeline.json",
+    "sync/*.npy"
+  ],
+  "completed_at": "2026-10-02T01:01:03.129992+00:00",
+  "git_status_after": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n"
+}

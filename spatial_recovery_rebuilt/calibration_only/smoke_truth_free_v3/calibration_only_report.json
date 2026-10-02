@@ -1,0 +1,166 @@
+{
+  "schema": "spatial_recovery_rebuilt.calibration_only_report",
+  "status": "smoke_complete",
+  "git_status_before": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n",
+  "git_status_after": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n",
+  "trial_count": 10,
+  "expected_trial_count": 10,
+  "full_matrix_started": false,
+  "all_guards_passed": true,
+  "all_truth_q_proxy_input_checks_pass": true,
+  "probe": {
+    "status": "completed",
+    "first_200_exactly_unchanged": true,
+    "truth_present_in_estimator_copies": false,
+    "perturbation": {
+      "frames_changed": [
+        200,
+        399
+      ],
+      "channel_steering_angle_deg": 40.0,
+      "amplitude_multiplier": 20.0
+    },
+    "baseline_geometry": {
+      "candidate_count": 5,
+      "target_count": 5,
+      "selected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "range_bins": [
+        230,
+        246,
+        253,
+        238,
+        232
+      ],
+      "angle_bins": [
+        34,
+        44,
+        46,
+        41,
+        37
+      ],
+      "angle_deg": [
+        2.615027733951205,
+        20.870073452494555,
+        25.111109363104106,
+        15.441241234313447,
+        9.424627128185314
+      ],
+      "measured_beta": [
+        1.001042448096848,
+        1.0702161574169304,
+        1.1043786570174754,
+        1.0374477035439045,
+        1.0136828235657447
+      ]
+    },
+    "perturbed_geometry": {
+      "candidate_count": 5,
+      "target_count": 5,
+      "selected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "range_bins": [
+        230,
+        246,
+        253,
+        238,
+        232
+      ],
+      "angle_bins": [
+        34,
+        44,
+        46,
+        41,
+        37
+      ],
+      "angle_deg": [
+        2.615027733951205,
+        20.870073452494555,
+        25.111109363104106,
+        15.441241234313447,
+        9.424627128185314
+      ],
+      "measured_beta": [
+        1.001042448096848,
+        1.0702161574169304,
+        1.1043786570174754,
+        1.0374477035439045,
+        1.0136828235657447
+      ]
+    },
+    "changed_frozen_geometry_fields": [],
+    "test_observation_changed": true,
+    "calibration_adc_sha256": "e5664cf7eca935ce71fe70c7b01e5dee487c9b1a23881000dacf494a5c48d033",
+    "perturbed_calibration_adc_sha256": "e5664cf7eca935ce71fe70c7b01e5dee487c9b1a23881000dacf494a5c48d033",
+    "conclusion": "calibration-only target/angle/beta remains unchanged under test-only ADC perturbation"
+  },
+  "score_reference": {
+    "definition": "truth interpolated on full physical radar frame grid; mean where elapsed <= 0.20 s",
+    "warm_reference_sample_count": 21,
+    "test_score_frames": [
+      200,
+      399
+    ],
+    "truth_used_post_run_only": true,
+    "success_threshold_mm": 0.01
+  },
+  "full_window_test_rmse_m": [
+    1.0886128409316128e-06,
+    1.0149291424884103e-06,
+    1.1152147440412594e-06,
+    1.0280588302466497e-06,
+    1.1605157643762048e-06,
+    1.0624010072361832e-06,
+    1.2979553295393069e-06,
+    1.1855723646397517e-06,
+    1.942259969241071e-06,
+    1.8189338555851146e-06
+  ],
+  "calibration_only_test_rmse_m": [
+    1.0909550876950876e-06,
+    1.008831388437614e-06,
+    1.1139153943812368e-06,
+    1.0279512502767207e-06,
+    1.1561715698240937e-06,
+    1.0678942506440748e-06,
+    1.288458303507092e-06,
+    1.2005166610379218e-06,
+    1.9243818276068555e-06,
+    1.848461607576205e-06
+  ],
+  "rmse_delta_calibration_only_minus_full_window_m": [
+    2.3422467634747362e-09,
+    -6.097754050796288e-09,
+    -1.2993496600226434e-09,
+    -1.0757996992903517e-10,
+    -4.344194552111022e-09,
+    5.493243407891617e-09,
+    -9.49702603221487e-09,
+    1.494429639817009e-08,
+    -1.787814163421558e-08,
+    2.9527751991090456e-08
+  ],
+  "route_summary": {
+    "full_window": {
+      "mean_test_rmse_mm": 0.0012714453848325564,
+      "successes_at_0p010mm": 10
+    },
+    "calibration_only": {
+      "mean_test_rmse_mm": 0.0012727537340986904,
+      "successes_at_0p010mm": 10
+    }
+  },
+  "geometry_equal_count": 10,
+  "geometry_diff_count": 0,
+  "claims_parity_with_lost_workspace": false
+}

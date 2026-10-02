@@ -1,0 +1,217 @@
+{
+  "protocol_name": "spatial_recovery_fair_branch_smoke",
+  "status": "design_and_smoke_only",
+  "claims_parity_with_lost_workspace": false,
+  "scope": {
+    "purpose": "Pre-register a fair branch comparison before any larger run.",
+    "tracked_thesis_source_may_change": false,
+    "full_matrix_allowed_in_this_step": false,
+    "truth_definition": "The capture package may contain truth for a post-run evaluator only; truth is not an estimator input."
+  },
+  "shared_capture_and_fence": {
+    "one_package_per_trial": true,
+    "branch_reuse_rule": "Generate one capture package for each stratum/seed, then run both branches against that exact package.",
+    "shared_adc": {
+      "source": "radar/algorithm_input/adc_cube.npy",
+      "frames": 400,
+      "frame_rate_hz": 100.0,
+      "virtual_channels": 8,
+      "adc_samples_per_chirp": 256,
+      "chirp_loops_per_frame": 16,
+      "physical_chirps_per_frame": 32,
+      "observation_budget_unit": "400 frame ADC capture; no branch may request additional frames or a regenerated ADC stream"
+    },
+    "shared_adxl": {
+      "source": "adxl355/algorithm_input/acceleration_mps2.npy",
+      "samples": 4000,
+      "sample_rate_hz": 1000.0,
+      "axes": 3,
+      "observation_budget_unit": "4000 sample, 3-axis ADXL capture; the estimator consumes the structural axis only"
+    },
+    "frozen_calibration_test_fence": {
+      "calibration_frames": [0, 199],
+      "frozen_test_frames": [200, 399],
+      "calibration_adxl_samples": [0, 1999],
+      "frozen_test_adxl_samples": [2000, 3999],
+      "freeze_before_test": true,
+      "guard_source": "calibration ADC and ADXL capture arrays plus monotonic timestamps only",
+      "guard_artifact": "guards.json",
+      "branch_rule": "Both branches consume the same guards.json and must not recompute or update limits from frozen-test values.",
+      "guard_failure_rule": "A rejected branch is an abstention for the primary metric; do not score its test RMSE as zero."
+    }
+  },
+  "observation_budget": {
+    "fairness_unit": "The same package, ADC cube, ADXL stream, time axis, and 200/200 fence are supplied to each branch.",
+    "radar_processing_budget": {
+      "frames_available": 400,
+      "calibration_frames": 200,
+      "test_frames": 200,
+      "physical_chirps_available_per_frame": 32,
+      "branch_may_discard_observations": true,
+      "branch_may_acquire_or_regenerate_observations": false
+    },
+    "adxl_processing_budget": {
+      "samples_available": 4000,
+      "calibration_samples": 2000,
+      "test_samples": 2000,
+      "branch_may_discard_observations": true,
+      "branch_may_acquire_or_regenerate_observations": false
+    }
+  },
+  "branches": [
+    {
+      "id": "ro_all_channel",
+      "label": "RO-all-channel",
+      "route_class": "range_only_all_channel",
+      "definition": "Range FFT and range-only complex observation using all available virtual channels; no angle map, AoA/MUSIC/ML angle refinement, or angle-derived beta may be used.",
+      "required_radar_input": "radar/algorithm_input/adc_cube.npy",
+      "required_adxl_input": "adxl355/algorithm_input/acceleration_mps2.npy",
+      "current_checkout_status": "unavailable",
+      "entrypoint": null,
+      "implementation_constraint": "The current checkout has no RO-all-channel estimator. A smoke run must fail closed with an unavailable-adapter record rather than invoking or relabeling the RA route.",
+      "beta_source": "branch-defined range-only calibration or an explicitly declared fixed value; angle_geometry is prohibited",
+      "target_count_rule": "Record the actual number of range-only targets/observations selected; never copy RA target count.",
+      "truth_and_proxy_input": false,
+      "prohibited_fallbacks": [
+        "algorithm.run --radar-mode frame",
+        "algorithm.run --radar-mode chirp",
+        "range_angle_process",
+        "local_music_ml",
+        "angle_geometry beta"
+      ]
+    },
+    {
+      "id": "ra",
+      "label": "RA",
+      "route_class": "range_angle",
+      "definition": "Range FFT plus angle processing, target detection, local MUSIC/ML refinement, target selection, angle-geometry beta, ADXL preintegration, and structural Kalman update.",
+      "required_radar_input": "radar/algorithm_input/adc_cube.npy",
+      "required_adxl_input": "adxl355/algorithm_input/acceleration_mps2.npy",
+      "current_checkout_status": "available",
+      "entrypoint": "python3 -m algorithm.run --input <shared_package> --output <result.npz> --radar-mode frame",
+      "expected_method": "fixed_geometry_beta_structural_kalman",
+      "expected_radar_mode": "frame",
+      "beta_source": "angle_geometry",
+      "target_count_rule": "Record the target count reported by the actual output summary and selected-target arrays.",
+      "truth_and_proxy_input": false,
+      "source_route_evidence": [
+        "algorithm/io.py:98-115",
+        "algorithm/frontend.py:46-88",
+        "algorithm/kalman.py:137-149"
+      ]
+    }
+  ],
+  "estimator_input_contract": {
+    "allowed_inputs": [
+      "radar/algorithm_input/adc_cube.npy",
+      "radar/algorithm_input/chirp_cube.npy",
+      "radar/algorithm_input/manifest.json",
+      "adxl355/algorithm_input/acceleration_mps2.npy",
+      "adxl355/algorithm_input/estimated_sample_monotonic_ns.npy",
+      "sync/manifest.json",
+      "sync/timeline.json",
+      "sync/*.npy"
+    ],
+    "forbidden_estimator_inputs": [
+      "truth/q_true_m.npy",
+      "truth/q_proxy_m.npy",
+      "truth/displacement_m.npy",
+      "truth/acceleration_mps2.npy",
+      "paper_response_metadata.json truth or q_proxy fields",
+      "post-run RMSE or any evaluator output"
+    ],
+    "q_proxy_usage": "post-run RMS logging only",
+    "truth_usage": "post-run evaluator only",
+    "audit_requirement": "Record estimator_input_manifest, truth_used_by_estimator=false, and q_proxy_used_by_estimator=false for every branch attempt."
+  },
+  "metrics": {
+    "primary": {
+      "name": "all_trial_success",
+      "definition": "accepted AND finite RMSE on the frozen test AND RMSE <= 0.010 mm",
+      "threshold_m": 1.0e-5,
+      "denominator": "all pre-registered branch trials, including guard rejects and unavailable-adapter abstentions"
+    },
+    "secondary": {
+      "coverage": {
+        "name": "coverage",
+        "definition": "accepted branch trials / pre-registered branch trials"
+      },
+      "abstention": {
+        "name": "abstention_rate",
+        "definition": "1 - coverage",
+        "includes": ["frozen-test guard rejection", "missing/failed branch adapter", "non-finite estimator result"]
+      },
+      "accepted_only_rmse": {
+        "name": "accepted_only_rmse",
+        "definition": "RMSE distribution among accepted branch trials only",
+        "interpretation": "Descriptive appendix metric; never substitute for all_trial_success."
+      }
+    },
+    "rmse_reference": "Use the fixed physical frame-grid reference and the same cold-start rule for both branches; compute it outside the estimator from post-run truth."
+  },
+  "smoke": {
+    "mode": "small_smoke_only",
+    "scenarios": [
+      {"name": "stationary", "requested_q_true_rms_mm": 0.0},
+      {"name": "low_motion_0p005mm", "requested_q_true_rms_mm": 0.005},
+      {"name": "low_motion_0p010mm", "requested_q_true_rms_mm": 0.01},
+      {"name": "low_motion_0p020mm", "requested_q_true_rms_mm": 0.02},
+      {"name": "low_motion_0p050mm", "requested_q_true_rms_mm": 0.05}
+    ],
+    "seeds_per_scenario": 2,
+    "seed_values": [20261001, 20261002],
+    "branches_per_shared_package": ["ro_all_channel", "ra"],
+    "expected_trial_count": 20,
+    "run_order": [
+      "record git status and source hashes",
+      "build exactly one package per scenario/seed",
+      "verify package contract",
+      "freeze guards from calibration only",
+      "run each branch against the same package and guards",
+      "compute post-run metrics without exposing truth to either estimator",
+      "audit route labels, beta source, target count, input hashes, and branch mixing",
+      "stop; do not start the 40-seed matrix"
+    ],
+    "stop_conditions": [
+      "RO adapter unavailable: record abstention and stop without RA fallback",
+      "shared ADC/ADXL or guard hash mismatch: stop the smoke",
+      "truth/q_proxy observed in estimator input: stop and mark invalid",
+      "actual route or beta source does not match declared branch: stop and mark invalid"
+    ]
+  },
+  "audit": {
+    "route_mixing_forbidden": true,
+    "required_per_branch_fields": [
+      "trial_id",
+      "branch_id",
+      "status",
+      "actual_route",
+      "beta_source",
+      "target_count",
+      "shared_package_sha256",
+      "adc_input_sha256",
+      "adxl_input_sha256",
+      "guards_sha256",
+      "truth_used_by_estimator",
+      "q_proxy_used_by_estimator",
+      "accepted",
+      "rmse_m",
+      "primary_success"
+    ],
+    "required_cross_branch_checks": [
+      "same shared package hash per scenario/seed",
+      "same ADC input hash per scenario/seed",
+      "same ADXL input hash per scenario/seed",
+      "same guards hash per scenario/seed",
+      "RA rows never labeled RO",
+      "RO unavailable rows never contain RA output artifacts",
+      "beta source agrees with branch definition",
+      "target count is read from actual branch output"
+    ],
+    "report_outputs": [
+      "fair_branch_smoke_report.json",
+      "fair_branch_smoke_trials.csv",
+      "fair_branch_route_audit.json"
+    ]
+  }
+}

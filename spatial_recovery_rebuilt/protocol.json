@@ -1,0 +1,48 @@
+{
+  "protocol_name": "spatial_recovery_rebuilt",
+  "status": "reconstructed_scratch_only",
+  "claims_parity_with_lost_workspace": false,
+  "radar_frames": 400,
+  "radar_rate_hz": 100.0,
+  "duration_s": 4.0,
+  "calibration_frames": [0, 199],
+  "frozen_test_frames": [200, 399],
+  "adxl_rate_hz": 1000.0,
+  "reference_rate_hz": 3000.0,
+  "motion_frequency_hz": 1.0,
+  "q_proxy_reference_angle_deg": 15.0,
+  "strata": [
+    {"name": "stationary", "requested_q_true_rms_mm": 0.0},
+    {"name": "low_motion_0p005mm", "requested_q_true_rms_mm": 0.005},
+    {"name": "low_motion_0p010mm", "requested_q_true_rms_mm": 0.01},
+    {"name": "low_motion_0p020mm", "requested_q_true_rms_mm": 0.02},
+    {"name": "low_motion_0p050mm", "requested_q_true_rms_mm": 0.05}
+  ],
+  "seed_count": 40,
+  "seed_start": 20261001,
+  "seed_values": [
+    20261001, 20261002, 20261003, 20261004, 20261005,
+    20261006, 20261007, 20261008, 20261009, 20261010,
+    20261011, 20261012, 20261013, 20261014, 20261015,
+    20261016, 20261017, 20261018, 20261019, 20261020,
+    20261021, 20261022, 20261023, 20261024, 20261025,
+    20261026, 20261027, 20261028, 20261029, 20261030,
+    20261031, 20261032, 20261033, 20261034, 20261035,
+    20261036, 20261037, 20261038, 20261039, 20261040
+  ],
+  "guard_policy": {
+    "source": "calibration_capture_arrays_only",
+    "freeze_artifact": "guards.json",
+    "finite_arrays": true,
+    "strictly_increasing_time": true,
+    "amplitude_limits": "1.25 times calibration ADC and ADXL absolute maxima",
+    "test_abs_limit_multiplier": 1.25,
+    "zero_stratum_epsilon_m": 1e-15
+  },
+  "unavailable_from_current_checkout": [
+    "lost workspace implementation and prior results",
+    "original q_true/q_proxy definitions",
+    "original guard thresholds and pass criteria",
+    "original 40-seed outputs"
+  ]
+}

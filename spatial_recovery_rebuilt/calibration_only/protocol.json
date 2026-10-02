@@ -1,0 +1,60 @@
+{
+  "schema": "spatial_recovery_rebuilt.calibration_only_protocol",
+  "status": "scratch_smoke_only",
+  "claims_parity_with_lost_workspace": false,
+  "tracked_thesis_source_may_change": false,
+  "radar": {
+    "frames": 400,
+    "rate_hz": 100.0,
+    "calibration_frames": [0, 199],
+    "test_frames": [200, 399]
+  },
+  "calibration_route": [
+    "range_angle_process(adc_cube[:200])",
+    "detect_target_bins(max_candidates=5)",
+    "extract_targets(local_music_ml on calibration snapshots)",
+    "select_targets(calibration availability only)",
+    "freeze range_bins, angle_bins, refined angle_deg, measured_beta, selected_indices, initial_r"
+  ],
+  "test_route": [
+    "range FFT on adc_cube[200:400]",
+    "fixed-angle steering projection at frozen calibration geometry",
+    "run_fixed_beta_kalman on 200 test observations",
+    "preintegrate ADXL samples at or after test start only"
+  ],
+  "forbidden_test_geometry_operations": [
+    "detect_target_bins",
+    "select_targets",
+    "estimate_local_music_ml",
+    "angle-derived beta update"
+  ],
+  "guards": {
+    "source": "calibration ADC/ADXL and timestamps",
+    "test_check": "full test ADC/ADXL window",
+    "freeze_before_test": true,
+    "failed_guard": "abstention before estimator"
+  },
+  "metrics": {
+    "score_window": "test frames 200:399",
+    "truth_reference": "mean truth on full frame grid with elapsed <= 0.20 s",
+    "full_window_comparison": "descriptive same-package route comparison only",
+    "q_proxy_and_truth_to_estimator": false
+  },
+  "test_only_perturbation_probe": {
+    "purpose": "geometry-fence diagnostic only",
+    "frames_unchanged": [0, 199],
+    "frames_perturbed": [200, 399],
+    "excluded_from_guard_and_rmse": true
+  },
+  "smoke": {
+    "strata": [
+      "stationary",
+      "low_motion_0p005mm",
+      "low_motion_0p010mm",
+      "low_motion_0p020mm",
+      "low_motion_0p050mm"
+    ],
+    "seeds": [20261001, 20261002],
+    "full_matrix_started": false
+  }
+}

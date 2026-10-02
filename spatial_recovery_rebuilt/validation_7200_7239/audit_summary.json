@@ -1,0 +1,1064 @@
+{
+  "schema": "spatial_recovery_rebuilt.independent_audit",
+  "audit_type": "read_only_recomputed_from_retained_artifacts",
+  "protocol": "rebuilt_protocol",
+  "claims_parity_with_lost_workspace": false,
+  "source_files": {
+    "protocol": "protocol.json",
+    "run_manifest": "run_manifest.json",
+    "trial_metrics": "trial_metrics.csv",
+    "trial_metrics_21frame": "trial_metrics_21frame.csv",
+    "trial_records": "trials/*/trial.json",
+    "test_errors": "trials/*/test_errors.npy"
+  },
+  "source_hashes": {
+    "protocol.json": "bee8f078490260f22944778c2beef3b89c0f7cbe37d0f2cd0133110f6c9784b2",
+    "run_manifest.json": "1ff97e183a372d93e8b068b2ac13245723fff70b6aad876212b4162329530d47",
+    "trial_metrics.csv": "7dc2ac872852091327a29745bdae95ad91686c9d604ef3a6834f9c4e3fa87044",
+    "trial_metrics_21frame.csv": "bd2f6c3a203734af3fd0fdb53e3027963200463c80f907f271c4f283d6f9f9b1"
+  },
+  "matrix_integrity": {
+    "observed_trial_records": 200,
+    "expected_trial_records": 200,
+    "duplicate_trial_ids": [],
+    "missing_trial_ids": [],
+    "unexpected_trial_ids": [],
+    "all_expected_trials_present_once": true,
+    "strata_observed": [
+      "low_motion_0p005mm",
+      "low_motion_0p010mm",
+      "low_motion_0p020mm",
+      "low_motion_0p050mm",
+      "stationary"
+    ],
+    "effective_seed_values": [
+      7200,
+      7201,
+      7202,
+      7203,
+      7204,
+      7205,
+      7206,
+      7207,
+      7208,
+      7209,
+      7210,
+      7211,
+      7212,
+      7213,
+      7214,
+      7215,
+      7216,
+      7217,
+      7218,
+      7219,
+      7220,
+      7221,
+      7222,
+      7223,
+      7224,
+      7225,
+      7226,
+      7227,
+      7228,
+      7229,
+      7230,
+      7231,
+      7232,
+      7233,
+      7234,
+      7235,
+      7236,
+      7237,
+      7238,
+      7239
+    ],
+    "protocol_seed_values": [
+      20261001,
+      20261002,
+      20261003,
+      20261004,
+      20261005,
+      20261006,
+      20261007,
+      20261008,
+      20261009,
+      20261010,
+      20261011,
+      20261012,
+      20261013,
+      20261014,
+      20261015,
+      20261016,
+      20261017,
+      20261018,
+      20261019,
+      20261020,
+      20261021,
+      20261022,
+      20261023,
+      20261024,
+      20261025,
+      20261026,
+      20261027,
+      20261028,
+      20261029,
+      20261030,
+      20261031,
+      20261032,
+      20261033,
+      20261034,
+      20261035,
+      20261036,
+      20261037,
+      20261038,
+      20261039,
+      20261040
+    ],
+    "seed_override_documented": "effective seeds 7200-7239 replace protocol example seeds for this rebuilt run",
+    "seed_override_expected": true,
+    "requested_rms_mismatches": [],
+    "realized_q_rms_mismatches": [],
+    "condition_failures": [],
+    "all_trial_conditions_match_protocol": true
+  },
+  "overall": {
+    "trials": 200,
+    "accepted_trials": 191,
+    "rejected_trials": 9,
+    "coverage": 0.955,
+    "successes": 191,
+    "success_rate_abstention_as_failure": 0.955,
+    "all_trial_rmse": {
+      "rmse_um": null,
+      "status": "not_estimable",
+      "reason": "rejected trials have no algorithm output"
+    },
+    "algorithm_route": {
+      "methods": [
+        "fixed_geometry_beta_structural_kalman"
+      ],
+      "radar_modes": [
+        "frame"
+      ],
+      "single_route": true,
+      "comparison_supported": false,
+      "statement": "one fixed_geometry_beta_structural_kalman frame route; no RA/RO comparison"
+    }
+  },
+  "by_stratum": {
+    "stationary": {
+      "trials": 40,
+      "accepted_trials": 38,
+      "rejected_trials": 2,
+      "coverage": 0.95,
+      "successes": 38,
+      "success_rate_abstention_as_failure": 0.95,
+      "seeds": [
+        7200,
+        7201,
+        7202,
+        7203,
+        7204,
+        7205,
+        7206,
+        7207,
+        7208,
+        7209,
+        7210,
+        7211,
+        7212,
+        7213,
+        7214,
+        7215,
+        7216,
+        7217,
+        7218,
+        7219,
+        7220,
+        7221,
+        7222,
+        7223,
+        7224,
+        7225,
+        7226,
+        7227,
+        7228,
+        7229,
+        7230,
+        7231,
+        7232,
+        7233,
+        7234,
+        7235,
+        7236,
+        7237,
+        7238,
+        7239
+      ],
+      "missing_seeds": [],
+      "duplicate_seeds": [],
+      "rejected_seeds": [
+        7227,
+        7238
+      ],
+      "requested_q_true_rms_mm": 0.0,
+      "q_true_rms_mm_all_trials": {
+        "count": 40,
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "population_std": 0.0,
+        "unique_values": [
+          0.0
+        ]
+      },
+      "q_true_rms_mm_accepted": {
+        "count": 38,
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "population_std": 0.0,
+        "unique_values": [
+          0.0
+        ]
+      },
+      "q_true_rms_mm_rejected": {
+        "count": 2,
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "population_std": 0.0,
+        "unique_values": [
+          0.0
+        ]
+      },
+      "q_proxy_rms_mm_all_trials": {
+        "count": 40,
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "population_std": 0.0,
+        "unique_values": [
+          0.0
+        ]
+      },
+      "q_proxy_rms_mm_accepted": {
+        "count": 38,
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "population_std": 0.0,
+        "unique_values": [
+          0.0
+        ]
+      },
+      "q_proxy_rms_mm_rejected": {
+        "count": 2,
+        "min": 0.0,
+        "max": 0.0,
+        "mean": 0.0,
+        "median": 0.0,
+        "population_std": 0.0,
+        "unique_values": [
+          0.0
+        ]
+      },
+      "q_rms_consistency": {
+        "q_true_realized_equals_requested_all": true,
+        "q_proxy_expected_ratio": 0.9659258262890683,
+        "q_proxy_over_q_true_all": [],
+        "q_true_calibration_test_equal_all": true,
+        "q_proxy_calibration_test_equal_all": true,
+        "accepted_and_rejected_have_same_q_rms": true
+      },
+      "package_contract": {
+        "all_passed": true,
+        "counts": {
+          "passed": 40
+        }
+      },
+      "rejection_reason_counts": {
+        "frozen_test_guard.acceleration_within_frozen_limit=false": 2
+      },
+      "rejection_reason_raw_counts": {
+        "frozen_test_guard:RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}": 2
+      },
+      "accepted_only_rmse": {
+        "metric": "corrected_test_rmse_um_21frame",
+        "trial_mean_um": 1.1290418804356914,
+        "pooled_um": 1.1315581852310823,
+        "min_um": 0.9656801612286549,
+        "max_um": 1.3985034310950042,
+        "reported_20frame_trial_mean_um": 1.1290418804356914
+      },
+      "all_trial_rmse": {
+        "rmse_um": null,
+        "status": "not_estimable",
+        "reason": "9 rejected trials have no algorithm q_hat/test_errors output; assigning zero would not be an error metric",
+        "abstention_as_zero_supplement_um": 1.1029064920632607,
+        "abstention_as_zero_supplement_definition": "accepted test_errors plus zero error for rejected samples, reported only as a non-error diagnostic"
+      },
+      "all_trial_sample_coverage": 0.95,
+      "algorithm_route": {
+        "methods": [
+          "fixed_geometry_beta_structural_kalman"
+        ],
+        "radar_modes": [
+          "frame"
+        ],
+        "method_counts": {
+          "fixed_geometry_beta_structural_kalman": 1
+        },
+        "single_route": true
+      },
+      "selection_bias_assessment": {
+        "q_rms_shift_detected": false,
+        "reason": "realized q_true and q_proxy RMS are constant within this stratum across accepted and rejected trials",
+        "conditional_rmse_caveat": "accepted-only RMSE is conditional on frozen guard pass; rejected seeds have no counterfactual q_hat, so guard-related selection bias cannot be quantified from retained outputs",
+        "rejection_seed_pattern": [
+          7227,
+          7238
+        ]
+      }
+    },
+    "low_motion_0p005mm": {
+      "trials": 40,
+      "accepted_trials": 38,
+      "rejected_trials": 2,
+      "coverage": 0.95,
+      "successes": 38,
+      "success_rate_abstention_as_failure": 0.95,
+      "seeds": [
+        7200,
+        7201,
+        7202,
+        7203,
+        7204,
+        7205,
+        7206,
+        7207,
+        7208,
+        7209,
+        7210,
+        7211,
+        7212,
+        7213,
+        7214,
+        7215,
+        7216,
+        7217,
+        7218,
+        7219,
+        7220,
+        7221,
+        7222,
+        7223,
+        7224,
+        7225,
+        7226,
+        7227,
+        7228,
+        7229,
+        7230,
+        7231,
+        7232,
+        7233,
+        7234,
+        7235,
+        7236,
+        7237,
+        7238,
+        7239
+      ],
+      "missing_seeds": [],
+      "duplicate_seeds": [],
+      "rejected_seeds": [
+        7227,
+        7238
+      ],
+      "requested_q_true_rms_mm": 0.005,
+      "q_true_rms_mm_all_trials": {
+        "count": 40,
+        "min": 0.005,
+        "max": 0.005,
+        "mean": 0.005,
+        "median": 0.005,
+        "population_std": 0.0,
+        "unique_values": [
+          0.005
+        ]
+      },
+      "q_true_rms_mm_accepted": {
+        "count": 38,
+        "min": 0.005,
+        "max": 0.005,
+        "mean": 0.005,
+        "median": 0.005,
+        "population_std": 0.0,
+        "unique_values": [
+          0.005
+        ]
+      },
+      "q_true_rms_mm_rejected": {
+        "count": 2,
+        "min": 0.005,
+        "max": 0.005,
+        "mean": 0.005,
+        "median": 0.005,
+        "population_std": 0.0,
+        "unique_values": [
+          0.005
+        ]
+      },
+      "q_proxy_rms_mm_all_trials": {
+        "count": 40,
+        "min": 0.004829629131445342,
+        "max": 0.004829629131445342,
+        "mean": 0.004829629131445342,
+        "median": 0.004829629131445342,
+        "population_std": 0.0,
+        "unique_values": [
+          0.004829629131445342
+        ]
+      },
+      "q_proxy_rms_mm_accepted": {
+        "count": 38,
+        "min": 0.004829629131445342,
+        "max": 0.004829629131445342,
+        "mean": 0.004829629131445342,
+        "median": 0.004829629131445342,
+        "population_std": 0.0,
+        "unique_values": [
+          0.004829629131445342
+        ]
+      },
+      "q_proxy_rms_mm_rejected": {
+        "count": 2,
+        "min": 0.004829629131445342,
+        "max": 0.004829629131445342,
+        "mean": 0.004829629131445342,
+        "median": 0.004829629131445342,
+        "population_std": 0.0,
+        "unique_values": [
+          0.004829629131445342
+        ]
+      },
+      "q_rms_consistency": {
+        "q_true_realized_equals_requested_all": true,
+        "q_proxy_expected_ratio": 0.9659258262890683,
+        "q_proxy_over_q_true_all": [
+          0.965925826289068
+        ],
+        "q_true_calibration_test_equal_all": true,
+        "q_proxy_calibration_test_equal_all": true,
+        "accepted_and_rejected_have_same_q_rms": true
+      },
+      "package_contract": {
+        "all_passed": true,
+        "counts": {
+          "passed": 40
+        }
+      },
+      "rejection_reason_counts": {
+        "frozen_test_guard.acceleration_within_frozen_limit=false": 2
+      },
+      "rejection_reason_raw_counts": {
+        "frozen_test_guard:RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}": 2
+      },
+      "accepted_only_rmse": {
+        "metric": "corrected_test_rmse_um_21frame",
+        "trial_mean_um": 1.1753078636515228,
+        "pooled_um": 1.179045160771864,
+        "min_um": 1.0373899012268741,
+        "max_um": 1.5470262142535667,
+        "reported_20frame_trial_mean_um": 1.149833703277957
+      },
+      "all_trial_rmse": {
+        "rmse_um": null,
+        "status": "not_estimable",
+        "reason": "9 rejected trials have no algorithm q_hat/test_errors output; assigning zero would not be an error metric",
+        "abstention_as_zero_supplement_um": 1.149191070528558,
+        "abstention_as_zero_supplement_definition": "accepted test_errors plus zero error for rejected samples, reported only as a non-error diagnostic"
+      },
+      "all_trial_sample_coverage": 0.95,
+      "algorithm_route": {
+        "methods": [
+          "fixed_geometry_beta_structural_kalman"
+        ],
+        "radar_modes": [
+          "frame"
+        ],
+        "method_counts": {
+          "fixed_geometry_beta_structural_kalman": 1
+        },
+        "single_route": true
+      },
+      "selection_bias_assessment": {
+        "q_rms_shift_detected": false,
+        "reason": "realized q_true and q_proxy RMS are constant within this stratum across accepted and rejected trials",
+        "conditional_rmse_caveat": "accepted-only RMSE is conditional on frozen guard pass; rejected seeds have no counterfactual q_hat, so guard-related selection bias cannot be quantified from retained outputs",
+        "rejection_seed_pattern": [
+          7227,
+          7238
+        ]
+      }
+    },
+    "low_motion_0p010mm": {
+      "trials": 40,
+      "accepted_trials": 38,
+      "rejected_trials": 2,
+      "coverage": 0.95,
+      "successes": 38,
+      "success_rate_abstention_as_failure": 0.95,
+      "seeds": [
+        7200,
+        7201,
+        7202,
+        7203,
+        7204,
+        7205,
+        7206,
+        7207,
+        7208,
+        7209,
+        7210,
+        7211,
+        7212,
+        7213,
+        7214,
+        7215,
+        7216,
+        7217,
+        7218,
+        7219,
+        7220,
+        7221,
+        7222,
+        7223,
+        7224,
+        7225,
+        7226,
+        7227,
+        7228,
+        7229,
+        7230,
+        7231,
+        7232,
+        7233,
+        7234,
+        7235,
+        7236,
+        7237,
+        7238,
+        7239
+      ],
+      "missing_seeds": [],
+      "duplicate_seeds": [],
+      "rejected_seeds": [
+        7227,
+        7238
+      ],
+      "requested_q_true_rms_mm": 0.01,
+      "q_true_rms_mm_all_trials": {
+        "count": 40,
+        "min": 0.01,
+        "max": 0.01,
+        "mean": 0.01,
+        "median": 0.01,
+        "population_std": 0.0,
+        "unique_values": [
+          0.01
+        ]
+      },
+      "q_true_rms_mm_accepted": {
+        "count": 38,
+        "min": 0.01,
+        "max": 0.01,
+        "mean": 0.01,
+        "median": 0.01,
+        "population_std": 0.0,
+        "unique_values": [
+          0.01
+        ]
+      },
+      "q_true_rms_mm_rejected": {
+        "count": 2,
+        "min": 0.01,
+        "max": 0.01,
+        "mean": 0.01,
+        "median": 0.01,
+        "population_std": 0.0,
+        "unique_values": [
+          0.01
+        ]
+      },
+      "q_proxy_rms_mm_all_trials": {
+        "count": 40,
+        "min": 0.009659258262890684,
+        "max": 0.009659258262890684,
+        "mean": 0.009659258262890684,
+        "median": 0.009659258262890684,
+        "population_std": 0.0,
+        "unique_values": [
+          0.009659258262890684
+        ]
+      },
+      "q_proxy_rms_mm_accepted": {
+        "count": 38,
+        "min": 0.009659258262890684,
+        "max": 0.009659258262890684,
+        "mean": 0.009659258262890684,
+        "median": 0.009659258262890684,
+        "population_std": 0.0,
+        "unique_values": [
+          0.009659258262890684
+        ]
+      },
+      "q_proxy_rms_mm_rejected": {
+        "count": 2,
+        "min": 0.009659258262890684,
+        "max": 0.009659258262890684,
+        "mean": 0.009659258262890684,
+        "median": 0.009659258262890684,
+        "population_std": 0.0,
+        "unique_values": [
+          0.009659258262890684
+        ]
+      },
+      "q_rms_consistency": {
+        "q_true_realized_equals_requested_all": true,
+        "q_proxy_expected_ratio": 0.9659258262890683,
+        "q_proxy_over_q_true_all": [
+          0.965925826289068
+        ],
+        "q_true_calibration_test_equal_all": true,
+        "q_proxy_calibration_test_equal_all": true,
+        "accepted_and_rejected_have_same_q_rms": true
+      },
+      "package_contract": {
+        "all_passed": true,
+        "counts": {
+          "passed": 40
+        }
+      },
+      "rejection_reason_counts": {
+        "frozen_test_guard.acceleration_within_frozen_limit=false": 2
+      },
+      "rejection_reason_raw_counts": {
+        "frozen_test_guard:RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}": 2
+      },
+      "accepted_only_rmse": {
+        "metric": "corrected_test_rmse_um_21frame",
+        "trial_mean_um": 1.284170893127086,
+        "pooled_um": 1.2899986429640156,
+        "min_um": 1.0932143110364754,
+        "max_um": 1.7291982052833097,
+        "reported_20frame_trial_mean_um": 1.196736620233651
+      },
+      "all_trial_rmse": {
+        "rmse_um": null,
+        "status": "not_estimable",
+        "reason": "9 rejected trials have no algorithm q_hat/test_errors output; assigning zero would not be an error metric",
+        "abstention_as_zero_supplement_um": 1.2573351478052903,
+        "abstention_as_zero_supplement_definition": "accepted test_errors plus zero error for rejected samples, reported only as a non-error diagnostic"
+      },
+      "all_trial_sample_coverage": 0.95,
+      "algorithm_route": {
+        "methods": [
+          "fixed_geometry_beta_structural_kalman"
+        ],
+        "radar_modes": [
+          "frame"
+        ],
+        "method_counts": {
+          "fixed_geometry_beta_structural_kalman": 1
+        },
+        "single_route": true
+      },
+      "selection_bias_assessment": {
+        "q_rms_shift_detected": false,
+        "reason": "realized q_true and q_proxy RMS are constant within this stratum across accepted and rejected trials",
+        "conditional_rmse_caveat": "accepted-only RMSE is conditional on frozen guard pass; rejected seeds have no counterfactual q_hat, so guard-related selection bias cannot be quantified from retained outputs",
+        "rejection_seed_pattern": [
+          7227,
+          7238
+        ]
+      }
+    },
+    "low_motion_0p020mm": {
+      "trials": 40,
+      "accepted_trials": 38,
+      "rejected_trials": 2,
+      "coverage": 0.95,
+      "successes": 38,
+      "success_rate_abstention_as_failure": 0.95,
+      "seeds": [
+        7200,
+        7201,
+        7202,
+        7203,
+        7204,
+        7205,
+        7206,
+        7207,
+        7208,
+        7209,
+        7210,
+        7211,
+        7212,
+        7213,
+        7214,
+        7215,
+        7216,
+        7217,
+        7218,
+        7219,
+        7220,
+        7221,
+        7222,
+        7223,
+        7224,
+        7225,
+        7226,
+        7227,
+        7228,
+        7229,
+        7230,
+        7231,
+        7232,
+        7233,
+        7234,
+        7235,
+        7236,
+        7237,
+        7238,
+        7239
+      ],
+      "missing_seeds": [],
+      "duplicate_seeds": [],
+      "rejected_seeds": [
+        7227,
+        7238
+      ],
+      "requested_q_true_rms_mm": 0.02,
+      "q_true_rms_mm_all_trials": {
+        "count": 40,
+        "min": 0.02,
+        "max": 0.02,
+        "mean": 0.02,
+        "median": 0.02,
+        "population_std": 0.0,
+        "unique_values": [
+          0.02
+        ]
+      },
+      "q_true_rms_mm_accepted": {
+        "count": 38,
+        "min": 0.02,
+        "max": 0.02,
+        "mean": 0.02,
+        "median": 0.02,
+        "population_std": 0.0,
+        "unique_values": [
+          0.02
+        ]
+      },
+      "q_true_rms_mm_rejected": {
+        "count": 2,
+        "min": 0.02,
+        "max": 0.02,
+        "mean": 0.02,
+        "median": 0.02,
+        "population_std": 0.0,
+        "unique_values": [
+          0.02
+        ]
+      },
+      "q_proxy_rms_mm_all_trials": {
+        "count": 40,
+        "min": 0.019318516525781367,
+        "max": 0.019318516525781367,
+        "mean": 0.019318516525781367,
+        "median": 0.019318516525781367,
+        "population_std": 0.0,
+        "unique_values": [
+          0.019318516525781367
+        ]
+      },
+      "q_proxy_rms_mm_accepted": {
+        "count": 38,
+        "min": 0.019318516525781367,
+        "max": 0.019318516525781367,
+        "mean": 0.019318516525781367,
+        "median": 0.019318516525781367,
+        "population_std": 0.0,
+        "unique_values": [
+          0.019318516525781367
+        ]
+      },
+      "q_proxy_rms_mm_rejected": {
+        "count": 2,
+        "min": 0.019318516525781367,
+        "max": 0.019318516525781367,
+        "mean": 0.019318516525781367,
+        "median": 0.019318516525781367,
+        "population_std": 0.0,
+        "unique_values": [
+          0.019318516525781367
+        ]
+      },
+      "q_rms_consistency": {
+        "q_true_realized_equals_requested_all": true,
+        "q_proxy_expected_ratio": 0.9659258262890683,
+        "q_proxy_over_q_true_all": [
+          0.965925826289068
+        ],
+        "q_true_calibration_test_equal_all": true,
+        "q_proxy_calibration_test_equal_all": true,
+        "accepted_and_rejected_have_same_q_rms": true
+      },
+      "package_contract": {
+        "all_passed": true,
+        "counts": {
+          "passed": 40
+        }
+      },
+      "rejection_reason_counts": {
+        "frozen_test_guard.acceleration_within_frozen_limit=false": 2
+      },
+      "rejection_reason_raw_counts": {
+        "frozen_test_guard:RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}": 2
+      },
+      "accepted_only_rmse": {
+        "metric": "corrected_test_rmse_um_21frame",
+        "trial_mean_um": 1.6362567212164099,
+        "pooled_um": 1.6447931263310782,
+        "min_um": 1.3832819785810435,
+        "max_um": 2.1609140329780434,
+        "reported_20frame_trial_mean_um": 1.3572886563684265
+      },
+      "all_trial_rmse": {
+        "rmse_um": null,
+        "status": "not_estimable",
+        "reason": "9 rejected trials have no algorithm q_hat/test_errors output; assigning zero would not be an error metric",
+        "abstention_as_zero_supplement_um": 1.6031460342104409,
+        "abstention_as_zero_supplement_definition": "accepted test_errors plus zero error for rejected samples, reported only as a non-error diagnostic"
+      },
+      "all_trial_sample_coverage": 0.95,
+      "algorithm_route": {
+        "methods": [
+          "fixed_geometry_beta_structural_kalman"
+        ],
+        "radar_modes": [
+          "frame"
+        ],
+        "method_counts": {
+          "fixed_geometry_beta_structural_kalman": 1
+        },
+        "single_route": true
+      },
+      "selection_bias_assessment": {
+        "q_rms_shift_detected": false,
+        "reason": "realized q_true and q_proxy RMS are constant within this stratum across accepted and rejected trials",
+        "conditional_rmse_caveat": "accepted-only RMSE is conditional on frozen guard pass; rejected seeds have no counterfactual q_hat, so guard-related selection bias cannot be quantified from retained outputs",
+        "rejection_seed_pattern": [
+          7227,
+          7238
+        ]
+      }
+    },
+    "low_motion_0p050mm": {
+      "trials": 40,
+      "accepted_trials": 39,
+      "rejected_trials": 1,
+      "coverage": 0.975,
+      "successes": 39,
+      "success_rate_abstention_as_failure": 0.975,
+      "seeds": [
+        7200,
+        7201,
+        7202,
+        7203,
+        7204,
+        7205,
+        7206,
+        7207,
+        7208,
+        7209,
+        7210,
+        7211,
+        7212,
+        7213,
+        7214,
+        7215,
+        7216,
+        7217,
+        7218,
+        7219,
+        7220,
+        7221,
+        7222,
+        7223,
+        7224,
+        7225,
+        7226,
+        7227,
+        7228,
+        7229,
+        7230,
+        7231,
+        7232,
+        7233,
+        7234,
+        7235,
+        7236,
+        7237,
+        7238,
+        7239
+      ],
+      "missing_seeds": [],
+      "duplicate_seeds": [],
+      "rejected_seeds": [
+        7227
+      ],
+      "requested_q_true_rms_mm": 0.05,
+      "q_true_rms_mm_all_trials": {
+        "count": 40,
+        "min": 0.05,
+        "max": 0.05,
+        "mean": 0.05,
+        "median": 0.05,
+        "population_std": 0.0,
+        "unique_values": [
+          0.05
+        ]
+      },
+      "q_true_rms_mm_accepted": {
+        "count": 39,
+        "min": 0.05,
+        "max": 0.05,
+        "mean": 0.05,
+        "median": 0.05,
+        "population_std": 0.0,
+        "unique_values": [
+          0.05
+        ]
+      },
+      "q_true_rms_mm_rejected": {
+        "count": 1,
+        "min": 0.05,
+        "max": 0.05,
+        "mean": 0.05,
+        "median": 0.05,
+        "population_std": 0.0,
+        "unique_values": [
+          0.05
+        ]
+      },
+      "q_proxy_rms_mm_all_trials": {
+        "count": 40,
+        "min": 0.04829629131445342,
+        "max": 0.04829629131445342,
+        "mean": 0.04829629131445342,
+        "median": 0.04829629131445342,
+        "population_std": 0.0,
+        "unique_values": [
+          0.04829629131445342
+        ]
+      },
+      "q_proxy_rms_mm_accepted": {
+        "count": 39,
+        "min": 0.04829629131445342,
+        "max": 0.04829629131445342,
+        "mean": 0.04829629131445342,
+        "median": 0.04829629131445342,
+        "population_std": 0.0,
+        "unique_values": [
+          0.04829629131445342
+        ]
+      },
+      "q_proxy_rms_mm_rejected": {
+        "count": 1,
+        "min": 0.04829629131445342,
+        "max": 0.04829629131445342,
+        "mean": 0.04829629131445342,
+        "median": 0.04829629131445342,
+        "population_std": 0.0,
+        "unique_values": [
+          0.04829629131445342
+        ]
+      },
+      "q_rms_consistency": {
+        "q_true_realized_equals_requested_all": true,
+        "q_proxy_expected_ratio": 0.9659258262890683,
+        "q_proxy_over_q_true_all": [
+          0.965925826289068
+        ],
+        "q_true_calibration_test_equal_all": true,
+        "q_proxy_calibration_test_equal_all": true,
+        "accepted_and_rejected_have_same_q_rms": true
+      },
+      "package_contract": {
+        "all_passed": true,
+        "counts": {
+          "passed": 40
+        }
+      },
+      "rejection_reason_counts": {
+        "frozen_test_guard.acceleration_within_frozen_limit=false": 1
+      },
+      "rejection_reason_raw_counts": {
+        "frozen_test_guard:RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}": 1
+      },
+      "accepted_only_rmse": {
+        "metric": "corrected_test_rmse_um_21frame",
+        "trial_mean_um": 3.1211149316367885,
+        "pooled_um": 3.128378797502391,
+        "min_um": 2.802864697273096,
+        "max_um": 3.6824183133943276,
+        "reported_20frame_trial_mean_um": 2.145649642777959
+      },
+      "all_trial_rmse": {
+        "rmse_um": null,
+        "status": "not_estimable",
+        "reason": "9 rejected trials have no algorithm q_hat/test_errors output; assigning zero would not be an error metric",
+        "abstention_as_zero_supplement_um": 3.08902655429602,
+        "abstention_as_zero_supplement_definition": "accepted test_errors plus zero error for rejected samples, reported only as a non-error diagnostic"
+      },
+      "all_trial_sample_coverage": 0.975,
+      "algorithm_route": {
+        "methods": [
+          "fixed_geometry_beta_structural_kalman"
+        ],
+        "radar_modes": [
+          "frame"
+        ],
+        "method_counts": {
+          "fixed_geometry_beta_structural_kalman": 1
+        },
+        "single_route": true
+      },
+      "selection_bias_assessment": {
+        "q_rms_shift_detected": false,
+        "reason": "realized q_true and q_proxy RMS are constant within this stratum across accepted and rejected trials",
+        "conditional_rmse_caveat": "accepted-only RMSE is conditional on frozen guard pass; rejected seeds have no counterfactual q_hat, so guard-related selection bias cannot be quantified from retained outputs",
+        "rejection_seed_pattern": [
+          7227
+        ]
+      }
+    }
+  },
+  "conclusions": [
+    "All 5 strata contain exactly one trial for each effective seed 7200-7239; the run manifest explicitly documents replacement of the protocol's example seed list.",
+    "All realized q_true/q_proxy RMS values are constant within stratum and match the requested RMS plus the 15 degree proxy factor; accepted and rejected trials have the same RMS distributions.",
+    "Nine trials are rejected by the frozen test acceleration guard (seed 7227 in all strata and seed 7238 in the first four strata); package contract passes for all trials.",
+    "Accepted-only RMSE is conditional on guard acceptance. Rejected trials have no algorithm output, so a valid all-trial RMSE cannot be recomputed; all-trial success and sample coverage are reported instead.",
+    "The retained algorithm route is one fixed_geometry_beta_structural_kalman frame route with radar_mode=frame; this audit supports no RA/RO comparison."
+  ]
+}

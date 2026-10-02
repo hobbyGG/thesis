@@ -1,0 +1,92 @@
+{
+  "schema": "spatial_recovery_rebuilt.ro_input_isolation_strict",
+  "status": "passed",
+  "started_at": "2026-10-02T01:11:11.905282+00:00",
+  "completed_at": "2026-10-02T01:11:11.931798+00:00",
+  "source_package": "/Users/umep/thesis/spatial_recovery_rebuilt/smoke/capture_low_motion_0p005mm_seed20261001",
+  "git_head": "86bf1acde6cd6254e09aeb15ce27c9d17d215474",
+  "git_status_before": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/",
+  "git_status_after": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/",
+  "script_sha256": "80b31716e659d0362ef823446aacc5f28d599373792e54c47cb1007fbed05811",
+  "source_adc_file_sha256": "bb031cfb3153e37704e92b80ef9a0cff5f92f045b00c081345677760a1e0a354",
+  "visible_files": [
+    "acceleration_mps2.npy",
+    "adc_cube.npy",
+    "adxl_time_ns.npy",
+    "observable_config.json",
+    "radar_time_ns.npy"
+  ],
+  "observable_config": {
+    "frames": 400,
+    "frame_rate_hz": 100.0,
+    "frame_period_s": 0.01,
+    "virtual_antennas": 8,
+    "adc_samples_per_chirp": 256,
+    "start_frequency_hz": 77000000000.0,
+    "range_resolution_m": 0.043571956298046874,
+    "chirp_slope_hz_per_s": 70000000000000.0,
+    "adc_sample_rate_hz": 5209000.0,
+    "chirp_cube_semantics": "paired TDM virtual snapshot: channels 0..3 are TX0/RX0..3 and 4..7 are TX2/RX0..3"
+  },
+  "observable_config_sha256": "1e5a8daa02c0ad2f0815c4b8fa232f799e2ab387a428038de319d2ea13203f74",
+  "boundary_checks": {
+    "truth_and_q_proxy_absent": true,
+    "simulation_source_labels_absent": true,
+    "angular_metadata_absent": true,
+    "poisoned_forbidden_metadata_has_no_effect": true,
+    "all_8_raw_channels_retained": true,
+    "calibration_adc_unchanged_under_test_only_perturbation": true,
+    "test_adc_changed": true
+  },
+  "array_contract": {
+    "adc_shape": [
+      400,
+      8,
+      256
+    ],
+    "adc_dtype": "complex64",
+    "calibration_range_fft_shape": [
+      200,
+      8,
+      256
+    ],
+    "test_range_fft_shape": [
+      200,
+      8,
+      256
+    ],
+    "all_range_fft_values_finite": true,
+    "radar_time_count": 400,
+    "adxl_shape": [
+      4000,
+      3
+    ]
+  },
+  "input_hashes": {
+    "calibration_adc_before": "6bdb60fb073e09e745d062973a69249d49ea63f82891658e1c74d0c3961c9e7b",
+    "calibration_adc_after": "6bdb60fb073e09e745d062973a69249d49ea63f82891658e1c74d0c3961c9e7b",
+    "test_adc_before": "5493d04035edd62e74fa2cac8ffde749451a8a119c1e212dcc0f0d6acf5bfcc4",
+    "test_adc_after": "47d712fd9edbcc942b33ddea8fa7bc3a15bb7f16e6bb0223d051e1aa30b768da",
+    "calibration_adxl": "aef1464c9717bbdf400cc7dbf67b2598940869dd41ab3259d6d9c3dbc1f457b5",
+    "test_adxl": "e7c201d14f2b39a00395b49a948ca10d416d85f0a6d18d29b55cbf612938f8ee",
+    "calibration_radar_time": "9505e224ffdf93908f7f1b30cbec4e38558e92988934dbb76f6c80bf7e912dca",
+    "test_radar_time": "1f9802eec392ec72c67a86c04c0e629901a099148ca038867f8a83741c9fb753"
+  },
+  "operations_invoked": [
+    "numpy range FFT independently for all channels",
+    "input hash and whitelist checks"
+  ],
+  "operations_not_invoked": [
+    "range-bin selection",
+    "beta fit",
+    "angle/DBF/MUSIC/ML",
+    "phase estimator",
+    "Kalman",
+    "RMSE scoring"
+  ],
+  "baseline_implemented": false,
+  "fairness_established": false,
+  "frozen_beta_verified": false,
+  "full_run_started": false,
+  "interpretation": "Input isolation only; channel selection, beta identifiability and correlated-observation weighting remain design blockers."
+}

@@ -1,0 +1,83 @@
+{
+  "schema": "spatial_recovery_rebuilt.fair_branch_trial",
+  "trial_id": "low_motion_0p005mm__seed20261001",
+  "stratum": "low_motion_0p005mm",
+  "seed": 20261001,
+  "branch_id": "ra",
+  "status": "completed",
+  "shared_package_sha256": "e0300b59cefcda3ad93b82778dad3f79e4b263d9b9d9ebdbda5088cec37cba3b",
+  "adc_input_sha256": "bb031cfb3153e37704e92b80ef9a0cff5f92f045b00c081345677760a1e0a354",
+  "adxl_input_sha256": "5bb8da0d6f70bc9333ad846deb17fcb4ca14115a2bba88cfffe4547497effbbd",
+  "guards_sha256": "371d1369d616a5e4d00c8d0c9e922c5f8a1aa84c97ebc142bcc5fc3c23b82cae",
+  "package_contract": {
+    "radar_schema": true,
+    "radar_complete": true,
+    "radar_frames_400": true,
+    "adc_shape": true,
+    "adc_is_loop_mean": true,
+    "radar_rate_100_hz": true,
+    "frame_time_count": true,
+    "adxl_4000": true,
+    "adxl_time_monotonic": true,
+    "sync_time_monotonic": true,
+    "truth_reference_count": true,
+    "proxy_shape": true
+  },
+  "guard_result": {
+    "guards": {
+      "source": "calibration_capture_arrays_only",
+      "frozen_before_test": true,
+      "calibration_frame_range": [
+        0,
+        199
+      ],
+      "calibration_adxl_sample_count": 2000,
+      "finite_calibration": true,
+      "adc_abs_limit": 1.2766949832439423,
+      "acceleration_abs_limit_mps2": 0.02569925640538352,
+      "time_monotonic_required": true
+    },
+    "frozen_test": {
+      "test_frame_range": [
+        200,
+        399
+      ],
+      "test_adxl_sample_count": 2000,
+      "finite_test_capture_arrays": true,
+      "test_radar_time_monotonic": true,
+      "adc_within_frozen_limit": true,
+      "acceleration_within_frozen_limit": true,
+      "passed": true
+    }
+  },
+  "radar_frames": 400,
+  "radar_rate_hz": 100.0,
+  "calibration_frames": 200,
+  "frozen_test_frames": 200,
+  "adxl_samples": 4000,
+  "adxl_rate_hz": 1000.0,
+  "estimator_input_manifest": [
+    "radar/algorithm_input/adc_cube.npy",
+    "radar/algorithm_input/chirp_cube.npy",
+    "radar/algorithm_input/manifest.json",
+    "adxl355/algorithm_input/acceleration_mps2.npy",
+    "adxl355/algorithm_input/estimated_sample_monotonic_ns.npy",
+    "sync/manifest.json",
+    "sync/timeline.json",
+    "sync/*.npy"
+  ],
+  "truth_used_by_estimator": false,
+  "q_proxy_used_by_estimator": false,
+  "actual_route": "fixed_geometry_beta_structural_kalman/frame",
+  "beta_source": "angle_geometry",
+  "target_count": 5,
+  "accepted": true,
+  "rmse_m": 1.1152147440412594e-06,
+  "primary_success": true,
+  "coverage": true,
+  "abstention": false,
+  "detected_candidate_count": 5,
+  "method": "fixed_geometry_beta_structural_kalman",
+  "radar_mode": "frame",
+  "truth_evaluation": "post_run_only_outside_estimator_input_copy"
+}

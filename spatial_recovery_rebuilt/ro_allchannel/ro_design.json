@@ -1,0 +1,72 @@
+{
+  "schema": "spatial_recovery_rebuilt.ro_allchannel_design",
+  "status": "blocked_design_only",
+  "tracked_source_modified": false,
+  "estimator_implemented": false,
+  "pair_smoke_started": false,
+  "observed_capture": {
+    "adc_cube_shape": [400, 8, 256],
+    "adc_cube_dtype": "complex64",
+    "chirp_cube_shape": [400, 16, 8, 256],
+    "chirp_cube_dtype": "complex64",
+    "adxl_shape": [4000, 3],
+    "radar_rate_hz": 100.0,
+    "calibration_frames": [0, 199],
+    "test_frames": [200, 399]
+  },
+  "current_api": {
+    "capture_loader": "algorithm/io.py:22-75",
+    "radar_input_contract": "algorithm/types.py:33-41",
+    "kalman_input_use": "algorithm/kalman.py:77-112",
+    "kalman_result_beta_source": "algorithm/kalman.py:146-150",
+    "current_beta_label": "angle_geometry",
+    "ro_route_entrypoint": false
+  },
+  "required_calibration_route": [
+    "range FFT over adc_cube[0:200] for all 8 channels",
+    "range-only channel-summed robust energy and local range-bin peaks",
+    "documented all-channel complex combination weights",
+    "freeze range bins, weights, selection, beta, phase convention before frame 200"
+  ],
+  "required_test_route": [
+    "range FFT over adc_cube[200:400]",
+    "apply frozen all-channel weights only",
+    "feed frozen observations and test-only ADXL preintegration to matched Kalman",
+    "no test-side range detection, channel-weight fit, angle, MUSIC, ML, or beta refit"
+  ],
+  "beta": {
+    "structural_relation": "phase is proportional to q*cos(theta); structural beta is approximately 1/abs(cos(theta))",
+    "q_proxy_fit": {
+      "status": "oracle_diagnostic_only",
+      "reason": "q_proxy is truth/q_true*cos(15 degrees), stored under truth, and conversion to structural beta needs external 15-degree information",
+      "source": "spatial_recovery_rebuilt/rebuild_validation.py:100-113,172-187"
+    },
+    "adxl_regressed_slope": {
+      "status": "candidate_observable_but_blocked",
+      "model": "phi=c0+c1*t+c2*t^2+gamma*u_adxl",
+      "stationary": "unidentifiable",
+      "low_motion": "noise_limited",
+      "required_scale": "independent ADXL scale and signed phase convention",
+      "source": "algorithm/acceleration.py:14-40"
+    },
+    "fixed_identity": {
+      "status": "LOS_only_diagnostic",
+      "structural_q_comparison": false
+    }
+  },
+  "channel_semantics": {
+    "channels_are_independent_targets": false,
+    "reason": "all target, static scatterer, and multipath contributions project into all 8 channels; PLL is shared per physical TX",
+    "source": "paper_bridge_simulation/package_builder.py:141-208",
+    "output_count_name": "range_bin_count"
+  },
+  "blockers": [
+    "all-channel combination weights and phase convention",
+    "range-bin threshold/merge/count contract",
+    "observable beta definition and abstention rules",
+    "matched phase unwrap and measurement variance equations",
+    "route-specific method and beta_source metadata",
+    "test-only perturbation fence"
+  ],
+  "source_sha256_recorded_by": "input_isolation_smoke.py"
+}

@@ -1,0 +1,46 @@
+{
+  "schema": "spatial_recovery_rebuilt.fair_branch_smoke_report",
+  "protocol": "/Users/umep/thesis/spatial_recovery_rebuilt/fair_branch_protocol.json",
+  "status": "smoke_complete_ro_blocked",
+  "git_status_before": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n",
+  "git_status_after": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n",
+  "claims_parity_with_lost_workspace": false,
+  "trial_count": 20,
+  "primary_success_count": 10,
+  "all_trial_success_rate": 0.5,
+  "by_branch": {
+    "ro_all_channel": {
+      "trials": 10,
+      "primary_success": 0,
+      "coverage": 0.0,
+      "abstention": 1.0,
+      "accepted_only_rmse_m": [],
+      "accepted_only_rmse_m_mean": null,
+      "metric_status": "not_estimable_missing_route"
+    },
+    "ra": {
+      "trials": 10,
+      "primary_success": 10,
+      "coverage": 1.0,
+      "abstention": 0.0,
+      "accepted_only_rmse_m": [
+        1.0886128409316128e-06,
+        1.0149291424884103e-06,
+        1.1152147440412594e-06,
+        1.0280588302466497e-06,
+        1.1605157643762048e-06,
+        1.0624010072361832e-06,
+        1.2979553295393069e-06,
+        1.1855723646397517e-06,
+        1.942259969241071e-06,
+        1.8189338555851146e-06
+      ],
+      "accepted_only_rmse_m_mean": 1.2714453848325564e-06,
+      "metric_status": "estimable"
+    }
+  },
+  "ra_route_values": [
+    "fixed_geometry_beta_structural_kalman/frame"
+  ],
+  "audit_file": "fair_branch_route_audit.json"
+}

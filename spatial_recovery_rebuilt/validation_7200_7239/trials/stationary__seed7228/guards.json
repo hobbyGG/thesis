@@ -1,0 +1,13 @@
+{
+  "source": "calibration_capture_arrays_only",
+  "frozen_before_test": true,
+  "calibration_frame_range": [
+    0,
+    199
+  ],
+  "calibration_adxl_sample_count": 2000,
+  "finite_calibration": true,
+  "adc_abs_limit": 1.4710405468940735,
+  "acceleration_abs_limit_mps2": 0.023181165637223264,
+  "time_monotonic_required": true
+}

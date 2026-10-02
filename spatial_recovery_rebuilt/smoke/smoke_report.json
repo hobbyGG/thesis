@@ -1,0 +1,108 @@
+{
+  "status": "smoke_passed",
+  "claims_parity_with_lost_workspace": false,
+  "source_evidence": {
+    "repository": "/Users/umep/thesis",
+    "git_head": "86bf1acde6cd6254e09aeb15ce27c9d17d215474",
+    "git_status_before": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n",
+    "git_status_before_scratch": "## main...origin/main [ahead 2]\n",
+    "python": "3.9.6 (default, Aug 25 2026, 21:26:21) \n[Clang 21.0.0 (clang-2100.3.34.2)]",
+    "platform": "macOS-26.6.2-arm64-arm-64bit",
+    "numpy": "2.0.2",
+    "source_sha256": {
+      "paper_bridge_simulation/package_builder.py": "9b2305687120a76ed9cf2257e6c384a4f2fc8138e733a04c4bf232ae45880407",
+      "paper_bridge_simulation/response.py": "11b7d52dc216de424088676237c8869c7f8123566084baa1c30e3753e775be5f",
+      "algorithm/io.py": "3d4b96a1147b0cabfc19ec909eb422dcd439c85e00a23e8ddcf60f0fe1f317ab",
+      "algorithm/run.py": "d2712e2947e0a763215cd97990a7cf52ed3e54283362a2033f561bf99db6affe",
+      "algorithm/frontend.py": "c2e0b276951f7fb815a1ca841ad06a78f9381dea68281459fc0d93fc3cd855ec",
+      "algorithm/selection.py": "b59d5972ff2be24b5b95896dd43058edcade55a29e95a4dc5cbd8be83cb15540",
+      "algorithm/kalman.py": "d75ac341885eaad2935556d461da85f479723d551c895c6e0f3b49e458ac2ee4"
+    },
+    "git_status_after": "## main...origin/main [ahead 2]\n?? spatial_recovery_rebuilt/\n"
+  },
+  "protocol": {
+    "radar_frames": 400,
+    "radar_rate_hz": 100.0,
+    "calibration_frames": 200,
+    "test_frames": 200,
+    "stratum": "low_motion_0p005mm",
+    "seed": 20261001
+  },
+  "realized_rms": {
+    "stratum": "low_motion_0p005mm",
+    "seed": 20261001,
+    "requested_q_true_rms_mm": 0.005,
+    "q_true_rms_m": 5e-06,
+    "q_proxy_rms_m": 4.829629131445342e-06,
+    "q_true_rms_mm": 0.005,
+    "q_proxy_rms_mm": 0.004829629131445342,
+    "q_true_rms_calibration_m": 5e-06,
+    "q_true_rms_test_m": 5e-06,
+    "q_proxy_rms_calibration_m": 4.829629131445342e-06,
+    "q_proxy_rms_test_m": 4.829629131445342e-06,
+    "q_true_max_abs_m": 7.0710678118654756e-06,
+    "q_proxy_max_abs_m": 6.830127018922194e-06,
+    "reference_samples": 12000,
+    "radar_frames": 400,
+    "calibration_frames": 200,
+    "test_frames": 200
+  },
+  "contract_checks": {
+    "radar_schema": true,
+    "radar_complete": true,
+    "radar_frames_400": true,
+    "adc_shape": true,
+    "adc_is_loop_mean": true,
+    "radar_rate_100_hz": true,
+    "frame_time_count": true,
+    "adxl_4000": true,
+    "adxl_time_monotonic": true,
+    "sync_time_monotonic": true,
+    "truth_reference_count": true,
+    "proxy_shape": true
+  },
+  "frozen_test": {
+    "test_frame_range": [
+      200,
+      399
+    ],
+    "test_adxl_sample_count": 2000,
+    "finite_test_capture_arrays": true,
+    "test_radar_time_monotonic": true,
+    "adc_within_frozen_limit": true,
+    "acceleration_within_frozen_limit": true,
+    "passed": true
+  },
+  "algorithm": {
+    "command": [
+      "/Library/Developer/CommandLineTools/usr/bin/python3",
+      "-m",
+      "algorithm.run",
+      "--input",
+      "spatial_recovery_rebuilt/smoke/capture_low_motion_0p005mm_seed20261001",
+      "--output",
+      "spatial_recovery_rebuilt/smoke/algorithm_result.npz"
+    ],
+    "stdout": "saved result: spatial_recovery_rebuilt/smoke/algorithm_result.npz\nsaved summary: spatial_recovery_rebuilt/smoke/algorithm_result.json\n",
+    "summary": {
+      "schema": "thesis.algorithm-result",
+      "schema_version": 1,
+      "input_package": "spatial_recovery_rebuilt/smoke/capture_low_motion_0p005mm_seed20261001",
+      "result_file": "algorithm_result.npz",
+      "method": "fixed_geometry_beta_structural_kalman",
+      "radar_mode": "frame",
+      "radar_samples": 400,
+      "radar_frames": 400,
+      "adxl_samples": 4000,
+      "selected_targets": 5,
+      "target_detection": {
+        "candidate_count": 5,
+        "strongest_magnitude": 0.21420985798095393
+      },
+      "truth_rmse_m": 1.1590060388888187e-06,
+      "truth_rmse_frame_grid_m": 1.1590060388888187e-06
+    }
+  },
+  "full_40_seed_run_safe_to_start": true,
+  "full_run_scope": "not run; retain compact logs and process one package at a time"
+}
