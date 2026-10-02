@@ -1,0 +1,136 @@
+{
+  "schema": "spatial_recovery_rebuilt.strict_calibration_only_trial",
+  "trial_id": "low_motion_0p050mm__seed7207",
+  "stratum": "low_motion_0p050mm",
+  "seed": 7207,
+  "requested_q_true_rms_mm": 0.05,
+  "geometry_source_frames": [
+    0,
+    199
+  ],
+  "phase_input_frames": [
+    200,
+    399
+  ],
+  "kalman_input_frames": [
+    200,
+    399
+  ],
+  "test_target_detection_executed": false,
+  "test_geometry_operations": [
+    "range_fft",
+    "fixed_angle_steering_projection"
+  ],
+  "forbidden_test_geometry_operations": [
+    "detect_target_bins",
+    "extract_targets",
+    "estimate_local_music_ml",
+    "select_targets",
+    "angle_derived_beta_update"
+  ],
+  "guards_fixed_before_test": true,
+  "truth_used_post_run_only": true,
+  "q_proxy_used_by_estimator": false,
+  "started_at": "2026-10-02T03:44:31.909193+00:00",
+  "realized_rms": {
+    "stratum": "low_motion_0p050mm",
+    "seed": 7207,
+    "requested_q_true_rms_mm": 0.05,
+    "q_true_rms_m": 5e-05,
+    "q_proxy_rms_m": 4.8296291314453415e-05,
+    "q_true_rms_mm": 0.05,
+    "q_proxy_rms_mm": 0.04829629131445341,
+    "q_true_rms_calibration_m": 5e-05,
+    "q_true_rms_test_m": 5e-05,
+    "q_proxy_rms_calibration_m": 4.8296291314453415e-05,
+    "q_proxy_rms_test_m": 4.8296291314453415e-05,
+    "q_true_max_abs_m": 7.071067811865475e-05,
+    "q_proxy_max_abs_m": 6.830127018922193e-05,
+    "reference_samples": 12000,
+    "radar_frames": 400,
+    "calibration_frames": 200,
+    "test_frames": 200
+  },
+  "package_contract": {
+    "radar_schema": true,
+    "radar_complete": true,
+    "radar_frames_400": true,
+    "adc_shape": true,
+    "adc_is_loop_mean": true,
+    "radar_rate_100_hz": true,
+    "frame_time_count": true,
+    "adxl_4000": true,
+    "adxl_time_monotonic": true,
+    "sync_time_monotonic": true,
+    "truth_reference_count": true,
+    "proxy_shape": true
+  },
+  "guards": {
+    "source": "calibration_capture_arrays_only",
+    "frozen_before_test": true,
+    "calibration_frame_range": [
+      0,
+      199
+    ],
+    "calibration_adxl_sample_count": 2000,
+    "finite_calibration": true,
+    "adc_abs_limit": 1.3709774613380432,
+    "acceleration_abs_limit_mps2": 0.024867124314695593,
+    "time_monotonic_required": true
+  },
+  "frozen_guard": {
+    "test_frame_range": [
+      200,
+      399
+    ],
+    "test_adxl_sample_count": 2000,
+    "finite_test_capture_arrays": true,
+    "test_radar_time_monotonic": true,
+    "adc_within_frozen_limit": true,
+    "acceleration_within_frozen_limit": true,
+    "passed": true
+  },
+  "truth_free_estimator_copy": true,
+  "status": "accepted",
+  "accepted": true,
+  "accepted_finite_test": true,
+  "metrics": {
+    "test_sample_count": 200,
+    "finite_test_samples": 200,
+    "test_sample_coverage": 1.0,
+    "test_rmse_m": 1.814911268628739e-06,
+    "test_rmse_mm": 0.001814911268628739,
+    "test_bias_m": 2.819412782488859e-07,
+    "test_bias_mm": 0.00028194127824888586,
+    "all_trial_success": true
+  },
+  "all_trial_success": true,
+  "calibration_input_hashes": {
+    "adc_frames_0_199_sha256": "daad2eec97101dedc57c2741609ef64083c5e88c7cf0baee9403cc6d34cc8647",
+    "adxl_samples_0_1999_sha256": "577029e169a1d288c9f491dcc494488052c237c506e1a7c11ff226d7c027d09c"
+  },
+  "route_audit": {
+    "geometry_source_frames": [
+      0,
+      199
+    ],
+    "phase_input_frames": [
+      200,
+      399
+    ],
+    "kalman_input_frames": [
+      200,
+      399
+    ],
+    "fresh_kalman_state": true,
+    "test_target_detection_executed": false,
+    "test_target_count": 5,
+    "frozen_geometry_hash": "d86ec616c339cc57ff60a12dc7ff1f508626a10151fa35ca05886682d00caa9c",
+    "frozen_geometry_frame_range": [
+      0,
+      199
+    ]
+  },
+  "duration_s": 3.3266974620019027,
+  "completed_at": "2026-10-02T03:44:35.235732+00:00"
+}

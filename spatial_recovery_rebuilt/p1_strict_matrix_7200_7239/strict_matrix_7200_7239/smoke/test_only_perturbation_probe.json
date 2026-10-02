@@ -1,0 +1,96 @@
+{
+  "status": "completed",
+  "first_200_exactly_unchanged": true,
+  "truth_present_in_estimator_copies": false,
+  "perturbation": {
+    "frames_changed": [
+      200,
+      399
+    ],
+    "channel_steering_angle_deg": 40.0,
+    "amplitude_multiplier": 20.0
+  },
+  "baseline_geometry": {
+    "candidate_count": 5,
+    "target_count": 5,
+    "selected_indices": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "range_bins": [
+      230,
+      232,
+      246,
+      238,
+      253
+    ],
+    "angle_bins": [
+      34,
+      36,
+      43,
+      40,
+      45
+    ],
+    "angle_deg": [
+      2.937695665255088,
+      7.830907538303111,
+      20.793444380548753,
+      14.810622483387515,
+      24.676852353365803
+    ],
+    "measured_beta": [
+      1.0013158739870727,
+      1.0094132976923686,
+      1.069671673218709,
+      1.0343657543418923,
+      1.1005011516484051
+    ]
+  },
+  "perturbed_geometry": {
+    "candidate_count": 5,
+    "target_count": 5,
+    "selected_indices": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "range_bins": [
+      230,
+      232,
+      246,
+      238,
+      253
+    ],
+    "angle_bins": [
+      34,
+      36,
+      43,
+      40,
+      45
+    ],
+    "angle_deg": [
+      2.937695665255088,
+      7.830907538303111,
+      20.793444380548753,
+      14.810622483387515,
+      24.676852353365803
+    ],
+    "measured_beta": [
+      1.0013158739870727,
+      1.0094132976923686,
+      1.069671673218709,
+      1.0343657543418923,
+      1.1005011516484051
+    ]
+  },
+  "changed_frozen_geometry_fields": [],
+  "test_observation_changed": true,
+  "calibration_adc_sha256": "baeaa1aa81eca70b1d1e2cabb1cea78473b107e84f2b3136643ca75624321773",
+  "perturbed_calibration_adc_sha256": "baeaa1aa81eca70b1d1e2cabb1cea78473b107e84f2b3136643ca75624321773",
+  "conclusion": "calibration-only target/angle/beta remains unchanged under test-only ADC perturbation"
+}

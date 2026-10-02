@@ -1,0 +1,222 @@
+{
+  "schema": "spatial_recovery_rebuilt.strict_calibration_only_matrix_summary",
+  "protocol": "P1 strict calibration-frozen route; 200 calibration + 200 test; no full-window comparison",
+  "claims_parity_with_lost_workspace": false,
+  "seed_range": [
+    7200,
+    7239
+  ],
+  "seed_values": [
+    7200,
+    7201,
+    7202,
+    7203,
+    7204,
+    7205,
+    7206,
+    7207,
+    7208,
+    7209,
+    7210,
+    7211,
+    7212,
+    7213,
+    7214,
+    7215,
+    7216,
+    7217,
+    7218,
+    7219,
+    7220,
+    7221,
+    7222,
+    7223,
+    7224,
+    7225,
+    7226,
+    7227,
+    7228,
+    7229,
+    7230,
+    7231,
+    7232,
+    7233,
+    7234,
+    7235,
+    7236,
+    7237,
+    7238,
+    7239
+  ],
+  "strata": [
+    "stationary",
+    "low_motion_0p005mm",
+    "low_motion_0p010mm",
+    "low_motion_0p020mm",
+    "low_motion_0p050mm"
+  ],
+  "trial_count": 200,
+  "expected_trial_count": 200,
+  "accepted_trials": 191,
+  "abstention_or_error_trials": 9,
+  "acceptance_coverage": 0.955,
+  "finite_test_sample_coverage_with_abstentions_zero": 0.955,
+  "accepted_only_rmse_mm_pooled": 0.001355051626199677,
+  "accepted_only_rmse_mm_mean_of_trials": 0.0013242379858395496,
+  "accepted_only_bias_mm_mean_of_trials": 8.471636167489491e-05,
+  "all_trial_successes_with_abstentions_counted_as_failure": 191,
+  "all_trial_success_rate_with_abstentions_counted_as_failure": 0.955,
+  "by_stratum": {
+    "stationary": {
+      "trials": 40,
+      "accepted": 38,
+      "acceptance_coverage": 0.95,
+      "accepted_only_rmse_mm_mean_of_trials": 0.0011338629671339719,
+      "all_trial_successes": 38,
+      "all_trial_success_rate": 0.95
+    },
+    "low_motion_0p005mm": {
+      "trials": 40,
+      "accepted": 38,
+      "acceptance_coverage": 0.95,
+      "accepted_only_rmse_mm_mean_of_trials": 0.0011460749457106476,
+      "all_trial_successes": 38,
+      "all_trial_success_rate": 0.95
+    },
+    "low_motion_0p010mm": {
+      "trials": 40,
+      "accepted": 38,
+      "acceptance_coverage": 0.95,
+      "accepted_only_rmse_mm_mean_of_trials": 0.0011763316256019677,
+      "all_trial_successes": 38,
+      "all_trial_success_rate": 0.95
+    },
+    "low_motion_0p020mm": {
+      "trials": 40,
+      "accepted": 38,
+      "acceptance_coverage": 0.95,
+      "accepted_only_rmse_mm_mean_of_trials": 0.0012854530416531358,
+      "all_trial_successes": 38,
+      "all_trial_success_rate": 0.95
+    },
+    "low_motion_0p050mm": {
+      "trials": 40,
+      "accepted": 39,
+      "acceptance_coverage": 0.975,
+      "accepted_only_rmse_mm_mean_of_trials": 0.0018652306987580643,
+      "all_trial_successes": 39,
+      "all_trial_success_rate": 0.975
+    }
+  },
+  "caveats": {
+    "cold_start": "Every trial starts a fresh retained Kalman state on test frames 200:399; first 0.20 s of that test state uses retained cold-start logic, so comparison to any full-window warm state would be state-mismatched.",
+    "bias": "RMSE uses post-run truth only and a 21-frame warm reference; reported bias is diagnostic and does not establish unbiasedness or online deployment.",
+    "R": "The retained Kalman adaptive R settings are unchanged; this matrix does not independently calibrate or identify measurement-noise R.",
+    "deployment": "Scratch synthetic-package calibration-only evidence; no online deployment or parity claim."
+  },
+  "completed_at": "2026-10-02T03:46:20.804084+00:00",
+  "test_only_perturbation_probe": {
+    "status": "completed",
+    "first_200_exactly_unchanged": true,
+    "truth_present_in_estimator_copies": false,
+    "perturbation": {
+      "frames_changed": [
+        200,
+        399
+      ],
+      "channel_steering_angle_deg": 40.0,
+      "amplitude_multiplier": 20.0
+    },
+    "baseline_geometry": {
+      "candidate_count": 5,
+      "target_count": 5,
+      "selected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "range_bins": [
+        230,
+        232,
+        246,
+        238,
+        253
+      ],
+      "angle_bins": [
+        34,
+        36,
+        43,
+        40,
+        45
+      ],
+      "angle_deg": [
+        2.937695665255088,
+        7.830907538303111,
+        20.793444380548753,
+        14.810622483387515,
+        24.676852353365803
+      ],
+      "measured_beta": [
+        1.0013158739870727,
+        1.0094132976923686,
+        1.069671673218709,
+        1.0343657543418923,
+        1.1005011516484051
+      ]
+    },
+    "perturbed_geometry": {
+      "candidate_count": 5,
+      "target_count": 5,
+      "selected_indices": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "range_bins": [
+        230,
+        232,
+        246,
+        238,
+        253
+      ],
+      "angle_bins": [
+        34,
+        36,
+        43,
+        40,
+        45
+      ],
+      "angle_deg": [
+        2.937695665255088,
+        7.830907538303111,
+        20.793444380548753,
+        14.810622483387515,
+        24.676852353365803
+      ],
+      "measured_beta": [
+        1.0013158739870727,
+        1.0094132976923686,
+        1.069671673218709,
+        1.0343657543418923,
+        1.1005011516484051
+      ]
+    },
+    "changed_frozen_geometry_fields": [],
+    "test_observation_changed": true,
+    "calibration_adc_sha256": "baeaa1aa81eca70b1d1e2cabb1cea78473b107e84f2b3136643ca75624321773",
+    "perturbed_calibration_adc_sha256": "baeaa1aa81eca70b1d1e2cabb1cea78473b107e84f2b3136643ca75624321773",
+    "conclusion": "calibration-only target/angle/beta remains unchanged under test-only ADC perturbation"
+  },
+  "git_status_after": "## main...origin/main [ahead 1]\n?? spatial_recovery_rebuilt/calibration_only/strict_matrix_7200_7239/\n?? spatial_recovery_rebuilt/p3_fusion_docs/\n",
+  "abstention_count": 9,
+  "rejection_reason_counts": {
+    "frozen_test_guard:acceleration_within_frozen_limit=false": 9
+  },
+  "accepted_only_rmse_mm_min": 0.0009676178340197172,
+  "accepted_only_rmse_mm_max": 0.0019894487652147106,
+  "full_window_route_called": false
+}
