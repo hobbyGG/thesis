@@ -1,0 +1,668 @@
+{
+  "schema": "spatial_recovery_rebuilt.strict_calibration_only_rejected_trial_summaries",
+  "generated_at": "2026-10-02T04:11:18.945320+00:00",
+  "source_compact_trials_path": "spatial_recovery_rebuilt/calibration_only/strict_matrix_7200_7239/full/trials.json",
+  "source_compact_trials_sha256": "5805e9daab3e1efbb951f3cadc595293500075a9bbe0279e1c76e75b4af68b0b",
+  "source_run_manifest_sha256": "6cc2f4257ecd22f9bc040cd3a4ea9a2b7b76febc0f6e093f750540d3b5efe2bd",
+  "raw_trial_files_untouched": true,
+  "count": 9,
+  "records": [
+    {
+      "trial_id": "low_motion_0p005mm__seed7227",
+      "stratum": "low_motion_0p005mm",
+      "seed": 7227,
+      "status_compact": "error",
+      "status_raw": "error",
+      "accepted_compact": false,
+      "accepted_raw": false,
+      "abstention_reason": "frozen_test_guard:acceleration_within_frozen_limit=false",
+      "rejection_reasons": [
+        "RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}"
+      ],
+      "metrics": {
+        "test_sample_count": 200,
+        "finite_test_samples": 0,
+        "test_sample_coverage": 0.0,
+        "test_rmse_m": null,
+        "test_rmse_mm": null,
+        "test_bias_m": null,
+        "test_bias_mm": null,
+        "all_trial_success": false
+      },
+      "guards": {
+        "source": "calibration_capture_arrays_only",
+        "frozen_before_test": true,
+        "calibration_frame_range": [
+          0,
+          199
+        ],
+        "calibration_adxl_sample_count": 2000,
+        "finite_calibration": true,
+        "adc_abs_limit": 1.2954045832157135,
+        "acceleration_abs_limit_mps2": 0.022217930303745154,
+        "time_monotonic_required": true
+      },
+      "frozen_guard_compact_postprocessed": {
+        "passed": false,
+        "test_frame_range": [
+          200,
+          399
+        ],
+        "test_adxl_sample_count": 2000,
+        "finite_test_capture_arrays": true,
+        "test_radar_time_monotonic": true,
+        "adc_within_frozen_limit": true,
+        "acceleration_within_frozen_limit": false
+      },
+      "geometry_source_frames": [
+        0,
+        199
+      ],
+      "phase_input_frames": [
+        200,
+        399
+      ],
+      "kalman_input_frames": [
+        200,
+        399
+      ],
+      "test_target_detection_executed": false,
+      "raw_trial_json": "trials/low_motion_0p005mm__seed7227/trial.json",
+      "raw_trial_json_sha256": "271f6039d0ca8406c8bcf6a8e1159dec82f9b1edabdd897d896e9fbc8e01d2e4",
+      "raw_missing_audit_fields": [
+        "frozen_guard",
+        "truth_free_estimator_copy",
+        "calibration_input_hashes",
+        "route_audit"
+      ],
+      "compact_added_fields_vs_raw": [
+        "abstention_reason",
+        "frozen_guard"
+      ]
+    },
+    {
+      "trial_id": "low_motion_0p005mm__seed7238",
+      "stratum": "low_motion_0p005mm",
+      "seed": 7238,
+      "status_compact": "error",
+      "status_raw": "error",
+      "accepted_compact": false,
+      "accepted_raw": false,
+      "abstention_reason": "frozen_test_guard:acceleration_within_frozen_limit=false",
+      "rejection_reasons": [
+        "RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}"
+      ],
+      "metrics": {
+        "test_sample_count": 200,
+        "finite_test_samples": 0,
+        "test_sample_coverage": 0.0,
+        "test_rmse_m": null,
+        "test_rmse_mm": null,
+        "test_bias_m": null,
+        "test_bias_mm": null,
+        "all_trial_success": false
+      },
+      "guards": {
+        "source": "calibration_capture_arrays_only",
+        "frozen_before_test": true,
+        "calibration_frame_range": [
+          0,
+          199
+        ],
+        "calibration_adxl_sample_count": 2000,
+        "finite_calibration": true,
+        "adc_abs_limit": 1.4050167798995972,
+        "acceleration_abs_limit_mps2": 0.021636137463832653,
+        "time_monotonic_required": true
+      },
+      "frozen_guard_compact_postprocessed": {
+        "passed": false,
+        "test_frame_range": [
+          200,
+          399
+        ],
+        "test_adxl_sample_count": 2000,
+        "finite_test_capture_arrays": true,
+        "test_radar_time_monotonic": true,
+        "adc_within_frozen_limit": true,
+        "acceleration_within_frozen_limit": false
+      },
+      "geometry_source_frames": [
+        0,
+        199
+      ],
+      "phase_input_frames": [
+        200,
+        399
+      ],
+      "kalman_input_frames": [
+        200,
+        399
+      ],
+      "test_target_detection_executed": false,
+      "raw_trial_json": "trials/low_motion_0p005mm__seed7238/trial.json",
+      "raw_trial_json_sha256": "904b0241c896ca80438b605f539f7a967694970c393a91474a115c3646416584",
+      "raw_missing_audit_fields": [
+        "frozen_guard",
+        "truth_free_estimator_copy",
+        "calibration_input_hashes",
+        "route_audit"
+      ],
+      "compact_added_fields_vs_raw": [
+        "abstention_reason",
+        "frozen_guard"
+      ]
+    },
+    {
+      "trial_id": "low_motion_0p010mm__seed7227",
+      "stratum": "low_motion_0p010mm",
+      "seed": 7227,
+      "status_compact": "error",
+      "status_raw": "error",
+      "accepted_compact": false,
+      "accepted_raw": false,
+      "abstention_reason": "frozen_test_guard:acceleration_within_frozen_limit=false",
+      "rejection_reasons": [
+        "RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}"
+      ],
+      "metrics": {
+        "test_sample_count": 200,
+        "finite_test_samples": 0,
+        "test_sample_coverage": 0.0,
+        "test_rmse_m": null,
+        "test_rmse_mm": null,
+        "test_bias_m": null,
+        "test_bias_mm": null,
+        "all_trial_success": false
+      },
+      "guards": {
+        "source": "calibration_capture_arrays_only",
+        "frozen_before_test": true,
+        "calibration_frame_range": [
+          0,
+          199
+        ],
+        "calibration_adxl_sample_count": 2000,
+        "finite_calibration": true,
+        "adc_abs_limit": 1.2953999638557434,
+        "acceleration_abs_limit_mps2": 0.022217701192603915,
+        "time_monotonic_required": true
+      },
+      "frozen_guard_compact_postprocessed": {
+        "passed": false,
+        "test_frame_range": [
+          200,
+          399
+        ],
+        "test_adxl_sample_count": 2000,
+        "finite_test_capture_arrays": true,
+        "test_radar_time_monotonic": true,
+        "adc_within_frozen_limit": true,
+        "acceleration_within_frozen_limit": false
+      },
+      "geometry_source_frames": [
+        0,
+        199
+      ],
+      "phase_input_frames": [
+        200,
+        399
+      ],
+      "kalman_input_frames": [
+        200,
+        399
+      ],
+      "test_target_detection_executed": false,
+      "raw_trial_json": "trials/low_motion_0p010mm__seed7227/trial.json",
+      "raw_trial_json_sha256": "6422f213c87f3bb6255413c9ca84d0146a99a71b00c9da23ded07e3cfcb801c5",
+      "raw_missing_audit_fields": [
+        "frozen_guard",
+        "truth_free_estimator_copy",
+        "calibration_input_hashes",
+        "route_audit"
+      ],
+      "compact_added_fields_vs_raw": [
+        "abstention_reason",
+        "frozen_guard"
+      ]
+    },
+    {
+      "trial_id": "low_motion_0p010mm__seed7238",
+      "stratum": "low_motion_0p010mm",
+      "seed": 7238,
+      "status_compact": "error",
+      "status_raw": "error",
+      "accepted_compact": false,
+      "accepted_raw": false,
+      "abstention_reason": "frozen_test_guard:acceleration_within_frozen_limit=false",
+      "rejection_reasons": [
+        "RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}"
+      ],
+      "metrics": {
+        "test_sample_count": 200,
+        "finite_test_samples": 0,
+        "test_sample_coverage": 0.0,
+        "test_rmse_m": null,
+        "test_rmse_mm": null,
+        "test_bias_m": null,
+        "test_bias_mm": null,
+        "all_trial_success": false
+      },
+      "guards": {
+        "source": "calibration_capture_arrays_only",
+        "frozen_before_test": true,
+        "calibration_frame_range": [
+          0,
+          199
+        ],
+        "calibration_adxl_sample_count": 2000,
+        "finite_calibration": true,
+        "adc_abs_limit": 1.4050696790218353,
+        "acceleration_abs_limit_mps2": 0.02163637311663052,
+        "time_monotonic_required": true
+      },
+      "frozen_guard_compact_postprocessed": {
+        "passed": false,
+        "test_frame_range": [
+          200,
+          399
+        ],
+        "test_adxl_sample_count": 2000,
+        "finite_test_capture_arrays": true,
+        "test_radar_time_monotonic": true,
+        "adc_within_frozen_limit": true,
+        "acceleration_within_frozen_limit": false
+      },
+      "geometry_source_frames": [
+        0,
+        199
+      ],
+      "phase_input_frames": [
+        200,
+        399
+      ],
+      "kalman_input_frames": [
+        200,
+        399
+      ],
+      "test_target_detection_executed": false,
+      "raw_trial_json": "trials/low_motion_0p010mm__seed7238/trial.json",
+      "raw_trial_json_sha256": "d845324ad557df7aa3bc078dd0dec534c48fd2bd75055c86b4624220faf280eb",
+      "raw_missing_audit_fields": [
+        "frozen_guard",
+        "truth_free_estimator_copy",
+        "calibration_input_hashes",
+        "route_audit"
+      ],
+      "compact_added_fields_vs_raw": [
+        "abstention_reason",
+        "frozen_guard"
+      ]
+    },
+    {
+      "trial_id": "low_motion_0p020mm__seed7227",
+      "stratum": "low_motion_0p020mm",
+      "seed": 7227,
+      "status_compact": "error",
+      "status_raw": "error",
+      "accepted_compact": false,
+      "accepted_raw": false,
+      "abstention_reason": "frozen_test_guard:acceleration_within_frozen_limit=false",
+      "rejection_reasons": [
+        "RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}"
+      ],
+      "metrics": {
+        "test_sample_count": 200,
+        "finite_test_samples": 0,
+        "test_sample_coverage": 0.0,
+        "test_rmse_m": null,
+        "test_rmse_mm": null,
+        "test_bias_m": null,
+        "test_bias_mm": null,
+        "all_trial_success": false
+      },
+      "guards": {
+        "source": "calibration_capture_arrays_only",
+        "frozen_before_test": true,
+        "calibration_frame_range": [
+          0,
+          199
+        ],
+        "calibration_adxl_sample_count": 2000,
+        "finite_calibration": true,
+        "adc_abs_limit": 1.2953144311904907,
+        "acceleration_abs_limit_mps2": 0.022217242970321432,
+        "time_monotonic_required": true
+      },
+      "frozen_guard_compact_postprocessed": {
+        "passed": false,
+        "test_frame_range": [
+          200,
+          399
+        ],
+        "test_adxl_sample_count": 2000,
+        "finite_test_capture_arrays": true,
+        "test_radar_time_monotonic": true,
+        "adc_within_frozen_limit": true,
+        "acceleration_within_frozen_limit": false
+      },
+      "geometry_source_frames": [
+        0,
+        199
+      ],
+      "phase_input_frames": [
+        200,
+        399
+      ],
+      "kalman_input_frames": [
+        200,
+        399
+      ],
+      "test_target_detection_executed": false,
+      "raw_trial_json": "trials/low_motion_0p020mm__seed7227/trial.json",
+      "raw_trial_json_sha256": "c388828b3be7fef8666c4ac7f213526bfbc8923c5b6f08aaca557305c71e6bc1",
+      "raw_missing_audit_fields": [
+        "frozen_guard",
+        "truth_free_estimator_copy",
+        "calibration_input_hashes",
+        "route_audit"
+      ],
+      "compact_added_fields_vs_raw": [
+        "abstention_reason",
+        "frozen_guard"
+      ]
+    },
+    {
+      "trial_id": "low_motion_0p020mm__seed7238",
+      "stratum": "low_motion_0p020mm",
+      "seed": 7238,
+      "status_compact": "error",
+      "status_raw": "error",
+      "accepted_compact": false,
+      "accepted_raw": false,
+      "abstention_reason": "frozen_test_guard:acceleration_within_frozen_limit=false",
+      "rejection_reasons": [
+        "RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}"
+      ],
+      "metrics": {
+        "test_sample_count": 200,
+        "finite_test_samples": 0,
+        "test_sample_coverage": 0.0,
+        "test_rmse_m": null,
+        "test_rmse_mm": null,
+        "test_bias_m": null,
+        "test_bias_mm": null,
+        "all_trial_success": false
+      },
+      "guards": {
+        "source": "calibration_capture_arrays_only",
+        "frozen_before_test": true,
+        "calibration_frame_range": [
+          0,
+          199
+        ],
+        "calibration_adxl_sample_count": 2000,
+        "finite_calibration": true,
+        "adc_abs_limit": 1.4048005640506744,
+        "acceleration_abs_limit_mps2": 0.021831343089306496,
+        "time_monotonic_required": true
+      },
+      "frozen_guard_compact_postprocessed": {
+        "passed": false,
+        "test_frame_range": [
+          200,
+          399
+        ],
+        "test_adxl_sample_count": 2000,
+        "finite_test_capture_arrays": true,
+        "test_radar_time_monotonic": true,
+        "adc_within_frozen_limit": true,
+        "acceleration_within_frozen_limit": false
+      },
+      "geometry_source_frames": [
+        0,
+        199
+      ],
+      "phase_input_frames": [
+        200,
+        399
+      ],
+      "kalman_input_frames": [
+        200,
+        399
+      ],
+      "test_target_detection_executed": false,
+      "raw_trial_json": "trials/low_motion_0p020mm__seed7238/trial.json",
+      "raw_trial_json_sha256": "27761c328f97776097aa0a6f0cb979d357b793bde905359376ff35af306e65b2",
+      "raw_missing_audit_fields": [
+        "frozen_guard",
+        "truth_free_estimator_copy",
+        "calibration_input_hashes",
+        "route_audit"
+      ],
+      "compact_added_fields_vs_raw": [
+        "abstention_reason",
+        "frozen_guard"
+      ]
+    },
+    {
+      "trial_id": "low_motion_0p050mm__seed7227",
+      "stratum": "low_motion_0p050mm",
+      "seed": 7227,
+      "status_compact": "error",
+      "status_raw": "error",
+      "accepted_compact": false,
+      "accepted_raw": false,
+      "abstention_reason": "frozen_test_guard:acceleration_within_frozen_limit=false",
+      "rejection_reasons": [
+        "RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}"
+      ],
+      "metrics": {
+        "test_sample_count": 200,
+        "finite_test_samples": 0,
+        "test_sample_coverage": 0.0,
+        "test_rmse_m": null,
+        "test_rmse_mm": null,
+        "test_bias_m": null,
+        "test_bias_mm": null,
+        "all_trial_success": false
+      },
+      "guards": {
+        "source": "calibration_capture_arrays_only",
+        "frozen_before_test": true,
+        "calibration_frame_range": [
+          0,
+          199
+        ],
+        "calibration_adxl_sample_count": 2000,
+        "finite_calibration": true,
+        "adc_abs_limit": 1.2952636182308197,
+        "acceleration_abs_limit_mps2": 0.02221586830347399,
+        "time_monotonic_required": true
+      },
+      "frozen_guard_compact_postprocessed": {
+        "passed": false,
+        "test_frame_range": [
+          200,
+          399
+        ],
+        "test_adxl_sample_count": 2000,
+        "finite_test_capture_arrays": true,
+        "test_radar_time_monotonic": true,
+        "adc_within_frozen_limit": true,
+        "acceleration_within_frozen_limit": false
+      },
+      "geometry_source_frames": [
+        0,
+        199
+      ],
+      "phase_input_frames": [
+        200,
+        399
+      ],
+      "kalman_input_frames": [
+        200,
+        399
+      ],
+      "test_target_detection_executed": false,
+      "raw_trial_json": "trials/low_motion_0p050mm__seed7227/trial.json",
+      "raw_trial_json_sha256": "96f6f0f2e67c6183a8e12f075ef04c1558a045297d5bd97e0d6afb325d636cbe",
+      "raw_missing_audit_fields": [
+        "frozen_guard",
+        "truth_free_estimator_copy",
+        "calibration_input_hashes",
+        "route_audit"
+      ],
+      "compact_added_fields_vs_raw": [
+        "abstention_reason",
+        "frozen_guard"
+      ]
+    },
+    {
+      "trial_id": "stationary__seed7227",
+      "stratum": "stationary",
+      "seed": 7227,
+      "status_compact": "error",
+      "status_raw": "error",
+      "accepted_compact": false,
+      "accepted_raw": false,
+      "abstention_reason": "frozen_test_guard:acceleration_within_frozen_limit=false",
+      "rejection_reasons": [
+        "RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}"
+      ],
+      "metrics": {
+        "test_sample_count": 200,
+        "finite_test_samples": 0,
+        "test_sample_coverage": 0.0,
+        "test_rmse_m": null,
+        "test_rmse_mm": null,
+        "test_bias_m": null,
+        "test_bias_mm": null,
+        "all_trial_success": false
+      },
+      "guards": {
+        "source": "calibration_capture_arrays_only",
+        "frozen_before_test": true,
+        "calibration_frame_range": [
+          0,
+          199
+        ],
+        "calibration_adxl_sample_count": 2000,
+        "finite_calibration": true,
+        "adc_abs_limit": 1.295280009508133,
+        "acceleration_abs_limit_mps2": 0.022218159414886397,
+        "time_monotonic_required": true
+      },
+      "frozen_guard_compact_postprocessed": {
+        "passed": false,
+        "test_frame_range": [
+          200,
+          399
+        ],
+        "test_adxl_sample_count": 2000,
+        "finite_test_capture_arrays": true,
+        "test_radar_time_monotonic": true,
+        "adc_within_frozen_limit": true,
+        "acceleration_within_frozen_limit": false
+      },
+      "geometry_source_frames": [
+        0,
+        199
+      ],
+      "phase_input_frames": [
+        200,
+        399
+      ],
+      "kalman_input_frames": [
+        200,
+        399
+      ],
+      "test_target_detection_executed": false,
+      "raw_trial_json": "trials/stationary__seed7227/trial.json",
+      "raw_trial_json_sha256": "b8e882db639fb4654046a1d3ce56199c69cc873d35f372923a185c8ce1cbe1de",
+      "raw_missing_audit_fields": [
+        "frozen_guard",
+        "truth_free_estimator_copy",
+        "calibration_input_hashes",
+        "route_audit"
+      ],
+      "compact_added_fields_vs_raw": [
+        "abstention_reason",
+        "frozen_guard"
+      ]
+    },
+    {
+      "trial_id": "stationary__seed7238",
+      "stratum": "stationary",
+      "seed": 7238,
+      "status_compact": "error",
+      "status_raw": "error",
+      "accepted_compact": false,
+      "accepted_raw": false,
+      "abstention_reason": "frozen_test_guard:acceleration_within_frozen_limit=false",
+      "rejection_reasons": [
+        "RuntimeError:frozen test guard failed: {'test_frame_range': [200, 399], 'test_adxl_sample_count': 2000, 'finite_test_capture_arrays': True, 'test_radar_time_monotonic': True, 'adc_within_frozen_limit': True, 'acceleration_within_frozen_limit': False, 'passed': False}"
+      ],
+      "metrics": {
+        "test_sample_count": 200,
+        "finite_test_samples": 0,
+        "test_sample_coverage": 0.0,
+        "test_rmse_m": null,
+        "test_rmse_mm": null,
+        "test_bias_m": null,
+        "test_bias_mm": null,
+        "all_trial_success": false
+      },
+      "guards": {
+        "source": "calibration_capture_arrays_only",
+        "frozen_before_test": true,
+        "calibration_frame_range": [
+          0,
+          199
+        ],
+        "calibration_adxl_sample_count": 2000,
+        "finite_calibration": true,
+        "adc_abs_limit": 1.4050738513469696,
+        "acceleration_abs_limit_mps2": 0.02163590181103478,
+        "time_monotonic_required": true
+      },
+      "frozen_guard_compact_postprocessed": {
+        "passed": false,
+        "test_frame_range": [
+          200,
+          399
+        ],
+        "test_adxl_sample_count": 2000,
+        "finite_test_capture_arrays": true,
+        "test_radar_time_monotonic": true,
+        "adc_within_frozen_limit": true,
+        "acceleration_within_frozen_limit": false
+      },
+      "geometry_source_frames": [
+        0,
+        199
+      ],
+      "phase_input_frames": [
+        200,
+        399
+      ],
+      "kalman_input_frames": [
+        200,
+        399
+      ],
+      "test_target_detection_executed": false,
+      "raw_trial_json": "trials/stationary__seed7238/trial.json",
+      "raw_trial_json_sha256": "fdd10aee218a44841871684963786665e36e4977f21d576bd0a0cd237b4ba8ea",
+      "raw_missing_audit_fields": [
+        "frozen_guard",
+        "truth_free_estimator_copy",
+        "calibration_input_hashes",
+        "route_audit"
+      ],
+      "compact_added_fields_vs_raw": [
+        "abstention_reason",
+        "frozen_guard"
+      ]
+    }
+  ]
+}
