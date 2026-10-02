@@ -1,0 +1,852 @@
+{
+  "schema": "spatial_recovery_rebuilt.p2_quality_gate_smoke",
+  "status": "smoke_complete",
+  "claims_parity_with_lost_workspace": false,
+  "protocol": {
+    "calibration_frames": [
+      0,
+      199
+    ],
+    "frozen_test_frames": [
+      200,
+      399
+    ],
+    "decision_uses_test": false,
+    "thresholds": {
+      "excitation_proxy_std_floor_rad": 0.012,
+      "corrected_weighted_residual_rms_max_rad": 0.02,
+      "primary_fit_r2_floor": 0.8,
+      "iq_snr_floor_db": 20.0,
+      "cross_channel_abs_corr_floor": 0.8,
+      "beta_abs_cos_floor": 0.5,
+      "false_accept_rmse_max_m": 1e-05
+    },
+    "features": [
+      "signed_beta",
+      "excitation_proxy_std",
+      "corrected_weighted_residual",
+      "median_leave_one_target_out_R2",
+      "IQ_SNR",
+      "cross_channel_abs_corr"
+    ],
+    "estimator_input": "radar/algorithm_input + adxl355/algorithm_input + sync only; truth and q_proxy removed",
+    "false_accept_definition": "gate accepted and post-run frozen-test RMSE > 0.010 mm",
+    "abstention_as_failure": true,
+    "fence_caveat": "Gate decisions are calibration-only, but retained RA geometry/selection currently uses full 400-frame ADC window; strict calibration-only P2 deployment remains blocked."
+  },
+  "trials": 10,
+  "coverage": 0.6,
+  "accepted": 6,
+  "abstentions": 4,
+  "false_accepts": 0,
+  "all_trial_success_abstention_as_failure": 0.6,
+  "by_stratum": {
+    "stationary": {
+      "trials": 2,
+      "accepted": 0,
+      "coverage": 0.0,
+      "false_accepts": 0,
+      "rmse_um_accepted_only": []
+    },
+    "low_motion_0p005mm": {
+      "trials": 2,
+      "accepted": 0,
+      "coverage": 0.0,
+      "false_accepts": 0,
+      "rmse_um_accepted_only": []
+    },
+    "low_motion_0p010mm": {
+      "trials": 2,
+      "accepted": 2,
+      "coverage": 1.0,
+      "false_accepts": 0,
+      "rmse_um_accepted_only": [
+        1.1605157643761943,
+        1.0624010072361838
+      ]
+    },
+    "low_motion_0p020mm": {
+      "trials": 2,
+      "accepted": 2,
+      "coverage": 1.0,
+      "false_accepts": 0,
+      "rmse_um_accepted_only": [
+        1.297955329539311,
+        1.1855723646397531
+      ]
+    },
+    "low_motion_0p050mm": {
+      "trials": 2,
+      "accepted": 2,
+      "coverage": 1.0,
+      "false_accepts": 0,
+      "rmse_um_accepted_only": [
+        1.9422599692410618,
+        1.818933855585112
+      ]
+    }
+  },
+  "truth_is_postrun_only": true,
+  "trial_rows": [
+    {
+      "trial_id": "stationary__seed20261001",
+      "stratum": "stationary",
+      "seed": 20261001,
+      "gate_accepted": false,
+      "false_accept": false,
+      "abstention_as_failure_success": false,
+      "frozen_test_rmse_m_postrun": 1.0886128409316107e-06,
+      "result_contains_truth": false,
+      "estimator_stdout": "saved result: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/stationary__seed20261001/algorithm_result.npz\nsaved summary: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/stationary__seed20261001/algorithm_result.json",
+      "gate": {
+        "accepted": false,
+        "checks": {
+          "signed_beta": true,
+          "excitation": false,
+          "corrected_residual": true,
+          "primary_fit_r2": false,
+          "iq_snr": true,
+          "cross_channel_consistency": false
+        },
+        "features_calibration": {
+          "beta_signed": [
+            1.001042448096848,
+            1.0702161574169302,
+            1.1043786570174754,
+            1.0374477035439045,
+            1.0136828235657447
+          ],
+          "beta_reported": [
+            1.001042448096848,
+            1.0702161574169302,
+            1.1043786570174754,
+            1.0374477035439045,
+            1.0136828235657447
+          ],
+          "target_angle_deg": [
+            2.615027733951205,
+            20.87007345249455,
+            25.111109363104106,
+            15.441241234313447,
+            9.424627128185314
+          ],
+          "excitation_proxy_std_rad": 0.007802179902625266,
+          "excitation_proxy_std_by_target_rad": [
+            0.004299976947656956,
+            0.010572796624303007,
+            0.013025580311414457,
+            0.007802179902625266,
+            0.006680729757448943
+          ],
+          "adxl_calibration_std_mps2_diagnostic": 0.005019400495247137,
+          "corrected_weighted_residual_rms_rad": 0.007895959915214046,
+          "primary_fit_metric": "median_leave_one_target_out_R2",
+          "primary_fit_r2": 0.0031299314457650107,
+          "fit_r2_by_target": [
+            0.007818340503965238,
+            0.0004303938001319896,
+            0.0031299314457650107,
+            0.002556740859425033,
+            0.01583187849648593
+          ],
+          "iq_snr_median_db": 36.7253793629444,
+          "cross_channel_abs_corr_median": 0.03201065837420717
+        },
+        "gate_data_scope": {
+          "decision_frames": [
+            0,
+            199
+          ],
+          "test_frames_not_used_for_decision": true,
+          "truth_used_by_estimator": false,
+          "q_proxy_used_by_estimator": false,
+          "signed_beta_convention": "beta_signed=1/cos(theta), positive mounting means cos(theta)>0"
+        }
+      }
+    },
+    {
+      "trial_id": "stationary__seed20261002",
+      "stratum": "stationary",
+      "seed": 20261002,
+      "gate_accepted": false,
+      "false_accept": false,
+      "abstention_as_failure_success": false,
+      "frozen_test_rmse_m_postrun": 1.014929142488411e-06,
+      "result_contains_truth": false,
+      "estimator_stdout": "saved result: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/stationary__seed20261002/algorithm_result.npz\nsaved summary: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/stationary__seed20261002/algorithm_result.json",
+      "gate": {
+        "accepted": false,
+        "checks": {
+          "signed_beta": true,
+          "excitation": false,
+          "corrected_residual": true,
+          "primary_fit_r2": false,
+          "iq_snr": true,
+          "cross_channel_consistency": false
+        },
+        "features_calibration": {
+          "beta_signed": [
+            1.0023286163130736,
+            1.0127411929408285,
+            1.0727005331877952,
+            1.0359783115160361,
+            1.1076296005915018
+          ],
+          "beta_reported": [
+            1.0023286163130736,
+            1.0127411929408285,
+            1.0727005331877952,
+            1.0359783115160361,
+            1.1076296005915018
+          ],
+          "target_angle_deg": [
+            3.906300495619712,
+            9.098081241088552,
+            21.2153909243272,
+            15.144245648988116,
+            25.467560142472372
+          ],
+          "excitation_proxy_std_rad": 0.007158185465001413,
+          "excitation_proxy_std_by_target_rad": [
+            0.0037275422264690453,
+            0.005394804991765161,
+            0.010014599895160783,
+            0.007158185465001413,
+            0.014639859944096048
+          ],
+          "adxl_calibration_std_mps2_diagnostic": 0.004930320910211179,
+          "corrected_weighted_residual_rms_rad": 0.007604429350504403,
+          "primary_fit_metric": "median_leave_one_target_out_R2",
+          "primary_fit_r2": 0.00505064375271469,
+          "fit_r2_by_target": [
+            0.0035667922023372434,
+            0.018656844501016012,
+            0.00505064375271469,
+            0.008874410902005914,
+            0.001963010787961239
+          ],
+          "iq_snr_median_db": 39.89033819335522,
+          "cross_channel_abs_corr_median": 0.037911369711411624
+        },
+        "gate_data_scope": {
+          "decision_frames": [
+            0,
+            199
+          ],
+          "test_frames_not_used_for_decision": true,
+          "truth_used_by_estimator": false,
+          "q_proxy_used_by_estimator": false,
+          "signed_beta_convention": "beta_signed=1/cos(theta), positive mounting means cos(theta)>0"
+        }
+      }
+    },
+    {
+      "trial_id": "low_motion_0p005mm__seed20261001",
+      "stratum": "low_motion_0p005mm",
+      "seed": 20261001,
+      "gate_accepted": false,
+      "false_accept": false,
+      "abstention_as_failure_success": false,
+      "frozen_test_rmse_m_postrun": 1.1152147440412552e-06,
+      "result_contains_truth": false,
+      "estimator_stdout": "saved result: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p005mm__seed20261001/algorithm_result.npz\nsaved summary: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p005mm__seed20261001/algorithm_result.json",
+      "gate": {
+        "accepted": false,
+        "checks": {
+          "signed_beta": true,
+          "excitation": true,
+          "corrected_residual": true,
+          "primary_fit_r2": false,
+          "iq_snr": true,
+          "cross_channel_consistency": false
+        },
+        "features_calibration": {
+          "beta_signed": [
+            1.001042448096848,
+            1.0702161574169302,
+            1.1043786570174754,
+            1.0374477035439045,
+            1.0136828235657447
+          ],
+          "beta_reported": [
+            1.001042448096848,
+            1.0702161574169302,
+            1.1043786570174754,
+            1.0374477035439045,
+            1.0136828235657447
+          ],
+          "target_angle_deg": [
+            2.615027733951205,
+            20.87007345249455,
+            25.111109363104106,
+            15.441241234313447,
+            9.424627128185314
+          ],
+          "excitation_proxy_std_rad": 0.018860714402240575,
+          "excitation_proxy_std_by_target_rad": [
+            0.017542824138252193,
+            0.021378961460989592,
+            0.021271600137801768,
+            0.018860714402240575,
+            0.017854487057342435
+          ],
+          "adxl_calibration_std_mps2_diagnostic": 0.005021869847145858,
+          "corrected_weighted_residual_rms_rad": 0.007909857043530012,
+          "primary_fit_metric": "median_leave_one_target_out_R2",
+          "primary_fit_r2": 0.7852817817737627,
+          "fit_r2_by_target": [
+            0.858075657151579,
+            0.730168643469849,
+            0.6093176920559709,
+            0.7921460190071938,
+            0.7852817817737627
+          ],
+          "iq_snr_median_db": 36.72894555620052,
+          "cross_channel_abs_corr_median": 0.7184418761439921
+        },
+        "gate_data_scope": {
+          "decision_frames": [
+            0,
+            199
+          ],
+          "test_frames_not_used_for_decision": true,
+          "truth_used_by_estimator": false,
+          "q_proxy_used_by_estimator": false,
+          "signed_beta_convention": "beta_signed=1/cos(theta), positive mounting means cos(theta)>0"
+        }
+      }
+    },
+    {
+      "trial_id": "low_motion_0p005mm__seed20261002",
+      "stratum": "low_motion_0p005mm",
+      "seed": 20261002,
+      "gate_accepted": false,
+      "false_accept": false,
+      "abstention_as_failure_success": false,
+      "frozen_test_rmse_m_postrun": 1.0280588302466485e-06,
+      "result_contains_truth": false,
+      "estimator_stdout": "saved result: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p005mm__seed20261002/algorithm_result.npz\nsaved summary: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p005mm__seed20261002/algorithm_result.json",
+      "gate": {
+        "accepted": false,
+        "checks": {
+          "signed_beta": true,
+          "excitation": true,
+          "corrected_residual": true,
+          "primary_fit_r2": false,
+          "iq_snr": true,
+          "cross_channel_consistency": false
+        },
+        "features_calibration": {
+          "beta_signed": [
+            1.0023286163130736,
+            1.0127411929408285,
+            1.0727005331877952,
+            1.0359783115160361,
+            1.1076296005915018
+          ],
+          "beta_reported": [
+            1.0023286163130736,
+            1.0127411929408285,
+            1.0727005331877952,
+            1.0359783115160361,
+            1.1076296005915018
+          ],
+          "target_angle_deg": [
+            3.906300495619712,
+            9.098081241088552,
+            21.2153909243272,
+            15.144245648988116,
+            25.467560142472372
+          ],
+          "excitation_proxy_std_rad": 0.017559015239390106,
+          "excitation_proxy_std_by_target_rad": [
+            0.017559015239390106,
+            0.017467235814946264,
+            0.020279840053227312,
+            0.01754442504736141,
+            0.022729154464717242
+          ],
+          "adxl_calibration_std_mps2_diagnostic": 0.004931214234582924,
+          "corrected_weighted_residual_rms_rad": 0.007640068432631007,
+          "primary_fit_metric": "median_leave_one_target_out_R2",
+          "primary_fit_r2": 0.7746239386490766,
+          "fit_r2_by_target": [
+            0.8987465503044693,
+            0.8770287056545809,
+            0.7092341857000264,
+            0.7746239386490766,
+            0.5565480976191439
+          ],
+          "iq_snr_median_db": 39.87958257268115,
+          "cross_channel_abs_corr_median": 0.7364373342938497
+        },
+        "gate_data_scope": {
+          "decision_frames": [
+            0,
+            199
+          ],
+          "test_frames_not_used_for_decision": true,
+          "truth_used_by_estimator": false,
+          "q_proxy_used_by_estimator": false,
+          "signed_beta_convention": "beta_signed=1/cos(theta), positive mounting means cos(theta)>0"
+        }
+      }
+    },
+    {
+      "trial_id": "low_motion_0p010mm__seed20261001",
+      "stratum": "low_motion_0p010mm",
+      "seed": 20261001,
+      "gate_accepted": true,
+      "false_accept": false,
+      "abstention_as_failure_success": true,
+      "frozen_test_rmse_m_postrun": 1.1605157643761944e-06,
+      "result_contains_truth": false,
+      "estimator_stdout": "saved result: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p010mm__seed20261001/algorithm_result.npz\nsaved summary: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p010mm__seed20261001/algorithm_result.json",
+      "gate": {
+        "accepted": true,
+        "checks": {
+          "signed_beta": true,
+          "excitation": true,
+          "corrected_residual": true,
+          "primary_fit_r2": true,
+          "iq_snr": true,
+          "cross_channel_consistency": true
+        },
+        "features_calibration": {
+          "beta_signed": [
+            1.001042448096848,
+            1.0702161574169302,
+            1.1043786570174754,
+            1.0374477035439045,
+            1.0136828235657447
+          ],
+          "beta_reported": [
+            1.001042448096848,
+            1.0702161574169302,
+            1.1043786570174754,
+            1.0374477035439045,
+            1.0136828235657447
+          ],
+          "target_angle_deg": [
+            2.615027733951205,
+            20.87007345249455,
+            25.111109363104106,
+            15.441241234313447,
+            9.424627128185314
+          ],
+          "excitation_proxy_std_rad": 0.03468520338357653,
+          "excitation_proxy_std_by_target_rad": [
+            0.03389180307057936,
+            0.0367955043663091,
+            0.03586554851072667,
+            0.03468520338357653,
+            0.033833906332557534
+          ],
+          "adxl_calibration_std_mps2_diagnostic": 0.005032091633948854,
+          "corrected_weighted_residual_rms_rad": 0.008003660796005308,
+          "primary_fit_metric": "median_leave_one_target_out_R2",
+          "primary_fit_r2": 0.9379999696509989,
+          "fit_r2_by_target": [
+            0.9600152808664498,
+            0.9101511898345744,
+            0.8621150227666948,
+            0.9379999696509989,
+            0.9382371628857692
+          ],
+          "iq_snr_median_db": 36.72634879091379,
+          "cross_channel_abs_corr_median": 0.9087847513775749
+        },
+        "gate_data_scope": {
+          "decision_frames": [
+            0,
+            199
+          ],
+          "test_frames_not_used_for_decision": true,
+          "truth_used_by_estimator": false,
+          "q_proxy_used_by_estimator": false,
+          "signed_beta_convention": "beta_signed=1/cos(theta), positive mounting means cos(theta)>0"
+        }
+      }
+    },
+    {
+      "trial_id": "low_motion_0p010mm__seed20261002",
+      "stratum": "low_motion_0p010mm",
+      "seed": 20261002,
+      "gate_accepted": true,
+      "false_accept": false,
+      "abstention_as_failure_success": true,
+      "frozen_test_rmse_m_postrun": 1.0624010072361838e-06,
+      "result_contains_truth": false,
+      "estimator_stdout": "saved result: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p010mm__seed20261002/algorithm_result.npz\nsaved summary: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p010mm__seed20261002/algorithm_result.json",
+      "gate": {
+        "accepted": true,
+        "checks": {
+          "signed_beta": true,
+          "excitation": true,
+          "corrected_residual": true,
+          "primary_fit_r2": true,
+          "iq_snr": true,
+          "cross_channel_consistency": true
+        },
+        "features_calibration": {
+          "beta_signed": [
+            1.0023286163130736,
+            1.0127411929408285,
+            1.0727005331877952,
+            1.0359783115160361,
+            1.1076296005915018
+          ],
+          "beta_reported": [
+            1.0023286163130736,
+            1.0127411929408285,
+            1.0727005331877952,
+            1.0359783115160361,
+            1.1076296005915018
+          ],
+          "target_angle_deg": [
+            3.906300495619712,
+            9.098081241088552,
+            21.2153909243272,
+            15.144245648988116,
+            25.467560142472372
+          ],
+          "excitation_proxy_std_rad": 0.03396518895719243,
+          "excitation_proxy_std_by_target_rad": [
+            0.03396518895719243,
+            0.03364035842019577,
+            0.035695804218297114,
+            0.033415951268741306,
+            0.037051745372065216
+          ],
+          "adxl_calibration_std_mps2_diagnostic": 0.004940005809494626,
+          "corrected_weighted_residual_rms_rad": 0.007942107450614825,
+          "primary_fit_metric": "median_leave_one_target_out_R2",
+          "primary_fit_r2": 0.9359993290992926,
+          "fit_r2_by_target": [
+            0.9713445600975043,
+            0.9659343591693028,
+            0.9049301678823525,
+            0.9359993290992926,
+            0.8349508984849784
+          ],
+          "iq_snr_median_db": 39.88937659986543,
+          "cross_channel_abs_corr_median": 0.9195554361934541
+        },
+        "gate_data_scope": {
+          "decision_frames": [
+            0,
+            199
+          ],
+          "test_frames_not_used_for_decision": true,
+          "truth_used_by_estimator": false,
+          "q_proxy_used_by_estimator": false,
+          "signed_beta_convention": "beta_signed=1/cos(theta), positive mounting means cos(theta)>0"
+        }
+      }
+    },
+    {
+      "trial_id": "low_motion_0p020mm__seed20261001",
+      "stratum": "low_motion_0p020mm",
+      "seed": 20261001,
+      "gate_accepted": true,
+      "false_accept": false,
+      "abstention_as_failure_success": true,
+      "frozen_test_rmse_m_postrun": 1.297955329539311e-06,
+      "result_contains_truth": false,
+      "estimator_stdout": "saved result: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p020mm__seed20261001/algorithm_result.npz\nsaved summary: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p020mm__seed20261001/algorithm_result.json",
+      "gate": {
+        "accepted": true,
+        "checks": {
+          "signed_beta": true,
+          "excitation": true,
+          "corrected_residual": true,
+          "primary_fit_r2": true,
+          "iq_snr": true,
+          "cross_channel_consistency": true
+        },
+        "features_calibration": {
+          "beta_signed": [
+            1.001042448096848,
+            1.0702161574169302,
+            1.1043786570174754,
+            1.0374477035439045,
+            1.0136828235657447
+          ],
+          "beta_reported": [
+            1.001042448096848,
+            1.0702161574169302,
+            1.1043786570174754,
+            1.0374477035439045,
+            1.0136828235657447
+          ],
+          "target_angle_deg": [
+            2.615027733951205,
+            20.87007345249455,
+            25.111109363104106,
+            15.441241234313447,
+            9.424627128185314
+          ],
+          "excitation_proxy_std_rad": 0.06748781429564005,
+          "excitation_proxy_std_by_target_rad": [
+            0.06697313192990453,
+            0.0693033966428071,
+            0.06787753624529679,
+            0.06748781429564005,
+            0.06672474562219544
+          ],
+          "adxl_calibration_std_mps2_diagnostic": 0.005075569640584967,
+          "corrected_weighted_residual_rms_rad": 0.008475421249325427,
+          "primary_fit_metric": "median_leave_one_target_out_R2",
+          "primary_fit_r2": 0.9838049862443405,
+          "fit_r2_by_target": [
+            0.9896232854060819,
+            0.9753032013650165,
+            0.9614561185841839,
+            0.984001961376741,
+            0.9838049862443405
+          ],
+          "iq_snr_median_db": 36.730230376594875,
+          "cross_channel_abs_corr_median": 0.9752650201698105
+        },
+        "gate_data_scope": {
+          "decision_frames": [
+            0,
+            199
+          ],
+          "test_frames_not_used_for_decision": true,
+          "truth_used_by_estimator": false,
+          "q_proxy_used_by_estimator": false,
+          "signed_beta_convention": "beta_signed=1/cos(theta), positive mounting means cos(theta)>0"
+        }
+      }
+    },
+    {
+      "trial_id": "low_motion_0p020mm__seed20261002",
+      "stratum": "low_motion_0p020mm",
+      "seed": 20261002,
+      "gate_accepted": true,
+      "false_accept": false,
+      "abstention_as_failure_success": true,
+      "frozen_test_rmse_m_postrun": 1.1855723646397532e-06,
+      "result_contains_truth": false,
+      "estimator_stdout": "saved result: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p020mm__seed20261002/algorithm_result.npz\nsaved summary: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p020mm__seed20261002/algorithm_result.json",
+      "gate": {
+        "accepted": true,
+        "checks": {
+          "signed_beta": true,
+          "excitation": true,
+          "corrected_residual": true,
+          "primary_fit_r2": true,
+          "iq_snr": true,
+          "cross_channel_consistency": true
+        },
+        "features_calibration": {
+          "beta_signed": [
+            1.0023286163130736,
+            1.0127411929408285,
+            1.0727005331877952,
+            1.0359783115160361,
+            1.1076296005915018
+          ],
+          "beta_reported": [
+            1.0023286163130736,
+            1.0127411929408285,
+            1.0727005331877952,
+            1.0359783115160361,
+            1.1076296005915018
+          ],
+          "target_angle_deg": [
+            3.906300495619712,
+            9.098081241088552,
+            21.2153909243272,
+            15.144245648988116,
+            25.467560142472372
+          ],
+          "excitation_proxy_std_rad": 0.0670610960878879,
+          "excitation_proxy_std_by_target_rad": [
+            0.0670610960878879,
+            0.06660766067007223,
+            0.06823380697694695,
+            0.06626607974817635,
+            0.068896382168908
+          ],
+          "adxl_calibration_std_mps2_diagnostic": 0.004981078859164412,
+          "corrected_weighted_residual_rms_rad": 0.008056734954126083,
+          "primary_fit_metric": "median_leave_one_target_out_R2",
+          "primary_fit_r2": 0.9830626012645497,
+          "fit_r2_by_target": [
+            0.9929770966926776,
+            0.9910032179466397,
+            0.9737921545423892,
+            0.9830626012645497,
+            0.9519069763578546
+          ],
+          "iq_snr_median_db": 39.89652577980181,
+          "cross_channel_abs_corr_median": 0.9788680193939743
+        },
+        "gate_data_scope": {
+          "decision_frames": [
+            0,
+            199
+          ],
+          "test_frames_not_used_for_decision": true,
+          "truth_used_by_estimator": false,
+          "q_proxy_used_by_estimator": false,
+          "signed_beta_convention": "beta_signed=1/cos(theta), positive mounting means cos(theta)>0"
+        }
+      }
+    },
+    {
+      "trial_id": "low_motion_0p050mm__seed20261001",
+      "stratum": "low_motion_0p050mm",
+      "seed": 20261001,
+      "gate_accepted": true,
+      "false_accept": false,
+      "abstention_as_failure_success": true,
+      "frozen_test_rmse_m_postrun": 1.9422599692410617e-06,
+      "result_contains_truth": false,
+      "estimator_stdout": "saved result: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p050mm__seed20261001/algorithm_result.npz\nsaved summary: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p050mm__seed20261001/algorithm_result.json",
+      "gate": {
+        "accepted": true,
+        "checks": {
+          "signed_beta": true,
+          "excitation": true,
+          "corrected_residual": true,
+          "primary_fit_r2": true,
+          "iq_snr": true,
+          "cross_channel_consistency": true
+        },
+        "features_calibration": {
+          "beta_signed": [
+            1.001042448096848,
+            1.0702161574169302,
+            1.1043786570174754,
+            1.0374477035439045,
+            1.0136828235657447
+          ],
+          "beta_reported": [
+            1.001042448096848,
+            1.0702161574169302,
+            1.1043786570174754,
+            1.0374477035439045,
+            1.0136828235657447
+          ],
+          "target_angle_deg": [
+            2.615027733951205,
+            20.87007345249455,
+            25.111109363104106,
+            15.441241234313447,
+            9.424627128185314
+          ],
+          "excitation_proxy_std_rad": 0.16672374426279427,
+          "excitation_proxy_std_by_target_rad": [
+            0.1665385902067739,
+            0.16849529841118616,
+            0.16672374426279427,
+            0.16693287330450227,
+            0.16618618341479058
+          ],
+          "adxl_calibration_std_mps2_diagnostic": 0.005380628826404093,
+          "corrected_weighted_residual_rms_rad": 0.00841099431826744,
+          "primary_fit_metric": "median_leave_one_target_out_R2",
+          "primary_fit_r2": 0.9973549549945703,
+          "fit_r2_by_target": [
+            0.9982949030592272,
+            0.9958623357557778,
+            0.9936475250421231,
+            0.9973549549945703,
+            0.9973709729467891
+          ],
+          "iq_snr_median_db": 36.72224044195226,
+          "cross_channel_abs_corr_median": 0.9959339041810514
+        },
+        "gate_data_scope": {
+          "decision_frames": [
+            0,
+            199
+          ],
+          "test_frames_not_used_for_decision": true,
+          "truth_used_by_estimator": false,
+          "q_proxy_used_by_estimator": false,
+          "signed_beta_convention": "beta_signed=1/cos(theta), positive mounting means cos(theta)>0"
+        }
+      }
+    },
+    {
+      "trial_id": "low_motion_0p050mm__seed20261002",
+      "stratum": "low_motion_0p050mm",
+      "seed": 20261002,
+      "gate_accepted": true,
+      "false_accept": false,
+      "abstention_as_failure_success": true,
+      "frozen_test_rmse_m_postrun": 1.818933855585112e-06,
+      "result_contains_truth": false,
+      "estimator_stdout": "saved result: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p050mm__seed20261002/algorithm_result.npz\nsaved summary: /workspace/scratch/4f8ee3bb0d3d/cloud_thesis/spatial_recovery_rebuilt/p2_gate_smoke/_work/low_motion_0p050mm__seed20261002/algorithm_result.json",
+      "gate": {
+        "accepted": true,
+        "checks": {
+          "signed_beta": true,
+          "excitation": true,
+          "corrected_residual": true,
+          "primary_fit_r2": true,
+          "iq_snr": true,
+          "cross_channel_consistency": true
+        },
+        "features_calibration": {
+          "beta_signed": [
+            1.0023286163130736,
+            1.0127411929408285,
+            1.0727005331877952,
+            1.0359783115160361,
+            1.1076296005915018
+          ],
+          "beta_reported": [
+            1.0023286163130736,
+            1.0127411929408285,
+            1.0727005331877952,
+            1.0359783115160361,
+            1.1076296005915018
+          ],
+          "target_angle_deg": [
+            3.906300495619712,
+            9.098081241088552,
+            21.2153909243272,
+            15.144245648988116,
+            25.467560142472372
+          ],
+          "excitation_proxy_std_rad": 0.16658607732527422,
+          "excitation_proxy_std_by_target_rad": [
+            0.16658607732527422,
+            0.16602748168063783,
+            0.16747270060733316,
+            0.165738523680624,
+            0.16781069255454983
+          ],
+          "adxl_calibration_std_mps2_diagnostic": 0.005282517459557533,
+          "corrected_weighted_residual_rms_rad": 0.008217253882682097,
+          "primary_fit_metric": "median_leave_one_target_out_R2",
+          "primary_fit_r2": 0.9973462084541633,
+          "fit_r2_by_target": [
+            0.9987786637347853,
+            0.9985618954033167,
+            0.9956543340131037,
+            0.9973462084541633,
+            0.9920183627198093
+          ],
+          "iq_snr_median_db": 39.875398319533375,
+          "cross_channel_abs_corr_median": 0.996584290384682
+        },
+        "gate_data_scope": {
+          "decision_frames": [
+            0,
+            199
+          ],
+          "test_frames_not_used_for_decision": true,
+          "truth_used_by_estimator": false,
+          "q_proxy_used_by_estimator": false,
+          "signed_beta_convention": "beta_signed=1/cos(theta), positive mounting means cos(theta)>0"
+        }
+      }
+    }
+  ]
+}

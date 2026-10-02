@@ -1,0 +1,32 @@
+{
+  "calibration_frames": [
+    0,
+    199
+  ],
+  "frozen_test_frames": [
+    200,
+    399
+  ],
+  "decision_uses_test": false,
+  "thresholds": {
+    "excitation_proxy_std_floor_rad": 0.012,
+    "corrected_weighted_residual_rms_max_rad": 0.02,
+    "primary_fit_r2_floor": 0.8,
+    "iq_snr_floor_db": 20.0,
+    "cross_channel_abs_corr_floor": 0.8,
+    "beta_abs_cos_floor": 0.5,
+    "false_accept_rmse_max_m": 1e-05
+  },
+  "features": [
+    "signed_beta",
+    "excitation_proxy_std",
+    "corrected_weighted_residual",
+    "median_leave_one_target_out_R2",
+    "IQ_SNR",
+    "cross_channel_abs_corr"
+  ],
+  "estimator_input": "radar/algorithm_input + adxl355/algorithm_input + sync only; truth and q_proxy removed",
+  "false_accept_definition": "gate accepted and post-run frozen-test RMSE > 0.010 mm",
+  "abstention_as_failure": true,
+  "fence_caveat": "Gate decisions are calibration-only, but retained RA geometry/selection currently uses full 400-frame ADC window; strict calibration-only P2 deployment remains blocked."
+}
