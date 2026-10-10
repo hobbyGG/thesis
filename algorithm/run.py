@@ -14,7 +14,25 @@ from .kalman import run_fixed_beta_kalman
 def run(input_dir: str | Path, output: str | Path, *, radar_mode: str = "frame") -> tuple[Path, Path]:
     capture = load_capture_package(input_dir)
     radar, acceleration, targets, radar_rate = build_algorithm_inputs(capture, radar_mode=radar_mode)
-    config = AlgorithmConfig(sample_rate_hz=float(radar_rate))
+    # FMCW phase is referenced to the centre of the sampled fast-time
+    # aperture.  Use that effective carrier for the phase-to-displacement
+    # conversion instead of the nominal synthesizer start frequency.
+    radar_meta = capture.radar_metadata
+    carrier_frequency_hz = float(radar_meta.get("start_frequency_hz", 77.0e9))
+    adc_rate_hz = float(radar_meta.get("adc_sample_rate_hz", 0.0))
+    chirp_slope_hz_per_s = float(radar_meta.get("chirp_slope_hz_per_s", 0.0))
+    adc_start_time_s = float(radar_meta.get("adc_start_time_s", 0.0))
+    if adc_rate_hz > 0.0 and chirp_slope_hz_per_s != 0.0:
+        if capture.frontend.range_fft_method == "apfft":
+            center_sample = (capture.frontend.num_adc_samples + 1) // 2 - 1
+        else:
+            center_sample = (capture.frontend.num_adc_samples - 1) / 2.0
+        aperture_center_s = adc_start_time_s + float(center_sample) / adc_rate_hz
+        carrier_frequency_hz += chirp_slope_hz_per_s * aperture_center_s
+    config = AlgorithmConfig(
+        sample_rate_hz=float(radar_rate),
+        carrier_frequency_hz=carrier_frequency_hz,
+    )
     result = run_fixed_beta_kalman(radar, acceleration, config)
     output_path = Path(output)
     if output_path.suffix != ".npz":
@@ -63,6 +81,9 @@ def run(input_dir: str | Path, output: str | Path, *, radar_mode: str = "frame")
         "adxl_samples": int(capture.adxl_time_ns.size),
         "selected_targets": int(radar.selected_indices.size),
         "target_detection": radar.extra["detection"],
+        "range_fft_method": capture.frontend.range_fft_method,
+        "range_window": capture.frontend.range_window,
+        "effective_carrier_frequency_hz": config.carrier_frequency_hz,
     }
     if truth_aligned is not None:
         truth = truth_aligned

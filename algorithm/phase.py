@@ -43,6 +43,7 @@ def causal_iq_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e
         radius = min_radius
         previous = np.nan + 1j * np.nan
         phase = 0.0
+        coordinate_scale = None
         for sample in range(samples):
             z = values[target, sample]
             if not (np.isfinite(z.real) and np.isfinite(z.imag)):
@@ -51,9 +52,15 @@ def causal_iq_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e
                 continue
 
             x, y = float(z.real), float(z.imag)
-            row = np.array([2.0 * x, 2.0 * y, 1.0], dtype=float)
+            if coordinate_scale is None:
+                # Keep the algebraic fit coordinates O(10) so the constant
+                # term and the IQ terms have comparable numerical weight.
+                coordinate_scale = max(abs(z) / 10.0, min_radius)
+            x_scaled = x / coordinate_scale
+            y_scaled = y / coordinate_scale
+            row = np.array([2.0 * x_scaled, 2.0 * y_scaled, 1.0], dtype=float)
             gram += np.outer(row, row)
-            rhs += row * (x * x + y * y)
+            rhs += row * (x_scaled * x_scaled + y_scaled * y_scaled)
             count += 1
             if count >= 3:
                 try:
@@ -66,15 +73,15 @@ def causal_iq_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e
                 except np.linalg.LinAlgError:
                     estimate = None
                 if estimate is not None and np.all(np.isfinite(estimate)):
-                    cx, cy, d = (float(value) for value in estimate)
-                    radius_squared = d + cx * cx + cy * cy
-                    if np.isfinite(radius_squared) and radius_squared > min_radius * min_radius:
-                        candidate = np.hypot(cx, cy)
+                    cx_scaled, cy_scaled, d_scaled = (float(value) for value in estimate)
+                    radius_squared_scaled = d_scaled + cx_scaled * cx_scaled + cy_scaled * cy_scaled
+                    if np.isfinite(radius_squared_scaled) and radius_squared_scaled > min_radius * min_radius:
+                        candidate = np.hypot(cx_scaled, cy_scaled)
                         # Reject an ill-conditioned algebraic fit that would
                         # make a single noisy sample dominate the phase.
-                        if candidate < 1.0e6 and np.sqrt(radius_squared) < 1.0e6:
-                            center = complex(cx, cy)
-                            radius = max(float(np.sqrt(radius_squared)), min_radius)
+                        if candidate < 1.0e6 and np.sqrt(radius_squared_scaled) < 1.0e6:
+                            center = coordinate_scale * complex(cx_scaled, cy_scaled)
+                            radius = max(float(coordinate_scale * np.sqrt(radius_squared_scaled)), min_radius)
 
             centered = z - center
             magnitude = abs(centered)

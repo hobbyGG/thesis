@@ -13,6 +13,12 @@ class FrontendConfig:
     num_angle_bins: int = 64
     range_resolution_m: float = 0.15
     antenna_spacing_wavelengths: float = 0.5
+    # Fast-time processing is kept explicit because its phase reference is
+    # part of the displacement equation.  ``apfft`` is the all-phase path;
+    # the ordinary FFT path remains available for controlled comparisons.
+    range_fft_method: str = "apfft"
+    # A symmetric window keeps the phase reference at the aperture centre.
+    range_window: str = "none"
     angle_window: str = "hann"
     radar_mount: str = "downward"
     virtual_array_positions_wavelengths: tuple[float, ...] = ()

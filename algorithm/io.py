@@ -51,6 +51,8 @@ def load_capture_package(root: str | Path) -> CapturePackage:
         num_range_bins=int(radar_meta["adc_samples_per_chirp"]),
         num_angle_bins=int(radar_meta.get("angle_bins", 64)),
         range_resolution_m=float(radar_meta["range_resolution_m"]),
+        range_fft_method="apfft",
+        range_window="none",
         virtual_array_positions_wavelengths=tuple(
             float(value) for value in radar_meta.get("virtual_array_positions_wavelengths", ())
         ),

@@ -22,6 +22,49 @@ def angle_axis_deg(config: FrontendConfig) -> np.ndarray:
     return np.rad2deg(np.arcsin(np.clip(spatial / config.antenna_spacing_wavelengths, -1.0, 1.0)))
 
 
+def _range_window(num_samples: int, name: str) -> np.ndarray:
+    if name == "hamming":
+        return np.hamming(num_samples)
+    if name == "hann":
+        return np.hanning(num_samples)
+    if name == "blackman":
+        return np.blackman(num_samples)
+    if name in ("rect", "rectangular", "none"):
+        return np.ones(num_samples, dtype=float)
+    raise ValueError(f"unsupported range window: {name}")
+
+
+def _range_spectrum(adc: np.ndarray, config: FrontendConfig) -> np.ndarray:
+    """Return the fast-time spectrum with the selected phase-preserving path.
+
+    The all-phase path follows the APC construction: M=N/2 overlapping
+    sub-records share the sample at M-1, each is cyclically shifted to put
+    that sample at the same location, and the aligned records are averaged.
+    The resulting M-sample signal is zero-padded to the configured FFT length
+    so the existing range-bin grid and target-selection contract are kept.
+    """
+
+    samples = np.asarray(adc, dtype=complex)
+    if samples.ndim < 1:
+        raise ValueError("adc must have a fast-time axis")
+    fast_window = _range_window(samples.shape[-1], config.range_window)
+    samples = samples * fast_window
+    if config.range_fft_method in ("fft", "windowed_fft"):
+        return np.fft.fft(samples, n=config.num_range_bins, axis=-1)
+    if config.range_fft_method != "apfft":
+        raise ValueError(f"unsupported range FFT method: {config.range_fft_method}")
+
+    length = samples.shape[-1]
+    sub_length = (length + 1) // 2
+    all_phase = np.zeros(samples.shape[:-1] + (sub_length,), dtype=complex)
+    for shift in range(sub_length):
+        start = sub_length - 1 - shift
+        segment = samples[..., start:start + sub_length]
+        all_phase += np.roll(segment, -shift, axis=-1)
+    all_phase /= float(sub_length)
+    return np.fft.fft(all_phase, n=config.num_range_bins, axis=-1)
+
+
 @dataclass(frozen=True)
 class RangeAngleData:
     cube: np.ndarray
@@ -45,14 +88,18 @@ class TargetData:
 
 def range_angle_process(adc_cube: np.ndarray, config: FrontendConfig) -> RangeAngleData:
     adc = np.asarray(adc_cube, dtype=complex)
-    range_fft = np.fft.fft(adc, n=config.num_range_bins, axis=2)
+    range_fft = _range_spectrum(adc, config)
     snapshots = np.transpose(range_fft, (0, 2, 1))
     positions = virtual_array_positions(config)
     window = np.hanning(config.num_virtual_rx) if config.angle_window == "hann" else np.ones(config.num_virtual_rx)
     spatial = np.fft.fftshift(np.fft.fftfreq(config.num_angle_bins, d=1.0))
     steering = np.exp(-2j * np.pi * positions[:, None] * (spatial / config.antenna_spacing_wavelengths)[None, :])
     cube = np.einsum("frv,va->fra", snapshots * window[None, None, :], steering, optimize=True)
-    cube /= float(config.num_adc_samples * max(np.sum(window), 1.0e-12))
+    if config.range_fft_method == "apfft":
+        range_scale = (adc.shape[-1] + 1) // 2
+    else:
+        range_scale = np.sum(_range_window(adc.shape[-1], config.range_window))
+    cube /= float(max(range_scale, 1.0e-12) * max(np.sum(window), 1.0e-12))
     return RangeAngleData(cube, range_axis_m(config), angle_axis_deg(config), snapshots, positions)
 
 
@@ -150,11 +197,7 @@ def extract_loop_targets(chirp_cube: np.ndarray, geometry: TargetData, config: F
         weights.append((indices, np.linalg.pinv(steering, rcond=1.0e-8)))
     for start in range(0, frames, 32):
         end = min(frames, start + 32)
-        spectrum = np.fft.fft(
-            np.asarray(chirp_cube[start:end], dtype=np.complex128),
-            n=config.num_range_bins,
-            axis=-1,
-        )
+        spectrum = _range_spectrum(np.asarray(chirp_cube[start:end], dtype=np.complex128), config)
         for r, (indices, weight) in zip(bins, weights):
             snapshots = spectrum[..., r].reshape(-1, config.num_virtual_rx).T
             slow[indices, start * loops:end * loops] = weight @ snapshots
