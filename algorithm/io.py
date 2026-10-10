@@ -123,7 +123,7 @@ def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "frame"
     range_bins, angle_bins, detection = detect_target_bins(first.cube, first.angle_axis_deg, max_candidates=5)
     processed = range_angle_process(stream_cube, capture.frontend)
     targets = extract_dbf_targets(processed, range_bins, angle_bins)
-    wrapped, centers, radii, circle_residual = causal_iq_circle_phase(targets.slow_time)
+    wrapped, centers, radii, circle_residual, normalized_iq = causal_iq_circle_phase(targets.slow_time)
     targets = type(targets)(
         slow_time=targets.slow_time,
         wrapped_phase_rad=wrapped,
@@ -174,6 +174,7 @@ def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "frame"
             "circle_center": centers,
             "circle_radius": radii,
             "circle_residual": circle_residual,
+            "normalized_iq": normalized_iq,
         },
         iq_slow_time=targets.slow_time,
     )

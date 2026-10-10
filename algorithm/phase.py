@@ -20,7 +20,9 @@ def causal_iq_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e
     current center for both the current and previous IQ sample.  The returned
     phase is referenced to zero at the first valid sample and is wrapped to
     ``(-pi, pi]``; the Kalman stage performs only the ordinary nearest-branch
-    continuation from the previous target phase.
+    continuation from the previous target phase.  The fifth return value is
+    the centered, radius-normalized IQ stream for diagnostics and later
+    fusion extensions.
     """
 
     values = np.asarray(iq_slow_time, dtype=np.complex128)
@@ -31,6 +33,7 @@ def causal_iq_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e
     centers = np.zeros((targets, samples), dtype=np.complex128)
     radii = np.full((targets, samples), np.nan, dtype=float)
     residuals = np.full((targets, samples), np.nan, dtype=float)
+    normalized = np.full((targets, samples), np.nan + 1j * np.nan, dtype=np.complex128)
 
     for target in range(targets):
         gram = np.zeros((3, 3), dtype=float)
@@ -94,5 +97,6 @@ def causal_iq_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e
                 radius = max(magnitude, min_radius)
             radii[target, sample] = radius
             residuals[target, sample] = abs(abs(centered) - radius)
+            normalized[target, sample] = centered / max(radius, min_radius)
 
-    return wrapped, centers, radii, residuals
+    return wrapped, centers, radii, residuals, normalized

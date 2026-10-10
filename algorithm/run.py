@@ -36,6 +36,7 @@ def run(input_dir: str | Path, output: str | Path, *, radar_mode: str = "frame")
         "radar_circle_center": np.asarray(radar.extra["circle_center"]),
         "radar_circle_radius": np.asarray(radar.extra["circle_radius"]),
         "radar_circle_residual": np.asarray(radar.extra["circle_residual"]),
+        "radar_iq_normalized": np.asarray(radar.extra["normalized_iq"]),
         "selected_target_indices": radar.selected_indices,
         "target_angle_deg": np.asarray(targets.angle_deg, dtype=float),
         "target_range_m": np.asarray(targets.range_m, dtype=float),
