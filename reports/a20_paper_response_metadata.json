@@ -33,7 +33,9 @@
   "assumed": {
     "arrival_s": 0.5,
     "car_count": 5,
-    "envelope": "quintic entry/exit transitions over one span-crossing time",
+    "passage_duration_s": 0.8,
+    "transition_duration_s": 0.12,
+    "envelope": "quintic entry/exit transitions around a short laser-like passage",
     "excitation_weights": [
       1.0,
       0.8,
