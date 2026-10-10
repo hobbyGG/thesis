@@ -16,9 +16,9 @@ class FrontendConfig:
     # Fast-time processing is kept explicit because its phase reference is
     # part of the displacement equation.  ``apfft`` is the all-phase path;
     # the ordinary FFT path remains available for controlled comparisons.
-    range_fft_method: str = "apfft"
+    range_fft_method: str = "fft"
     # A symmetric window keeps the phase reference at the aperture centre.
-    range_window: str = "none"
+    range_window: str = "hamming"
     angle_window: str = "hann"
     radar_mount: str = "downward"
     virtual_array_positions_wavelengths: tuple[float, ...] = ()

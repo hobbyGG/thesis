@@ -11,8 +11,19 @@ from .io import build_algorithm_inputs, load_capture_package
 from .kalman import run_fixed_beta_kalman
 
 
-def run(input_dir: str | Path, output: str | Path, *, radar_mode: str = "frame") -> tuple[Path, Path]:
-    capture = load_capture_package(input_dir)
+def run(
+    input_dir: str | Path,
+    output: str | Path,
+    *,
+    radar_mode: str = "frame",
+    range_fft_method: str = "fft",
+    range_window: str = "hamming",
+) -> tuple[Path, Path]:
+    capture = load_capture_package(
+        input_dir,
+        range_fft_method=range_fft_method,
+        range_window=range_window,
+    )
     radar, acceleration, targets, radar_rate = build_algorithm_inputs(capture, radar_mode=radar_mode)
     # FMCW phase is referenced to the centre of the sampled fast-time
     # aperture.  Use that effective carrier for the phase-to-displacement
@@ -129,8 +140,20 @@ def main() -> None:
     parser.add_argument("--input", required=True, type=Path, help="capture package directory")
     parser.add_argument("--output", required=True, type=Path, help="result .npz path or output directory")
     parser.add_argument("--radar-mode", choices=("frame", "chirp"), default="frame")
+    parser.add_argument("--range-fft-method", choices=("fft", "apfft"), default="fft")
+    parser.add_argument(
+        "--range-window",
+        choices=("none", "hamming", "hann", "blackman"),
+        default="hamming",
+    )
     args = parser.parse_args()
-    result, summary = run(args.input, args.output, radar_mode=args.radar_mode)
+    result, summary = run(
+        args.input,
+        args.output,
+        radar_mode=args.radar_mode,
+        range_fft_method=args.range_fft_method,
+        range_window=args.range_window,
+    )
     print(f"saved result: {result}")
     print(f"saved summary: {summary}")
 
