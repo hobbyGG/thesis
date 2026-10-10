@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from .config import AlgorithmConfig
-from .phase import itoh_unwrap, prediction_correct_wrapped_phase
+from .phase import prediction_correct_wrapped_phase
 from .types import AccelerationInput, RadarInput
 
 
@@ -20,66 +20,21 @@ class AlgorithmResult:
     extra: dict = field(default_factory=dict)
 
 
-def _cold_start_count(radar: RadarInput, config: AlgorithmConfig, samples: int) -> int:
-    if "radar_time_ns" in radar.extra:
-        times = np.asarray(radar.extra["radar_time_ns"], dtype=np.int64)
-        elapsed_s = (times - times[0]).astype(float) * 1.0e-9
-        return max(1, int(np.searchsorted(elapsed_s, config.cold_start_duration_s, side="left")))
-    return max(1, min(samples, round(config.cold_start_duration_s * config.sample_rate_hz)))
+def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, config: AlgorithmConfig) -> AlgorithmResult:
+    """Fuse causal IQ-circle phase observations with native-time acceleration.
 
+    Phase continuation uses the previous valid phase of each target.  The
+    acceleration prediction is used by the state model and update weighting;
+    it is deliberately not used to choose a phase-wrap branch.
+    """
 
-def _cold_start_statistics(radar: RadarInput, config: AlgorithmConfig) -> tuple[np.ndarray, np.ndarray]:
-    count = _cold_start_count(radar, config, radar.wrapped_phase_rad.shape[1])
-    biases = np.zeros(radar.wrapped_phase_rad.shape[0], dtype=float)
+    targets, samples = radar.wrapped_phase_rad.shape
+    beta = np.asarray(radar.measured_beta, dtype=float).copy()
     initial_r = np.clip(
         np.asarray(radar.initial_r, dtype=float).copy(),
         config.min_measurement_variance,
         config.max_measurement_variance,
     )
-    if config.cold_start_r_mode != "residual":
-        for i, row in enumerate(radar.wrapped_phase_rad[:, :count]):
-            valid = np.isfinite(row)
-            if np.any(valid):
-                biases[i] = float(np.mean(itoh_unwrap(row[valid])))
-        return biases, initial_r
-
-    beta = np.asarray(radar.measured_beta, dtype=float)
-    structural_phase = np.full((radar.wrapped_phase_rad.shape[0], count), np.nan, dtype=float)
-    for i, row in enumerate(radar.wrapped_phase_rad[:, :count]):
-        valid = np.isfinite(row)
-        if np.any(valid):
-            unwrapped = itoh_unwrap(row[valid])
-            biases[i] = float(np.mean(unwrapped))
-            structural_phase[i, valid] = beta[i] * (unwrapped - biases[i])
-
-    selected = np.asarray(radar.selected_indices, dtype=int)
-    if selected.size < 2:
-        return biases, initial_r
-
-    common = np.full(count, np.nan, dtype=float)
-    for k in range(count):
-        values = structural_phase[selected, k]
-        values = values[np.isfinite(values)]
-        if values.size:
-            common[k] = float(np.median(values))
-    for i in selected:
-        residual = structural_phase[i] - common
-        residual = residual[np.isfinite(residual)]
-        if residual.size >= 2:
-            initial_r[i] = np.clip(
-                float(np.var(residual)),
-                config.min_measurement_variance,
-                config.max_measurement_variance,
-            )
-    return biases, initial_r
-
-
-def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, config: AlgorithmConfig) -> AlgorithmResult:
-    """Fuse fixed geometry beta observations with native-time acceleration."""
-
-    targets, samples = radar.wrapped_phase_rad.shape
-    beta = np.asarray(radar.measured_beta, dtype=float).copy()
-    biases, initial_r = _cold_start_statistics(radar, config)
     selected = np.asarray(radar.selected_indices, dtype=int)
     x = np.array([0.0, 0.0], dtype=float)
     p = np.diag([config.initial_state_variance, config.initial_rate_variance])
@@ -89,8 +44,9 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
     corrected = np.full((targets, samples), np.nan, dtype=float)
     innovation = np.full((targets, samples), np.nan, dtype=float)
     r_history = np.full((targets, samples), np.nan, dtype=float)
+    previous_phase = np.full(targets, np.nan, dtype=float)
     preintegration = acceleration.preintegration
-    reference_dt = float(radar.extra.get("frame_period_s", 1.0 / config.sample_rate_hz))
+    reference_dt = float(radar.extra.get("sample_period_s", 1.0 / config.sample_rate_hz))
     for k in range(samples):
         duration = reference_dt
         if k:
@@ -106,9 +62,16 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
             observations = []
             variances = []
             for i in active:
-                los = prediction_correct_wrapped_phase(radar.wrapped_phase_rad[i, k], x[0] / beta[i] + biases[i])
+                wrapped = float(radar.wrapped_phase_rad[i, k])
+                if np.isfinite(previous_phase[i]):
+                    # Ordinary nearest-2pi continuation from the preceding
+                    # target phase; no acceleration-assisted unwrap branch.
+                    los = float(prediction_correct_wrapped_phase(wrapped, previous_phase[i]))
+                else:
+                    los = wrapped
+                previous_phase[i] = los
                 corrected[i, k] = los
-                observations.append(beta[i] * (los - biases[i]))
+                observations.append(beta[i] * los)
                 variances.append(r[i])
             observations = np.asarray(observations)
             variances = np.asarray(variances)
@@ -135,6 +98,8 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
         theta[k], rate[k] = x
         r_history[:, k] = r
     return AlgorithmResult(
+        # Keep the retained result schema name so existing downstream result
+        # readers continue to load it; ``extra`` records the new causal path.
         method_name="fixed_geometry_beta_structural_kalman",
         q_hat_m=theta * config.wavelength_m() / (4.0 * np.pi),
         theta_hat_rad=theta,
@@ -146,8 +111,9 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
         extra={
             "selected_indices": selected,
             "beta_source": "angle_geometry",
-            "adaptive_r_mode": "cold_start_residual_then_posterior",
-            "cold_start_r_mode": config.cold_start_r_mode,
+            "adaptive_r_mode": "causal_posterior",
+            "phase_unwrap_mode": "previous_target_phase",
+            "circle_source": "causal_algebraic_fit",
             "initial_r": initial_r,
         },
     )

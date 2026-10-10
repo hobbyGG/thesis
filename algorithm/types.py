@@ -39,6 +39,10 @@ class RadarInput:
     initial_r: np.ndarray
     selection_scores: np.ndarray
     extra: dict[str, Any] = field(default_factory=dict)
+    # Complex target IQ before phase extraction.  Keeping this at the
+    # algorithm boundary lets the causal IQ-circle estimator use the same
+    # per-observation samples that produced ``wrapped_phase_rad``.
+    iq_slow_time: Optional[np.ndarray] = None
 
 
 @dataclass(frozen=True)

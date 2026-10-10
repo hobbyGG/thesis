@@ -139,7 +139,8 @@ Focused Pi hardware results are recorded in
 [PI4_VALIDATION_2026-08-30.md](PI4_VALIDATION_2026-08-30.md).
 
 Hardware-trigger mode requires `frameCfg triggerSelect=2`; software mode
-requires `triggerSelect=1`. A hardware edge is a radar trigger reference, not
+requires `triggerSelect=1`. The supplied high-rate examples use one TX0+TX2
+MIMO loop per frame and target a 2 kHz structure-observation rate. A hardware edge is a radar trigger reference, not
 a measured radar ADC sampling instant. It also does not frequency-lock the
 ADXL355 and radar ADC clocks. Keep `hardware_validated = false` until the
 powered wiring, firmware, trigger waveform, frame count, and latency have been
@@ -148,8 +149,8 @@ measured on the actual fixture.
 For hardware mode, trigger count must equal `capture_frames`, frequency must
 not exceed 90% of the configured radar frame rate, and both the initial delay
 and inter-trigger period must stay below the conservative 5 s DCA no-LVDS
-guard. The 100 Hz hardware example uses a 9 ms radar minimum period and a
-10 ms GPIO trigger period, retaining that 10% timing guard. Normal completion
+guard. The 2 kHz hardware example uses a 0.45 ms radar frame period and a
+0.5 ms GPIO trigger period, retaining that 10% timing guard. Normal completion
 and SIGTERM make a best-effort attempt to leave GPIO18 low; SIGKILL cannot
 provide that guarantee. Use a hardware pull-down on the real trigger net and
 verify idle and pulse levels on the assembled fixture with a scope or logic
@@ -206,7 +207,7 @@ edges when explicitly configured. Neither reference is labelled as radar ADC
 time. DCA1000 PCAP timestamps are Ethernet receive times, never frame-start
 timestamps.
 
-At the configured 1 kHz ADXL ODR, any DRDY sequence gap, queued GPIO-event
+At the configured 2 kHz ADXL ODR, any DRDY sequence gap, queued GPIO-event
 backlog, FIFO overrun/protocol error, non-one-set pre-pop depth, or nonzero
 post-pop FIFO depth fails the capture instead of silently assigning uncertain
 data to a timestamp. Each accepted edge uses a `STATUS`/`FIFO_ENTRIES`/

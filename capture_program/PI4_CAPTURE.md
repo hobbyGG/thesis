@@ -125,7 +125,7 @@ resolution does not turn transport latency into nanosecond timing accuracy.
 - Sends a finite pulse train from GPIO18 to J6-9 `SYNC_IN`.
 - Requires the trigger count to equal `capture_frames` and caps trigger
   frequency at 90% of the configured radar frame rate. If omitted, the
-  coordinator chooses that 90% value (100 Hz for the supplied 9 ms frameCfg).
+  coordinator chooses that 90% value (2 kHz for the supplied 0.45 ms frameCfg).
 - Records `frame_trigger_events.csv` and `frame_trigger_summary.json`; GPIO24
   loopback provides kernel edge timestamps when the optional branch is present.
   Without it, timestamp quality is `userspace_set_completed`, which remains a
@@ -134,7 +134,7 @@ resolution does not turn transport latency into nanosecond timing accuracy.
 This provides one Pi-timed trigger reference per intended radar frame, but the
 edge is not itself a measured radar ADC or frame-start instant. It also does
 not give ADXL355 and the radar a common ADC clock. ADXL355 still free-runs at
-nominal 1 kHz, radar chirp/ADC timing remains internal to the radar, and
+nominal 2 kHz, radar chirp/ADC timing remains internal to the radar, and
 sensor/filter latencies still require characterization.
 `hardware_validated = false` is the correct setting until firmware acceptance
 of `SYNC_IN`, DCA routing, voltage levels, trigger count, and measured timing

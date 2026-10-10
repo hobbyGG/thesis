@@ -6,7 +6,9 @@ class AlgorithmConfig:
     """Only the parameters used by the retained fixed-beta experiment."""
 
     carrier_frequency_hz: float = 77.0e9
-    sample_rate_hz: float = 100.0
+    # The retained acquisition profile emits one MIMO loop per frame at 2 kHz.
+    # ``run`` still replaces this with the measured package rate.
+    sample_rate_hz: float = 2000.0
     process_noise_intensity: float = 5.0e4
     initial_state_variance: float = 25.0
     initial_rate_variance: float = 400.0

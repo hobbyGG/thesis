@@ -26,9 +26,16 @@ def preintegrate_acceleration_to_radar(
     delta_v = np.empty(starts.size, dtype=float)
     delta_q = np.empty(starts.size, dtype=float)
     for i, (start, end) in enumerate(zip(starts, ends)):
-        indices = np.flatnonzero((adxl >= start) & (adxl <= end))
+        # Use only ADXL samples whose timestamp is at or before the radar
+        # interval endpoint.  Interpolating the endpoint from a future ADXL
+        # sample would introduce a look-ahead into the online fusion path.
+        indices = np.flatnonzero((adxl > start) & (adxl < end))
+        start_index = int(np.searchsorted(adxl, start, side="right") - 1)
+        end_index = int(np.searchsorted(adxl, end, side="right") - 1)
+        start_index = min(max(start_index, 0), accel.size - 1)
+        end_index = min(max(end_index, 0), accel.size - 1)
         nodes_t = np.r_[start, adxl[indices], end]
-        nodes_a = np.interp(nodes_t, adxl, accel)
+        nodes_a = np.r_[accel[start_index], accel[indices], accel[end_index]]
         dv = 0.0
         dq = 0.0
         for j in range(nodes_t.size - 1):

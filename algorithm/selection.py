@@ -30,8 +30,16 @@ def detect_target_bins(range_angle_cube: np.ndarray, angle_axis_deg: np.ndarray,
 
 
 def select_targets(targets):
-    quality = np.mean(targets.available_mask, axis=1)
-    selected = np.flatnonzero(quality > 0.5)
-    scores = np.asarray(quality, dtype=float)
-    initial_r = np.full(targets.measured_beta.shape, 9.0, dtype=float)
+    # Geometry is fixed from the first range-angle observation.  Selection is
+    # consequently a causal decision rather than a statistic over the entire
+    # record.  Later missing samples are handled by the fusion loop.
+    first_valid = np.asarray(targets.available_mask[:, 0], dtype=bool)
+    selected = np.flatnonzero(first_valid)
+    amplitude = np.abs(np.asarray(targets.slow_time[:, 0], dtype=complex))
+    scale = max(float(np.nanmax(amplitude)) if amplitude.size else 0.0, 1.0e-12)
+    scores = np.nan_to_num(amplitude / scale, nan=0.0, posinf=0.0, neginf=0.0)
+    # A first-sample amplitude proxy gives the Kalman stage a causal phase
+    # noise prior: a weaker IQ return receives a larger initial variance.
+    normalized = np.maximum(amplitude / scale, 1.0e-3)
+    initial_r = np.clip(0.2 / (normalized * normalized), 1.0e-2, 25.0)
     return selected, initial_r, scores

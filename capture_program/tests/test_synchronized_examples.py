@@ -29,10 +29,10 @@ def test_software_example_has_matching_radar_and_adxl_contracts():
 
     assert hardware["sync_mode"] == "software_timestamp"
     assert int(radar.command_args("frameCfg")[0][5]) == 1
-    assert radar.frame_period == 10.0
-    assert active_frame_time_ms(radar) <= 0.5 * radar.frame_period
+    assert radar.frame_period == 0.5
+    assert active_frame_time_ms(radar) <= 0.9 * radar.frame_period
     assert hardware["adxl_kwargs"]["drdy_line"] == 25
-    assert hardware["adxl_kwargs"]["odr_hz"] == 1000
+    assert hardware["adxl_kwargs"]["odr_hz"] == 2000
     assert hardware["adxl_kwargs"]["spi_device"] == "/dev/spidev0.0"
 
 
@@ -45,11 +45,11 @@ def test_hardware_example_has_one_trigger_per_radar_frame():
     assert hardware["sync_mode"] == "hardware_trigger"
     assert hardware["hardware_validated"] is False
     assert int(radar.command_args("frameCfg")[0][5]) == 2
-    assert radar.frame_period == 9.0
-    assert active_frame_time_ms(radar) <= 0.5 * radar.frame_period
+    assert radar.frame_period == 0.45
+    assert active_frame_time_ms(radar) <= 0.9 * radar.frame_period
     assert trigger["count"] == hardware["radar_kwargs"]["capture_frames"]
-    assert trigger["frequency_hz"] == 100.0
-    assert 1000.0 / trigger["frequency_hz"] == 10.0
+    assert trigger["frequency_hz"] == 2000.0
+    assert 1000.0 / trigger["frequency_hz"] == 0.5
     assert trigger["frequency_hz"] <= 0.9 * 1000.0 / radar.frame_period
     assert 1000.0 / trigger["frequency_hz"] < 5000.0
     assert trigger["initial_delay_ms"] < 5000

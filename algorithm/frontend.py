@@ -98,6 +98,39 @@ def extract_targets(
     )
 
 
+def extract_dbf_targets(
+    data: RangeAngleData,
+    range_bins: Sequence[int],
+    angle_bins: Sequence[int],
+) -> TargetData:
+    """Extract one complex DBF angle-bin sample per target and observation.
+
+    Target bins are selected from the first observation by the caller.  This
+    function applies the same range FFT and steering-vector DBF independently
+    to each later observation; it does not use a full-record MUSIC fit or a
+    future sample to refine the geometry.
+    """
+
+    ranges = np.asarray(range_bins, dtype=int)
+    angles = np.asarray(angle_bins, dtype=int)
+    slow_time = data.cube[:, ranges, angles].T.copy()
+    available = np.isfinite(slow_time.real) & np.isfinite(slow_time.imag) & (np.abs(slow_time) > 0.0)
+    wrapped = np.angle(slow_time)
+    wrapped[~available] = np.nan
+    angle_values = data.angle_axis_deg[angles].copy()
+    beta = 1.0 / np.maximum(np.abs(np.cos(np.deg2rad(angle_values))), 1.0e-6)
+    return TargetData(
+        slow_time=slow_time,
+        wrapped_phase_rad=wrapped,
+        available_mask=available,
+        angle_deg=angle_values,
+        measured_beta=beta,
+        range_bins=ranges,
+        angle_bins=angles,
+        range_m=data.range_axis_m[ranges],
+    )
+
+
 def extract_loop_targets(chirp_cube: np.ndarray, geometry: TargetData, config: FrontendConfig) -> TargetData:
     """Project each loop onto the frozen frame-level range/angle targets.
 

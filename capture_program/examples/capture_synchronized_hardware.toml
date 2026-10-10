@@ -46,11 +46,12 @@ dca_config_port = 4096
 dca_data_port = 4098
 host_ip = "192.168.33.30"
 radar_config_filename = "examples/configs/iwr1843_hardware_trigger.cfg"
-capture_frames = 10
+# 0.1 s at 2 kHz; each frame contains one TX0+TX2 MIMO loop.
+capture_frames = 200
 export_algorithm_data = true
 # Required while export_sync_timeline=true: decoded radar metadata is the
 # timeline source, so configured frame counts are never used as a fallback.
-algorithm_chirp_aggregation = "coherent_mean"
+algorithm_chirp_aggregation = "first"
 save_chirp_cube = true
 
 [hardware.synchronized.adxl_kwargs]
@@ -58,7 +59,7 @@ executable = "native/adxl355_capture/build/adxl355_capture"
 spi_device = "/dev/spidev0.0"
 gpiochip = "/dev/gpiochip0"
 drdy_line = 25
-odr_hz = 1000
+odr_hz = 2000
 range_g = 2
 spi_hz = 5000000
 # Set all three fields only after measuring the ADXL355 digital-filter delay.
@@ -76,11 +77,10 @@ use_loopback = false
 # To enable optional edge-observation diagnostics, set both fields:
 # use_loopback = true
 # loopback_line = 24
-# The radar frameCfg minimum period is 9 ms. A 100 Hz GPIO trigger has a 10 ms
-# period, preserving the coordinator's 10% guard while producing 100 Hz actual
-# radar slow-time observations.
-frequency_hz = 100.0
-count = 10
+# A 0.45 ms frameCfg minimum period preserves the coordinator's 10% guard
+# for 2 kHz external triggers. Each trigger produces one MIMO loop.
+frequency_hz = 2000.0
+count = 200
 pulse_width_us = 100
 # Both this delay and the inter-trigger period must stay below the conservative
 # 5 s DCA1000 no-LVDS guard.

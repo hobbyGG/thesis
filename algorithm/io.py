@@ -54,7 +54,10 @@ def load_capture_package(root: str | Path) -> CapturePackage:
         virtual_array_positions_wavelengths=tuple(
             float(value) for value in radar_meta.get("virtual_array_positions_wavelengths", ())
         ),
-        angle_estimation_method="local_music_ml",
+        # The retained high-rate path uses the DBF angle bin directly.  Local
+        # MUSIC/ML remains available in ``frontend.extract_targets`` for
+        # offline comparisons, but it is not part of the streaming algorithm.
+        angle_estimation_method="dbf",
     )
     truth_q = truth_t = None
     truth_dir = root / "truth"
@@ -96,31 +99,82 @@ def _radar_timestamps(capture: CapturePackage, radar_mode: str) -> np.ndarray:
 
 
 def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "frame"):
-    from .frontend import extract_loop_targets, extract_targets, range_angle_process
+    from .frontend import extract_dbf_targets, range_angle_process
+    from .phase import causal_iq_circle_phase
     from .selection import detect_target_bins, select_targets
 
     radar_time_ns = _radar_timestamps(capture, radar_mode)
-    # Freeze the same target locations and geometry for both observation modes.
-    processed = range_angle_process(capture.adc_cube, capture.frontend)
-    range_bins, angle_bins, detection = detect_target_bins(processed.cube, processed.angle_axis_deg, max_candidates=5)
-    targets = extract_targets(processed, range_bins, angle_bins, capture.frontend)
+
+    # Select geometry from the first observation only.  For chirp mode the
+    # cube is flattened to one stream of MIMO-loop observations; for frame
+    # mode the exported adc_cube already contains the configured first loop.
     if radar_mode == "chirp":
-        targets = extract_loop_targets(capture.chirp_cube, targets, capture.frontend)
-    radar_rate = 1.0 / np.median(np.diff(radar_time_ns) * 1.0e-9)
+        if capture.chirp_cube is None:
+            raise ValueError("chirp radar mode requires radar/algorithm_input/chirp_cube.npy")
+        stream_cube = np.asarray(capture.chirp_cube).reshape(
+            -1, capture.chirp_cube.shape[-2], capture.chirp_cube.shape[-1]
+        )
+    else:
+        stream_cube = np.asarray(capture.adc_cube)
+    if stream_cube.shape[0] != radar_time_ns.size:
+        raise ValueError("radar stream length and timestamp length do not match")
+
+    first = range_angle_process(stream_cube[:1], capture.frontend)
+    range_bins, angle_bins, detection = detect_target_bins(first.cube, first.angle_axis_deg, max_candidates=5)
+    processed = range_angle_process(stream_cube, capture.frontend)
+    targets = extract_dbf_targets(processed, range_bins, angle_bins)
+    wrapped, centers, radii, circle_residual = causal_iq_circle_phase(targets.slow_time)
+    targets = type(targets)(
+        slow_time=targets.slow_time,
+        wrapped_phase_rad=wrapped,
+        available_mask=targets.available_mask,
+        angle_deg=targets.angle_deg,
+        measured_beta=targets.measured_beta,
+        range_bins=targets.range_bins,
+        angle_bins=targets.angle_bins,
+        range_m=targets.range_m,
+    )
+    if radar_time_ns.size > 1:
+        radar_rate = 1.0 / np.median(np.diff(radar_time_ns) * 1.0e-9)
+        sample_period_s = float(np.median(np.diff(radar_time_ns)) * 1.0e-9)
+    else:
+        radar_rate = 1.0
+        sample_period_s = 1.0
     structural_accel = np.asarray(capture.adxl_acceleration_mps2[:, 0], dtype=float)
     preintegration = preintegrate_acceleration_to_radar(radar_time_ns, capture.adxl_time_ns, structural_accel)
-    interval_average = preintegration.delta_v_mps / preintegration.duration_s
-    measured = np.r_[interval_average[0], interval_average]
+    interval_average = np.divide(
+        preintegration.delta_v_mps,
+        preintegration.duration_s,
+        out=np.zeros_like(preintegration.delta_v_mps),
+        where=preintegration.duration_s > 0.0,
+    )
+    measured = (
+        np.r_[interval_average[0], interval_average]
+        if interval_average.size
+        else np.zeros(1, dtype=float)
+    )
     acceleration = AccelerationInput(capture.adxl_time_ns, structural_accel, measured, preintegration)
     selected, initial_r, scores = select_targets(targets)
-    radar = RadarInput(targets.measured_beta, targets.wrapped_phase_rad, targets.available_mask, selected, initial_r, scores, {
-        "angle_deg": targets.angle_deg,
-        "range_bins": targets.range_bins,
-        "angle_bins": targets.angle_bins,
-        "range_m": targets.range_m,
-        "detection": detection,
-        "radar_time_ns": radar_time_ns,
-        "radar_mode": radar_mode,
-        "frame_period_s": float(np.median(np.diff(capture.radar_time_ns)) * 1.0e-9),
-    })
+    radar = RadarInput(
+        targets.measured_beta,
+        targets.wrapped_phase_rad,
+        targets.available_mask,
+        selected,
+        initial_r,
+        scores,
+        {
+            "angle_deg": targets.angle_deg,
+            "range_bins": targets.range_bins,
+            "angle_bins": targets.angle_bins,
+            "range_m": targets.range_m,
+            "detection": detection,
+            "radar_time_ns": radar_time_ns,
+            "radar_mode": radar_mode,
+            "sample_period_s": sample_period_s,
+            "circle_center": centers,
+            "circle_radius": radii,
+            "circle_residual": circle_residual,
+        },
+        iq_slow_time=targets.slow_time,
+    )
     return radar, acceleration, targets, radar_rate
