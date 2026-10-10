@@ -25,6 +25,8 @@ DURATION_S = 4.0
 # Assumptions, not values identified from the paper.
 ARRIVAL_S = 0.5
 CAR_COUNT = 5
+PASSAGE_DURATION_S = 0.8
+TRANSITION_DURATION_S = 0.12
 DYNAMIC_ACCELERATION_PEAK_MPS2 = 0.45  # illustrative scale near Fig. 4(b)'s range
 EXCITATION_WEIGHTS = np.array([1.0, 0.8, 0.7, 0.5])
 
@@ -51,10 +53,13 @@ def simulate_response():
     """
     dt = 1.0 / REFERENCE_RATE_HZ
     time_s = np.arange(round(DURATION_S * REFERENCE_RATE_HZ)) * dt
-    crossing_s = GUIDEWAY_SPAN_M / (SPEED_KMH / 3.6)
-    exit_s = ARRIVAL_S + CAR_COUNT * CHARACTERISTIC_LENGTHS_M[0] / (SPEED_KMH / 3.6)
-    rise, rise_second = _smooth_step(time_s, ARRIVAL_S, crossing_s)
-    fall, fall_second = _smooth_step(time_s, exit_s, crossing_s)
+    # The event duration is chosen to match the roughly 1 s laser response
+    # observed for a train passage.  A 0.12 s C2 transition gives the desired
+    # fast rise/fall while leaving a short plateau where the modal oscillation
+    # is visible around the peak displacement.
+    exit_s = ARRIVAL_S + PASSAGE_DURATION_S - TRANSITION_DURATION_S
+    rise, rise_second = _smooth_step(time_s, ARRIVAL_S, TRANSITION_DURATION_S)
+    fall, fall_second = _smooth_step(time_s, exit_s, TRANSITION_DURATION_S)
     envelope = rise - fall
     envelope_second = rise_second - fall_second
     drive = envelope * np.sum(
@@ -109,7 +114,9 @@ def reference_metadata() -> dict:
         "assumed": {
             "arrival_s": ARRIVAL_S,
             "car_count": CAR_COUNT,
-            "envelope": "quintic entry/exit transitions over one span-crossing time",
+            "passage_duration_s": PASSAGE_DURATION_S,
+            "transition_duration_s": TRANSITION_DURATION_S,
+            "envelope": "quintic entry/exit transitions around a short laser-like passage",
             "excitation_weights": EXCITATION_WEIGHTS.tolist(),
             "modal_participation": "unit gains at one illustrative off-axis observation",
             "dynamic_acceleration_peak_before_total_rescale_mps2": DYNAMIC_ACCELERATION_PEAK_MPS2,
