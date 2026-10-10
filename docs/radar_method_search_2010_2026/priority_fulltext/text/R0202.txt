@@ -1,0 +1,979 @@
+                                               Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+                                                          Contents lists available at ScienceDirect
+
+
+                                      Mechanical Systems and Signal Processing
+                                                journal homepage: www.elsevier.com/locate/ymssp
+
+
+Full length article
+
+Acceleration-aided Kalman filtering for joint phase denoising and
+unwrapping in FMCW radar-based displacement monitoring
+Zhanxiong Ma a,b ,∗, Tongtong Zhang a , Yang Zhu a , Shuhan Lin a , Jigu Lee c ,
+Hoon Sohn c , Qiangqiang Zhang a,b ,∗
+a College of Civil Engineering and Mechanics, Lanzhou University, China
+b Key Laboratory of Mechanics on Disaster and Environment in Western China Attached to The Ministry of Education of China, Lanzhou
+
+University, China
+c
+  Department of Civil and Environmental Engineering, Korea Advanced Institute of Science and Technology, Republic of Korea
+
+
+
+ARTICLE               INFO                              ABSTRACT
+
+Communicated by S. Laflamme                             Structural displacement monitoring is essential for ensuring the safety and longevity of civil
+                                                        infrastructures. Millimeter-wave radar offers high-precision and non-contact measurements but
+Keywords:
+                                                        suffers from phase-wrapping issues. Existing methods perform unwrapping alone, limiting
+Structural health monitoring
+Millimeter-wave radar
+                                                        performance under high-noise conditions. This study proposes an acceleration-aided Kalman
+Phase unwrapping and denoising                          filtering method for joint phase denoising and unwrapping in FMCW millimeter-wave radar
+Acceleration-aided Kalman filtering                     displacement monitoring. The radar phase is modeled as a discrete-time constant-acceleration
+                                                        system, with measured acceleration incorporated to enhance dynamic tracking and suppress
+                                                        high-frequency noise. A predictive phase-correction step removes phase discontinuities, and
+                                                        recursive Kalman updates produce a continuous and noise-suppressed phase trajectory, which
+                                                        can be converted to displacement. Noise parameters of the Kalman filter are adaptively
+                                                        optimized, and the Kalman recursion is further expressed in convolution form, enabling analysis
+                                                        of minimum convergence time for robust phase unwrapping. The effectiveness of the proposed
+                                                        method was validated through experimental testing on a four-story building model and a 45 m
+                                                        long pedestrian bridge under multiple excitation scenarios. Under high-noise conditions, the
+                                                        existing methods performed poorly, whereas the proposed method completed phase unwrapping
+                                                        and denoising in both laboratory and field bridge tests, achieving errors of 2.1 rad and 0.2 rad,
+                                                        respectively.
+
+
+
+
+1. Introduction
+
+    Monitoring structural displacement is crucial for maintaining the long-term safety of bridges, buildings, tunnels, and other
+civil infrastructure [1]. Structures in service are continuously subjected to operational loads, environmental changes, and material
+aging. These factors can induce displacements, potentially leading to cracks, settlements, or even structural instability. Continuous
+monitoring allows for the early detection of abnormal behavior, supports timely intervention, and informs maintenance strategies,
+thereby enhancing structural reliability and prolonging service life [2,3].
+    Displacement measurement methods can be broadly classified into contact and non-contact types [4]. Contact-based methods
+rely on physical sensors attached to the structure to directly or indirectly capture motion information. Commonly used instruments
+include accelerometers and global navigation satellite systems (GNSS). Accelerometers infer displacement by double-integrating the
+
+
+  ∗ Corresponding authors at: College of Civil Engineering and Mechanics, Lanzhou University, China.
+     E-mail addresses: mazx@lzu.edu.cn (Z. Ma), zhangqq@lzu.edu.cn (Q. Zhang).
+
+https://doi.org/10.1016/j.ymssp.2026.113991
+Received 22 October 2025; Received in revised form 19 December 2025; Accepted 6 February 2026
+Available online 12 February 2026
+0888-3270/© 2026 Elsevier Ltd. All rights are reserved, including those for text and data mining, AI training, and similar technologies.
+Z. Ma et al.                                                                         Mechanical Systems and Signal Processing 248 (2026) 113991
+
+measured acceleration [5,6], enabling effective tracking of dynamic responses but introducing low-frequency drift due to integration
+errors. In contrast, GNSS provides absolute displacement measurements and has been widely employed for monitoring long-span
+bridges and geotechnical structures [7,8]. However, its resolution and sampling rate are insufficient to capture small-amplitude
+vibrations in small-scale structures.
+    Non-contact methods, mainly including vision- and radar-based methods, have thus gained increasing attention. Vision-based
+methods estimate displacement by tracking the motion of features or patterns across sequential images, converting pixel movements
+into physical displacements through camera calibration [9,10]. They enable full-field [11] and multi-directional [12] measurements,
+making them effective for global displacement assessment. Despite these advantages, vision-based methods still face challenges
+related to environmental interference and computational efficiency. Recent studies have addressed these limitations by introducing
+a light field correction model to mitigate modal distortion under complex lighting [13], employing a Binary Decomposition Tree
+(BDT) for automated modal separation [14], and using a derivative-based phase optical flow algorithm to overcome computational
+bottlenecks in large-scale data processing [15]. These advancements have enhanced the robustness, automation, and efficiency of
+vision-based non-contact measurements. Radar-based methods, in contrast, mainly determine displacement from the phase variation
+of the back-scattered electromagnetic wave, where the phase change is proportional to the target motion along the radar’s line of
+sight (LoS). They offer long-range, all-weather capability and exhibit high resilience to illumination and environmental variations
+[16]. These characteristics make radar interferometry particularly attractive for robust displacement monitoring in challenging field
+environments.
+    Previous studies have widely employed centimeter-wave radars (below 30 GHz) for bridge displacement monitoring due
+to their long-range coverage and stable signal propagation [17–19]. Millimeter-wave radars, operating at higher frequencies
+(typically 60 or 77 GHz), offer shorter wavelengths, enabling higher displacement resolution and improved sensitivity to small-scale
+vibrations [20–23]. In addition, Millimeter-wave systems are compact, lightweight, and energy-efficient, making them well-suited
+for continuous and high-precision monitoring of small- and medium-span bridges [24]. The shorter wavelength of millimeter-wave
+signals also introduces an inherent challenge: phase wrapping. The measured phase is limited to the [−𝜋, 𝜋] interval, and any
+displacement exceeding half a wavelength results in ambiguous measurements. For example, a 77 GHz radar has a half-wavelength
+of approximately 0.975 mm, highlighting the necessity of effective phase unwrapping for accurate displacement estimation over the
+range of ±0.975 mm.
+    Various radar-only phase unwrapping algorithms have been developed to tackle the phase wrapping issue. The Itoh-condition-
+based method assumes phase changes between consecutive samples are smaller than 𝜋, and corrects wrapped phases by ±2𝜋
+increments. However, this assumption often fails in large displacement monitoring [25]. Xu et al. proposed a modified differentiate-
+and-cross-multiply (MDACM) algorithm for continuous wave radars, and it detects and corrects phase jumps by differentiating and
+cross-multiplying consecutive phase data [26]. Liu et al. adapted the algorithm for FMCW radars using synthesized I/Q signals [27].
+More recently, a Doppler-based iterative phase unwrapping method was proposed for multiple-input multiple-output (MIMO) FMCW
+radars, enabling reliable point-wise phase and displacement tracking under fast target motion, with low computational complexity
+[28]. In addition, some methods incorporate additional sensors to mitigate phase wrapping. For example, Zhang et al. combined two
+FMCW radar signals at different frequencies to form a virtual signal with a longer effective wavelength, enhancing phase ambiguity
+resolution [29]. The authors previously developed an acceleration-aided algorithm to enable adaptive phase unwrapping [30], and
+later developed a multi-target algorithm to handle intermittent radar occlusion [31]. However, all these existing methods treat
+phase unwrapping as an independent step and do not directly reduce phase noise. As a result, in situations with strong phase noise,
+standalone unwrapping methods may fail or give inaccurate results.
+    To address these limitations, this study proposes an acceleration-aided Kalman filtering method for joint phase denoising and
+unwrapping in FMCW millimeter-wave radar displacement monitoring. The radar phase is modeled as a discrete-time constant-
+acceleration system. Measured acceleration is incorporated in the prediction step to improve dynamic tracking and suppress
+high-frequency noise. A predictive phase-correction step aligns incoming wrapped measurements with the predicted phase to
+remove phase discontinuities. Recursive Kalman updates then produce a continuous and noise-suppressed phase trajectory, which
+is subsequently converted to displacement. The noise parameter of the Kalman filter is optimized by minimizing the energy of
+the unwrapped phase over a candidate set. At the same time, a direction conversion factor is calibrated by band-pass filtering
+radar- and acceleration-derived phases. The Kalman recursion is also reformulated in a convolutional representation, where each
+estimate is expressed as a weighted combination of past corrected measurements and acceleration inputs. This representation allows
+determination of the minimum convergence time, ensuring stable phase unwrapping.
+    Note that although Kalman filter-based methods for simultaneous phase denoising and unwrapping have been reported in
+Interferometric Synthetic Aperture Radar (InSAR) [32,33] and optical interferometry [34], these studies mainly focus on leveraging
+the spatial continuity of phase for topographic mapping in InSAR or achieving high-precision reconstruction of quasi-static or
+slowly varying deformations in optical measurements. In both cases, phase predictions rely primarily on the phase’s own historical
+evolution (e.g., assuming a constant-velocity model or smooth transitions), representing a typical single-sensor-driven approach. In
+contrast, this study proposes an acceleration-aided sensor fusion framework for high-dynamic structural vibration monitoring using
+FMCW radar. The key contributions of this study are as follows: (1) development of an acceleration-aided phase unwrapping and
+denoising framework based on Kalman filtering; (2) adaptive tuning of Kalman filter noise parameters for robust phase unwrapping
+and denoising; (3) quantitative determination of the minimum convergence time required for the Kalman filter to avoid phase
+unwrapping failure; (4) enhanced robustness against phase noise, enabling high-accuracy phase estimation even under strong
+measurement noise.
+
+                                                                 2
+Z. Ma et al.                                                                           Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+Fig. 1. FMCW-radar-based displacement estimation: (a) overall working principle and (b) limited measurement range due to phase wrapping
+issue.
+
+
+
+   The remainder of this paper is organized as follows. Section 2 reviews the phase wrapping issue and existing unwrapping
+algorithms in FMCW radar-based displacement estimation. Section 3 presents the proposed acceleration-aided Kalman filtering
+method for joint phase denoising and unwrapping. Sections 4 and 5 experimentally validate the proposed method using a four-story
+building model and a 45 m long pedestrian bridge, respectively. Section 6 concludes the paper with a summary of the main findings.
+
+2. Review of a phase wrapping issue and existing unwrapping algorithms in FMCW-radar-based displacement estimation
+
+    As shown in Fig. 1(a), FMCW radar measures distance by transmitting a frequency-modulated chirp signal and receiving its
+reflection from a target. Let the transmitted signal be [30]
+                              2
+        𝑇 (𝑡) = 𝑒𝑗(2𝜋𝑓𝑠 𝑡+𝜋𝐾𝑡 ) ,    0 < 𝑡 < 𝑇𝑐                                                                                             (1)
+and the received signal be 𝑅(𝑡) = 𝛿𝑇 (𝑡 − 𝛥𝑡). Here 𝑓𝑠 is the starting frequency of the chirp, 𝐾 is the frequency slope, 𝑇𝑐 is the chirp
+duration, 𝛥𝑡 is the round-trip time-of-flight, and 𝛿 accounts for signal attenuation. Mixing 𝑇 (𝑡) and 𝑅(𝑡) generates the intermediate
+frequency (IF) signal, which encodes the time-of-flight information:
+
+        IF(𝑡) ≈ 𝛿𝑒𝑗(𝜙+𝜔𝑡) ,       𝜔 = 2𝜋𝐾𝛥𝑡, ; 𝜙 = 2𝜋𝑓𝑠 𝛥𝑡                                                                                  (2)
+The target distance can then be estimated from either the IF frequency (𝜔) or phase (𝜙). For multiple targets, the IF signal is a
+superposition of terms corresponding to each target, and their distances can be estimated similarly.
+   In structural displacement monitoring, chirp signals are continuously transmitted, and the displacement at the 𝑘th time step
+along the radar LoS direction can be estimated from phase variation:
+                         𝜆
+        𝑑𝑘 = 𝐷𝑘 − 𝐷0 =     (𝜙 − 𝜙0 )                                                                                                  (3)
+                        4𝜋 𝑘
+where 𝜆 is the radar wavelength. 𝜙0 and 𝜙𝑘 are the measured phases at the initial and 𝑘th time steps, respectively. 𝐷0 and 𝐷𝑘
+are the distances at the initial and 𝑘th time steps, respectively. In case the actual vibration direction differs, a direction conversion
+factor 𝛼 is required. The displacement expression then becomes
+                     𝜆
+        𝑢𝑘 = 𝛼𝑑𝑘 = 𝛼    (𝜙 − 𝜙0 )                                                                                            (4)
+                    4𝜋 𝑘
+     As shown in Fig. 1(b), because the measured phase is limited to [−𝜋, 𝜋], the unambiguous LoS displacement measurement range
+is
+            [      ]
+               𝜆 𝜆
+       𝑑𝑘 ∈ − ,                                                                                                                  (5)
+               4 4
+For commonly used millimeter-wave radars operating at 77 GHz or 60 GHz, this corresponds to displacement ranges of approximately
+±0.975 mm and ±1.25 mm. If the LoS displacement exceeds this range, phase wrapping occurs, leading to ambiguity in displacement
+estimation. Additionally, if the initial phase 𝜙0 is near ±𝜋, even a small motion can trigger wrapping.
+    Therefore, phase unwrapping is an essential step in FMCW radar-based displacement estimation. The most commonly used
+method is based on the Itoh condition [25,35,36]. It assumes that the phase change between consecutive measurements is
+smaller than 𝜋, and resolves wrapped phases by adding or subtracting multiples of 2𝜋. In addition, the MDACM algorithm
+improves robustness to noise by differentiating and cross-multiplying consecutive phase data to detect and correct phase jumps
+[26,27]. The dual-frequency method combines two FMCW signals at different carrier frequencies to generate a virtual longer
+wavelength, enhancing ambiguity resolution [29]. Acceleration-aided algorithms fuse radar and accelerometer data to guide adaptive
+unwrapping, improving robustness under large motions [30,31]. However, all these existing methods treat phase unwrapping as an
+independent step and do not directly reduce phase noise. As a result, in situations with strong noise, standalone unwrapping methods
+may fail or give inaccurate results.
+
+                                                                   3
+Z. Ma et al.                                                                            Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+Fig. 2. Overview of the proposed acceleration-aided Kalman filtering method for joint phase denoising and unwrapping: (a) sensor setup and
+(b) overall flowchart.
+
+
+
+3. Acceleration-aided Kalman filtering for joint phase denoising and unwrapping in FMCW radar-based displacement
+monitoring
+
+    To address the limitation of standalone unwrapping methods, this study proposes an acceleration-aided Kalman filtering method
+for joint phase denoising and unwrapping in FMCW millimeter-wave radar displacement monitoring. As shown in Fig. 2(a), a
+millimeter-wave radar and an accelerometer are collocated in the displacement monitoring location of a target structure. The
+accelerometer measured structural acceleration in the actual vibration direction, while the radar tracks nearby stationary targets.
+The overall flowchart is shown in Fig. 2(b). The raw phase was first extracted from radar measurements. Then the raw phase
+and accelerations are fused by a Kalman filter for joint phase denoising and unwrapping (Section 3.1). The estimated phase can
+be further converted to displacement based on Eq. (4). In addition, the noise parameter required in the Kalman filter and the
+direction conversion factor needed in Eq. (4) are adaptively calibrated (Section 3.2), and the Kalman recursion is reformulated in a
+convolutional representation to determine the minimum convergence time for stable phase unwrapping (Section 3.3). Note that the
+calibration is performed only once using data collected over a short period, typically less than 1 min. After this one-time calibration,
+the resulting calibrated values are used for continuous real-time monitoring.
+
+3.1. Kalman-filter-based phase unwrapping and denoising framework
+
+    Inspired by the previous studies on the Kalman filter-based displacement estimation [37–39], the phase is modeled as a
+one-dimensional constant-acceleration system, where the state vector contains the phase and its instantaneous rate of change
+(i.e., velocity). The discrete-time system is expressed as
+                          𝑎     4𝜋
+        𝐱𝑘 = 𝐀𝑑 𝐱𝑘−1 + 𝐁𝑑 𝑘−1      + 𝐰𝑘−1                                                                                (6)
+                            𝛼 𝜆
+where 𝐱𝑘 = [𝑥𝑘 , 𝑥̇ 𝑘 ]𝑇 represents the phase and velocity at 𝑘th time step 𝑘, 𝑎𝑘 is the measured acceleration input, and 𝐰𝑘 is zero-mean
+process noise with covariance
+            [ 3                   ]
+             𝑄𝑇𝑎 ∕3 𝑄𝑇𝑎2 ∕2
+      𝐐𝑑 =                                                                                                                             (7)
+             𝑄𝑇𝑎2 ∕2        𝑄𝑇𝑎
+Here, 𝑇𝑎 is the radar sampling interval, and 𝑄 characterizes the model uncertainty.
+   The system matrices are defined as
+             [      ]        [ 2 ]
+              1 𝑇𝑎             𝑇 ∕2
+      𝐀𝑑 =            , 𝐁𝑑 = 𝑎                                                                                                               (8)
+              0 1               𝑇𝑎
+and only the phase is observed through
+
+        𝑧𝑘 = 𝐻𝐱𝑘 + 𝑣𝑘 ,     𝐻 = [1 0]                                                                                                        (9)
+
+where 𝑣𝑘 represents measurement noise with variance 𝑅𝑑 = 𝑅∕𝑇𝑎 . The initial state is set to 𝐱0        = [0, 0]𝑇 , and the initial covariance
+is 𝑃0 = diag(0, 0), reflecting high uncertainty in the initial phase and velocity.
+    As shown in Fig. 3, at each time step, the prior phase state and covariance are first predicted using the system dynamics and
+the input acceleration:
+        pred                  𝑎    4𝜋
+       𝐱𝑘 = 𝐀𝑑 𝐱𝑘−1  est
+                         + 𝐁𝑑 𝑘−1                                                                                            (10)
+                                𝛼 𝜆
+          pred
+        𝐏𝑘       = 𝐀𝑑 𝐏est 𝐀𝑇 + 𝐐𝑑
+                       𝑘−1 𝑑
+                                                                                                                                            (11)
+
+                                                                    4
+Z. Ma et al.                                                                             Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+                      Fig. 3. Overview of the proposed Kalman-filter-based joint phase unwrapping and denoising method.
+
+
+
+This prediction step propagates the prior knowledge of the phase state forward in time, incorporating the dynamic effect of the
+measured acceleration while accounting for model uncertainty.
+   To integrate the measurement, the Kalman gain is computed as
+                     (               )−1
+              pred       pred
+      𝐾𝑘 = 𝐏𝑘 𝐻 𝑇 𝐻𝐏𝑘 𝐻 𝑇 + 𝑅𝑑                                                                                             (12)
+
+The Kalman gain determines the relative weighting of the predicted state and the measured phase, balancing model confidence
+against measurement reliability.
+   To handle the phase wrapping issue, a predictive-based correction is applied:
+                                         ( pred   )
+                                          𝑥𝑘 − 𝑧𝑘
+       𝑧corr
+        𝑘
+             = 2𝜋 ⋅ 𝑝𝑘 + 𝑧𝑘 = 2𝜋 ⋅ round            + 𝑧𝑘                                                               (13)
+                                              2𝜋
+          pred
+where 𝑥𝑘 is the predicted phase. This step ensures that the measurement is aligned with the predicted phase, effectively removing
+2𝜋 discontinuities without introducing artificial jumps.
+   Finally, the posterior phase state and covariance are updated:
+                        (               )
+                pred               pred
+       𝐱𝑘est = 𝐱𝑘 + 𝐾𝑘 𝑧corr
+                          𝑘
+                              − 𝐻𝐱𝑘                                                                                          (14)
+
+                           pred
+        𝐏est
+         𝑘
+             = (𝐼 − 𝐾𝑘 𝐻)𝐏𝑘                                                                                                                  (15)
+
+This update incorporates the corrected measurement, reducing the effect of measurement noise while maintaining a continuous and
+physically consistent phase trajectory.
+   By recursively applying this procedure over the entire measurement sequence, the framework simultaneously denoises the phase
+signal and resolves phase ambiguities, producing high-fidelity estimates of the continuous phase. The first component of the state
+vector provides the final estimated phase, which can be further converted to displacement using Eq. (4).
+
+3.2. Calibration of noise parameters and conversion factor
+
+    The performance of the Kalman filter is strongly influenced by the selection of its noise parameters, namely the process noise
+covariance 𝑄 and the measurement noise covariance 𝑅. The parameter 𝑄 represents the uncertainty in the system model, reflecting
+how much the filter trusts the predicted state, while 𝑅 characterizes the uncertainty in the radar phase measurement, indicating
+how much the filter relies on the observation. Since the output of the Kalman filter primarily depends on the ratio between 𝑄 and
+𝑅 rather than their absolute values, one parameter can be fixed while tuning the other. In this study, 𝑅 is set to 1, and 𝑄 is adjusted
+as the variable parameter.
+    When 𝑄 is excessively large, the filter places undue confidence in the radar phase measurements, making it difficult to effectively
+suppress high-frequency phase noise, which can trigger phase unwrapping errors at individual time steps. Conversely, when 𝑄 is
+too small, the filter relies excessively on the prediction model, preventing timely correction of model errors and low-frequency
+biases, which may likewise result in phase unwrapping failure. Because Kalman filtering operates in a sequential estimation manner,
+such unwrapping errors do not remain localized. Instead, they propagate to subsequent time steps and progressively accumulate,
+ultimately manifesting as divergence and long-term drift in the estimated phase. From this perspective, the energy of the unwrapped
+phase can be regarded as a unified quantitative indicator of phase unwrapping stability. Both noise-induced unwrapping errors
+and drift-induced failures contribute to error propagation and accumulation, which are reflected by a pronounced increase in
+the unwrapped phase energy. Therefore, minimizing the unwrapped phase energy is, in essence, equivalent to minimizing the
+accumulated estimation error energy in the Kalman filtering process. Based on this, an energy-based noise optimization algorithm
+is proposed here. Specifically, the unwrapped radar phase is computed for a range of 𝑄𝑖 , and its energy is evaluated as:
+
+                   1 ∑ [ corr
+                      𝑁
+                                ]2
+        𝐸(𝑄𝑖 ) =         𝑧 (𝑄𝑖 )                                                                                                             (16)
+                   𝑁 𝑘=1 𝑘
+
+                                                                     5
+Z. Ma et al.                                                                                Mechanical Systems and Signal Processing 248 (2026) 113991
+
+and the optimal process noise parameter is determined by minimizing this energy:
+
+        𝑄opt = arg min 𝐸(𝑄𝑖 )                                                                                                                   (17)
+                        𝑄𝑖
+   Furthermore, the direction conversion factor (𝛼) needs to be calibrated to convert the radar LoS direction into the actual structural
+vibration direction. Since acceleration is measured along the vibration direction, its double integration yields displacement (𝑢𝑎𝑐𝑐 𝑘
+                                                                                                                                      ),
+which can be converted to phase through the phase–displacement relationship,
+               4𝜋 𝑎𝑐𝑐
+        𝜙𝑎𝑐𝑐
+         𝑘 =      𝑢                                                                                                             (18)
+                𝜆 𝑘
+Thus, by linearly fitting the acceleration-based phase to the radar-derived unwrapped phase, the optimal direction conversion factor
+can be obtained:
+                    (           )
+       𝛼opt = slope 𝑧𝑐𝑜𝑟𝑟   𝑎𝑐𝑐
+                       𝑘 , 𝜙𝑘                                                                                                   (19)
+
+Note that, considering that the acceleration-derived phase is prone to low-frequency drift and the radar-derived phase to high-
+frequency noise, both are first band-pass filtered before linear fitting. The filter passband is chosen not only to mitigate these noise
+effects but also to ensure that the structural vibration response within this frequency range is significant. Specifically, the lower
+cutoff frequency is determined based on the accelerometer’s noise distribution, while the upper cutoff frequency is set sufficiently
+high to encompass the main vibration frequencies of the structure.
+
+3.3. Determination of minimum convergence time
+
+     Since the initial state is unknown, the Kalman filter is initialized with 𝐱0 = [0, 0]𝑇 and 𝐏0 = diag(0, 0) in this study. For the
+time-invariant system defined in Eqs. (6)–(9), the error covariance 𝐏𝑘 will converge to a stable matrix, and the initial covariance
+𝐏0 does not affect the long-term steady-state behavior of the filter [40]. However, during the early stage, the filter output exhibits
+a transient response, which may lead to phase unwrapping failure. Because the system defined in Eqs. (6)–(9) is time-invariant,
+i.e., 𝐀𝑑 , 𝐻, 𝐐𝑑 , and 𝑅𝑑 are constant, the Kalman filter eventually reaches a steady state in which the Kalman gain converges to
+a constant value denoted as 𝐾 𝑐 . A detailed proof can be found in [40]. Then, the converged constant values are adopted here,
+instead of treating the Kalman gain as time-varying parameters for simplicity. To express the filter output as a convolution of past
+measurements and inputs, the error feedback is first defined as,
+
+        𝐶 = 𝐼 − 𝐾𝑐𝐻                                                                                                                             (20)
+
+so that Eq. (14) can be rewritten as
+                     pred
+        𝐱𝑘est = 𝐶𝐱𝑘         + 𝐾 𝑐 𝑧corr
+                                   𝑘                                                                                                            (21)
+
+Substituting Eq. (10) yields
+                             𝑎𝑘−1 4𝜋
+        𝐱𝑘est = 𝐶𝐴𝑑 𝐱𝑘−1
+                     est
+                         + 𝐶𝐵𝑑        + 𝐾 𝑐 𝑧corr
+                                             𝑘                                                                                   (22)
+                              𝛼 𝜆
+This shows that the current state estimate depends on the previous filtered state, the previous acceleration input, and the current
+measurement. Here, 𝐶𝐴𝑑 determines the weight of the past state in the current output, 𝐶𝐵𝑑 determines the contribution of past
+acceleration.
+                                                                                                                        est in terms
+    To make the contribution of historical information explicit, the equation was recursively expanded by substituting 𝐱𝑘−1
+    est and continuing to iterate, giving
+of 𝐱𝑘−2
+                                 𝑎𝑘−1 4𝜋
+        𝐱𝑘est = 𝐶𝐴𝑑 𝐱𝑘−1
+                     est
+                         + 𝐶𝐵𝑑           + 𝐾 𝑐 𝑧corr
+                                                𝑘
+                                  𝛼 𝜆                                                                                                           (23)
+                                         𝑎𝑘−2 4𝜋                          𝑎    4𝜋
+                       2 est
+               = (𝐶𝐴𝑑 ) 𝐱𝑘−2 + (𝐶𝐴𝑑 )𝐶𝐵𝑑           + (𝐶𝐴𝑑 )𝐾 𝑐 𝑧corr
+                                                                𝑘−1
+                                                                     + 𝐶𝐵𝑑 𝑘−1    + 𝐾 𝑐 𝑧corr
+                                                                                         𝑘
+                                          𝛼 𝜆                               𝛼 𝜆
+    Iterating to the initial time step gives the convolution form:
+                  ∑𝑘                     ∑𝑘
+                                                          𝑎    4𝜋
+        𝐱𝑘est =       (𝐶𝐴𝑑 )𝑖 𝐾 𝑐 𝑧corr
+                                   𝑘−𝑖 +     (𝐶𝐴𝑑 )𝑖−1 𝐶𝐵𝑑 𝑘−𝑖                                                                                  (24)
+                  𝑖=0                    𝑖=1
+                                                            𝛼 𝜆
+
+    The first term represents the accumulated contribution of past measurements, and the second term represents the accumulated
+contribution of past acceleration inputs. From a physical perspective, the convolution coefficients (𝐶𝐴𝑑 )𝑖 𝐾 𝑐 describe the weight of
+each past measurement in the current phase or displacement estimate and decay over time, reflecting the filter’s memory of past
+information. The coefficients (𝐶𝐴𝑑 )𝑖−1 𝐶𝐵𝑑 describe the effect of past acceleration inputs, enabling acceleration-aided prediction.
+By observing when the convolution coefficients (𝐶𝐴𝑑 )𝑖 𝐾 𝑐 and (𝐶𝐴𝑑 )𝑖−1 𝐶𝐵𝑑 decay sufficiently close to zero, one can determine the
+number of steps 𝑁converge required to reach the steady state (Fig. 4). The corresponding physical time is approximately 𝑁converge 𝑇𝑎 ,
+indicating the minimum time after initialization for the filter to produce stable and reliable estimates. To ensure that phase
+unwrapping and denoising are conducted successfully, it is essential to make sure that the structure has negligible motion during
+the short convergence period.
+
+                                                                        6
+Z. Ma et al.                                                                                      Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+               Fig. 4. Comparison of convolution coefficients with different levels of noise ratios: (a) (𝐶𝐴𝑑 )𝑖 𝐾 𝑐 and (b) (𝐶𝐴𝑑 )𝑖−1 𝐶𝐵𝑑 .
+
+
+
+
+Fig. 5. Overview of the laboratory experiment: (a) sensor setup, (b) the radar, accelerometer, and laser displacement sensor used in the
+experiment, and (c) nearby building used as radar targets (top view)
+
+
+
+4. Laboratory experiment
+
+4.1. Experimental setup
+
+
+    A four-story building model was first used to assess the long-distance monitoring capability of the proposed method. As shown
+in Fig. 5(a), a uniaxial force-balance accelerometer (EpiSensor ES-U2) and a 77 GHz millimeter-wave radar (TI IWR1642) were
+installed on the top floor. The EpiSensor ES-U2 is a high-precision force-balance accelerometer for structural appli- cations, offering
+a wide dynamic range of up to 155 dB, a bandwidth from DC to 200 Hz, and a user-selectable full-scale acceleration range of ±0.25 g
+to ±4 g with multiple output voltage options. The TI IWR1642 is an integrated FMCW radar operating in the 76–81 GHz band, with
+up to 4 GHz instantaneous bandwidth, on-chip DSP and ARM Cortex-R4F microcontroller for signal processing and control, typical
+transmit power of 12.5 dBm, and a receive noise figure of approximately 14–15 dB. At the same time, horizontal excitation was
+applied via a shaking table. Displacements were recorded by a KAIS KL3-W400 laser displacement sensor with 10 μm resolution
+[41], which were converted to phase based on Eq. (4) to serve as ground-truth values. The sensors employed in this experiment are
+depicted in Fig. 5(b). Data from the radar, accelerometer, and laser displacement sensor were all sampled at a rate of 100 Hz. The
+radar operated with a frequency slope of 15.015 MHz/μs, 256 ADC samples, an ADC rate of 6 MHz, and a chirp duration of 60 ms.
+A stationary building located roughly 30–60 m away served as the radar target (Fig. 5(c)). A total of seven tests were conducted
+using different excitation signals, i.e., 0.1 Hz, 0.3 Hz, 1 Hz, and sweep (0.5–3 Hz) signals.
+
+
+4.2. Phase estimation results
+
+4.2.1. Radar target detection results
+   Fig. 6(a) presents the radar target detection results. Two targets, located at distances of 52.0 m and 42.5 m, were selected and
+designated as Targets 1 and 2, respectively. Fig. 6(b) shows the phases extracted from these two targets in Test 1 under 0.1 Hz
+sinusoidal excitation. Both phase signals are significantly distorted due to phase wrapping. By examining the initial few seconds
+when phase wrapping did not occur, it can be observed that Target 2 exhibits a higher level of phase noise than Target 1. Both
+targets were used to validate the proposed method under different phase noise levels.
+
+                                                                            7
+Z. Ma et al.                                                                                Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+Fig. 6. Radar target detection results of the laboratory experiment: (a) distance spectrum and two targets selected and (b) phases extracted from
+these two targets in Test 1 under 0.1 Hz sinusoidal excitation.
+
+
+
+
+Fig. 7. Comparison of phase estimation results for Target 1 in Test 1 of the laboratory experiment: (a) raw phase; (b)–(d) phases estimated using
+the Itoh condition-based, existing acceleration-aided , and proposed methods, respectively. The red dashed line denotes the raw or estimated
+phase, and the black solid line denotes the ground-truth phase.
+
+
+
+4.2.2. Phase estimated using target 1 with a low phase noise level
+    Phases were first estimated using the raw phase extracted from Target 1. Figs. 7 and 8 compare the raw phase with the estimated
+phase obtained using different methods in Tests 1 and 7, respectively. In addition to the proposed method, two existing phase
+unwrapping methods, i.e., the Itoh condition-based method [25] and the existing acceleration-aided method [30], were also applied.
+Note that the existing acceleration-based method predicts the current displacement using the previous displacement estimates
+and the current acceleration, and converts this prediction into a phase to guide the correction of the raw wrapped phase. This
+method relies on the raw radar phase being sufficiently reliable during the unwrapping stage. In contrast, the proposed method
+formulates displacement estimation within a unified state-space model using an acceleration-aided Kalman filtering framework.
+Phase unwrapping is embedded into the recursive filtering process rather than treated as a standalone step, and is performed jointly
+with noise suppression. By adaptively balancing acceleration-based prediction and radar observation at each time step, the proposed
+method continuously constrains phase evolution, thereby enabling stable displacement estimation even under strong phase noise.
+    Due to the relatively large structural motion, the raw phase directly extracted from the radar data was significantly distorted,
+as shown in Figs. 7(a) and 8(a). When the building model was excited at a low frequency of 0.1 Hz, all three methods successfully
+unwrapped the phase, and the estimation results showed good agreement with the ground-truth phases (Figs. 7(b)–(d)). However,
+under a sweep excitation with frequency varying from 0.5 to 3 Hz, only the proposed method and the existing acceleration-aided
+method were able to correctly unwrap the phase (Figs. 8(c)–(d)). The assumption underlying the Itoh condition-based method was
+violated under this condition, causing it to fail in phase unwrapping (Figs. 8(b)). Note that many advanced phase unwrapping
+techniques are not directly applicable under the system constraints considered in this study. For example, dual-frequency methods
+require radar systems operating at multiple carrier frequencies [29], while MIMO-based approaches rely on multi-transmit and
+multi-receive antenna configurations [28]. Moreover, Kalman filter-based joint phase denoising and unwrapping methods reported
+in InSAR [32,33] and optical interferometry [34] are primarily developed for two-dimensional spatial phase maps and exploit spatial
+phase continuity, and are therefore not suitable for one-dimensional, time-sequential radar phase unwrapping under high-dynamic
+vibration conditions.
+    For a more quantitative comparison, the root mean square errors (RMSEs) of the raw phase and estimated phases under seven
+excitations are summarized in Table 1. The Itoh condition-based method produced reasonable results only in Test 1 with 0.1 Hz
+excitation but exhibited large RMSEs in the other eight tests, reaching up to 146.522 rad. Both the acceleration-based and proposed
+methods performed well across all seven tests and achieved nearly identical RMSEs, with an average value of approximately 2
+rad. According to the phase–displacement relationship defined in Eq. (4), this phase error corresponds to a displacement error of
+0.652 mm. It is worth noting that in scenarios with relatively low phase noise, although the proposed method simultaneously
+performs phase unwrapping and denoising, its performance does not improve compared with the existing acceleration-aided
+unwrapping method, which does not incorporate denoising.
+
+                                                                       8
+Z. Ma et al.                                                                                Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+Fig. 8. Comparison of phase estimation results for Target 1 in Test 7 of the laboratory experiment: (a) raw phase; (b)–(d) phases estimated using
+the Itoh condition-based, existing acceleration-aided , and proposed methods, respectively. The red dashed line denotes the raw or estimated
+phase, and the black solid line denotes the ground-truth phase.
+
+
+               Table 1
+               RMSEs (rad) of phase estimation for Target 1 under various excitations using different methods in the laboratory
+               experiment.
+                No. of tests       Excitations       Raw            Itoh condition-based       Existing                    Proposed
+                                                                                               acceleration-aided
+                1                  0.1 Hz            70.867         2.267                      2.267                       2.270
+                2                  0.1 Hz            72.183         27.661                     1.915                       1.918
+                3                  0.3 Hz            84.080         146.522                    1.497                       1.498
+                4                  0.3 Hz            72.225         88.530                     2.538                       2.540
+                5                  1 Hz              74.072         123.477                    2.193                       2.214
+                6                  1 Hz              45.502         89.876                     1.655                       1.670
+                7                  Sweep             36.689         51.899                     1.959                       2.015
+                         Average                     65.088         75.747                     2.003                       2.018
+
+
+
+
+4.2.3. Phase estimated using target 2 with a high phase noise level
+    Phases were then estimated from the raw phase extracted from Target 2. Figs. 9 compare the raw phase with the phases estimated
+using different methods. Clearly, across all seven tests, the raw phases were still constrained within [−𝜋, 𝜋] and differed significantly
+from the ground-truth phases. At relatively high excitation frequencies, the Itoh condition-based method failed to estimate the phase
+correctly, which is consistent with the observations in Fig. 8(b). At a low excitation frequency of 0.1 Hz in Test 1, the Itoh condition-
+based method successfully estimated the phase using Target 1 (Fig. 7(b)) but failed with Target 2 (Fig. 9(a)). This indicates that the
+Itoh condition-based method is sensitive to phase noise. In contrast, in all seven tests, the proposed method accurately estimated the
+phase, and the results closely matched the ground-truth phases. Note that the existing acceleration-aided method showed strong
+sensitivity to phase noise, and their estimated phases did not converge. This is because the method fundamentally relies on the
+unwrapped phases from the two preceding time steps to assist the current phase unwrapping. If unwrapping fails at any point, the
+error propagates to subsequent steps, causing cumulative errors that may eventually lead to non-convergence. Only the result in
+Test 1 under 0.1 Hz excitation is presented in Fig. 10 as an example, while similar results for other excitations are omitted for the
+sake of space.
+    The RMSEs of the raw phase and estimated phases of Target 2 in all seven tests are summarized in Table 2. Due to severe
+phase wrapping, the raw phases exhibited large errors, exceeding 38.117 rad. The Itoh condition-based method failed to produce
+reliable estimates, with errors greater than 54.750 rad. The existing acceleration-aided method performed even worse, yielding
+non-convergent and physically meaningless results, with errors reaching up to 6393.704 rad. This indicates its extreme sensitivity
+to phase noise. In contrast, the proposed method achieved highly accurate and consistent phase estimation, with a maximum error
+of only 2.659 rad and an average error of 2.019 rad across all seven tests. These results confirm the robustness and accuracy of the
+proposed method under severe wrapping and noise, outperforming existing methods. Based on the phase–displacement relationship
+defined in Eq. (4), the phase errors obtained with the proposed method correspond to displacement errors of 0.822 mm at the
+maximum and 0.624 mm on average.
+
+4.3. Step-by-step validation
+
+    Considering that the proposed Kalman-filter-based phase unwrapping and denoising framework consists of different steps,
+including noise parameter determination, conversion factor estimation, and minimum convergence time determination. Additional
+validation is performed here to step-by-step validate the effectiveness of each of these steps.
+
+4.3.1. Noise parameter determination results
+   The effectiveness of the noise parameter determination algorithm was first validated. As discussed in Section 3.2, the output of
+the Kalman filter depends on the ratio between 𝑄 and 𝑅, rather than on the individual values of 𝑄 or 𝑅. Therefore, 𝑅 was fixed at 1,
+
+                                                                        9
+Z. Ma et al.                                                                                Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+Fig. 9. Comparison of phase estimation results for Target 2 : (a)–(g) correspond to Tests 1–7 of the laboratory experiment. The green dotted line
+denotes the raw phase, the red dash-dotted line denotes the phase estimated by the Itoh condition-based method, the blue dashed line denotes
+the phase estimated by the proposed method, and the black solid line denotes the ground-truth phase.
+
+
+
+
+Fig. 10. Phase estimation of Target 2 in Test 1 of the laboratory experiment using the existing acceleration-aided method. The red dashed line
+denotes the estimated phase, while the black solid line denotes the ground-truth phase.
+
+
+               Table 2
+               RMSEs (rad) of phase estimation for Target 2 under various excitations using different methods in the laboratory
+               experiment.
+                No. of Tests       Excitation        Raw            Itoh condition-based       Existing                    Proposed
+                                                                                               acceleration-aided
+                1                  0.1 Hz            73.468         62.458                     56 774.804                  2.452
+                2                  0.1 Hz            74.889         141.187                    6393.704                    2.044
+                3                  0.3 Hz            87.269         166.140                    25 133.804                  1.563
+                4                  0.3 Hz            74.781         137.147                    52 875.094                  2.659
+                5                  1 Hz              76.546         150.330                    22 794.037                  2.181
+                6                  1 Hz              47.047         88.980                     74 426.634                  1.710
+                7                  Sweep             38.117         54.750                     25 081.596                  2.060
+                         Average                     67.554         114.427                    37 639.95                   2.096
+
+
+
+
+                                                                       10
+Z. Ma et al.                                                                              Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+Fig. 11. Noise parameter determination results for Target 2: (a) 𝑄 estimation results, (b) examples of phase estimated with excessively large
+and small 𝑄 values, and (c) averaged RMSEs of phase estimation over all seven excitations.
+
+
+
+
+Fig. 12. Conversion factor estimation under sweep excitations: (a) Target 1 and (b) Target 2, with both radar-based and acceleration-based
+phases band-pass filtered in [0.5 Hz, 3 Hz].
+
+
+
+and only 𝑄 was optimized. Fig. 11 presents the determination results of 𝑄 for Target 2. Here, candidate values of 𝑄 were set to 10𝑗
+with 𝑗 varying from 0 to 20. As shown in Fig. 11(a), values of 𝑄 smaller than 104 or larger than 109 result in excessively large energy
+in the estimated phase, while the minimum energy is achieved when 𝑄 = 107 . Typical examples of phases estimated with excessively
+large (i.e., 𝑄 = 1020 ) and excessively small (i.e., 𝑄 = 100 ) values are shown in Fig. 11(b), where no physically meaningful results
+were obtained. Fig. 11(c) further compares phase estimation errors using 𝑄 values ranging 100 to 1020 . Note that the averaged RMSEs
+of phase estimation across all seven excitations are used as the error metric. Large RMSEs, up to 42822.29 rad, were observed when
+𝑄 was below 106 or above 108 . Relatively small RMSEs were obtained when 𝑄 was set to 106 , 107 , or 108 , with the smallest RMSE
+occurring at 𝑄 = 107 . This is consistent with the value determined by the proposed algorithm. This consistent agreement across both
+energy and error criteria highlights the robustness and effectiveness of the proposed noise parameter determination algorithm.
+
+4.3.2. Conversion factor estimation results
+    To calibrate the direction conversion factor, acceleration was first double integrated to yield displacement, which was then
+converted to phase based on Eq. (18). Then, the acceleration- and radar-derived phases were band-pass filtered with a frequency
+range of [0.5 Hz, 3 Hz] to eliminate low-frequency drift in the former and suppress high-frequency noise in the latter. Note that
+for the accelerometer used in this study, lab-scale tests verified that a lower cut-off frequency of 0.5 Hz is sufficient to suppress
+low-frequency drift. Based on the acceleration frequency spectrum, the structure exhibits significant vibration only below 3 Hz, and
+thus the upper cut-off frequency is set to 3 Hz. Finally, by linearly fitting the radar-derived unwrapped phase to the acceleration-
+based phase, the direction conversion factor can be obtained. Fig. 12 shows estimation results for Targets 1 and 2. The estimated
+conversion factors are 1.035 and 0.9975 for Targets 1 and 2, respectively. As shown in the figure, a distinct linear relationship is
+observed between the acceleration-based and radar-based displacements, with a 𝑅2 value greater than 0.997.
+
+4.3.3. Minimum convergence time determination results
+    Fig. 13 shows the results of determining the minimum convergence time for Target 2. As shown in Fig. 13(a), the coefficients
+of the causal filters have meaningful values on the right side and gradually converge to zero toward the left. The effective period
+was determined as 0.21 s, corresponding to 21 time steps with a 0.01 s interval. For all excitations, the data were recorded with at
+least 3 s of static conditions, during which no phase wrapping occurred. Since this duration is longer than the effective period, the
+Kalman filter performed well, and the phase was correctly estimated and denoised by the proposed method for all cases.
+    To examine the effect of the minimum convergence time, phase estimation was performed after removing different lengths of
+data from the beginning. Fig. 13(b) shows the phase results when 558 and 560 data points were removed. In these cases, the
+assumption of no phase wrapping during the convergence period was violated, leading to incorrect phase estimation. When 560
+points were removed, accumulated errors caused a significant linear drift. When 558 points were removed, the phase was initially
+incorrect due to poor convergence, but later recovered and remained accurate. Fig. 13(c) summarizes the RMSEs of the estimated
+
+                                                                     11
+Z. Ma et al.                                                                               Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+Fig. 13. Minimum convergence time determination results for Target 2: (a) causal filter coefficients, (b) displacement estimation with removing
+a few seconds of data from the beginning, and (c) RMSEs of the estimated phase for the 1 Hz excitation with varying data removal and their
+relation to the actual phase trend.
+
+
+
+
+Fig. 14. Overview of the pedestrian bridge experiment: (a) bridge overview, (b) sensor setup, and (c) radar, accelerometer, and LDV used in the
+test.
+
+
+
+phase for the 1 Hz excitation with varying data removal. When the starting point fell within a region of rapid phase change where
+phase wrapping occurred, the Kalman filter failed to converge properly, resulting in large RMSEs.
+
+5. Pedestrian bridge experiment
+
+5.1. Experimental setup
+
+    The proposed method was further tested on a pedestrian steel box-girder bridge (Fig. 14(a)). The 77 GHz millimeter-wave radar
+and uniaxial force-balance accelerometer, the same as in the prior experiment, were positioned at the midspan of the bridge (Fig.
+14(b)). Displacements were recorded using a Polytech RSV-150 laser Doppler vibrometer (LDV) with 0.3 nm resolution [42], which
+were converted to phase based on Eq. (4) to serve as ground-truth values. The sensors employed in this experiment are depicted
+in Fig. 14(c). The radar chirp frequency slope was adjusted from 15.015 to 64.985 MHz/μs, while other chirp settings remained
+consistent with the previous laboratory experiment. A total of nine tests were considered in this experiment by varying the number of
+people walking and jumping on the bridge. A total of nine tests were considered in this experiment by varying the number of people
+walking and jumping on the bridge. Tests 1–2 involved 14 pedestrians walking slowly across the bridge, primarily inducing pseudo-
+static displacements. Tests 3–8 introduced a combined excitation, where 14 pedestrians walked while 5 jumped at the midspan,
+generating both pseudo-static and high-frequency displacements. Finally, Test 9 featured 6 pedestrians jumping at the midspan to
+induce predominantly high-frequency displacements.
+
+5.2. Phase and displacement estimation results
+
+5.2.1. Radar target detection results
+    Fig. 15(a) shows the radar target detection results. Two targets were selected for validation of the proposed method: Target 1
+with the highest amplitude and Target 2 with a relatively smaller amplitude. Fig. 15(b) compares the raw phases of both targets in
+Test 1. Under this excitation, phase wrapping occurred only at a few points for Target 1, whereas Target 2 exhibited more severe
+phase wrapping during the first and last 10 s. By comparing the phases within the intervals [11 s, 20 s], where no wrapping occurred,
+it can be observed that Target 2 shows a higher level of phase noise than Target 1. For Target 1, the estimated noise parameter,
+conversion factor, and minimum convergence time were 1021 , 0.9754, and 5, respectively, while the corresponding values for Target
+2 were 106 , 1.2013, and 35, respectively. The initial calibration was conducted using 6000 data points on a laptop equipped with
+an Intel Core Ultra 7 155H processor (16 cores, up to 4.8 GHz) and 32 GB of memory, and was completed in 0.786 s.
+
+                                                                      12
+Z. Ma et al.                                                                               Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+Fig. 15. Radar target detection results of the pedestrian bridge experiment: (a) distance spectrum and two targets selected and (b) phases
+extracted from these two targets in Test 1.
+
+
+
+
+Fig. 16. Comparison of phase estimation results for Target 1 in Test 1 of the pedestrian bridge experiment: (a) raw phase; (b)–(d) phases
+estimated using the Itoh condition-based, existing acceleration-aided , and proposed methods, respectively. The red dashed line denotes the raw
+or estimated phase, and the black solid line denotes the ground-truth phase.
+
+
+               Table 3
+               RMSEs (rad) of phase estimation for Target 1 under various excitations using different methods in the pedestrian
+               bridge experiment.
+                No. of tests           Raw               Itoh condition-based            Existing                         Proposed
+                                                                                         acceleration-aided
+                1                      0.167             0.167                           0.167                            0.167
+                2                      0.421             0.189                           0.189                            0.190
+                3                      1.095             0.139                           0.139                            0.140
+                4                      1.063             0.179                           0.179                            0.179
+                5                      1.099             0.220                           0.220                            0.220
+                6                      1.531             0.157                           0.157                            0.158
+                7                      1.297             0.197                           0.197                            0.198
+                8                      1.603             0.184                           0.184                            0.186
+                9                      2.181             0.101                           0.101                            0.102
+                Average                1.162             0.170                           0.170                            0.171
+
+
+
+
+5.2.2. Phase and displacement estimated using target 1 with a low phase noise level
+    Phases were first estimated using the raw phase extracted from target 1. Fig. 16 compare the raw phase with the phases estimated
+by the Itoh condition-based, existing acceleration-aided, and proposed methods. Clearly, the raw phase directly extracted from
+the radar data was constrained in the range of [−𝜋, 𝜋], as shown in Fig. 16(a). All three methods estimated the phase correctly
+by addressing the phase wrapping issue, and the estimated phases closely matched the ground-truth phases. Similar results were
+obtained from other eight tests and were omitted here for the sake of space.
+    A quantitative comparison between the proposed and existing methods is summarized in Table 3. Large RMSE values of up
+to 2.181 rad were observed when using the raw phase. However, all three methods significantly reduced the errors, and their
+performances were nearly identical. In addition, since both the Itoh-based and acceleration-based methods successfully achieve
+phase unwrapping, the unwrapped phases are identical, resulting in identical RMSEs. It is worth noting that the bridge exhibited
+relatively small motion, so the assumption underlying the Itoh condition-based method was not violated, allowing it to perform well
+in this case.
+
+5.2.3. Phase and displacement estimated using target 2 with a low phase noise level
+   Figs. 17–19 compare the raw phase of Target 2 with the phases estimated using the Itoh condition-based, existing acceleration-
+aided, and proposed methods. In all cases, the raw phases were constrained within [−𝜋, 𝜋] and deviated significantly from the
+
+                                                                       13
+Z. Ma et al.                                                                                Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+Fig. 17. Comparison of phase estimation results for Target 2 : (a)–(g) correspond to Tests 1–4 of the pedestrian bridge experiment. The green
+dotted line denotes the raw phase, the red dash-dotted line denotes the phase estimated by the Itoh condition-based method, the orange long-
+dashed line denotes the phase estimated by the acceleration-based method, the blue short-dashed line denotes the phase estimated by the proposed
+method, and the black solid line denotes the ground-truth phases.
+
+
+
+
+Fig. 18. Comparison of phase estimation results for Target 2 : (a)–(c) correspond to Tests 5–7 of the pedestrian bridge experiment. The green
+dotted line denotes the raw phase, the red dash-dotted line denotes the phase estimated by the Itoh condition-based method, the blue dashed
+line denotes the phase estimated by the proposed method, and the black solid line denotes the ground-truth phases.
+
+
+
+ground-truth phases. For tests 1–4, all three methods successfully resolved phase wrapping, and the estimated phases closely matched
+the LDV measurements (Fig. 17).
+    For tests 5–7, the Itoh condition-based and proposed methods continued to estimate the phase accurately, aligning well with the
+LDV reference. In contrast, the existing acceleration-aided method was highly sensitive to phase noise and failed to converge,
+consistent with observations in the laboratory experiment (Fig. 10). To highlight differences between the raw, estimated, and
+ground-truth phases, only the estimation results of the existing acceleration-aided method were not shown in Fig. 18.
+    For tests 8–9, the existing acceleration-aided method again failed to converge. The Itoh condition-based method exhibited
+noticeable drift (Fig. 19(a)) or discrepancies over certain time periods (Fig. 19(b)), whereas the proposed method robustly estimated
+the phase, maintaining close agreement with the LDV ground truth (Fig. 19). To highlight differences, only the estimation results
+of the Itoh condition-based and proposed methods are shown in Fig. 19.
+    Table 4 summarizes the RMSEs of the raw and estimated phases for Target 2 under all tests. For excitations 1–4, all three methods
+achieved RMSEs below 0.4 rad. For tests 5–9, the existing acceleration-aided method produced extremely large errors (> 3700 rad)
+due to convergence issues. The Itoh condition-based method maintained RMSEs below 0.4 rad for tests 5–7 but exceeded 1 rad for
+tests 8–9. In contrast, the proposed method consistently estimated the phase across all nine tests, with an average RMSE of 0.276
+rad, corresponding to overall displacement errors of 0.084 mm based on the phase–displacement relationship in Eq. (4). The superior
+performance of the proposed method is attributed to its simultaneous phase unwrapping and denoising, which enhances robustness
+and accuracy compared with both the Itoh condition-based and existing acceleration-aided methods. Note that even in tests where
+these methods successfully unwrap the phase (i.e., Tests 1–4), the proposed method reduced the estimation error by approximately
+11% compared to existing methods.
+
+                                                                      14
+Z. Ma et al.                                                                              Mechanical Systems and Signal Processing 248 (2026) 113991
+
+
+
+
+Fig. 19. Comparison of phase estimation results for Target 2 : (a)–(b) correspond to Tests 8–9 of the pedestrian bridge experiment. The red
+dash-dotted line denotes the phase estimated by the Itoh condition-based method, the blue dashed line denotes the phase estimated by the
+proposed method, and the black solid line denotes the ground-truth phases.
+
+
+               Table 4
+               RMSEs (rad) of phase estimation for Target 2 under various excitations using different methods in the pedestrian
+               bridge experiment.
+                No. of Tests           Raw               Itoh condition-based           Existing                         Proposed
+                                                                                        acceleration-aided
+                1                      5.110             0.310                          0.310                            0.278
+                2                      5.276             0.278                          0.278                            0.231
+                3                      4.651             0.281                          0.281                            0.230
+                4                      4.567             0.283                          0.283                            0.236
+                5                      4.781             0.396                          11 523.917                       0.361
+                6                      4.458             0.318                          12 595.580                       0.250
+                7                      4.699             0.324                          19 176.185                       0.250
+                8                      5.062             4.847                          3707.834                         0.364
+                9                      3.043             1.098                          31 887.892                       0.287
+                Average                4.739             0.904                          8790.618                         0.276
+
+
+
+
+6. Conclusions
+
+
+   This study proposes an acceleration-aided Kalman filtering method for joint phase denoising and unwrapping in FMCW radar
+displacement monitoring. The main innovations uniqueness: (1) development of an acceleration-aided phase unwrapping and
+denoising framework based on Kalman filtering; (2) adaptive tuning of Kalman filter noise parameters for robust phase unwrapping
+and denoising; (3) quantitative determination of the minimum convergence time required for the Kalman filter to avoid phase
+unwrapping failure; (4) enhanced robustness against phase noise, enabling high-accuracy phase estimation even under strong
+measurement noise. Experimental validations on a four-story building model and a 48 m long pedestrian bridge led to the following
+conclusions:
+
+    • In laboratory tests, due to large structural motions, the Itoh condition-based phase unwrapping method almost completely
+      failed for both low- and high-noise targets, with an overall RMSE of 71.596 rad. The existing acceleration-aided method
+      successfully handled large motions and achieved an overall RMSE of 2.003 rad for the low-noise target. However, it was
+      susceptible to noise and failed for the high-noise target, with an overall RMSE of 37639.95 rad. The proposed method
+      successfully performed phase unwrapping and denoising for both low- and high-noise targets, achieving an overall RMSE
+      of 2.057 rad. This demonstrates that the proposed method can simultaneously handle large structural motions and high levels
+      of phase noise.
+    • In field bridge tests, all three methods successfully unwrapped and estimated the phase of the low-noise target, with an overall
+      RMSE less than 0.180 rad. For the high-noise target, the existing acceleration-aided method succeeded in 4 out of 9 tests, while
+      the Itoh condition-based method succeeded in 7 out of 9 tests. The proposed method successfully unwrapped and estimated the
+      phase in all 9 tests, achieving an overall RMSE of 0.276 rad and demonstrating the strongest robustness against phase noise.
+      In addition, even for tests where all methods worked, the proposed method reduced the estimation error by approximately
+      11% compared to existing methods.
+    • Laboratory experiments also validated the importance of properly selecting the noise parameters and minimum convergence
+      time in the Kalman-filter-based phase unwrapping and denoising framework. These selections ensure accurate and stable phase
+      unwrapping, even under conditions of large motion and high phase noise.
+
+   Future work will implement the proposed method in a compact sensing system and broader real-world applications to further
+enhance its practicality and generalization capabilities.
+
+                                                                      15
+Z. Ma et al.                                                                                          Mechanical Systems and Signal Processing 248 (2026) 113991
+
+CRediT authorship contribution statement
+
+   Zhanxiong Ma: Writing – review & editing, Writing – original draft, Visualization, Validation, Supervision, Resources, Project
+administration, Methodology, Investigation, Funding acquisition, Formal analysis, Data curation, Conceptualization. Tongtong
+Zhang: Writing – review & editing, Validation, Data curation. Yang Zhu: Validation, Data curation. Shuhan Lin: Visualization,
+Data curation. Jigu Lee: Writing – review & editing, Validation. Hoon Sohn: Writing – review & editing, Supervision, Resources.
+Qiangqiang Zhang: Writing – review & editing, Supervision, Funding acquisition.
+
+Declaration of competing interest
+
+    The authors declare that they have no known competing financial interests or personal relationships that could have appeared
+to influence the work reported in this paper.
+
+Acknowledgments
+
+   This work was supported by the Natural Science Foundation of China (Grant No. 52192661), the Gansu Key Research and
+Development Program (Grant No. 25YFWA001), the Science and Technology Program of Gansu Province (Grant No. 26RCKA019),
+and the Talent Scientific Fund of Lanzhou University.
+
+Data availability
+
+    Data will be made available on request.
+
+
+References
+
+ [1] D. Ribeiro, R. Santos, R. Cabral, G. Saramago, P. Montenegro, H. Carvalho, J. Correia, R. Calçada, Non-contact structural displacement measurement using
+     unmanned aerial vehicles and video-based systems, Mech. Syst. Signal Process. 160 (2021) 107869.
+ [2] C.-Z. Dong, F.N. Catbas, A review of computer vision–based structural health monitoring at local and global levels, Struct. Health Monit. 20 (2) (2021)
+     692–743.
+ [3] A. Sofi, J. Jane Regita, B. Rane, H.H. Lau, Structural health monitoring using wireless smart sensor network – an overview, Mech. Syst. Signal Process.
+     163 (2022) 108113, http://dx.doi.org/10.1016/j.ymssp.2021.108113.
+ [4] Z. Ma, J. Choi, H. Sohn, Structural displacement sensing techniques for civil infrastructure: A review, J. Infrastruct. Intell. Resil. 2 (3) (2023) 100041.
+ [5] D. Arias-Lara, J. De-la Colina, Assessment of methodologies to estimate displacements from measured acceleration records, Measurement 114 (2018)
+     261–273.
+ [6] A. Bunce, D. Hester, S. Taylor, J. Brownjohn, F. Huseynov, Y. Xu, A robust approach to calculating bridge displacements from unfiltered accelerations for
+     highway and railway bridges, Mech. Syst. Signal Process. 200 (2023) 110554.
+ [7] J.R. Vazquez-Ontiveros, G.E. Vazquez-Becerra, J.A. Quintana, F.J. Carrion, G.M. Guzman-Acevedo, J.R. Gaxiola-Camacho, Implementation of PPP-GNSS
+     measurement technology in the probabilistic SHM of bridge structures, Measurement 173 (2021) 108677.
+ [8] N. Shen, L. Chen, R. Chen, Displacement detection based on Bayesian inference from GNSS kinematic positioning for deformation monitoring, Mech. Syst.
+     Signal Process. 167 (2022) 108570.
+ [9] E. Cai, Y. Zhang, X. Lu, X. Ji, X. Gao, J. Hou, J. Shi, W. Guo, Estimating structural motions in extreme environmental conditions——A dynamic correlation
+     filter based computer vision approach, Mech. Syst. Signal Process. 215 (2024) 111398.
+[10] J. Hou, Y. Zhang, E. Cai, T. Guo, M. Luo, J. Guo, An automatic method for measuring inter-storey structural displacement based on vision data, Mech.
+     Syst. Signal Process. 237 (2025) 113123.
+[11] Y. Wang, W. Hu, J. Teng, Y. Xia, Full-field displacement measurement of long-span bridges using one camera and robust self-adaptive complex pyramid,
+     Mech. Syst. Signal Process. 215 (2024) 111451.
+[12] D. Li, B. Cheng, K. Wang, Self-calibrating technique for 3D displacement measurement using monocular vision and planar marker, Autom. Constr. 159
+     (2024) 105263.
+[13] X. Xiong, L. Liu, C. Wei, S. Tan, M. Dang, Z. Zhong, B. Liu, L. Yu, M. Shan, Visual vibration measurement using intensity optical flow with optical field
+     correction under uneven illumination, Mech. Syst. Signal Process. 240 (2025) 113431.
+[14] M. Shan, M. Dang, J. Wang, K. Zhu, X. Xiong, Z. Zhong, L. Yu, B. Liu, L. Liu, Video-based adaptive vibration modal identification via binary decomposition
+     tree, Mech. Syst. Signal Process. 234 (2025) 112851.
+[15] S. Liu, L. Yu, W. Niu, J. Wang, Z. Zhong, J. Huang, M. Shan, Fast and accurate visual vibration measurement via derivative-enhanced phase-based optical
+     flow, Mech. Syst. Signal Process. 209 (2024) 111089.
+[16] Y. Xiong, Z. Peng, G. Xing, W. Zhang, G. Meng, Accurate and robust displacement measurement for FMCW radar vibration monitoring, IEEE Sensors J.
+     18 (3) (2017) 1131–1139.
+[17] B. Zhang, X. Ding, C. Werner, K. Tan, B. Zhang, M. Jiang, J. Zhao, Y. Xu, Dynamic displacement monitoring of long-span bridges with a microwave radar
+     interferometer, ISPRS J. Photogramm. Remote Sens. 138 (2018) 252–264.
+[18] G. Zhang, Y. Wu, W. Zhao, J. Zhang, Radar-based multipoint displacement measurements of a 1200-m-long suspension bridge, ISPRS J. Photogramm.
+     Remote Sens. 167 (2020) 71–84.
+[19] Q. Huang, Y. Wang, G. Luzi, M. Crosetto, O. Monserrat, J. Jiang, H. Zhao, Y. Ding, Ground-based radar interferometry for monitoring the dynamic
+     performance of a multitrack steel truss high-speed railway bridge, Remote. Sens. 12 (16) (2020) 2594.
+[20] Y. Xiong, Z. Liu, S. Li, G. Meng, Z. Peng, Scanning microwave vibrometer: Full-field vibration measurement via microwave sensing with phase-encoded
+     beam scanning, IEEE Trans. Instrum. Meas. 72 (2023) 1–11.
+[21] Y. Izumi, M. Komuro, T. Kawarai, K. Yoshimori, Dynamic displacement estimation of bridge using MIMO radar interferometry from an oscillating platform,
+     IEEE Trans. Geosci. Remote Sens. (2025).
+[22] Y. Matsue, J. Kuroda, Y. Kashima, S. Kawaji, S. Yamada, T. Nagayama, J. Iyama, Modal analysis of structures using a millimeter-wave sensor, IEEE Sensors
+     Lett. (2025).
+
+
+                                                                              16
+Z. Ma et al.                                                                                       Mechanical Systems and Signal Processing 248 (2026) 113991
+
+[23] Y. Xiong, Y. Gou, W. Tian, X. Dong, G. Meng, Z. Peng, Full-field 3D displacement measurement via microwave sensing, Mech. Syst. Signal Process. 234
+     (2025) 112804.
+[24] Z. Ma, K. Han, J. Choi, J. Lee, O. Kwon, H. Sohn, J. Liu, D. Hwang, J. Aggarwal, H. Noh, et al., Development and field deployment validation of a
+     low-cost and high-precision displacement sensing system by fusing millimeter-wave radar and accelerometer, Eng. Struct. 321 (2024) 118926.
+[25] A.A. Pramudita, D.-B. Lin, A.A. Dhiyani, H.H. Ryanu, T. Adiprabowo, E.A. Yudha, FMCW radar for noncontact bridge structure displacement estimation,
+     IEEE Trans. Instrum. Meas. 72 (2023) 1–14.
+[26] W. Xu, Y. Li, C. Gu, J.-F. Mao, Large displacement motion interferometry with modified differentiate and cross-multiply technique, IEEE Trans. Microw.
+     Theory Tech. 69 (11) (2021) 4879–4890.
+[27] J. Liu, Y. Li, C. Gu, Solving phase ambiguity in interferometric displacement measurement with millimeter-wave FMCW radar sensors, IEEE Sensors J. 22
+     (9) (2022) 8482–8489.
+[28] G. Guerzoni, E. Faghand, L. Vincenzi, E. Bassoli, G.M. Vitetta, A novel Doppler-based phase unwrapping algorithm for mmwave MIMO radars and its
+     application to displacement estimation in structural health monitoring, Mech. Syst. Signal Process. 235 (2025) 112777.
+[29] P. Zhang, Z. Xu, A dual-frequency phase ambiguity resolution method for fmcw radar high-accuracy ranging, IEEE Trans. Instrum. Meas. 73 (2024) 1–10.
+[30] Z. Ma, J. Choi, L. Yang, H. Sohn, Structural displacement estimation using accelerometer and fmcw millimeter wave radar, Mech. Syst. Signal Process.
+     182 (2023) 109582.
+[31] Z. Ma, J. Choi, H. Sohn, Continuous bridge displacement estimation using millimeter-wave radar, strain gauge and accelerometer, Mech. Syst. Signal
+     Process. 197 (2023) 110408.
+[32] O. Loffeld, H. Nies, S. Knedlik, W. Yu, Phase unwrapping for SAR interferometry—A data fusion approach by Kalman filtering, IEEE Trans. Geosci. Remote
+     Sens. 46 (1) (2008) 47–58.
+[33] X. Luo, H. Li, Z. Dong, S. Zhu, Insar phase unwrapping based on square-root Cubature Kalman filter, IEEE J. Sel. Top. Appl. Earth Obs. Remote. Sens. 13
+     (2020) 4627–4641.
+[34] X. Xie, Iterated unscented Kalman filter for phase unwrapping of interferometric fringes, Opt. Express 24 (17) (2016) 18872–18897.
+[35] J. Guo, Y. He, C. Jiang, M. Jin, S. Li, J. Zhang, R. Xi, Y. Liu, Measuring micrometer-level vibrations with mmwave radar, IEEE Trans. Mob. Comput. 22
+     (4) (2021) 2248–2261.
+[36] G. Ciattaglia, G. Iadarola, G. Battista, L. Senigagliesi, E. Gambi, P. Castellini, S. Spinsante, Displacement evaluation by mmwave FMCW radars: Method
+     and performance metrics, IEEE Trans. Instrum. Meas. 73 (2024) 1–13.
+[37] A. Smyth, M. Wu, Multi-rate Kalman filtering for the data fusion of displacement and acceleration response measurements in dynamic system monitoring,
+     Mech. Syst. Signal Process. 21 (2) (2007) 706–723.
+[38] Z. Ma, J. Choi, H. Sohn, Real-time structural displacement estimation by fusing asynchronous acceleration and computer vision measurements,
+     Computer-Aided Civ. Infrastruct. Eng. 37 (6) (2022) 688–703.
+[39] Z. Zhu, S. Zhu, Asynchronous Kalman filtering for dynamic response reconstruction by fusing multi-type sensor data with arbitrary sampling frequencies,
+     Mech. Syst. Signal Process. 215 (2024) 111395.
+[40] M.I. Ribeiro, Kalman and extended kalman filters: Concept, derivation and properties, Inst. Syst. Robot. 43 (46) (2004) 3736–3741.
+[41] KAIS Co., Ltd, KL3 series Laser Displacement Sensor Datasheet, 2019, URL https://ekais.kr/ekaisbiz/wp-content/uploads/2019/05/KL3-Series.pdf.
+[42] Polytech GmbH, RSV-150 Scanning Vibrometer Datasheet, 2019, URL https://www.atecorp.com/products/polytec/rsv-150.
+
+
+
+
+                                                                            17
+

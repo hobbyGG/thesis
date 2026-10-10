@@ -1,0 +1,228 @@
+{
+  "protocol": {
+    "seed": 20261001,
+    "stratum": "low_motion_0p050mm",
+    "requested_rms_mm": 0.05,
+    "deltas_deg": [
+      0,
+      -1,
+      1
+    ],
+    "calibration_frames": [
+      0,
+      199
+    ],
+    "test_frames": [
+      200,
+      399
+    ],
+    "change": "both steering and beta; fixed range bins and selected identities",
+    "beta_only_not_run": "would hold complex IQ observations fixed and change only conversion scale",
+    "reference": "post-run truth mean on same first test cold-start indices as estimator; no fitted alignment",
+    "legacy_reference": "also report prior full-record elapsed <= 0.20s reference for comparison",
+    "cold_start": "unchanged retained estimator: test-prefix phase bias and residual R; NOT strict calibration-only initialization",
+    "config": {
+      "carrier_frequency_hz": 77000000000.0,
+      "sample_rate_hz": 100.0,
+      "process_noise_intensity": 50000.0,
+      "initial_state_variance": 25.0,
+      "initial_rate_variance": 400.0,
+      "initial_measurement_variance": 9.0,
+      "min_measurement_variance": 0.0001,
+      "max_measurement_variance": 25.0,
+      "adaptive_r_forgetting": 0.95,
+      "cold_start_duration_s": 0.2,
+      "cold_start_r_mode": "residual",
+      "radar_mount": "downward"
+    },
+    "scoring_after_all_routes": true,
+    "raw_arrays_retained": false,
+    "input": "local scratch 1Hz sine generator with package_builder exports, NOT A20 physical response or cloud 400-402"
+  },
+  "geometry": {
+    "angle_deg": [
+      2.615027733951205,
+      20.870073452494555,
+      25.111109363104106,
+      15.441241234313447,
+      9.424627128185314
+    ],
+    "beta": [
+      1.001042448096848,
+      1.0702161574169304,
+      1.1043786570174754,
+      1.0374477035439045,
+      1.0136828235657447
+    ],
+    "range_bins": [
+      230,
+      246,
+      253,
+      238,
+      232
+    ],
+    "selected": [
+      0,
+      1,
+      2,
+      3,
+      4
+    ],
+    "initial_r": [
+      9.0,
+      9.0,
+      9.0,
+      9.0,
+      9.0
+    ],
+    "scores": [
+      1.0,
+      1.0,
+      1.0,
+      1.0,
+      1.0
+    ]
+  },
+  "geometry_hash": "899c26329a4ab82b5b9dcd0cbacde5a1f707f10a1699d14a185e1c9a55379fe3",
+  "input_sha256": {
+    "guards.json": "9287ad5b3eed8a156af07874da633666d9b17df321dfb6fab964aed277b5f283",
+    "status.json": "31d5406688c7895a83e91dd7139ee93fa22fe690c80409e2e8b19ce2f5419275",
+    "frozen_test_guard_result.json": "143eed1bae419045ba9c69e81912d07d23c04412f8d82d3f22d19bfe7d466892",
+    "adxl355/algorithm_input/sample_times_s.npy": "94d2abb828c5f238eb06144184116cafcee1e63708c49daf79c457a5f07dfaff",
+    "adxl355/algorithm_input/acceleration_raw.npy": "a8f8c2d6c1db36d4c923505ffd73375b46986932d5332124400e7e4a9242b918",
+    "adxl355/algorithm_input/manifest.json": "55f0f038bdc6c8c915da065e7329c8a7fc3608fca69112683c8c358f04075526",
+    "adxl355/algorithm_input/estimated_sample_monotonic_ns.npy": "221f0eadd3ca1c09dd6b6f94d7029ccbdddf5f21cdcbddc3b6db51f88048c1aa",
+    "adxl355/algorithm_input/drdy_monotonic_ns.npy": "221f0eadd3ca1c09dd6b6f94d7029ccbdddf5f21cdcbddc3b6db51f88048c1aa",
+    "adxl355/algorithm_input/acceleration_mps2.npy": "bfba9a1bce3870c274610ab3cc3baedfc7b81e77098acd24b30b47983c61a2d9",
+    "sync/radar_frame_monotonic_ns.npy": "0b7ce5522ba69aebb423792193a3102dbf2b0cbec628218e4402171be062779b",
+    "sync/radar_adc_sample_monotonic_ns.npy": "1f1920b5e8f790a19664adfc7bf7053bb5c1ea9ffd1b58d63928af89459993e5",
+    "sync/timeline.json": "11f2622dbcfe6bfc11c754ae8220d35dc4d39c1d8c4489c4bbbfa9f92983d26f",
+    "sync/manifest.json": "0058f4bf91a33ade30e1a56d53462892f174b88d952b0e525acd775e07069987",
+    "radar/algorithm_input/chirp_cube.npy": "7164d324efcd0fb4b2cf814d20e579afbff39da9f4e0f39b93106472c1a7258f",
+    "radar/algorithm_input/manifest.json": "52707057e25737487dd5b682b5d4c37beb982b1b041bc36de2ca40932bc494a4",
+    "radar/algorithm_input/adc_cube.npy": "000918d9e47614919655aa6718c9a9902fe389552fde06a72a14f3959ae9cdda",
+    "radar/algorithm_input/frame_times_s.npy": "dd30c2caed7f79831b13cd94cab38df35c76901efccb0d2b27a7ffe8fb1c8080"
+  },
+  "guards": {
+    "source": "calibration_capture_arrays_only",
+    "frozen_before_test": true,
+    "calibration_frame_range": [
+      0,
+      199
+    ],
+    "calibration_adxl_sample_count": 2000,
+    "finite_calibration": true,
+    "adc_abs_limit": 1.2766489386558533,
+    "acceleration_abs_limit_mps2": 0.02570118123317602,
+    "time_monotonic_required": true
+  },
+  "guard_test": {
+    "test_frame_range": [
+      200,
+      399
+    ],
+    "test_adxl_sample_count": 2000,
+    "finite_test_capture_arrays": true,
+    "test_radar_time_monotonic": true,
+    "adc_within_frozen_limit": true,
+    "acceleration_within_frozen_limit": true,
+    "passed": true
+  },
+  "contract": {
+    "radar_schema": true,
+    "radar_complete": true,
+    "radar_frames_400": true,
+    "adc_shape": true,
+    "adc_is_loop_mean": true,
+    "radar_rate_100_hz": true,
+    "frame_time_count": true,
+    "adxl_4000": true,
+    "adxl_time_monotonic": true,
+    "sync_time_monotonic": true,
+    "truth_reference_count": true,
+    "proxy_shape": true
+  },
+  "truth_free": true,
+  "geometry_test_perturbation_invariant": true,
+  "rows": [
+    {
+      "delta_deg": 0,
+      "beta": [
+        1.001042448096848,
+        1.0702161574169304,
+        1.1043786570174754,
+        1.0374477035439045,
+        1.0136828235657447
+      ],
+      "projection_relative_error": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "q_hat_rms_mm": 0.06452507442334955,
+      "truth_physical_rms_mm": 0.04999998140189448,
+      "truth_matched_reference_rms_mm": 0.0627387849959068,
+      "matched_reference_rmse_mm": 0.0020845851957377827,
+      "signed_bias_mm": -0.000933102093578939,
+      "legacy_reference_rmse_mm": 0.0019243818276068554,
+      "reference_delta_matched_minus_legacy_mm": 0.001411045078856234,
+      "cold_start_count": 20,
+      "finite_coverage": 1.0
+    },
+    {
+      "delta_deg": -1,
+      "beta": [
+        1.000397400590304,
+        1.063302904024383,
+        1.095584263468271,
+        1.0326269807923103,
+        1.0109082545286086
+      ],
+      "projection_relative_error": [
+        -0.0006443757782403914,
+        -0.006459679518605932,
+        -0.007963204914657407,
+        -0.004646713983872841,
+        -0.002737117540747347
+      ],
+      "q_hat_rms_mm": 0.06427584017813634,
+      "truth_physical_rms_mm": 0.04999998140189448,
+      "truth_matched_reference_rms_mm": 0.0627387849959068,
+      "matched_reference_rmse_mm": 0.0018713462283697442,
+      "signed_bias_mm": -0.0008099100876365201,
+      "legacy_reference_rmse_mm": 0.0017909063722168714,
+      "reference_delta_matched_minus_legacy_mm": 0.001411045078856234,
+      "cold_start_count": 20,
+      "finite_coverage": 1.0
+    },
+    {
+      "delta_deg": 1,
+      "beta": [
+        1.0019937419106502,
+        1.0775502748832828,
+        1.1136573563900425,
+        1.0426327332484084,
+        1.0167832392862866
+      ],
+      "projection_relative_error": [
+        0.0009503031720690114,
+        0.006852930985506767,
+        0.00840173731501248,
+        0.00499787091608761,
+        0.0030585659029278567
+      ],
+      "q_hat_rms_mm": 0.064794960598012,
+      "truth_physical_rms_mm": 0.04999998140189448,
+      "truth_matched_reference_rms_mm": 0.0627387849959068,
+      "matched_reference_rmse_mm": 0.0023267912251080246,
+      "signed_bias_mm": -0.001065952002390246,
+      "legacy_reference_rmse_mm": 0.002096853110082985,
+      "reference_delta_matched_minus_legacy_mm": 0.001411045078856234,
+      "cold_start_count": 20,
+      "finite_coverage": 1.0
+    }
+  ],
+  "limitation": "Combined steering/beta sensitivity with test-prefix cold start; not beta-only or strict held-out initialization; finite coverage is not uncertainty coverage."
+}

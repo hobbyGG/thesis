@@ -1,0 +1,105 @@
+{
+  "scope": "2010-01-01 through 2026-12-31 publication-year window; retrieved 2026-10-08; OpenAlex works type=article",
+  "queries": [
+    {
+      "query": "millimeter wave radar vibration displacement",
+      "raw_count": 1241,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=millimeter+wave+radar+vibration+displacement&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:50:30Z"
+    },
+    {
+      "query": "FMCW radar structural displacement",
+      "raw_count": 387,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=FMCW+radar+structural+displacement&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:50:33Z"
+    },
+    {
+      "query": "radar interferometry bridge vibration displacement",
+      "raw_count": 661,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=radar+interferometry+bridge+vibration+displacement&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:50:37Z"
+    },
+    {
+      "query": "ground based radar bridge dynamic displacement",
+      "raw_count": 5429,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=ground+based+radar+bridge+dynamic+displacement&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:50:41Z"
+    },
+    {
+      "query": "radar accelerometer displacement fusion",
+      "raw_count": 1405,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=radar+accelerometer+displacement+fusion&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:50:45Z"
+    },
+    {
+      "query": "IQ phase radar displacement measurement",
+      "raw_count": 322,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=IQ+phase+radar+displacement+measurement&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:50:49Z"
+    },
+    {
+      "query": "Doppler radar structural vibration",
+      "raw_count": 1496,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=Doppler+radar+structural+vibration&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:50:54Z"
+    },
+    {
+      "query": "FMCW radar phase unwrapping vibration",
+      "raw_count": 137,
+      "returned": 137,
+      "api_url": "https://api.openalex.org/works?search=FMCW+radar+phase+unwrapping+vibration&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:50:57Z"
+    },
+    {
+      "query": "mmWave radar vibration measurement",
+      "raw_count": 822,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=mmWave+radar+vibration+measurement&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:51:01Z"
+    },
+    {
+      "query": "MIMO radar structural displacement",
+      "raw_count": 547,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=MIMO+radar+structural+displacement&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:51:05Z"
+    },
+    {
+      "query": "radar vibration monitoring bridge",
+      "raw_count": 5979,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=radar+vibration+monitoring+bridge&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:51:08Z"
+    },
+    {
+      "query": "radar sensor fusion accelerometer vibration",
+      "raw_count": 1728,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=radar+sensor+fusion+accelerometer+vibration&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:51:11Z"
+    },
+    {
+      "query": "microwave radar interferometry structural monitoring",
+      "raw_count": 1532,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=microwave+radar+interferometry+structural+monitoring&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:51:16Z"
+    },
+    {
+      "query": "radar micro displacement vibration",
+      "raw_count": 2898,
+      "returned": 200,
+      "api_url": "https://api.openalex.org/works?search=radar+micro+displacement+vibration&filter=from_publication_date%3A2010-01-01%2Cto_publication_date%3A2026-12-31%2Ctype%3Aarticle&per-page=200&mailto=research%40example.com",
+      "retrieved_utc": "2026-10-08T01:51:19Z"
+    }
+  ],
+  "raw_query_count_sum": 24584,
+  "unique_returned_records": 1663
+}

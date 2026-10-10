@@ -1,0 +1,580 @@
+{
+  "historical_400_402_recovery": false,
+  "protocol_sha256": "c301bc68572b7434489e2cca8b2dc03ee78b9a7d6bb50379142e0d970069f424",
+  "rows": [
+    {
+      "config": {
+        "beta_scale": 1.0,
+        "position_error": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "theta_true_deg": 17.37
+      },
+      "result": {
+        "bartlett_peak": 0.9994977585859407,
+        "bartlett_theta_deg": 17.25,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9883136864559627,
+          "theta_hat_deg": 17.25
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0023394656785248255,
+          "rmse_mm": 0.0016707896841062968,
+          "score_samples": 128,
+          "score_start_frame": 128
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.002429077066691522,
+          "rmse_mm": 0.0023645266216965784,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_objective": null,
+        "score_start_frame": 128,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4101
+    },
+    {
+      "config": {
+        "beta_scale": 1.0,
+        "position_error": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "theta_true_deg": 17.37
+      },
+      "result": {
+        "bartlett_peak": 0.9994977585859407,
+        "bartlett_theta_deg": 17.25,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9883136864559627,
+          "theta_hat_deg": 17.25
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.00242907706669152,
+          "rmse_mm": 0.002364526621696631,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.00242907706669152,
+          "rmse_mm": 0.002364526621696631,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4101
+    },
+    {
+      "config": {
+        "beta_scale": 1.0,
+        "position_error": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "theta_true_deg": 17.37
+      },
+      "result": {
+        "bartlett_peak": 0.9994977585859407,
+        "bartlett_theta_deg": 17.25,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9884738620951277,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002342506181267412,
+          "rmse_mm": 0.0018069400404720673,
+          "score_samples": 128,
+          "score_start_frame": 128
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.002434240917092277,
+          "rmse_mm": 0.002504479989326912,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0002774620502427364,
+        "score_start_frame": 128,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4101
+    },
+    {
+      "config": {
+        "beta_scale": 1.0,
+        "position_error": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "theta_true_deg": 17.37
+      },
+      "result": {
+        "bartlett_peak": 0.9994977585859407,
+        "bartlett_theta_deg": 17.25,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9884738620951277,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002434240917092293,
+          "rmse_mm": 0.00250447998932687,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.002434240917092293,
+          "rmse_mm": 0.00250447998932687,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0002774620502427364,
+        "score_start_frame": 148,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4101
+    },
+    {
+      "config": {
+        "beta_scale": 1.015,
+        "position_error": [
+          0.0,
+          0.015,
+          -0.01,
+          0.02,
+          -0.012,
+          0.008,
+          -0.018,
+          0.005
+        ],
+        "theta_true_deg": 17.83
+      },
+      "result": {
+        "bartlett_peak": 0.9996885013336688,
+        "bartlett_theta_deg": 17.75,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9892427425351776,
+          "theta_hat_deg": 17.75
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0026095723975022938,
+          "rmse_mm": 0.014871942385916903,
+          "score_samples": 128,
+          "score_start_frame": 128
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.0026889587120057365,
+          "rmse_mm": 0.012621831925771279,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_objective": null,
+        "score_start_frame": 128,
+        "theta_hat_deg": 17.75
+      },
+      "seed": 4102
+    },
+    {
+      "config": {
+        "beta_scale": 1.015,
+        "position_error": [
+          0.0,
+          0.015,
+          -0.01,
+          0.02,
+          -0.012,
+          0.008,
+          -0.018,
+          0.005
+        ],
+        "theta_true_deg": 17.83
+      },
+      "result": {
+        "bartlett_peak": 0.9996885013336688,
+        "bartlett_theta_deg": 17.75,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9892427425351776,
+          "theta_hat_deg": 17.75
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002688958712005736,
+          "rmse_mm": 0.012621831925771109,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.002688958712005736,
+          "rmse_mm": 0.012621831925771109,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_hat_deg": 17.75
+      },
+      "seed": 4102
+    },
+    {
+      "config": {
+        "beta_scale": 1.015,
+        "position_error": [
+          0.0,
+          0.015,
+          -0.01,
+          0.02,
+          -0.012,
+          0.008,
+          -0.018,
+          0.005
+        ],
+        "theta_true_deg": 17.83
+      },
+      "result": {
+        "bartlett_peak": 0.9996885013336688,
+        "bartlett_theta_deg": 17.75,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9892263942156774,
+          "theta_hat_deg": 17.800000000000242
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0026322190940138435,
+          "rmse_mm": 0.015157821119033578,
+          "score_samples": 128,
+          "score_start_frame": 128
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.0027102821427832306,
+          "rmse_mm": 0.012882234272652221,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_bounds_deg": [
+          16.25,
+          19.25
+        ],
+        "profile_objective": 0.00041133863618393146,
+        "score_start_frame": 128,
+        "theta_hat_deg": 17.800000000000242
+      },
+      "seed": 4102
+    },
+    {
+      "config": {
+        "beta_scale": 1.015,
+        "position_error": [
+          0.0,
+          0.015,
+          -0.01,
+          0.02,
+          -0.012,
+          0.008,
+          -0.018,
+          0.005
+        ],
+        "theta_true_deg": 17.83
+      },
+      "result": {
+        "bartlett_peak": 0.9996885013336688,
+        "bartlett_theta_deg": 17.75,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9892263942156774,
+          "theta_hat_deg": 17.800000000000242
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0027102821427831985,
+          "rmse_mm": 0.012882234272652445,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.0027102821427831985,
+          "rmse_mm": 0.012882234272652445,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_bounds_deg": [
+          16.25,
+          19.25
+        ],
+        "profile_objective": 0.00041133863618393146,
+        "score_start_frame": 148,
+        "theta_hat_deg": 17.800000000000242
+      },
+      "seed": 4102
+    },
+    {
+      "config": {
+        "beta_scale": 0.985,
+        "position_error": [
+          0.0,
+          0.015,
+          -0.01,
+          0.02,
+          -0.012,
+          0.008,
+          -0.018,
+          0.005
+        ],
+        "theta_true_deg": 18.21
+      },
+      "result": {
+        "bartlett_peak": 1.0005961033262212,
+        "bartlett_theta_deg": 18.25,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9902564183841447,
+          "theta_hat_deg": 18.25
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0029979245890475173,
+          "rmse_mm": 0.016358393840474942,
+          "score_samples": 128,
+          "score_start_frame": 128
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.003061131973134654,
+          "rmse_mm": 0.01193625017098666,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_objective": null,
+        "score_start_frame": 128,
+        "theta_hat_deg": 18.25
+      },
+      "seed": 4103
+    },
+    {
+      "config": {
+        "beta_scale": 0.985,
+        "position_error": [
+          0.0,
+          0.015,
+          -0.01,
+          0.02,
+          -0.012,
+          0.008,
+          -0.018,
+          0.005
+        ],
+        "theta_true_deg": 18.21
+      },
+      "result": {
+        "bartlett_peak": 1.0005961033262212,
+        "bartlett_theta_deg": 18.25,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9902564183841447,
+          "theta_hat_deg": 18.25
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0030611319731346817,
+          "rmse_mm": 0.011936250170986588,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.0030611319731346817,
+          "rmse_mm": 0.011936250170986588,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_hat_deg": 18.25
+      },
+      "seed": 4103
+    },
+    {
+      "config": {
+        "beta_scale": 0.985,
+        "position_error": [
+          0.0,
+          0.015,
+          -0.01,
+          0.02,
+          -0.012,
+          0.008,
+          -0.018,
+          0.005
+        ],
+        "theta_true_deg": 18.21
+      },
+      "result": {
+        "bartlett_peak": 1.0005961033262212,
+        "bartlett_theta_deg": 18.25,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9902866299347556,
+          "theta_hat_deg": 18.180000000000224
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.00301999727442294,
+          "rmse_mm": 0.016768332309860932,
+          "score_samples": 128,
+          "score_start_frame": 128
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.003085013724909805,
+          "rmse_mm": 0.012260134085509505,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_bounds_deg": [
+          16.75,
+          19.75
+        ],
+        "profile_objective": 0.0004185185584026964,
+        "score_start_frame": 128,
+        "theta_hat_deg": 18.180000000000224
+      },
+      "seed": 4103
+    },
+    {
+      "config": {
+        "beta_scale": 0.985,
+        "position_error": [
+          0.0,
+          0.015,
+          -0.01,
+          0.02,
+          -0.012,
+          0.008,
+          -0.018,
+          0.005
+        ],
+        "theta_true_deg": 18.21
+      },
+      "result": {
+        "bartlett_peak": 1.0005961033262212,
+        "bartlett_theta_deg": 18.25,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9902866299347556,
+          "theta_hat_deg": 18.180000000000224
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.003085013724909794,
+          "rmse_mm": 0.01226013408550976,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "paired_metrics_start_frame_148": {
+          "dynamic_proxy_delta_rmse_mm": 0.003085013724909794,
+          "rmse_mm": 0.01226013408550976,
+          "score_samples": 108,
+          "score_start_frame": 148
+        },
+        "profile_bounds_deg": [
+          16.75,
+          19.75
+        ],
+        "profile_objective": 0.0004185185584026964,
+        "score_start_frame": 148,
+        "theta_hat_deg": 18.180000000000224
+      },
+      "seed": 4103
+    }
+  ],
+  "schema": "new_synthetic_heldout_profile_ls_vs_bartlett",
+  "seeds": [
+    4101,
+    4102,
+    4103
+  ],
+  "source_sha256": "0b48a1f335f3802ac6e5cd69e3b0530e2f34328c1d8babfe4056891b1fddd940",
+  "status": "NEW_SYNTHETIC_HELD_OUT_EXPERIMENT",
+  "truth_access": "post_run_scoring_only",
+  "truth_free_geometry": true
+}

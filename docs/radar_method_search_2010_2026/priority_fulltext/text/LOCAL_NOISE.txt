@@ -1,0 +1,832 @@
+3678                                                     IEEE TRANSACTIONS ON MICROWAVE THEORY AND TECHNIQUES, VOL. 71, NO. 8, AUGUST 2023
+
+
+
+
+Radar Sensing of Displacement Motions With High
+       Robustness Against Additive Noise
+  Zihao Chen , Wei Xu , Graduate Student Member, IEEE, Shuqin Dong , Graduate Student Member, IEEE,
+     Ruyu Ma , Member, IEEE, Changzhan Gu , Senior Member, IEEE, and Xiuyin Zhang , Fellow, IEEE
+
+
+   Abstract— Doppler radar uses phase demodulation to extract
+the target displacement motion contained in the phase of the
+echo signal. The demodulation performance is vulnerable to
+the additive Gauss noise. Especially when the signal-to-noise
+ratio (SNR) is extremely low in the scenarios of long-range
+or subtle displacement motion sensing, it may be impossible to
+extract the correct phase information. In this article, a phase
+demodulation method with high robustness against additive noise
+is proposed for accurate displacement motion reconstruction.
+Mathematical derivations are performed to analyze the noise
+effect on phase demodulation, and it shows that the influence of              Fig. 1. Simplified block diagram of the 24-GHz CW Doppler radar system
+phase noise is much smaller than the additive noise. Based on                 for displacement motion sensing.
+this finding, the key idea of the proposed method is to transform
+the additive noise of I/ Q signals into phase noise. The simulation
+results validate the noise analysis and verify the high robustness            work in lighting extremes and inclement weather. Compared
+of the proposed method against additive noise. Furthermore,
+experiments were carried out to evaluate the proposed method                  with the contact sensors, the contactless nature of Doppler
+under different radial distances and displacement amplitudes.                 radar makes it suitable for a wider range of application
+The experimental results show that the proposed method enables                scenarios. Besides, Doppler radar features low cost, small size,
+accurate motion sensing even in low-SNR scenarios. In our                     and lightweight, which meets the requirements of the actual
+experiments, we observe that the relative root-mean-square error              implementation.
+(RRMSE) of the reconstructed displacement motion can be
+greatly reduced with the proposed method.                                        Fig. 1 shows the simplified block diagram of the 24-GHz
+                                                                              continuous-wave (CW) Doppler radar system, which is
+  Index Terms— Doppler radar, motion sensing, noise robustness,               custom-designed for sensing displacement motions. Voltage-
+phase demodulation, remote sensing, subtle vibration.
+                                                                              controlled oscillator (VCO) generates a single-frequency sinu-
+                         I. I NTRODUCTION                                     soidal continuous wave at 24 GHz. Through transmit antenna,
+                                                                              this signal is then radiated toward the target. If the target
+
+R     ECENTLY, displacement motion measurement using
+      Doppler radar is a hotspot of research. Several applica-
+tions such as human cardiopulmonary monitoring [1], struc-
+                                                                              is not stationary, the echo signal backscattered from it will
+                                                                              be phase-modulated by the target motion due to the Doppler
+                                                                              effect. The echo signal is captured by the receive antenna,
+tural health monitoring [2], radio frequency microphone [3],                  down-converted by a quadrature mixer, and converted to a
+and hand gesture sensing [4], are widely studied. Owing to its                digital domain by data acquisition. To recover the displacement
+short wavelength, millimeter-wave Doppler radar is sensitive                  motion contained in the phase of the digital output accurately,
+to subtle displacement. In addition, Doppler radar has strong                 an appropriate phase demodulation method should be adopted.
+robustness against environmental conditions, e.g., it can still               The reconstruction accuracy of the target displacement motion
+  Manuscript received 11 August 2022; revised 29 October 2022; accepted       is highly dependent on the phase demodulation performance.
+12 November 2022. Date of publication 22 June 2023; date of current version   For this reason, phase demodulation has become one of the
+7 August 2023. This work was supported in part by the National Key Research   most important research topics for radar motion sensing, and
+and Development Program of China under Grant 2021YFA0715303 and in
+part by the National Science Foundation of China under Grant 62201216.        several promising methods have been proposed in recent
+(Corresponding authors: Ruyu Ma; Changzhan Gu.)                               years [5], [7], [8], [9], [10].
+  Zihao Chen, Ruyu Ma, and Xiuyin Zhang are with the Engineering                 Arctangent demodulation is one of the most widely used
+Research Center for Short-Distance Wireless Communications and Network,
+Ministry of Education, School of Electronic and Information Engineering,      phase demodulation techniques [5]. The codomain ranges
+South China University of Technology, Guangzhou 510641, China (e-mail:        of arctan and arctan2 functions are limited to [−π/2, π/2]
+maruyu@scut.edu.cn).                                                          and [−π, π], respectively, which may cause phase wrap-
+  Wei Xu, Shuqin Dong, and Changzhan Gu are with the State Key Laboratory
+of Radio Frequency Heterogeneous Integration and the MoE Key Laboratory       ping in the demodulated signal. Therefore, phase unwrapping
+of Artificial Intelligence, Shanghai Jiao Tong University, Shanghai 200240,   techniques are required for accurate arctangent demodula-
+China (e-mail: changzhan@sjtu.edu.cn).                                        tion. However, phase unwrapping may be disabled by the
+  Color versions of one or more figures in this article are available at
+https://doi.org/10.1109/TMTT.2023.3284264.                                    presence of noise in practical applications [6]. To tackle the
+  Digital Object Identifier 10.1109/TMTT.2023.3284264                         phase wrapping problem, six-port-based [7] and arcsine [8]
+                      0018-9480 © 2023 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+                                    See https://www.ieee.org/publications/rights/index.html for more information.
+
+       Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+CHEN et al.: RADAR SENSING OF DISPLACEMENT MOTIONS WITH HIGH ROBUSTNESS                                                                             3679
+
+
+
+demodulation methods were proposed. These two methods                        noise [14], [15]. Residual phase noise comes from the oscil-
+both calculate the relative phase change instead of the absolute             lator. According to range correlation theory [16], if the trans-
+phase value. If the sampling frequency is high enough, the                   mitted and received signals share the same oscillator, their
+phase change between adjacent samples will not exceed the                    phase noises are correlated and the correlated part will be
+codomain limitation and the phase wrapping can be prevented.                 counteracted at the mixer. The smaller the time delay between
+Compared with the six-port-based method, arcsine can achieve                 transmitted and received signals, the larger the correlated part
+the same demodulation performance with lower hardware                        in the phase noise, thus the lower the residual phase noise.
+complexity, which generates greater acceptance of its use.                   Thermal noise is generated by the receiver due to random
+Another demodulation method without a phase wrapping issue                   electron movement. Note that its power spectral density does
+is differentiating and cross-multiply (DACM) algorithm [9].                  not vary with frequency, and its probability density function
+Owing to the differential and integral operations, DACM will                 (pdf) is Gaussian distributed. Thus, the thermal noise is
+not suffer from the phase discontinuity problem. In addition,                generally modeled as an additive white Gaussian noise, and
+the implementation of DACM only requires a few multipliers,                  its power level is decided on the temperature of the receiver.
+adders, and a single divider, which relieves the pressure of                 Flicker noise is generated by the mixer due to the dc offset. Its
+hardware design. Xu et al. [10] further propose an improved                  power density spectral is inversely proportional to frequency
+version of the DACM demodulation technique, called modified                  and tends to be flat at the high-frequency band, so it is
+DACM (MDACM). By removing the square terms in DACM,                          also called 1/ f noise or pink noise. This implies that the
+higher demodulation accuracy, higher linearity, and lower                    power of the flicker noise is mainly concentrated in low
+computational complexity are achieved.                                       frequency. These three noises can be further categorized into
+   In practical applications, the phase demodulation perfor-                 phase noise and additive noise, where the residual phase noise
+mance is vulnerable to errors in the received signal due to                  belongs to the former, and the thermal noise and flicker noise
+the non-idealities of the real systems, such as alternating-                 belongs to the latter. In this section, we will mathematically
+current (ac)-coupling distortion [11], I/Q imbalance [12],                   analyze the influence of additive and phase noise on the phase
+direct-current (dc) offset [13], and noises. Many scholars only              demodulation output.
+consider the correction of I /Q imbalance and dc offset but
+ignore noises, since the noises are much smaller than the
+signal in general cases. However, the signal power is greatly                A. Additive Noise Effect
+reduced in the scenarios of long-range or subtle displacement                   The additive noise is mainly composed of thermal noise
+motion sensing, and the influence of noises cannot be ignored                and flicker noise in the receiver chain, and can be modeled
+anymore.                                                                     as Gaussian distribution [17], [18]. It inevitably appears in
+   To solve this issue, this article first analyzes the noise influ-         the raw I /Q signals at the data acquisition output. The raw
+ence on phase demodulation through detailed mathematical                     I /Q signals are fed into a series of signal processing steps to
+derivations. The analysis results show that the deterioration                reconstruct the displacement motion, but the additive noise
+of phase demodulation performance by the additive noise is                   therein will degrade the phase demodulation accuracy and
+much more serious than that by the phase noise. Based on this                increase the reconstruction error. The relationship between
+finding, a phase demodulation method with high robustness                    the reconstruction error and the additive noise is decided on
+against additive noise is proposed for accurate displacement                 the signal processing steps. To analyze the additive noise
+motion sensing. The key idea of the proposed method is to                    influence on phase demodulation, this section derives the
+transform the additive noise into phase noise, which can be                  expressions of the reconstruction error caused by additive
+realized by mapping the raw I /Q signal points onto the ellipse              noise, which is based on the standard signal processing steps
+they form in the complex plane. For minimizing the extra                     proposed in [10]. The three main processing steps are I /Q
+phase noise transformed from the additive noise, the I /Q                    imbalance compensation, dc offset compensation, and phase
+signal points with additive noise should be mapped close                     demodulation. Note that the ac-coupling-induced distortion
+to their ideal noiseless points. Therefore, this article makes               correction step is removed since this article only considers
+a statistical analysis of the relationship between the I /Q                  dc-coupled radar.
+signal points with and without additive noise and then designs                  The raw I /Q signals with additive Gauss noise are given
+an effective mapping criterion accordingly. Simulations and                  by
+experiments are performed to evaluate the proposed method.
+The results show that the proposed method can effectively                                 I0 (t) = A · cos[8(t) − ϕe ] + dc I + e I (t)             (1)
+reduce the relative root-mean-square error (RRMSE) of the                                Q 0 (t) = Ae · A · sin[8(t)] + dc Q + e Q (t)              (2)
+reconstructed displacement motion. Even under an extremely
+low signal-to-noise ratio (SNR), the proposed method can                     where 8(t) = 4π L/λ + 4π xtru (t)/λ is the phase of the I /Q
+still maintain a low RRMSE implying high robustness against                  signals, L is the distance between the target and radar, xtru (t)
+additive noise.                                                              represents the ground truth of the target displacement motion,
+                                                                             λ is the radar wavelength, A is the received signal amplitude,
+                 II. N OISE E FFECT A NALYSIS                                Ae and ϕe are the amplitude and phase imbalance between the
+   In radar systems, there are three dominant noise sources                  I /Q channels, dc I and dc Q are the dc offsets, and e I (t) and
+including residual phase noise, thermal noise, and flicker                   e Q (t) are the additive Gauss noises.
+
+      Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+3680                                                     IEEE TRANSACTIONS ON MICROWAVE THEORY AND TECHNIQUES, VOL. 71, NO. 8, AUGUST 2023
+
+
+
+   After estimating the parameters Ae , ϕe by least-square                    where x[n], I [n], and Q[n] denote the discrete-time form of
+ellipse fitting [19], the I /Q imbalance can be compensated by                the reconstructed displacement motion x(t) and the precondi-
+the following Gram-Schmidt orthogonalization equation [20]:                   tioned I /Q signals I (t), Q(t) in (7) and (8). According to (7)
+                                                                            and (8), the expression of reconstructed displacement motion
+                                             Ae         0
+      I1 (t) Q 1 (t) = I0 (t) Q 0 (t)                           . (3)
+                                   
+                                                                              can be expanded as (10). Except for the first two terms, the
+                                          − sin(ϕe ) cos(ϕe )
+                                                                              others in (10) represent the reconstruction error due to the
+Substituting (1) and (2) into (3), the I /Q signals after imbal-              additive noise of the I /Q signals. By combining like terms,
+ance compensation can be given by                                             the reconstruction error can be simplified into (11). Since the
+                                                                              power of additive noises e I , e Q is generally very small, for
+   I1 (t) = [Ae cos(ϕe )A] · cos[8(t)]                                        simplicity, their quadratic terms are ignored in the following:
+            + Ae dc I − sin(ϕe )dc Q + Ae e I (t) − sin(ϕe )e Q (t)
+                                                                                                       λ
+                                                                  (4)              ex [n] ≈
+                                                                                                4π[Ae cos(ϕe )A]
+  Q 1 (t) = [Ae cos(ϕe )A] · sin[8(t)]                                                           n
+            + cos(ϕe )dc Q + cos(ϕe )e Q (t).
+                                                                                                 X
+                                                                  (5)                          ·   {Ae sin[8[k]] · e I [k − 1]
+                                                                                                k=2
+Then, the dc offsets of I1 (t) and Q 1 (t) are estimated by
+                                                                                                            − Ae sin[8[k − 1]] · e I [k]
+compressed-sensing circle fitting [21], [22], and removed by
+the following:                                                                                              − cos[8[k] − ϕe ] · e Q [k − 1]
+                                                                                                            + cos[8[k − 1] − ϕe ] · e Q [k] .        (11)
+                     I1 (t)       Ae dc I − sin(ϕe )dc Q
+                                                      
+                              −
+         I (t)       Q 1 (t)          cos(ϕe )dc Q
+              
+                                                                              By expanding the summation and uniting the similar terms,
+                 =                                         . (6)
+         Q(t)                   Ae cos(ϕe )A                                  (11) can be rewritten as
+Therefore, the preconditioned I /Q signals can be expressed as                                      λ
+                                                                               ex [n] ≈
+follows:                                                                                    4π [Ae cos(ϕe )A]
+                              Ae e I (t) − sin(ϕe )e Q (t)                                 · Ae sin[8[2]] · e I [1] − cos[8[2] − ϕe ] · e Q [1]
+                                                                                             
+           I (t) = cos[8(t)] +                                         (7)
+                                      Ae cos(ϕe )A                                                  n−1
+                                                                                                    X
+                             cos(ϕe )e Q (t)                                                    +         Ae [sin[8[k + 1]] − sin[8[k − 1]]] · e I [k]
+          Q(t) = sin[8(t)] +                 .                         (8)
+                             Ae cos(ϕe )A                                                           k=2
+                                                                                                    n−1
+   To extract the target displacement motion in 8(t), the
+                                                                                                    X
+                                                                                                +         [cos[8[k − 1] − ϕe ]
+MDACM algorithm is adopted in [10] to conduct phase                                                 k=2
+demodulation on the preconditioned I /Q signals. The calcu-                                     − cos[8[k + 1] − ϕe ]] · e Q [k]
+lation formula of the MDACM algorithm is given as
+                                                                                                −Ae sin[8[n − 1]] · e I [n]
+               n
+x[n] =
+        λ X
+              I [k − 1]Q[k] − I [k]Q[k − 1]                            (9)                      + cos[8[n − 1] − ϕe ] · e Q [n] .                    (12)
+       4π k=2
+           n 
+                                                                              Since the additive noises in the I and Q channel are indepen-
+        λ X                                                                   dent, the weighted sum of e I [k] and e Q [k] at the same time
+x[n] =          cos[8[k − 1]] sin[8[k]]
+       4π k=2                                                                 step k, namely ae I [k] + be Q [k], is still a Gauss noise, which
+                    − cos[8[k]] sin[8[k − 1]]                                 is denoted as e I /Q [k]. Therefore, the reconstruction error (12)
+                                                                              can be further simplified into
+                        Ae e I [k − 1] − sin(ϕe )e Q [k − 1]
+                    +                                         sin[8[k]]
+                                     Ae cos(ϕe )A                                 ex [n]
+                        Ae e I [k] − sin(ϕe )e Q [k]                                                    n
+                    −                                 sin[8[k − 1]]                              λ      X
+                                Ae cos(ϕe )A                                       ≈                  ·    e I /Q [k]                                (13)
+                                                                                      4π[Ae cos(ϕe )A] k=1
+                        cos(ϕe )e Q [k]
+                    +                    cos[8[k − 1]]                                           
+                         Ae cos(ϕe )A                                             var e I /Q [k]
+                       cos(ϕe )e Q [k − 1]                                         = σ2
+                    −                        cos[8[k]]
+                           Ae cos(ϕe )A                                               
+                                                                                        [Ae sin[8[2]]]2 + cos2 [8[2] − ϕe ]
+                        Ae e I [k − 1] − sin(ϕe )e Q [k − 1]
+                                                                                      
+                                                                                      
+                                                                                      
+                    +                                                                             k=1
+                                     Ae cos(ϕe )A
+                                                                                      
+                                                                                      
+                                                                                      
+                                                                                          2
+                                                                                                     + 1]] − sin[8[k − 1]]]2
+                                                                                      
+                                                                                        A   [sin[8[k
+                      cos(ϕe )e Q [k]
+                                                                                      
+                                                                                       e
+                                                                                      
+                    ·                                                                · +[cos[8[k − 1] − ϕe ] − cos[8[k + 1] − ϕe ]]2
+                       Ae cos(ϕe )A
+                                                                                                   1<k<n
+                                                                                      
+                          Ae e I [k] − sin(ϕe )e Q [k]
+                                                                                      
+                                                                                      
+                                                                                      
+                    −
+                                                                                      
+                                                                                                     − 1]]]2 + cos2 [8[n − 1] − ϕe ]
+                                                                                      
+                                  Ae cos(ϕe )A                                          [A   sin[8[n
+                                                                                      
+                                                                                      
+                                                                                      
+                                                                                          e
+                      cos(ϕe )e Q [k − 1]
+                                                                                     
+                                                                                                   k=n
+                    ·                                               (10)
+                         Ae cos(ϕe )A                                                                                                                (14)
+
+       Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+CHEN et al.: RADAR SENSING OF DISPLACEMENT MOTIONS WITH HIGH ROBUSTNESS                                                                                  3681
+
+
+
+where σ 2 is the variance of e I and e Q . The variance of e I /Q [k]                                            III. M ETHOD
+is shown in (14), which is derived based on two important                               In this section, we propose a phase demodulation method
+properties of Gauss noise: 1) if two Gauss noises with the                            with high robustness against additive noise. With the pro-
+variance of σ12 and σ22 are independent, the sum of them is                           posed method, the accuracy of the reconstructed motion is
+still a Gauss noise whose variance is σ12 + σ22 . 2) If the Gauss                     improved significantly, which is more obvious under low-SNR
+noise with a variance of σ12 is multiplied by a constant s, then                      conditions.
+the variance becomes s 2 · σ12 .
+    As shown in (13), ex [n] is the integration of every e I /Q [k]
+                                                                                      A. Theory
+with k ≤ n, where ex [n] is the reconstruction error of the
+displacement motion, and e I /Q [k] is the weighted sum of                               As concluded in Section II, the additive noise in the raw I /Q
+the additive noises e I [k] and e Q [k] in the raw I /Q signals.                      signals will be added up at the phase demodulation output
+Therefore, it can be concluded that the reconstruction error at                       whereas the phase noise will not. Due to the accumulation
+a certain time step n, is the integration of all the additive noises                  of additive noise, the reconstruction error of the displacement
+at the previous time steps 1–n. For example, the reconstruction                       motion will increase over time. To tackle this problem, the key
+error at time step n = 2 is the integration of four additive                          idea of the proposed method is to transform the additive noise
+noises e I [1], e I [2], e Q [1], e Q [2], and the reconstruction error               into phase noise. For this purpose, the geometrical relationship
+at time step n = 100 is the integration of 200 additive noises                        between the raw I /Q signals with additive noise and phase
+e I [1], e I [2], . . . , e I [100], e Q [1], e Q [2], . . . , e Q [100]. It can be   noise on the complex plane is analyzed in the following.
+found that, as time goes on, more additive noises are being                              The raw I /Q signals with additive noise in (1) and (2) can
+integrated into the reconstruction error, and thereby the recon-                      be decomposed into two components, which are the noiseless
+struction accuracy will get worse continuously. Especially in                         signal part A·cos[8(t) − ϕe ]+dc I and Ae · A·sin[8(t)]+dc Q ,
+the long-time monitoring application, the additive noise would                        and the additive Gauss noise part e I (t) and e Q (t). It is well
+induce a great error in the reconstructed displacement motion,                        known that, due to I /Q imbalance Ae , ϕe and dc offsets dc I ,
+resulting in a disastrous deterioration of the reconstruction                         dc Q , the noiseless signal part will form an ellipse on the
+accuracy.                                                                             complex plane. In the strict sense, the noiseless signal takes
+                                                                                      rather a spiral shape than an ellipse-like one, since its power
+B. Phase Noise Effect                                                                 will vary with the fourth power of the distance. However,
+                                                                                      for the long-distance and subtle displacement motion sensing
+   In addition to the additive noise, the influence of the
+                                                                                      scenarios considered in this article, the signal amplitude almost
+phase noise on the reconstructed displacement motion is also
+                                                                                      remains unchanged, hence the approximation using ellipse
+analyzed mathematically. The derivation process is similar to
+                                                                                      shape is acceptable. The equation of this ellipse is
+that in Section II-A, which is simplified in this section for
+                                                                                        I0,tru (t) − dc I 2      Q 0,tru (t) − dc Q 2
+                                                                                                                                
+clarity.
+                                                                                                            +
+   The raw I /Q signals with phase noise can be expressed as                             [cos(ϕe )A]2            [Ae cos(ϕe )A]2
+follows:                                                                                          2Ae sin(ϕe ) · I0,tru (t) − dc I Q 0,tru (t) − dc Q
+                                                                                                                                                     
+                                                                                               −                                                        =1
+           I0 (t) = A · cos 8(t) + e p (t) − ϕe + dc I
+                                                
+                                                         (15)                                                       [Ae cos(ϕe )A]2
+          Q 0 (t) = Ae · A · sin 8(t) + e p (t) + dc Q
+                                              
+                                                         (16)                                                                                            (21)
+
+where e p (t) is the phase noise. The hardware imperfections in                       where I0,tru (t) and Q 0,tru (t) represent the ideal noiseless raw
+the raw I /Q signals are corrected by signal preconditioning                          I /Q signals. Fig. 2 draws this ellipse on the complex plane,
+steps (3) and (6), then we have                                                       where tep denotes the time variation due to the phase noise
+                                                                                      e p . At an arbitrary moment t0 , the noiseless I /Q signal point
+                     I (t) = cos 8(t) + e p (t)
+                                              
+                                                           (17)                       [I0,tru (t0 ), Q 0,tru (t0 )] must be on the ellipse, as the red point
+                     Q(t) = sin 8(t) + e p (t) .
+                                              
+                                                           (18)                       in Fig. 2. However, due to the presence of noises, the actual
+                                                                                      I /Q signal point will deviate from its original position. The
+Taking in the preconditioned I /Q signals, the phase demodu-                          deviations caused by additive and phase noise are shown in
+lation step (9) reconstructs the target displacement motion as                        Fig. 2. It can be found that the I /Q signal point with additive
+follows:                                                                              noise falls outside the ellipse, while the point with phase noise
+                                          λ                                           is still on the ellipse because its expressions (15) and (16) also
+                     x[n] = xtru [n] +      e p [n]          (19)
+                                         4π                                           satisfy the ellipse equation (21).
+                              λ                                                           Therefore, in order to transform the additive noise to phase
+                    ex [n] =     e p [n]                     (20)
+                             4π                                                       noise, a simple way is to map all the raw I /Q signal points
+where ex [n] represents the error in the reconstructed dis-                           back onto the ellipse. The mapping criterion will be given
+placement motion x[n]. As shown in (20), the error in the                             in Section III-B. It should be noted that the mapping process
+reconstructed displacement motion is proportional to the phase                        will result in a loss of the amplitude of the I /Q signal.
+noise e p [n] in the raw I /Q signals. In contrast to the additive                    However, it is generally acceptable for the following two
+noise, the phase noise will not be accumulated at the phase                           reasons. One reason is that for the long-distance and subtle dis-
+demodulation output, which has a much smaller effect on the                           placement motion sensing scenarios considered in this article,
+reconstruction accuracy.                                                              the amplitude of the received signal almost remains unchanged
+
+       Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+3682                                                     IEEE TRANSACTIONS ON MICROWAVE THEORY AND TECHNIQUES, VOL. 71, NO. 8, AUGUST 2023
+
+
+
+
+Fig. 2. Ellipse formed by noiseless raw I /Q signals, and the geometrical
+                                                                              Fig. 3.   Lower and upper limits of the Euclidean distance d.
+relationship between the I /Q signals with and without noise.
+
+during the target motion. Another is that the subsequent
+                                                                              where σ is the standard deviation. Due to the independence
+phase demodulation process is independent of the amplitude
+                                                                              between e I and e Q , the pdf of the 2-D random variables
+information.
+                                                                              (e I , e Q ) can be obtained by multiplying the pdfs of e I and
+B. Mapping Criterion                                                          e Q , which is as follows:
+                                                                                                                                         2    2
+   In the proposed method, the raw I /Q signal points are                                                                    1 − e I +e2Q
+                                                                                    pdf(e I , e Q ) = pdf(e I ) · pdf e Q =     e 2σ .
+                                                                                                                         
+                                                                                                                                            (25)
+mapped onto the ellipse for transforming the additive noise                                                              2π σ 2
+to phase noise. Although the signal points after mapping can                  From (25), it can be found that the probability density of
+get rid of the additive noise but will introduce extra phase                  (e I , e Q ) will be higher if the value of e2I + e2Q gets smaller.
+noise. For minimizing this extra phase noise, an effective                    It should be mentioned that e2I + e2Q is the square Euclidean
+mapping criterion is developed. The mapping criterion requires                distance between the noiseless and raw signal points. In other
+the mapping point to be as close to the ideal noiseless point                 words, the probability density is increasing as the Euclidean
+as possible. The key challenge is to locate the position of the               distance decreases, which means that the noiseless signal
+noiseless point.                                                              point is more likely to fall closer to the raw signal point.
+   As shown in Fig. 2, the difference between the raw signal                  Actually, there is a lower limit of their Euclidean distance,
+point with additive noise and its corresponding noiseless point,              since the noiseless point can only be on the ellipse as shown
+i.e., the difference between the blue and red point, can be                   in Fig. 3, where dlow and dup are the Euclidean distances of
+expressed as the following form:                                              the closest and farthest points on the ellipse. Therefore, the
+                             e = (e I , e Q )                         (22)    most likely noiseless signal point should be the ellipse point
+                                                                              whose Euclidean distance from the raw signal point is dlow .
+where e I and e Q are the additive Gauss random noises in                         As mentioned at the beginning of this section, the mapping
+the I /Q channel, and (e I , e Q ) are the so-called 2-D random               point of the raw signal point should be as close to the
+variables. Since the difference between the raw and noise-                    noiseless signal point as possible, in order to minimize the
+less signal points is random rather than deterministic, it is                 extra phase noise transformed from the additive noise. To this
+impossible to find out the accurate position of the noiseless                 aim, according to the above statistical analysis for the most
+point from the known raw signal point. Instead, we can find                   likely position of the noiseless signal point, the proposed
+out the position where the noiseless point is most likely to                  mapping criterion should be to map the raw signal point to
+locate according to the pdf of (e I , e Q ). To obtain pdf(e I , e Q ),       its closest ellipse point.
+we first give out the pdfs of the random variables e I and
+e Q . According to [23], the additive noises in the I /Q channel
+                                                                              C. Signal Processing Flowchart
+are usually modeled as independent and identical zero-mean
+Gaussian random processes, since the in-phase and quadrature                     In the traditional signal processing flowchart, the raw
+channels are two individual channels under similar environ-                   I /Q signals are first preconditioned to eliminate the hard-
+mental conditions (e.g., temperature). Hence, their pdfs can                  ware imperfections due to non-idealities, and then phase-
+be written as                                                                 demodulated to reconstruct the target displacement motion.
+                                     1        e2I                             However, the traditional scheme is vulnerable to the additive
+                     pdf(e I ) = √        e− 2σ 2                (23)         noise of the raw I /Q signals. To solve this issue, we give
+                                    2πσ
+                                             e2Q
+                                                                              a novel signal processing flowchart of the proposed method,
+                                     1
+                                          e− 2σ 2                             which can guarantee high robustness against additive noise for
+                             
+                    pdf e Q = √                                  (24)
+                                    2πσ                                       phase demodulation. The proposed signal processing flowchart
+
+       Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+CHEN et al.: RADAR SENSING OF DISPLACEMENT MOTIONS WITH HIGH ROBUSTNESS                                                                                 3683
+
+
+
+
+                                                                                 Fig. 5. Difference between the signal processing processes of (a) proposed
+                                                                                 method: first mapping then preconditioning and (b) arctangent, arcsine, and
+                                                                                 six-port-based method: first preconditioning then mapping.
+
+Fig. 4.    Signal processing flowchart of the proposed method.
+                                                                                 the traditional methods implicitly map the signal point onto the
+                                                                                 unit circle after preconditioning. Comparing Fig. 5(a) and (b),
+is shown in Fig. 4. First, the parameters of the ellipse                         the order of mapping and preconditioning is inverse between
+formed by the raw I /Q signals are estimated, including I /Q                     the proposed method and the traditional methods, which results
+imbalance estimation [19] and dc offsets estimation [21], [22].                  in different signal points. In this example, the obtained signal
+Subsequently, the raw I /Q signal points are mapped onto the                     point by the traditional methods is located on the in-phase axis
+estimated ellipse on the basis of the well-designed mapping                      just like the raw signal point, but that of the proposed method
+criterion. This step can transform the additive noise to phase                   is not. Therefore, the final output phase of the proposed
+noise, thus the obtained I /Q signals after mapping have no                      method is different from the traditional methods. As mentioned
+additive noise anymore. Then it is further processed by the                      in Section III-B, the obtained signal point by the proposed
+signal preconditioning module for compensating the hardware                      method is the most likely noiseless point, hence the output
+imperfections. In this module, the I /Q imbalance and dc                         phase of the proposed method is more likely to be close to
+offsets are corrected by (3) and (6), respectively based on                      the ideal value than the traditional methods.
+the ellipse parameters estimated at the first step. At last,
+to reconstruct the displacement motion contained in phase,                                                  IV. S IMULATION
+phase demodulation is performed on the signals with the use                         Simulations performed in MATLAB are given to evaluate
+of the MDACM algorithm. Since the additive noise at the                          the correctness of the noise effect analysis and the feasibility
+MDACM input has been removed, there is no accumulative                           of the proposed method. In this section, a 24-GHz dc-coupled
+noise in the reconstructed displacement motion, which greatly                    CW Doppler radar is adopted to detect the target displacement
+increases the reconstruction accuracy.                                           motion. The detected motion is a sinusoidal motion that has
+   The signal processing flowchart of the proposed method                        a frequency of 0.5 Hz and amplitude of λ /8 (1.5625 mm at
+is similar to the traditional methods. To avoid confusion,                       24 GHz). It is contained in the phase of the raw I /Q signals
+Fig. 5 illustrates the difference between the signal processing                  as shown in (1) and (2). For all simulations, the hardware
+processes of the proposed method and the traditional methods                     imperfections in the raw I /Q signals are defined as Ae =
+including arctangent, arcsine, and six-port-based demodula-                      0.63, ϕe = −0.82, A = 0.037, dc I = 0.29, dc Q = 1.38, the
+tion. For clarity, a raw I /Q signal point, which is located on the              sampling frequency is set to 1 kHz, and the additive noise is
+in-phase axis, is chosen as an example. As shown in Fig. 5(a),                   assumed as Gaussian distribution.
+the proposed method first maps the raw I/Q signal point to                          The main improvement of the proposed method is trans-
+its closest ellipse point, and then corrects the hardware imper-                 forming the additive noise to phase noise. Therefore, the sim-
+fections by preconditioning. On the contrary, the traditional                    ulation results of the reconstructed displacement motion with
+methods first precondition the raw I /Q signals and correct the                  and without noise transformation are given for comparison,
+signal trajectory from the ellipse to the unit circle, then the                  which are respectively obtained by the proposed method and
+phase of the calibrated signal point is calculated. As shown in                  the traditional MDACM method. Fig. 6 shows the constellation
+Fig. 5(b), the phase of the calibrated signal point is equivalent                diagrams of the I /Q signals after signal preconditioning and
+to the phase of its closest circle point, thus it can be argued that             the error in the reconstructed displacement motion under an
+
+          Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+3684                                                     IEEE TRANSACTIONS ON MICROWAVE THEORY AND TECHNIQUES, VOL. 71, NO. 8, AUGUST 2023
+
+
+
+
+Fig. 6.     Simulation results of the I/Q constellation and reconstruction    Fig. 7.     Simulation results of the I/Q constellation and reconstruction
+error with and without noise transformation under an additive noise of        error with and without noise transformation under an additive noise of
+SNR = 30 dB. (a) I /Q constellation without noise transformation, (b) I /Q    SNR = 25 dB. (a) I /Q constellation without noise transformation, (b) I /Q
+constellation with noise transformation, and (c) reconstruction error.        constellation with noise transformation, and (c) reconstruction error.
+
+
+additive noise of SNR = 30 dB. As shown in Fig. 6(a), there                   in Fig. 8. It can be found from Fig. 8(a) and (b) that the pro-
+is additive noise remaining in the corrected I /Q signals, which              posed method can successfully remove the additive noise even
+causes divergence of the I /Q signal points from the unit circle.             in low-SNR condition. As shown in Fig. 8(c), without noise
+With noise transformation, the additive noise is transformed                  transformation, the motion information cannot be successfully
+to phase noise, thus the I /Q signal points can fit the unit                  extracted in such a low SNR, since the reconstruction error is
+circle well as in Fig. 6(b). It can be seen in Fig. 6(c) that the             much larger than the amplitude of the desired displacement.
+proposed method can reduce the reconstruction error of the                    However, with the proposed method, the displacement motion
+target displacement motion. In this case, the reconstruction                  can still be reconstructed accurately with a relatively low error
+errors with and without noise transformation are both trivial                 even under this harsh condition.
+relative to the displacement amplitude λ /8, since the SNR is                     Actual displacement motion is always with low frequency.
+high enough in this case. Fig. 7 shows the simulation results                 To reduce the noise in the reconstructed motion, a finite-
+when the SNR decreases to 25 dB. As shown in Fig. 7(a),                       impulse-response (FIR) low-pass filter is one of the most
+the I /Q signal points are more divergent for a lower SNR.                    widely used techniques. However, the accumulative noise in
+However, the proposed noise transformation can still fit the                  the reconstructed motion without noise transformation cannot
+I /Q signal points on the unit circle as shown in Fig. 7(b).                  be effectively attenuated in this way, since its energy is also
+Without noise transformation, the reconstruction error of dis-                concentrated in the low frequency as shown in Fig. 9. Fig. 10
+placement motion is generated by accumulating the additive                    gives out the reconstructed motions with and without noise
+noises of the I /Q signals. Due to the low-pass characteristic                transformation, which have been filtered by the FIR low-pass
+of accumulation, the reconstruction error is a low-frequency                  filter. Without noise transformation, the accumulative noise
+colored noise that has a slowly varying envelope, as shown                    still exists in the reconstructed motions after filtering. As can
+in Fig. 7(c). The amplitude of the error envelope is increasing               be seen that it is much larger than the transformed phase
+over time since the additive noise power is accumulated at each               noise in the reconstructed motions with noise transformation.
+time step. It can be seen that the maximum error is approxi-                  Therefore, the RRMSEs of the reconstructed motions with
+mately equal to the displacement amplitude λ /8, which causes                 noise transformation are much smaller than those without
+significant distortion in the reconstructed displacement motion.              noise transformation. Especially in the case of low SNR, such
+After using the proposed method, the reconstruction error will                as 20 dB, the reduction of RRMSE with the proposed method
+not increase with time anymore, and it can maintain at a                      can reach up to 209.77%.
+relatively low level, as shown in Fig. 7(c). This is because the
+                                                                                                         V. E XPERIMENT
+additive noise is transformed to phase noise by the proposed
+method, and the phase noise will not be accumulated in the                    A. Experiment Setup
+reconstruction process. The superiority of the proposed method                   To evaluate the performance of the proposed method in
+will be more obvious if the SNR further degrades to 20 dB as                  this article, experiments were carried out in a laboratory
+
+       Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+CHEN et al.: RADAR SENSING OF DISPLACEMENT MOTIONS WITH HIGH ROBUSTNESS                                                                              3685
+
+
+
+
+Fig. 8.     Simulation results of the I/Q constellation and reconstruction
+error with and without noise transformation under an additive noise of        Fig. 10. Simulation results of the reconstructed displacement motion with
+SNR = 20 dB. (a) I /Q constellation without noise transformation, (b) I /Q    and without noise transformation under different SNR, where SNR is equal
+constellation with noise transformation, and (c) reconstruction error.        to (a) and (b) 30 dB, (c) and (d) 25 dB, and (e) and (f) 20 dB.
+
+
+
+
+Fig. 9. Simulated frequency spectrum of the accumulative noise under an
+additive noise of SNR = 20 dB, the amplitude of this spectrum is normalized
+by its maximum value.
+                                                                              Fig. 11. Experimental setup of motion sensing with the use of 24-GHz radar.
+environment and the experimental setup is shown in Fig. 11.
+An actuator carrying a metal plate is programmed to move
+back and forth periodically. A 24-GHz dc-coupled CW radar
+                                                                              to the metal plate. Therefore, the selection of distance will
+is used to measure the displacement motion of the metal plate.
+                                                                              affect the measurement accuracy of the metal plate motion.
+The I /Q imbalance parameters of the 24-GHz radar used in
+                                                                              To evaluate the performance of the proposed method at differ-
+this article are about Ae = 1.08, ϕe = −0.04. Note that the
+                                                                              ent distances, the moving plate is placed at a series of radial
+displacement motion is contained in the phase of the received
+                                                                              distances from 3 to 9 m, which performs a sinusoidal motion
+radar signal. To reconstruct the movement information, the
+                                                                              with a fixed displacement amplitude of 1.5625 mm (λ /8 at
+received signal is transmitted to a personal computer (PC) for
+                                                                              24 GHz). Although our proposed method can also measure
+further signal processing. At last, the reconstructed motions are
+                                                                              the displacements larger than λ /8 with tracking techniques,
+all filtered by an FIR low-pass filter to attenuate the undesired
+                                                                              the ability to measure large displacements is not the focus
+high-frequency noise.
+                                                                              of the evaluation of the proposed method. As the simulation
+                                                                              results, the experiment results obtained with and without
+B. Distance Evaluations                                                       noise transformation are given for comparison. In this section,
+   According to the radar range equation, the SNR of raw                      the experiment results without noise transformation are all
+I /Q signals is partly decided by the distance from the radar                 obtained using the traditional MDACM method.
+
+       Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+3686                                                        IEEE TRANSACTIONS ON MICROWAVE THEORY AND TECHNIQUES, VOL. 71, NO. 8, AUGUST 2023
+
+
+
+
+Fig. 12.     Experiment results of the I/Q constellation and reconstruction      Fig. 13.     Experiment results of the I/Q constellation and reconstruction
+displacement motion with and without noise transformation when the radial        displacement motion with and without noise transformation when the radial
+distance is equal to 3 m. (a) and (b) Without noise transformation and (c) and   distance is equal to 5 m. (a) and (b) Without noise transformation and (c) and
+(d) with noise transformation.                                                   (d) with noise transformation.
+
+
+
+                                                                                 method can still effectively remove the additive noise in the
+   Fig. 12 shows the experimental results when the radial                        I /Q signals, and maintain the reconstruction RRMSE at a low
+distance is equal to 3 m and the SNR is 36.57 dB. As shown                       level of 6.58%, which is approximately six times smaller than
+in Fig. 12(a), the corrected I /Q signal points fall outside                     that without noise transformation. Furthermore, the experiment
+the unit circle due to the additive noise. With the proposed                     results measured at 9 m are given in Fig. 15, where the SNR is
+method, the I /Q signal points are mapped onto the unit circle                   16.61 dB. As shown in Fig. 15(a) and (b), the I /Q signal points
+as shown in Fig. 12(c), to transform the additive noise into                     get more divergent and the reconstructed motion is highly
+phase noise. Since the additive noise of the I /Q signals will be                distorted. The RRMSE is up to 102.14%, which implies the
+accumulated during the reconstruction process while the phase                    error in the reconstructed motion is even larger than the motion
+noise will not, the reconstruction RRMSE of the proposed                         itself. However, under the same condition, the reconstruction
+method is lower, as shown in Fig. 12(b) and (d). Although the                    RRMSE of the proposed method is much smaller, which is
+reconstruction motion has a worse error performance without                      only 7.31%. Consequently, it can be concluded that it is unable
+noise transformation, it also shows a good fit to the ground                     to reconstruct the motion of the target placed at such a long
+truth with a low RRMSE of 6.77%. This is because the additive                    distance unless using our proposed method.
+noise, in this case, is relatively small due to the short radial                    By comparing the results in Figs. 12–15, it is found that with
+distance. When the radial distance increases to 5 m, the SNR                     the increase of the additive noise power, the reconstruction
+will be decreased to 31.42 dB and the ratio of the additive                      accuracy degradation is much smaller after applying the pro-
+noise to the I /Q signals will increase, hence the arc width of                  posed method. For example, when the radial distance increases
+the I /Q signal points becomes thicker as shown in Fig. 13(a).                   from 3 to 5 m, the increment of RRMSE is about 9.30% for
+The increase of the additive noise in the I /Q signals will result               the traditional method, and it is reduced to 0.86% with the use
+in a great increment of the reconstruction error. For this reason,               of the proposed method. It is more obvious when the radial
+the reconstructed motion as shown in Fig. 13(b) cannot fit well                  distance increases from 7 to 9 m, the RRMSE increments of
+with the ground truth anymore, and the RRMSE is greatly                          the traditional and proposed methods are 63.44% and 0.73%,
+increased to 16.07%. As for the proposed method, the additive                    respectively. Therefore, it proves that the proposed method
+noise is removed and the I /Q signal points will not fall outside                can help to improve the additive noise robustness of phase
+the unit circle as shown in Fig. 13(c), thus the reconstruction                  demodulation.
+error can be greatly reduced as shown in Fig. 13(d). It can be
+seen that the reconstructed motion of the proposed method can
+still fit well with the ground truth. The RRMSE is only 5.03%,                   C. Displacement Evaluations
+which is 11.04% lower than that without noise transformation.                       In addition to the radial distance, the displacement ampli-
+When the radial distance is further increased to 7 m, the                        tude of the moving plate will also affect the reconstructed
+positions of the corrected I /Q signal points get more divergent                 motion accuracy. Although the Doppler radar is superior in
+since the SNR is reduced to 24.09 dB, as can be seen in                          measuring subtle displacement motion due to its short wave-
+Fig. 14(a). And the reconstruction RRMSE further deteriorated                    length, it is still difficult to detect extremely small motion with
+to 38.70% as shown in Fig. 14(b). In contrast, the proposed                      deep subwavelength displacement amplitude. To evaluate the
+
+       Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+CHEN et al.: RADAR SENSING OF DISPLACEMENT MOTIONS WITH HIGH ROBUSTNESS                                                                              3687
+
+
+
+                                                                                 have been given in Fig. 12 in Section V-B, and the results
+                                                                                 of the other amplitudes are shown in Figs. 16–18. In Fig. 12,
+                                                                                 the SNR is 36.57 dB. Due to the reduction of displacement
+                                                                                 amplitude, the SNRs in Figs. 16–18 are respectively deterio-
+                                                                                 rated to 20.64, 8.66, and 1.46 dB, though the additive noise
+                                                                                 power almost remains unchanged. Likewise, for comparison,
+                                                                                 Figs. 16–18 give the experimental results obtained with and
+                                                                                 without noise transformation, which are corresponding to the
+                                                                                 proposed method and the traditional MDACM method.
+                                                                                    The amplitude of the displacement motion can be seen
+                                                                                 from the arclength formed by the I /Q signals. As shown
+                                                                                 in Fig. 12, when the displacement amplitude is equal to λ /8,
+                                                                                 the arclength of the I /Q signals occupies half of the unit
+                                                                                 circle. Since the displacement amplitude is much larger than
+                                                                                 the noise in this case, both the RRMSEs of the reconstructed
+                                                                                 motion with and without noise transformation are very small.
+                                                                                 If displacement amplitude is smaller, the proportion of noise
+                                                                                 in the reconstructed motion will be increased, thereby the
+                                                                                 RRMSE gets worse. Fig. 16 shows the experimental results
+Fig. 14.    Experiment results of the I/Q constellation and reconstruction
+displacement motion with and without the noise transformation when the           for a smaller displacement amplitude of λ /50. As shown in
+radial distance is equal to 7 m. (a) and (b) Without noise transformation        Fig. 16(a), the arclength gets much shorter, which is about
+and (c) and (d) with noise transformation.                                       8% of the unit circle. And the arc of the I /Q signals is
+                                                                                 broadened by the additive noise. During the reconstruction
+                                                                                 process of the displacement motion, the traditional method will
+                                                                                 accumulate this additive noise, which has a large influence on
+                                                                                 reconstruction accuracy. Compared to Fig. 12(b), the RRMSE
+                                                                                 is increased by 5.71% in Fig. 16(b). This mainly results from
+                                                                                 that the additive noise power almost remains unchanged while
+                                                                                 the displacement amplitude is greatly reduced. To eliminate
+                                                                                 this additive noise, the proposed method is adopted to map the
+                                                                                 I /Q signal points onto the unit circle as shown in Fig. 16(c).
+                                                                                 In this way, the additive noise is completely removed with the
+                                                                                 cost of extra phase noise. Unlike the additive noise, the extra
+                                                                                 phase noise will not be accumulated during motion recon-
+                                                                                 struction. Therefore, as shown in Fig. 16(d), the reconstructed
+                                                                                 displacement motion of the proposed method is more accurate.
+                                                                                 Quantificationally, the reconstruction RRMSE is reduced by
+                                                                                 7.68% with the proposed method. Comparing Figs. 12(d)
+                                                                                 and 16(d), the RRMSE maintains at a low level although
+                                                                                 the displacement amplitude is greatly decreased. It implies
+                                                                                 that the extra phase noise power will get smaller when the
+                                                                                 displacement amplitude decreases. In Fig. 17, the displace-
+Fig. 15.     Experiment results of the I/Q constellation and reconstruction      ment amplitude is further decreased to λ /250. As shown in
+displacement motion with and without noise transformation when the radial
+distance is equal to 9 m. (a) and (b) Without noise transformation and (c) and   Fig. 17(a), the arclength is only 1.6% of the unit circle, which
+(d) with noise transformation.                                                   is comparable to the arc width produced by the additive noise.
+                                                                                 For the proposed method, the additive noise is disappeared
+                                                                                 and the I /Q signal arc becomes clearly visible as shown in
+ability of the traditional and proposed method to recover subtle                 Fig. 17(c). The reconstructed displacement motions with and
+vibration, a series of subwavelength displacement motions                        without noise transformation are shown in Fig. 17(b) and (d).
+are detected using these two methods. For the subwavelength                      It is seen that the displacement motion recovered using the
+displacement motion, the estimation of the I /Q imbalance                        proposed method matches well with the ground truth that is
+parameters and dc offsets requires the use of some speci-                        programmed to the actuator. The reconstruction RRMSE of the
+fied techniques, such as multiarc [24], [25], [26] and ego-                      proposed method is 8.96%, which means the rms error is about
+motion [27]. The moving plate is placed 3 m away from the                        4.5 µm as compared with the ground truth of 50 µm. However,
+radar and conducts a sinusoidal motion. The amplitudes of                        for the traditional method, the rms error in the reconstructed
+the sinusoidal motion are λ /8, λ /50, λ /250, and λ /500, which                 displacement motion is about 21 µm, which is much larger
+are respectively equal to 1.5625 mm, 0.25 mm, 50 µm, and                         than that of the proposed method. Fig. 18 shows the measure-
+25 µm at 24 GHz. The experiment results of amplitude λ /8                        ment results of a deep subwavelength displacement motion
+
+       Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+3688                                                     IEEE TRANSACTIONS ON MICROWAVE THEORY AND TECHNIQUES, VOL. 71, NO. 8, AUGUST 2023
+
+
+
+                                                                        TABLE I
+             M EASUREMENT RRMSE C OMPARISON B ETWEEN OTHER P HASE D EMODULATION M ETHODS AND THE P ROPOSED M ETHOD
+
+
+
+
+Fig. 16.    Experiment results of the I/Q constellation and reconstruction
+displacement motion with and without noise transformation for the displace-   Fig. 17.    Experiment results of the I/Q constellation and reconstruction
+ment amplitude of λ /50 (0.25 mm at 24 GHz). (a) and (b) Without noise        displacement motion with and without noise transformation for the displace-
+transformation and (c) and (d) with noise transformation.                     ment amplitude of λ /250 (50 µm at 24 GHz). (a) and (b) Without noise
+                                                                              transformation and (c) and (d) with noise transformation.
+
+with an amplitude of λ /500. As shown in Fig. 18(a), it is hard
+to distinguish the short I /Q signal arc from the additive noise.
+However, the proposed method can still effectively remove                     proposed method. All the measurement data are obtained using
+the additive noise and recover the I /Q signal trajectory to the              exactly the same hardware shown in Fig. 11.
+arc fitting well on the unit circle. As shown in Fig. 18(b),                     Table I shows a measurement RRMSE comparison between
+the reconstructed motion without noise transformation deviates                the mainly used phase demodulation methods and the pro-
+from the ground truth seriously due to the accumulative noise.                posed method. As in Sections V-B and V-C, the displacement
+The RRMSE of 96.67% means that the reconstruction error                       amplitude is fixed to λ /8 when the radial distance is varying,
+without noise transformation is comparable with the desired                   and the radial distance is fixed to 3 m when the displace-
+motion. However, the reconstructed motion of the proposed                     ment amplitude is varying. The results of the arctangent
+method can still match well with the ground truth even if the                 demodulation method are calculated based on the arctan2
+traditional approach fails to detect such a deep subwavelength                function, which has a larger codomain range of [−π, π] than
+motion. The RRMSE is 17.89%, which is reduced by over five                    that of the arctan function. And its phase wrapping issue is
+times.                                                                        tackled by the unwrap method in [28]. Since the six-port-
+                                                                              based and arcsine method has the same technical principle
+                                                                              and demodulation output, their RRMSE results are identical,
+D. Comparison With Other Phase Demodulation Methods                           which are merged in one row for conciseness. As can be seen
+  In this section, the experiment results of the other phase                  in Table I, there are four methods with relatively low RRMSE,
+demodulation methods are also given for comparison with the                   including arctangent with phase unwrapping, six-port, arcsine,
+
+       Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+CHEN et al.: RADAR SENSING OF DISPLACEMENT MOTIONS WITH HIGH ROBUSTNESS                                                                              3689
+
+
+
+                                                                                 RRMSE. Therefore, developing a more advanced ellipse fitting
+                                                                                 technique will be helpful for the RRMSE performance of the
+                                                                                 proposed method at long radial distances. However, this is
+                                                                                 beyond the scope of this article, which shall be addressed in
+                                                                                 our future work. For the displacement amplitude of λ /500,
+                                                                                 the ellipse estimation accuracy can maintain at a satisfactory
+                                                                                 level by the use of multiarc or ego-motion techniques. Thus,
+                                                                                 the problem in the long-distance case does not appear in this
+                                                                                 case.
+                                                                                    To further compare the proposed method with the traditional
+                                                                                 methods having low RRMSE, such as arctangent, six-port [7],
+                                                                                 and arcsine, Fig. 19 is given to illustrate the superiority of the
+                                                                                 proposed method on mapping error. In this case, the mapping
+                                                                                 error represents the angular difference of the mapping point on
+                                                                                 the circle from the ideal noiseless point. As shown in Fig. 5,
+                                                                                 the order of mapping and preconditioning is inverse between
+                                                                                 the proposed method and the traditional methods, resulting in
+                                                                                 different mapping points and thereby different mapping errors.
+Fig. 18.    Experiment results of the I/Q constellation and reconstruction       Specifically, the proposed method maps the signal points to the
+displacement motion with and without noise transformation for the displace-
+ment amplitude of λ /500 (25 µm at 24 GHz). (a) and (b) Without noise
+                                                                                 closest ellipse points before preconditioning, but the traditional
+transformation and (c) and (d) with noise transformation.                        methods map the signal points to the closest circle points after
+                                                                                 preconditioning. This fact is confirmed in Fig. 19, where the
+                                                                                 mapping errors of the three traditional methods are the same,
+                                                                                 but different from the proposed method as expected. As can be
+                                                                                 seen in Fig. 19, the mapping error of the proposed method is
+                                                                                 more concentrated around zero compared with the traditional
+                                                                                 methods. It demonstrates that the mapping signal points of
+                                                                                 the proposed method are closer to the ideal noiseless signal
+                                                                                 points than the traditional methods. The reason can be found
+                                                                                 in Section III-B, where the statistical analysis proved that the
+                                                                                 mapping points of the proposed method, i.e., the closest ellipse
+                                                                                 points, are the most likely position of the ideal noiseless points.
+                                                                                    Unlike the phase unwrapping technique, which can only be
+                                                                                 applied to the arctangent method for solving phase wrapping
+                                                                                 issue, the noise transformation technique used in the proposed
+Fig. 19. Statistical histogram for the experimental mapping error of different   method can be extended to all the other demodulation methods
+phase demodulation methods. Mapping error denotes the angular difference
+of the mapping point on circle from the ideal noiseless point. The distance
+                                                                                 in the future for reducing their demodulation error induced by
+and displacement amplitude are 3 m and λ /500 in this experiment.                the additive noise.
+
+                                                                                                        VI. C ONCLUSION
+and the proposed method. For large displacement amplitude,                          Millimeter-wave CW Doppler radar with phase demodula-
+these four methods have similar RRMSE results. When the                          tion is superior to subtle displacement motion sensing. How-
+displacement amplitude gets smaller, the RRMSE perfor-                           ever, the phase demodulation performance is vulnerable to the
+mance of the proposed method becomes more superior to                            additive Gauss noise, which results in the accuracy reduction
+the other three methods, and the RRMSE improvement is                            of the reconstructed displacement motion. By mathematical
+the most obvious for the displacement amplitude of λ /500.                       derivation, the reason is found that the additive noise in the
+It is meaningful since sensing subtle vibrations is one of the                   I /Q signals will be accumulated during the motion reconstruc-
+most important applications of millimeter-wave Doppler radar,                    tion by phase demodulation. The large accumulative noise is
+such as vital signs and structural health monitoring. In the                     seriously harmful to reconstruction accuracy. In contrast to
+deep-subwavelength case, the additive noise effect on the                        the additive noise, the phase noise in the I /Q signals does
+reconstruction RRMSE is relatively large, hence the RRMSE                        not have this problem. To improve the noise robustness and
+improvement after removing additive noise by the proposed                        reconstruction accuracy of phase demodulation, this article
+method will be more obvious. Although the additive noise is                      proposes a method that works by transforming the additive
+also large in the case of 9 m, the RRMSE improvement of                          noise to phase noise. The idea is to map the raw I /Q signal
+the proposed method is negligible. This is because the large                     points onto the ellipse they form. And the mapping criterion
+additive noise power seriously affects the estimation accuracy                   of the proposed method is designed to reduce the extra phase
+of the ellipse parameters. The proposed method maps the                          noise transformed from the additive noise. Both simulations
+I /Q signal points onto the wrong ellipse resulting in a high                    and experiments are carried out to evaluate the performance
+
+       Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+3690                                                        IEEE TRANSACTIONS ON MICROWAVE THEORY AND TECHNIQUES, VOL. 71, NO. 8, AUGUST 2023
+
+
+
+of the proposed method. Owing to the proposed method,                            [13] S. Guan, J. A. Rice, C. Li, and C. Gu, “Automated DC offset calibration
+the reconstructed displacement motion can match well to                               strategy for structural health monitoring based on portable CW radar
+                                                                                      sensor,” IEEE Trans. Instrum. Meas., vol. 63, no. 12, pp. 3111–3118,
+the ground truth with a low RRMSE even in the case of                                 Dec. 2014.
+long radial distance or subtle displacement amplitude. When                      [14] A. D. Droitcour, O. Boric-Lubecke, and G. T. A. Kovacs, “Signal-
+the SNR decreases, the proposed method can guarantee the                              to-noise ratio in Doppler radar system for heart and respiratory rate
+                                                                                      measurements,” IEEE Trans. Microw. Theory Techn., vol. 57, no. 10,
+reconstruction RRMSE maintaining at a relatively low level,                           pp. 2498–2507, Oct. 2009.
+which reflects its strong robustness against additive noise.                     [15] D. Nguyen, S. Yamada, B. K. Park, V. Lubecke, O. Boric-Lubecke, and
+                                                                                      A. Host-Madsen, “Noise considerations for remote detection of life signs
+                              R EFERENCES                                             with microwave Doppler radars,” in Proc. IEEE Eng. Med. Biol. Soc.,
+                                                                                      Aug. 2007, pp. 1667–1670.
+ [1] S. Dong et al., “Doppler cardiogram: A remote detection of human            [16] A. D. Dritcour, O. Boric-Lubecke, V. M. Lubecke, J. Lin, and
+     heart activities,” IEEE Trans. Microw. Theory Techn., vol. 68, no. 3,            G. T. Kovacs, “Range correlation and I/Q performance benefits in single
+     pp. 1132–1141, Mar. 2020.                                                        chip silicon Doppler radars for non-contact cardiopulmonary monitor-
+ [2] D. V. Q. Rodrigues, D. Zuo, Z. Tang, J. Wang, C. Gu, and C. Li,                  ing,” IEEE Trans. Microw. Theory Techn., vol. 52, no. 3, pp. 838–848,
+     “Adaptive displacement calibration strategies for field structural health        Mar. 2004.
+     monitoring based on Doppler radars,” IEEE Trans. Instrum. Meas.,            [17] M. Zakrzewski et al., “Quadrature imbalance compensation with ellipse-
+     vol. 69, no. 10, pp. 7813–7824, Oct. 2020.                                       fitting methods for microwave radar physiological sensing,” IEEE Trans.
+ [3] L. Wen, C. Gu, and J. Mao, “Silent speech recognition based on short-            Microw. Theory Techn., vol. 62, no. 6, pp. 1400–1408, Jun. 2014.
+     range millimeter-wave sensing,” in IEEE MTT-S Int. Microw. Symp. Dig.,      [18] M. Zakrzewski, “Methods for Doppler radar monitoring of physiological
+     Aug. 2020, pp. 779–782.                                                          signals,” Ph.D. dissertation, Dept. Electron. Commun. Eng., Tampere
+ [4] S. Skaria, A. Al-Hourani, M. Lech, and R. J. Evans, “Hand-gesture                Univ. Technol., Tampere, Finland, 2015.
+     recognition using two-antenna Doppler radar with deep convolutional         [19] A. Singh et al., “Data-based quadrature imbalance compensation for a
+     neural networks,” IEEE Sensors J., vol. 19, no. 8, pp. 3041–3048,                CW Doppler radar system,” IEEE Trans. Microw. Theory Techn., vol. 61,
+     Apr. 2019.                                                                       no. 4, pp. 1718–1724, Apr. 2013.
+ [5] S. Srinivas, Y. Rong, and D. W. Bliss, “UWB radar cardiac activity          [20] I. Fatadin, S. J. Savory, and D. Ives, “Compensation of quadrature
+     sensing: Novel arctangent demodulator for direct-RF receivers,” in Proc.         imbalance in an optical QPSK coherent receiver,” IEEE Photon. Technol.
+     IEEE Int. Radar Conf. (RADAR), Apr. 2020, pp. 984–989.                           Lett., vol. 20, no. 20, pp. 1733–1735, Oct. 2008.
+ [6] K. Itoh, “Analysis of the phase unwrapping problem,” Appl. Opt., vol. 21,   [21] W. Xu, C. Gu, C. Li, and M. Sarrafzadeh, “Robust Doppler radar
+     no. 14, p. 2470, Jul. 1982.                                                      demodulation via compressed sensing,” Electron. Lett., vol. 48, no. 22,
+ [7] A. Koelpin, F. Lurz, S. Linz, S. Mann, C. Will, and S. Lindner, “Six-            pp. 1428–1430, Oct. 2012.
+     port based interferometry for precise radar and sensing applications,”      [22] C. Gu et al., “Noncontact large-scale displacement tracking: Doppler
+     Sensors, vol. 16, no. 10, pp. 1556–1581, Sep. 2016.                              radar for water level gauging,” IEEE Microw. Wireless Compon. Lett.,
+ [8] T. Fan et al., “Wireless hand gesture recognition based on continuous-           vol. 24, no. 12, pp. 899–901, Dec. 2014.
+     wave Doppler radar sensors,” IEEE Trans. Microw. Theory Techn.,             [23] M. Richards, Fundamentals of Radar Signal Processing. New York, NY,
+     vol. 64, no. 11, pp. 4012–4020, Nov. 2016.                                       USA: McGraw-Hill, 2005.
+ [9] J. Wang, X. Wang, L. Chen, J. Huangfu, C. Li, and L. Ran, “Noncontact       [24] J. Guo et al., “Measuring micrometer-level vibrations with mmWave
+     distance and amplitude-independent vibration measurement based on an             radar,” IEEE Trans. Mobile Comput., vol. 22, no. 4, pp. 2248–2261,
+     extended DACM algorithm,” IEEE Trans. Instrum. Meas., vol. 63, no. 1,            Apr. 2023.
+     pp. 145–153, Jan. 2014.                                                     [25] S. Bi, X. Gao, V. M. Lubecke, O. B. Lubecke, D. Matthews, and
+[10] W. Xu, Y. Li, C. Gu, and J. Mao, “Large displacement motion inter-               X. L. Liu, “A multi-arc method for improving Doppler radarmotion
+     ferometry with modified differentiate and cross-multiply technique,”             measurement accuracy,” in IEEE MTT-S Int. Microw. Symp. Dig.,
+     IEEE Trans. Microw. Theory Techn., vol. 69, no. 11, pp. 4879–4890,               Jun. 2018, pp. 244–247.
+     Nov. 2021.                                                                  [26] D. K. Kim and Y. Kim, “Quadrature frequency-group radar and its
+[11] C. Gu, Z. Peng, and C. Li, “High-precision motion detection using                center estimation algorithms for small vibrational displacement,” Sci.
+     low-complexity Doppler radar with digital post-distortion technique,”            Rep., vol. 9, no. 1, May 2019, Art. no. 6763.
+     IEEE Trans. Microw. Theory Techn., vol. 64, no. 3, pp. 961–971,             [27] W. Xu, C. Gu, and J. Mao, “Deep sub-wavelength millimeter-wave radar
+     Mar. 2016.                                                                       interferometry with a novel ego-motion based calibration technique,” in
+[12] E. Yavari and O. Boric-Lubecke, “Channel imbalance effects and                   IEEE MTT-S Int. Microw. Symp. Dig., Jun. 2021, pp. 282–285.
+     compensation for Doppler radar physiological measurements,” IEEE            [28] M. Alizadeh, G. Shaker, J. C. M. D. Almeida, P. P. Morita, and
+     Trans. Microw. Theory Techn., vol. 63, no. 11, pp. 3834–3842,                    S. Safavi-Naeini, “Remote monitoring of human vital signs using mm-
+     Nov. 2015.                                                                       wave FMCW radar,” IEEE Access, vol. 7, pp. 54958–54968, 2019.
+
+
+
+
+       Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on November 16,2025 at 14:48:08 UTC from IEEE Xplore. Restrictions apply.
+

@@ -1,0 +1,930 @@
+                                                                                                       www.nature.com/scientificreports
+
+
+
+
+                OPEN             Theoretical derivation
+                                 and experimental investigation
+                                 of dynamic displacement
+                                 reconstruction based on data
+                                 fusion for beam structures
+                                 Liang Ren , Qing Zhang * & Xing Fu
+
+                                 Accurately obtaining the dynamic displacement response of the beam structure is of great
+                                 significance. However, it is difficult to directly measure the dynamic displacement for large structures
+                                 due to the low measurement accuracy or the installation difficulty of the sensor. Therefore, it is
+                                 urgent to develop an indirect measurement method for displacement based on measurable physical
+                                 quantities. Since acceleration and strain contain high and low frequency displacement information
+                                 respectively, this paper proposes a displacement reconstruction algorithm that can realize the data
+                                 fusion of the two, which is very helpful for the research of structural health monitoring. Firstly, the
+                                 stochastic subspace identification (SSI) method is adopted to calculate the strain mode, and then the
+                                 displacement is derived via the mode shape superposition method. Afterwards, the strain-derived
+                                 displacement and acceleration are combined by the proposed algorithm to reconstruct the dynamic
+                                 displacement. Both the numerical simulation and model experiment are conducted to verify the
+                                 effectiveness of the proposed algorithm. Furthermore, the influences of noise, sampling rate ratio
+                                 and measurement point position are analyzed. The results show that the proposed algorithm can
+                                 accurately reconstruct both high-frequency and pseudo-static displacements, and the displacement
+                                 reconstructed error in the model experiment is within 5%.
+
+
+                                 Structural health monitoring is an important guarantee for the long-term operation of the s­ tructure1–3, whose
+                                 purpose is to evaluate the health of the structure and to give a reference to whether the structure needs main-
+                                 tenance, which plays a vital role in the safe operation of large-scale infrastructure during service. Dynamic
+                                 displacement is one of the key parameters for evaluating the safety performance of s­ tructure4, which is widely
+                                 used in the field of structural health monitoring and vibration control owing to provide information directly
+                                 related to structural deformation and ­flexibility5–7. Nevertheless, it is difficult to measure dynamic displacement
+                                 of actual structures directly. On the one hand, contact displacement sensors such as linear variable differential
+                                 transformer (LVDT) requires a fixed reference point, but the reference point tends to move due to various rea-
+                                 sons. On the other hand, non-contact sensors like GPS still have various issues, such as low sampling rates and
+                                 poor accuracy that have not been solved. As a result, research on structural dynamic displacement reconstruction
+                                 has received extensive a­ ttention8,9.
+                                     In the past few decades, scholars have done a lot of work on the reconstruction of dynamic ­displacement10,11.
+                                 A single type data easy to measure was used to achieve displacement reconstruction at the b         ­ eginning12–14. For
+                                 example, Lee et al.15 designed a finite impulse response (FIR) filter to instruct the acceleration integration process,
+                                 and effectively reduced the acceleration integration error. However, the selection criteria of the optimal regu-
+                                 larization factor in this method has not been clearly deterministic and is only applicable to zero mean dynamic
+                                 displacement reconstruction. Shin et al.16 applied the theoretical displacement mode shape of the simply sup-
+                                 ported beam and the strain measured by the fiber grating sensor to estimate displacement. Nevertheless, it is
+                                 unrealistic for the displacement mode to completely match the theoretical one for the actual bridge structure.
+                                 Wang et al.17 used the strain response to derive the strain mode, then calculated the displacement mode, and
+                                 finally employed the mode superposition method to obtain the dynamic displacement of a simply supported
+
+
+                                 State Key Laboratory of Coastal and Offshore Engineering, Dalian University of Technology, Dalian 116023, China.
+                                 *
+                                   email: zhang37qing@163.com
+
+
+Scientific Reports |   (2022) 12:19904                | https://doi.org/10.1038/s41598-022-24449-2                                                     1
+
+                                                                                                                                                  Vol.:(0123456789)
+          www.nature.com/scientificreports/
+
+
+                                            beam. While this method requires a higher sampling rate, and the existing health monitoring system is difficult
+                                            to meet this requirement. Obviously, there are many limitations to achieve displacement reconstruction by using
+                                            a single type data.
+                                                To utilize the redundant information of multiple types of sensors as much as possible and to improve the
+                                            accuracy of dynamic displacement reconstruction, the displacement reconstruction method based on multiple
+                                            types data has been ­studied18–20. Roberts et al.21 applied GPS measurement data and its derivative to correct the
+                                            integral process of acceleration, realized the data fusion of GPS measurement data and acceleration. Even so, the
+                                            existence of signal measurement noise makes the integration and differentiation of measurement data inaccurate.
+                                            The disadvantages of low accuracy, expensive equipment and low sampling rate of GPS also limit the application
+                                            of the above methods in civil engineering. Park et al.22 applied strain-derived displacement to guide the accelera-
+                                            tion double integration process, and successfully achieved non-zero mean dynamic displacement reconstruction.
+                                            Cho et al.23 used the theoretical strain mode shape to derive the displacement from the strain, and then utilized
+                                            the Kalman filtering algorithm to incorporate the acceleration. The same rate data is used in the aforementioned
+                                            data fusion algorithms, while most of the collected multiple types data are in a state where multiple rates coexist
+                                            in the current health monitoring system. And the modal information of the actual structure may be different
+                                            from the theoretical value, and the operation modal analysis method should be used for modal identification.
+                                                For the purpose of solving the problem of multi-rate data information fusion, researchers have introduced
+                                            Kalman filtering technology into dynamic displacement ­reconstruction24–26. Smyth et al.27 suggested the use
+                                            of Kalman filtering technology to perform multi-rate data fusion of displacement and measured acceleration
+                                            with different sampling rates, and the effectiveness of the method was proved by numerical simulation. Kim
+                                            et al.28 estimated the dynamic displacement in real-time by fusing the measured velocity from the laser Dop-
+                                            pler vibrometer (LDV) along with the measured displacement from the light detection and ranging (LiDAR),
+                                            which improved the poor accuracy and low sampling rate of the LiDAR, finally obtained high sampling rate and
+                                            precision dynamic displacement. It is worth noting that although the above Kalman filtering algorithms solved
+                                            the problem of multi-rate data fusion, the usage of physical quantities that are difficult to measure in actual
+                                            engineering (such as displacement or velocity), limits its practical application.
+                                                The above research shows that many scholars have done a lot of exploratory work in dynamic displacement
+                                            reconstruction, as well as provide a variety of methods to achieve ­it29. The existing data fusion algorithms have
+                                            many limitations, such as depending on the theoretical mode shapes of the structure, unable to deal with the
+                                            inconsistency between the acceleration and the strain sampling rate, and requiring more measurement points.
+                                            Therefore, this paper proposes a multi-rate data fusion algorithm that relies on the measured data to realize mode
+                                            parameters identification and displacement reconstruction, which breaks through the above limitations. The
+                                            proposed algorithm distinguishes itself from the existing methods by utilizing a novel mode shape superposi-
+                                            tion method and fuse strain-derived displacement with high sample rate acceleration, which improves both the
+                                            accuracy and convenience of displacement reconstruction. Compared with the previous r­ esearch30, the method
+                                            proposed in this paper explicitly considers the error of the acceleration sensor, and the acceleration integral
+                                            error and displacement error are considered as state variables to further improve the reconstruction accuracy.
+                                            Moreover, the research object of this paper is cantilever structure while previous study focused on simply sup-
+                                            ported structure. In “Displacement reconstruction method from multi-rate data”, the theory of above-mentioned
+                                            improved multi-rate Kalman filtering algorithm is introduced. In “Case study using a cantilever beam”, a can-
+                                            tilever beam finite element model is established for numerical simulation verification, and we compared with
+                                            existing methods, including different mode identification and displacement reconstruction methods. Afterwards,
+                                            parameter analysis is carried out. In “Experimental validation”, the vibration experiment and parameter analysis
+                                            of the cantilever beam model are performed and compared with the simulation results in “Case study using a
+                                            cantilever beam”. Finally, “Summary and conclusion” summarizes the full text and gives a conclusion.
+
+                                            Displacement reconstruction method from multi‑rate data
+                                            To solve the problem of information fusion of data with multiple types and rates in existing research, an improved
+                                            multi-rate data displacement reconstruction method is proposed. Different from the existing multi-rate Kalman
+                                                                                          ­ isplacement31, the proposed improved multi-rate Kalman filtering
+                                            filtering algorithm based on acceleration and d
+                                            algorithm fuses the displacement derived from strain with the measured acceleration to estimate the acceleration
+                                            integration error, and finally realizes dynamic displacement reconstruction. This section introduces the mode
+                                            superposition method and the multi-rate Kalman filtering algorithm respectively.
+
+                                            Strain mode superposition method for beam structure. The derivation process of the mode super-
+                                            position method based on the SSI algorithm can refer to the existing literature, and the important parts are
+                                            introduced ­here32. Dynamic displacement u(x, t) and strain response ε(x, t) have the same modal coordinates,
+                                            and both of them can be expressed as the superposition of the first n-order modes:
+                                                                                                     n
+                                                                                                     
+                                                                                        u(x, t) =          �i (x)qi (t)                                    (1)
+                                                                                                     i=1
+
+                                                                                                     n
+                                                                                                     
+                                                                                         ε(x, t) =         �i (x)qi (t)                                    (2)
+                                                                                                     i=1
+
+
+
+
+          Scientific Reports |   (2022) 12:19904 |               https://doi.org/10.1038/s41598-022-24449-2                                                  2
+
+Vol:.(1234567890)
+www.nature.com/scientificreports/
+
+
+                                  where �i (x) denotes the modal displacement of the ith-order displacement mode shape; qi (t) is the ith-order
+                                  modal coordinate; n represents the modal order used; and �i (x) represents the modal displacement of the ith-
+                                  order strain mode shape.
+                                     The SSI method based on data-driven is more applicable for the actual structure under long-term environ-
+                                  mental ­load33,34. The strain mode shapes of the structure can be ultimately obtained as follows via the identifica-
+                                  tion of the system matrix Acε and Ccε:
+
+                                                                                      Acε = χχ −1                                                 (3)
+
+                                                                                        � = Ccε ψ                                                  (4)
+                                  where  represents the strain mode of the structure; χ is the eigenvector;  is the diagonal eigenvalue matrix.
+                                  Then the modal conversion method is used to convert the identified strain mode into displacement mode, there
+                                  are the following formulas for cantilever beam structures according to the beam bending theory in material
+                                  mechanics:
+                                                                                                M(x)
+                                                                             u(x)′′ · d = d ·        = ε(x)                                        (5)
+                                                                                                 EI
+                                  where d represents the distance from the measurement point to the neutral layer of the structure. The position
+                                  of the neutral layer can be determined by parallel strain experiments; ε(x) means the strain, M(x) represents the
+                                  bending moment; EI stands for the bending stiffness of the beam and u(x) represents the displacement.
+                                      Extending Eq. (5) to a period of time, we can get:
+                                                                                                      n
+                                                                                     ∂ 2 u(x, t)     
+                                                                     ε(x, t) = d ·          2
+                                                                                                 =d·   �′′i (x)qi (t)                              (6)
+                                                                                         ∂x
+                                                                                                     i=1
+
+                                     Integrating the left and right ends twice at the same time to get the ith-order displacement mode function:
+                                                                                 1
+                                                                                      
+                                                                      �i (x) = · (       �i (x)dx 2 ) + Cx + D                                (7)
+                                                                                 d
+                                  where C and D are two integral constants, both of them are 0 for cantilever beam.
+                                     After calculating the first n-order displacement mode shapes, composing them into a displacement mode
+                                  matrix. The displacement response of the structure u(x, t), denoted as xstrain, can be obtained by substituting the
+                                  calculated strain mode matrix �i (x) and displacement mode matrix (x) into Eqs. (1) and (2).
+
+                                  Improved multi‑rate Kalman filtering algorithm. Different from existing studies, the improvement of
+                                  the proposed method is that the observed value used is the strain-derived displacement. Therefore, only the gen-
+                                  eral process of the Kalman filter algorithm is introduced here. For details, please refer to the existing literature.
+                                  The state variables of the continuous-time state space model of Kalman filtering are selected as:
+                                                                                                       T
+                                                                                                                                                    (8)
+                                                                                     
+                                                                            X(t) = x(t) ẋ(t) a(t)
+
+                                  where x(t) is the displacement error; ẋ(t) means the speed error. The discrete form is:
+                                                                X(k) = �(k|k − 1 )X(k − 1) + Ŵ(k|k − 1 )w(k − 1)                                   (9)
+                                  where (k|k − 1 ) represents the state transition matrix; Ŵ(k|k − 1 ) denotes the noise process vector and
+                                                                                                                    
+                                                                              1 �t 0.5�t 2                     0.5�t 2
+                                                           �(k|k − 1 ) =  0 1        �t ,Ŵ(k|k − 1 ) =  0                                (10)
+                                                                              0 0      1                          0
+
+                                     The covariance matrix of one-step state prediction can be expressed as:
+
+                                                             P(k|k − 1 ) = (k|k − 1 )P(k − 1|k − 1 )(k|k − 1 )T + Q                             (11)
+                                  where P(k − 1|k − 1 ) denotes the covariance matrix; Q denotes the stochastic noise covariance matrix:
+                                                                                                     
+                                                                                  0.25t 4 0.5t 3 0
+                                                                          Q = q 0.5t 3 t 2 0                                                  (12)
+                                                                                      0       0    0
+
+                                     Supposing that the strain-derived displacement is obtained at the time step i, the displacement error at the
+                                  time step i can be updated:
+                                                                                y(i) = x̂(i) − xstrain (i)                                        (13)
+                                  where y(i) is the calculated displacement error. The displacement error can also be obtained from the observa-
+                                  tion process:
+
+
+
+Scientific Reports |   (2022) 12:19904 |               https://doi.org/10.1038/s41598-022-24449-2                                                    3
+
+                                                                                                                                                Vol.:(0123456789)
+          www.nature.com/scientificreports/
+
+
+
+
+                                            Figure 1.  Flow chart of multi-rate data displacement reconstruction method.
+
+
+
+                                                                                       Z(i) = HX(i|i − 1) + v(i)                                          (14)
+                                            where Z(i) denotes the observed displacement error; the observation matrix H = 1 0 0 ; v(i) means the uncer-
+                                                                                                                                      
+                                            tainty associated with the observation process, assuming that this uncertainty obeys a stationary zero mean
+                                            Gaussian process, namely v(i) ∼ N(0, r). Thus, the state estimation vector X(i|i ) and state estimation covariance
+                                            matrix P(i|i ) in the measurement update process are:
+                                                                            X(i|i ) = X(i|i − 1 ) + K(i)(y(i) − HX(i|i − 1 ))                            (15)
+
+                                                                                    P(i|i ) = (I − K(i)H)P(i|i − 1 )                                     (16)
+                                            where I denotes the unit matrix; K(i) represents the Kalman gain matrix at the time step i, calculated by the
+                                            following formula:
+
+                                                                             K(i) = P(i|i − 1 )HT (HP(i|i − 1 )HT + r)−1                                 (17)
+                                            where r indicates the variance of the measurement noise during the observation process.
+                                                According to the state estimation vector acquired from the measurement update process, the acceleration
+                                            integral results can be further corrected:
+                                                                                         ˆ ) = ẋ(i) − ẋ(i|i )
+                                                                                         ẋ(i|i                                                          (18)
+
+                                                                                         x̂(i|i ) = x(i) − x(i|i )                                      (19)
+                                            where x̂(i|i ) represents the reconstructed displacement; ẋ(i|i
+                                                                                                      ˆ ) means the reconstructed speed.
+                                               The flow chart of the proposed multi-rate data displacement reconstruction method is shown in Fig. 1. Only
+                                            the important steps are introduced here for the sake of brevity, corresponding details and smoothing technology
+                                            could refer to Kim et al.31.
+
+                                            Case study using a cantilever beam
+                                            Simulation scenario. To verify the effectiveness of the above-mentioned multi-rate data fusion algorithm,
+                                            the ANSYS software was used to establish the three-dimensional finite element model of a cantilever beam. A
+                                            steel beam of 800 mm × 30 mm × 3.75 mm was simulated by BEAM188, the material constants of the beam are
+                                            Elastic modulus = 206 GPa and Poisson’s ratio = 0.3.
+                                                Considering that the vibration of the first three-order mode shapes is dominant when the structure vibrates,
+                                            and the number of measurement points needs to be greater than the order of mode shape to identify the mode
+                                            shape, four strain sensors were arranged on the entire model evenly from top to bottom, the free end endpoint
+                                            was set as the acceleration and displacement sensors. The cantilever beam model was excited along the Z direction
+                                            for a duration of 20 s, then the acceleration and strain response sampling rate were set to 1200 Hz and 300 Hz
+                                            respectively. The finite element model and measurement point layout are shown in Fig. 2.
+
+                                            Displacement reconstruction. The strain response time history extracted by ANSYS software was used
+                                            to identify the strain mode via SSI method, and the stability diagram and spectrum diagram were shown in
+
+
+          Scientific Reports |   (2022) 12:19904 |               https://doi.org/10.1038/s41598-022-24449-2                                                 4
+
+Vol:.(1234567890)
+www.nature.com/scientificreports/
+
+
+
+
+                                  Figure 2.  Finite element model and measurement point layout drawing (unit: mm).
+
+
+
+
+                                  Figure 3.  Stability diagram and spectrum diagram.
+
+
+
+                                  Fig. 3. The circles in the stability diagram represent the points where the modal parameters have stable solutions
+                                  and the orange curve represents the spectrum curve.
+                                      Considering the stable axis and the spectrogram comprehensively, the first two-order strain modes occupy
+                                  most of the vibration energy clearly, so only the first two-order strain modes are extracted, and they are compared
+                                  with the strain mode shapes extracted by ANSYS and that calculated by the method proposed by Wang et al.17
+                                  as shown in Fig. 4. The calculated results of proposed method are closer to the theoretical value whether the
+                                  first-order or second-order mode, indicating the superiority of the proposed method.
+                                      According to the mode superposition method, the displacement mode can be calculated from the strain
+                                  mode and the low sampling rate dynamic displacement was obtained, then the proposed multi-rate Kalman
+                                  filtering algorithm was used to reconstruct the displacement. In addition, the displacement reconstruction
+                                  method proposed by Zhu et al.26 was used for comparison, the measurement points required by this method are
+                                  0 m, 0.27 m, 0.54 m and 0.8 m away from the fixed end. The strain data on both the left and right sides for each
+                                  measurement point are needed to be extracted to calculate the strain difference, which means there are eight
+                                  strain sensors. The method has established the mapping relationship between strain difference on both sides
+                                  and displacement of the same measuring point, so the strain sensor must be arranged at the target measuring
+                                  point. Nevertheless, the method proposed in this paper fits the function relation between the mode shape value
+                                  and the corresponding height value. Even if the strain sensor is not installed at the target point, the height of the
+                                  target can be substituted into the mode shape function to obtain the mode shape value, and then the dynamic
+                                  displacement can be obtained. The schematic diagram of the measurement points layout and parameters is shown
+                                  in Fig. 5. The unit virtual force is applied at the target point.
+
+
+Scientific Reports |   (2022) 12:19904 |               https://doi.org/10.1038/s41598-022-24449-2                                                    5
+
+                                                                                                                                                Vol.:(0123456789)
+          www.nature.com/scientificreports/
+
+
+
+
+                                            Figure 4.  Strain mode shapes calculated by different methods.
+
+
+
+
+                                            Figure 5.  Schematic diagram of measurement points layout and parameters (unit: mm).
+
+
+
+                                               The strain-derived displacement xsd can be expressed as:
+                                                                           3                                                   
+                                                                        1  hi
+                                                                 xsd =            (2Mi−1 �εi−1 + Mi−1 �εi + Mi �εi−1 + 2Mi �εi )                      (20)
+                                                                        6      si
+                                                                          i=1
+
+                                            where hi is the length of ith segment; si means the cross-section width of ith segment, which is 3.75 mm for
+                                            the cantilever beam in this paper; Mi is the bending moment at the position of sensor i; �εi denotes the strain
+
+
+
+
+          Scientific Reports |   (2022) 12:19904 |              https://doi.org/10.1038/s41598-022-24449-2                                               6
+
+Vol:.(1234567890)
+www.nature.com/scientificreports/
+
+
+
+
+                                  Figure 6.  Dynamic displacement reconstructed by different methods.
+
+
+                                  difference at the position of sensor i. Then xsd and acceleration are used as the state variables to reconstruct the
+                                  displacement. Please refer to the ­literature26 for the detailed process of the Kalman filtering algorithm.
+                                      Figure 6 is a comparison diagram between theoretical displacement time history extracted by ANSYS and
+                                  the results reconstructed by different methods. The acceleration-based displacement reconstruction method
+                                  proposed by Lee et al.15 and data fusion method proposed by Zhu et al. are used for comparison. In order to
+                                  verify the correctness of the proposed algorithm, no noise was added to the dynamic response. Figure 6a shows
+                                  that acceleration-derived displacement has large errors in pseudo-static and non-zero mean displacements. The
+                                  strain-derived displacement is close to the theoretical value but the sampling rate is lower. The displacement
+                                  reconstructed by the two data fusion methods are in good agreement with the reference values.
+                                      Figure 6b illustrates a partial enlarged view of 9.3–9.35 s. It can be seen that the accuracy of the reconstructed
+                                  displacement of the proposed algorithm is significantly higher than that proposed by Zhu et al., which proves that
+                                  the proposed algorithm can still have a good effect even when the number of measurement points is reduced.
+                                      To better reflect the difference between forward and backward Kalman filtering algorithms as well as the
+                                  effectiveness of the fixed interval smoothing technique, Gaussian white noise with a signal to noise ratio of 100 dB
+                                  was added to the acceleration and strain response. At the same time, the error index γ is defined to measure the
+                                  degree of error between the reconstructed displacement value and the theoretical displacement value:
+                                                                                  
+                                                                                        N
+                                                                                     1 
+                                                                                           (dr − dt )2
+                                                                                     N
+                                                                                       n=1                                                          (21)
+                                                                            γ =                         × 100%
+                                                                                        max(dr )
+                                  where N is the total number of data points, dr is the reconstructed displacement value, and dt represents the
+                                  theoretical displacement value.
+                                      As shown in Fig. 7, the reconstructed displacement curve and the theoretical displacement curve still have
+                                  a good agreement after adding noise to the dynamic response. Figure 7a,b display that the displacement curves
+                                  reconstructed by forward Kalman filtering and backward Kalman filtering are not completely consistent. It can
+                                  be clearly seen that the displacement reconstructed by forward filtering oscillates around 0 s, but the displace-
+                                  ment reconstructed by backward filtering oscillates at the end of the time series, namely 20 s. This is because the
+                                  backward filtering is a reverse operation on the time series, the Kalman gain has a different trend. The reason for
+                                  the oscillation is due to the inaccurate estimation of the initial value of the velocity, but the displacement error
+                                  is gradually reduced after the subsequent correction of the algorithm.
+                                      Figure 7c illustrates the displacement time history reconstructed by smoothing Kalman filtering. It can be
+                                  seen that the displacement curve of 0–5 s is obviously smoother. The partial enlargement also shows that the
+                                  degree of oscillation near 0 s and 20 s is significantly reduced. On the whole, the error indexes of forward filter-
+                                  ing, the backward filtering and the smoothing filtering are 0.92%, 1.45%, 0.81% respectively, indicating that the
+                                  smoothing Kalman filtering technique can improve the accuracy of the reconstructed displacement effectively.
+                                  The smoothing Kalman filtering algorithm is applied to reconstruct the displacement in the following discussion.
+
+                                  Parametric analysis. In actual engineering, acceleration and strain response data may have different sam-
+                                  pling rates, and noise levels, or reconstructed displacement points may vary. In order to investigate the robust-
+                                  ness of the algorithm, three parameters were proposed, namely sampling rate ratio (SRR), signal to noise ratio
+                                  (SNR), and distance from fixed end (DFF). Among them, the SRR refers to the ratio of acceleration sampling rate
+                                  and strain sampling rate. Refer to Table 1 for specific working conditions.
+                                      Acceleration, strain and displacement response data under different working conditions were acquired using
+                                  ANSYS software. The positions of the applied load point and the strain response extraction point are the same as
+                                  those in Fig. 2, while the locations of the acceleration and displacement response extraction points were increased
+                                  by three, which were respectively 0.2 m, 0.4 m and 0.6 m from the fixed end. Then the corresponding white
+
+
+Scientific Reports |   (2022) 12:19904 |               https://doi.org/10.1038/s41598-022-24449-2                                                     7
+
+                                                                                                                                                 Vol.:(0123456789)
+          www.nature.com/scientificreports/
+
+
+
+
+                                            Figure 7.  Displacement time histories reconstructed by different multi-rate Kalman filtering algorithms
+                                            compared with theoretical displacement.
+
+
+
+
+          Scientific Reports |   (2022) 12:19904 |              https://doi.org/10.1038/s41598-022-24449-2                                             8
+
+Vol:.(1234567890)
+www.nature.com/scientificreports/
+
+
+                                   Parameter   SRR   SNR (db)     DFF (m)
+                                                4    100          0.8
+                                               20    100          0.8
+                                   SRR
+                                               50    100          0.8
+                                               100   100          0.8
+                                                4     5           0.8
+                                                4    10           0.8
+                                   SNR (db)
+                                                4    20           0.8
+                                                4    100          0.8
+                                                4    100          0.2
+                                                4    100          0.4
+                                   DFF (m)
+                                                4    100          0.6
+                                                4    100          0.8
+
+
+                                  Table 1.  Parameter settings.
+
+
+
+
+                                  Figure 8.  Displacement time history comparison.
+
+
+
+                                  Gaussian noise was added to the acceleration and strain response according to the specific working conditions.
+                                  For saving space, the follow-up discussion only gives the displacement time history diagram with the largest
+                                  error in each influencing factor.
+                                     Figure 8a displays displacement time history when the SRR is 100 with the SNR of strain and acceleration are
+                                  the same, it illustrates that the degree of agreement between the two curves is reduced compared with Fig. 7c.
+
+
+Scientific Reports |   (2022) 12:19904 |              https://doi.org/10.1038/s41598-022-24449-2                                               9
+
+                                                                                                                                          Vol.:(0123456789)
+          www.nature.com/scientificreports/
+
+
+                                             SRR            4               20             50            100
+                                             γ (%)          0.81            1.35           1.85          2.86
+
+
+                                            Table 2.  The error indexes corresponding to the different SRRs.
+
+
+
+
+                                            Figure 9.  Displacement time history comparison (SRR is 4, SNR is 5 db, DFF is 0.8 m).
+
+
+
+                                             SNR (dB)              5               10             20            100
+                                             γ (%)                 2.86            2.18           1.68          0.81
+
+
+                                            Table 3.  The error indexes corresponding to different SNRs.
+
+
+
+                                            This is due to the increase in the SRR results in a longer measurement update interval, which in turn increases
+                                            the error. The pseudo-static displacement error is larger than that of the high-frequency displacement, but the
+                                            reduction of the strain sampling rate will not affect the reconstruction of the pseudo-static displacement in
+                                            fact because of the strain corresponding to the pseudo-static displacement changes slowly. On the contrary,
+                                            the accuracy of the high-frequency displacement is more limited by the strain sampling rate owing to the rapid
+                                            change of the corresponding strain. The reason for this situation is that the noise added to acceleration and
+                                            strain is unreasonable. Figure 8b shows a comparison diagram between reconstructed displacement time history
+                                            when the SNR of acceleration and strain noise is different and theoretical displacement, which indicates that the
+                                            pseudo-static displacement error is small and the high-frequency displacement error is large, that confirms to
+                                            the previous judgment. As a result of the parameter analysis mainly aiming at the robustness of the algorithm,
+                                            the acceleration and strain noise levels remain consistent in the subsequent discussion.
+                                                Table 2 demonstrates the error indexes corresponding to different SRRs. As the ratio of sampling rates
+                                            increases, the error index γ also increases, which is the consequence of the requirement of the strain-derived
+                                            displacement to guide the update process of the displacement error in the measurement update phase of the
+                                            Kalman filtering. When the strain sampling rate is reduced, the time interval of the measurement update phase
+                                            will also become longer and will lead to the larger error of reconstructed displacement. But even when the SRR
+                                            reaches 100, the γ is still only 2.86%, which shows that the proposed data fusion algorithm still has good robust-
+                                            ness when the sampling rate ratio is large.
+                                                As shown in Fig. 9, the accuracy is reduced to a certain extent compared with Fig. 7c, especially in the
+                                            0–5 s stage, the pseudo-static reconstructed displacement has been underestimated or overestimated in various
+                                            degrees at most time points. However, the high-frequency reconstructed displacement within 5–20 s only shows
+                                            a decrease in accuracy at the peak. Which is since the increase in the SNR makes the strain and acceleration
+                                            response more inaccurate, yet the acceleration sampling frequency is higher, which can provide more information
+                                            for the high-frequency displacement reconstruction process, hence, the accuracy change of the high-frequency
+                                            displacement is smaller than that of the pseudo-static displacement.
+                                                Table 3 indicates the error indexes corresponding to different SNRs. It can be seen that as the SNR increases,
+                                            the error index γ gradually decreases. This is because the acceleration and strain responses are closer to the
+                                            theoretical values as the noise level becomes lower and lower that results the reconstructed displacement being
+                                            closer to the theoretical values. And when the SNR is reduced to 5 db, the γ is only 2.86%, which displays that
+                                            the proposed algorithm has good anti-noise performance.
+
+
+
+          Scientific Reports |   (2022) 12:19904 |                 https://doi.org/10.1038/s41598-022-24449-2                                              10
+
+Vol:.(1234567890)
+www.nature.com/scientificreports/
+
+
+
+
+                                  Figure 10.  Displacement time history comparison (SRR is 4, SNR is 100 db, DFF is 0.2 m).
+
+
+
+                                   DFF (m)            0.2            0.4            0.6            0.8
+                                   γ (%)              2.02           1.22           0.94           0.81
+
+
+                                  Table 4.  The error indexes corresponding to different positions.
+
+
+
+                                      Figure 10 describes a comparison diagram between the reconstructed displacement time history at 0.2 m
+                                  from the fixed end and theoretical displacement. The reconstruction accuracy of pseudo-static displacement and
+                                  high-frequency displacement is reduced compared with Fig. 7c, which due to the target point is relatively close
+                                  to the vibration mode zero point of the first two displacement modes of the structure, and the error in obtain-
+                                  ing the displacement mode shape from the strain mode shape increases, which leads to a larger strain-derived
+                                  displacement error.
+                                      Table 4 shows the corresponding error indexes at different positions. As the distance from the fixed end
+                                  increases, the error index γ gradually decreases. Which is due to the error of the displacement mode calculated
+                                  from the strain mode near the fixed end is larger than that of the free end. Therefore, the error of strain-derived
+                                  displacement is also increased, and the displacement response near the fixed end is smaller, which also makes
+                                  reconstruction difficult. But the γ is only 2.02% when the distance is only 0.2 m, which demonstrates that the
+                                  proposed data fusion algorithm can effectively reconstruct the displacement closer to the fixed end.
+
+                                  Experimental validation
+                                  Experiment system. To further study the situation when the proposed algorithm is applied to the actual
+                                  structure, a steel plate was processed into a cantilever beam model for model test. The cantilever beam model
+                                  is 800 mm long, has a section size of 30 × 3.75 ­mm2, an elastic modulus of 210 GPa, and a Poisson’s ratio of 0.3.
+                                  Then it was placed vertically on an optical platform, and five resistance strain gauges are evenly arranged along
+                                  the height of the beam. The acceleration response was measured by a piezoelectric acceleration sensor, and a
+                                  laser displacement sensor was used to collect the displacement response of the measurement point. The light
+                                  emitted by the laser displacement meter, the center point of the strain gauge and the accelerometer should be
+                                  guaranteed to be on the axis of the cantilever beam, and all sensors should be vertically parallel to the cantilever
+                                  beam. It is worth noting that the part of the cables close to the structure and sensors are fixed on the structure.
+                                  Therefore, the cables, sensors and structure can be regarded as one object. This means that the identified mode
+                                  shape is of this overall structure, and the proposed method will also be applied to this overall structure. Moreo-
+                                  ver, the strain gauge is fixed on the surface of the cantilever beam by strong glue, the accelerometer is adsorbed
+                                  on the surface of the cantilever beam through the bottom magnetic seat, and the laser displacement meter is
+                                  fixed on the other beam opposite to the cantilever beam to be tested by strong double-sided glue.
+                                      In order to calibrate all the sensors, the strain gauge and the standard fiber grating strain sensor were installed
+                                  on both sides of the standard specimen, and use the universal testing machine to load. The sensitivity of the
+                                  strain gauge is calculated according to the sensitivity of the standard fiber grating sensor. The calibration of the
+                                  accelerometer is completed by the acceleration sensor calibration system, and the sensitivity of the laser displace-
+                                  ment meter can be obtained according to the factory test report of the sensor provided by the manufacturer.
+                                  The main performance parameters of the sensor are shown in Table 5, it can be seen from the above table that
+                                  the resolution of the laser displacement meter can reach 0.005 mm, which is enough to ensure the accuracy of
+                                  the measured value.
+                                      The sensor layout is shown in Fig. 11.
+
+
+
+Scientific Reports |   (2022) 12:19904 |               https://doi.org/10.1038/s41598-022-24449-2                                                     11
+
+                                                                                                                                                  Vol.:(0123456789)
+          www.nature.com/scientificreports/
+
+
+                                                               Strain gauge   Accelerometer   Laser displacement meter
+                                             Measuring range   ± 1000 με      50 g            ± 500 mm
+                                             Resolution        0.02 με        0.0002 g        0.005 mm
+
+                                            Table 5.  Performance parameters of all sensors.
+
+
+
+
+                                            Figure 11.  Sensor layout.
+
+
+
+                                                A coordinate system was also established Fig. 11, and excitation was applied along the Z direction. The
+                                            loading method adopted a manual push method to produce pseudo-static displacement, high-frequency dis-
+                                            placement with zero mean and non-zero mean. The acceleration and strain sensors were demodulated by the
+                                            photoelectric synchronous demodulator independently developed by the research group, and the signal of the
+                                            laser displacement meter was collected by the Donghua (DH) dynamic signal acquisition and analysis system.
+                                            The built experimental system is shown in Fig. 12. The acceleration, strain and displacement sampling rate are
+                                            set to 1200 Hz, 300 Hz and 10 kHz respectively. And the acquisition time was 20 s. The method of resampling
+                                            was adopted to reduce the displacement sampling rate to 1200 Hz in the later data processing.
+
+                                            Displacement reconstruction. The data fusion algorithm and SSI method proposed above were used to
+                                            process the collected dynamic response to realize displacement reconstruction, and the reconstructed displace-
+                                            ment was compared with the data collected by the laser displacement meter, the acceleration-derived displace-
+                                            ment and the strain-derived displacement. The proposed method was also compared with the existing method
+                                            proposed by Ma et al.35. Figure 13 illustrates that the acceleration-derived results fail to recover non-zero mean
+                                            and pseudo-static components. The strain-derived displacement and displacement calculated by Ma et al. are
+                                            very close to the measured values, and the data fusion displacement is the most accurate one, indicating that the
+                                            reconstruction results are reliable and accurate.
+                                                Different Kalman filter algorithms were used to reconstruct the displacements to show the effectiveness of
+                                            the smoothing technique. Figure 14a compares the forward filtering displacement and the measured displace-
+                                            ment time history of the measurement point at 0.79 m, which can be seen that the reconstructed displacement
+                                            curve calculated by the data fusion algorithm is in good agreement with the measured displacement. Zero mean
+                                            high-frequency displacement, non-zero mean high-frequency displacement and pseudo-static displacement are
+                                            all effectively reconstructed. The error index γ is 0.96%, indicating the proposed method has a high reconstruc-
+                                            tion accuracy.
+                                                Figure 14b,c indicates the displacement reconstructed by backward filtering and smoothing filtering and
+                                            measured displacement respectively. As shown in Fig. 14b, the results of the backward Kalman filtering are not
+
+
+          Scientific Reports |   (2022) 12:19904 |                https://doi.org/10.1038/s41598-022-24449-2                                               12
+
+Vol:.(1234567890)
+www.nature.com/scientificreports/
+
+
+
+
+                                  Figure 12.  Vibration experiment system.
+
+
+
+
+                                  Figure 13.  Comparison of displacement reconstructed by different methods.
+
+
+                                  completely consistent with those of the forward. The displacement time history of the backward filtering oscillates
+                                  around 20 s that does not appear in the forward filtering, which is the same as the numerical simulation section.
+                                  Figure 14c indicates that the degree of oscillation at the peak is significantly reduced. Overall, the γ has reduced
+                                  from 0.96% to 0.78%, demonstrating that the smoothing Kalman filtering technique can effectively diminish
+                                  the error, which is consistent with the simulation results in “Case study using a cantilever beam”. The smoothing
+                                  Kalman filtering algorithm was used to reconstruct the displacement in the following discussion.
+
+                                  Parametric analysis. Since the actual response collected already contains noise, the influence of noise on
+                                  the accuracy of the proposed algorithm is no longer analyzed here, and only the influence of SRR and DFF on
+                                  the accuracy of the algorithm are studied. The specific working conditions are shown in Table 6. The accelera-
+                                  tion and displacement sampling rate remain unchanged, and the strain sampling rate changes accordingly with
+                                  different working conditions.
+                                      To study the influence of the distance from the fixed end, it is necessary to arrange the acceleration and
+                                  displacement sensors to four different measurement points since the laser displacement meter can only meas-
+                                  ure the dynamic displacement of one point at a time; neither the loading method nor the location of the strain
+                                  measurement point changes.
+                                      As shown in Fig. 15, the accuracy of the reconstructed displacement has been reduced to a certain extent
+                                  compared with Fig. 14b, and the fitting error of the high-frequency displacement part is larger than that of the
+                                  pseudo-static displacement. This is due to the pseudo-static displacement has a low change frequency so as the
+                                  corresponding strain change rate. Even the displacement reconstructed by the strain with a low sampling rate
+                                  can have a good effect, while high-frequency displacement has a high change frequency, which not only relies
+
+
+Scientific Reports |   (2022) 12:19904 |               https://doi.org/10.1038/s41598-022-24449-2                                                  13
+
+                                                                                                                                               Vol.:(0123456789)
+          www.nature.com/scientificreports/
+
+
+
+
+                                            Figure 14.  Comparison between displacement reconstructed by different Kalman filtering algorithms and
+                                            measured displacement.
+
+
+
+
+          Scientific Reports |   (2022) 12:19904 |             https://doi.org/10.1038/s41598-022-24449-2                                            14
+
+Vol:.(1234567890)
+www.nature.com/scientificreports/
+
+
+                                   Parameter   SRR      DFF (m)
+                                                4       0.79
+                                               10       0.79
+                                   SRR
+                                               20       0.79
+                                               40       0.79
+                                                4       0.2
+                                                4       0.4
+                                   DFF (m)
+                                                4       0.62
+                                                4       0.79
+
+                                  Table 6.  Parameter settings.
+
+
+
+
+                                  Figure 15.  Displacement time history comparison (SRR is 40, DFF is 0.79 m).
+
+
+
+                                   SRR              4               10             20            40
+                                   γ (%)            0.78            0.98           2.54          9.47
+
+
+                                  Table 7.  The error indexes corresponding to the different SRRs.
+
+
+
+                                  on the strain-derived displacement to instruct the measurement update process, but also requires the accelera-
+                                  tion integration results to provide information. The decrease of the strain sampling rate makes the measurement
+                                  update interval longer, which in turn leads to larger high-frequency displacement fitting errors. This also verifies
+                                  the results of the numerical simulation section.
+                                      Table 7 describes the error indexes corresponding to the different SRRs. As the SRR increases, the error
+                                  index γ gradually increases. The above situation also occurs because the increase of the sampling rate makes the
+                                  measurement update time interval longer, and the fitting error of the high-frequency displacement time history
+                                  increases. However, when SRR reaches 40, the error index is only 9.47%, illustrating that the algorithm is suitable
+                                  for situations with low sampling rate strain.
+                                      Figure 16 displays reconstructed displacement and measured displacement at 0.2 m from the fixed end. It can
+                                  be found that the accuracy of reconstructed displacement is reduced compared with Fig. 14b. The fitting errors
+                                  of high-frequency displacements of either zero mean or non-zero mean are larger than those of pseudo-static
+                                  displacement, which due to the decreasing of signal to noise ratio of acceleration and displacement response at
+                                  0.2 m. The reconstructed process of pseudo-static displacement mainly depends on the strain response, and the
+                                  error is also smaller in comparison.
+                                      Table 8 shows error indexes corresponding to different positions. As the DFF increases, the error index γ
+                                  gradually decreases. But not only because the fixed end is located at the mode zero point of the first two dis-
+                                  placement modes, but also because the SNR of the acceleration and displacement response near the fixed end
+                                  decreases, which results in the measurement error increases. The γ is 4.72% when the DFF is 0.2 m, which shows
+                                  that the proposed algorithm can effectively reconstruct the displacement time history of the measurement point
+                                  near the fixed end in actual measurement.
+
+
+
+Scientific Reports |   (2022) 12:19904 |                   https://doi.org/10.1038/s41598-022-24449-2                                              15
+
+                                                                                                                                               Vol.:(0123456789)
+          www.nature.com/scientificreports/
+
+
+
+
+                                            Figure 16.  Displacement time history comparison (SRR is 4, DFF is 0.2 m).
+
+
+
+                                             DFF (m)               0.2            0.4            0.62           0.79
+                                             γ (%)                 4.72           1.35           1.34           0.78
+
+
+                                            Table 8.  The error indexes corresponding to different positions.
+
+
+
+                                            Summary and conclusion
+                                            This paper proposes a method using multi-rate data fusion based on high-frequency acceleration and low-
+                                            frequency strain responses to solve the problem of displacement reconstruction of beam structure. The SSI
+                                            method was utilized to process the low sampling rate strain response to calculate the strain mode of the structure,
+                                            and then derives the low sampling rate displacement response through the mode superposition method; finally,
+                                            the multi-rate Kalman filtering algorithm is used to correct the acceleration integration error to achieve the
+                                            purpose of reconstructing the displacement with high sampling rate, which is verified by numerical simulation
+                                            and cantilever beam model experiment. The proposed method can effectively reconstruct the zero mean, non-
+                                            zero mean high-frequency displacement and pseudo-static displacement of the target point. Among them, the
+                                            pseudo-static displacement mainly depends on the accuracy of the strain response measurement, and the high-
+                                            frequency displacement depends on the measured data of acceleration and strain. The conclusions are as follows:
+
+                                            (1)      This method has good anti-noise performance. In the numerical simulation, the error index γ of recon-
+                                                     structed displacement is only 2.86% when the SNRs of acceleration and strain responses are both 5 db. The
+                                                     dynamic displacement can also be accurately reconstructed using real measurement data with noise in the
+                                                     model experiment.
+                                            (2)      This method can still maintain excellent performance when the acceleration and strain sampling rates differ
+                                                     greatly. In the numerical simulation, the γ is 2.86% with a SRR of 100, while the γ is only 9.47% when the
+                                                     SRR is 40 in the experiment.
+                                            (3)      For cantilever structures, the closer the position to the fixed end, the greater the error index of reconstructed
+                                                     displacement due to the closer to the displacement mode zero point. In the numerical simulation, the γ
+                                                     at 0.8 m from the fixed end is 0.81% meanwhile is only 2.02% at 0.2 m, while the γ in the experiment are
+                                                     only 0.78% and 4.72%, respectively, indicating that the displacement reconstruction at a position relatively
+                                                     close to the fixed end also has excellent performance.
+                                            (4)      When the acceleration and strain responses in the entire time series are known, smoothing technology
+                                                     can effectively improve the accuracy of the reconstructed displacement, which is based on the premise of
+                                                     sacrificing the function of real-time online reconstruction of displacement.
+                                            (5)      The proposed data fusion algorithm reconstructs displacements with higher accuracy than those based on
+                                                     strain or acceleration alone.
+
+                                               This method makes full use of high sampling rate acceleration and low sampling rate strain to accurately
+                                            reconstruct the dynamic displacement of the cantilever beam, and the comparison with existing methods shows
+                                            that the proposed method has higher accuracy. It is worth noting that this method is also suitable for structures
+                                            have other boundary conditions (such as simply supported beam) that can use the SSI method to calculate the
+                                            modal parameters. As a result of this method does not require additional monitoring equipment and only few
+                                            measurement points are needed, which means that the purpose of real-time dynamic displacement reconstruc-
+                                            tion with higher precision can be achieved based on the current health monitoring system. The above shows
+                                            that the proposed method has the advantages of simplicity, economy and real-time efficiency, which is expected
+
+
+          Scientific Reports |   (2022) 12:19904 |                  https://doi.org/10.1038/s41598-022-24449-2                                                     16
+
+Vol:.(1234567890)
+www.nature.com/scientificreports/
+
+
+                                  to be widely used in the field of structural health monitoring. Although modern DAQ systems can provide
+                                  synchronized sampling rate for the heterogeneous sensors, there are still many demodulation devices that have
+                                  been in service for a long time that cannot achieve this. Moreover, the sampling rate of some sensors (e.g. incli-
+                                  nometer) are also limited by their own conditions. To solve this issue, this paper proposes a multi-rate data fusion
+                                  algorithm, which is applicable to both the same rate and different rate data. This paper conducted a preliminary
+                                  study on the displacement reconstruction of uniform cross-section beams, but the actual structure usually has
+                                  a variety of cross-sectional forms. In order to make the proposed method more suitable for actual engineering,
+                                  the scope of application can be extended to variable cross-section structures in the future.
+
+                                  Data availability
+                                  All data generated or analyzed during this study are included in this published article [and its supplementary
+                                  information files].
+
+                                  Received: 29 July 2022; Accepted: 15 November 2022
+
+
+                                  References
+                                   1. Wernitz, S., Hofmeister, B., Jonscher, C., Griessmann, T., & Rolfes, R. A new open-database benchmark structure for vibration-
+                                      based Structural Health Monitoring. Struct. Control Health Monit. e3077.
+                                   2. Gomez, J., Casas, J. R. & Villalba, S. structural health monitoring with distributed optical fiber sensors of tunnel lining affected by
+                                      nearby construction activity. Autom. Constr. 117, 103261 (2020).
+                                   3. Oh, B. K. & Park, H. S. Urban safety network for long-term structural health monitoring of buildings using convolutional neural
+                                      network. Autom. Constr. 137, 104225 (2022).
+                                   4. Li, C. et al. Experimental investigation and Error analysis of high precision FBG displacement sensor for structural health moni-
+                                      toring. Int. J. Struct. Stab. Dyn. 20(6), 2040011 (2020).
+                                   5. Li, M. Y., Kefal, A., Oterkus, E. & Oterkus, S. Structural health monitoring of an offshore wind turbine tower using iFEM meth-
+                                      odology. Ocean Eng. 204, 107291 (2020).
+                                   6. Martinez, D., Malekjafarian, A. & Obrien, E. Bridge health monitoring using deflection measurements under random traffic. Struct.
+                                      Control. Health Monit. 27(9), e2593 (2020).
+                                   7. Dong, C. Z. & Catbas, F. N. A review of computer vision-based structural health monitoring at local and global levels. Struct.
+                                      Health Monit. Int. J. 20(2), 692–743 (2021).
+                                   8. Jeon, J.-C. & Lee, H.-H. Development of displacement estimation method of girder bridges using measured strain signal induced
+                                      by vehicular loads. Eng. Struct. 186, 203–215 (2019).
+                                   9. Xu, Y., Brownjohn, J. M. W., Hester, D. & Koo, K. Y. Long-span bridges: Enhanced data fusion of GPS displacement and deck
+                                      accelerations. Eng. Struct. 147, 639–651 (2017).
+                                  10. Ma, Z. X., Choi, J. & Sohn, H. Real-time structural displacement estimation by fusing asynchronous acceleration and computer
+                                      vision measurements. Comput. Aid. Civ. Infrastruct. Eng. 37(6), 688–703 (2022).
+                                  11. Zhou, Q., Li, Q. S., Han, X. L., Xu, K. & Wan, J. W. Horizontal displacement estimation of high-rise structures by fusing strain and
+                                      acceleration measurements. J. Build. Eng. 57, 104964 (2022).
+                                  12. Xia, Y., Zhang, P., Ni, Y. Q. & Zhu, H. P. Deformation monitoring of a super-tall structure using real-time strain data. Eng. Struct.
+                                      67, 29–38 (2014).
+                                  13. Thomas, J., Gurusamy, S., Rajanna, T. R. & Asokan, S. Structural shape estimation by mode shapes using fiber Bragg grating sen-
+                                      sors: A genetic algorithm approach. IEEE Sens. J. 20(6), 2945–2952 (2020).
+                                  14. Gomez, F., Park, J.-W. & Spencer, B. F. Reference-free structural dynamic displacement estimation method. Struct. Control. Health
+                                      Monit. 25(8), e2209 (2018).
+                                  15. Lee, H. S., Hong, Y. H. & Park, H. W. Design of an FIR filter for the displacement reconstruction using measured acceleration in
+                                      low-frequency dominant structures. Int. J. Numer. Meth. Eng. 82(4), 403–434 (2010).
+                                  16. Shin, S., Lee, S. U., Kim, Y. & Kim, N. S. Estimation of bridge displacement responses using FBG sensors and theoretical mode
+                                      shapes. Struct. Eng. Mech. 42(2), 229–245 (2012).
+                                  17. Wang, Z.-C., Geng, D., Ren, W.-X. & Liu, H.-T. Strain modes based dynamic displacement estimation of beam structures with
+                                      strain sensors. Smart Mater. Struct. 23(12), 125045 (2014).
+                                  18. Ma, Z., Choi, J., Liu, P. & Sohn, H. Structural displacement estimation by fusing vision camera and accelerometer using hybrid
+                                      computer vision algorithm and adaptive multi-rate Kalman filter. Autom. Constr. 140, 104338 (2022).
+                                  19. Ma, Z., Choi, J., Yang, L. & Sohn, H. Structural displacement estimation using accelerometer and FMCW millimeter wave radar.
+                                      Mech. Syst. Signal Process. 182, 109582 (2023).
+                                  20. Xu, Y., Brownjohn, J. M. W. & Huseynov, F. Accurate deformation monitoring on bridge structures using a cost-effective sensing
+                                      system combined with a camera and accelerometers: Case study. J. Bridg. Eng. 24(1), 05018014 (2019).
+                                  21. Roberts, G. W., Meng, X. L. & Dodson, A. H. Integrating a global positioning system and accelerometers to monitor the deflection
+                                      of bridges. J. Surv. Eng. 130(2), 65–72 (2004).
+                                  22. Park, J.-W., Sim, S.-H. & Jung, H.-J. Displacement estimation using multimetric data fusion. IEEE/ASME Trans. Mechatron. 18(6),
+                                      1675–1682 (2013).
+                                  23. Cho, S., Park, J. W., Palanisamy, R. P. & Sim, S. H. Reference-free displacement estimation of bridges using Kalman filter-based
+                                      multimetric data fusion. J. Sens. 2016, 3791856 (2016).
+                                  24. Chang, C. C. & Xiao, X. H. An integrated visual-inertial technique for structural displacement and velocity measurement. Smart
+                                      Struct. Syst. 6(9), 1025–1039 (2010).
+                                  25. Zhang, C.D., Li, J.A., & Xu, Y.L. online dynamic response reconstruction in the presence of observation outliers. Int. J. Struct. Stab.
+                                      Dyn. 21(13) (2021).
+                                  26. Zhu, H. et al. Multi-rate data fusion for dynamic displacement measurement of beam-like supertall structures using acceleration
+                                      and strain sensors. Struct. Health Monit. Int. J. 19(2), 520–536 (2019).
+                                  27. Smyth, A. & Wu, M. L. Multi-rate Kalman filtering for the data fusion of displacement and acceleration response measurements
+                                      in dynamic system monitoring. Mech. Syst. Signal Process. 21(2), 706–723 (2007).
+                                  28. Kim, K. & Sohn, H. Dynamic displacement estimation by fusing LDV and LiDAR measurements via smoothing based Kalman
+                                      filtering. Mech. Syst. Signal Process. 82, 339–355 (2017).
+                                  29. Kim, K., Choi, J., Koo, G. & Sohn, H. Dynamic displacement estimation by fusing biased high-sampling rate acceleration and
+                                      low-sampling rate displacement measurements using two-stage Kalman estimator. Smart Struct. Syst. 17(4), 647–667 (2016).
+                                  30. Qing Zhang, X.F., Sun, Z., & Ren, L. A smart multi-rate data fusion method for displacement reconstruction of beam structures.
+                                      Sensors 22, 3167. https://​doi.​org/​10.​3390/​s2209​3167 (2022).
+
+
+
+Scientific Reports |   (2022) 12:19904 |                   https://doi.org/10.1038/s41598-022-24449-2                                                                     17
+
+                                                                                                                                                                     Vol.:(0123456789)
+          www.nature.com/scientificreports/
+
+
+                                            31. Kim, J., Kim, K. & Sohn, H. Autonomous dynamic displacement estimation from data fusion of acceleration and intermittent
+                                                displacement measurements. Mech. Syst. Signal Process. 42(1–2), 194–205 (2014).
+                                            32. Zhang, Q., Fu, X. & Ren, L. Deflection estimation of beam structures based on the measured strain mode shape. Smart Mater.
+                                                Struct. 30(10), 105003 (2021).
+                                            33. Li, H.-N., Wang, J.-X., Fu, X., Ren, L. & Zhang, Q. Field measurements of typhoon effects on a transmission tower and its modal
+                                                parameter identification. Adv. Struct. Eng. 23(8), 1548–1561 (2020).
+                                            34. Zhang, Q., Fu, X., Ren, L. & Jia, Z. G. Modal parameters of a transmission tower considering the coupling effects between the tower
+                                                and lines. Eng. Struct. 220, 110947 (2020).
+                                            35. Ma, Z., Chung, J., Liu, P. & Sohn, H. Bridge displacement estimation by fusing accelerometer and strain gauge measurements.
+                                                Struct. Control. Health Monit. 28(6), e2733 (2021).
+
+                                            Acknowledgements
+                                            This research was supported by the National Natural Science Foundation of China (grant no. 52078104) and
+                                            Dalian High-Level Talent Innovation Support Program (grant nos. 2019RD01 and 2020RQ056).
+
+                                            Author contributions
+                                            L.R.: conceptualization, supervision, methodology, writing—reviewing and editing investigation. Q.Z.: data
+                                            curation, methodology, writing—original draft preparation. X.F.: supervision, validation, methodology, writ-
+                                            ing—reviewing and editing investigation.
+
+                                            Competing interests
+                                            The authors declare no competing interests.
+
+                                            Additional information
+                                            Correspondence and requests for materials should be addressed to Q.Z.
+                                            Reprints and permissions information is available at www.nature.com/reprints.
+                                            Publisher’s note Springer Nature remains neutral with regard to jurisdictional claims in published maps and
+                                            institutional affiliations.
+                                                          Open Access This article is licensed under a Creative Commons Attribution 4.0 International
+                                                          License, which permits use, sharing, adaptation, distribution and reproduction in any medium or
+                                            format, as long as you give appropriate credit to the original author(s) and the source, provide a link to the
+                                            Creative Commons licence, and indicate if changes were made. The images or other third party material in this
+                                            article are included in the article’s Creative Commons licence, unless indicated otherwise in a credit line to the
+                                            material. If material is not included in the article’s Creative Commons licence and your intended use is not
+                                            permitted by statutory regulation or exceeds the permitted use, you will need to obtain permission directly from
+                                            the copyright holder. To view a copy of this licence, visit http://​creat​iveco​mmons.​org/​licen​ses/​by/4.​0/.
+
+                                            © The Author(s) 2022
+
+
+
+
+          Scientific Reports |   (2022) 12:19904 |                  https://doi.org/10.1038/s41598-022-24449-2                                                                  18
+
+Vol:.(1234567890)
+

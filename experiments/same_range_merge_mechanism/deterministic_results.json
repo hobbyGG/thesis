@@ -1,0 +1,520 @@
+{
+  "cases": [
+    {
+      "amplitudes": [
+        1.0,
+        0.8
+      ],
+      "angles_deg": [
+        -4.0,
+        4.0
+      ],
+      "expected_route": "merge",
+      "n_sources": 2,
+      "name": "close_same_phase",
+      "note": "Close angles below the declared 12 deg peak-separation threshold; non-destructive mixture.",
+      "q_amp_mm": 0.2,
+      "q_second_amp_mm": 0.05,
+      "snr_db": 35.0,
+      "static_phase_rad": [
+        0.15,
+        -0.3
+      ]
+    },
+    {
+      "amplitudes": [
+        1.0,
+        0.9
+      ],
+      "angles_deg": [
+        -25.0,
+        25.0
+      ],
+      "expected_route": "split",
+      "n_sources": 2,
+      "name": "separated_balanced",
+      "note": "Separated same-range angles with comparable amplitudes.",
+      "q_amp_mm": 0.4,
+      "q_second_amp_mm": 0.1,
+      "snr_db": 35.0,
+      "static_phase_rad": [
+        0.15,
+        -0.3
+      ]
+    },
+    {
+      "amplitudes": [
+        1.0,
+        0.35
+      ],
+      "angles_deg": [
+        -18.0,
+        18.0
+      ],
+      "expected_route": "split",
+      "n_sources": 2,
+      "name": "separated_unequal",
+      "note": "Separated angles but a weak second scatterer; tests leakage/conditioning.",
+      "q_amp_mm": 0.4,
+      "q_second_amp_mm": 0.1,
+      "snr_db": 35.0,
+      "static_phase_rad": [
+        0.15,
+        -0.3
+      ]
+    },
+    {
+      "amplitudes": [
+        1.0,
+        1.0
+      ],
+      "angles_deg": [
+        -4.0,
+        4.0
+      ],
+      "expected_route": "negative",
+      "n_sources": 2,
+      "name": "close_destructive",
+      "note": "Negative case: close equal phasors initially cancel; unresolved mixture is not assumed equivalent.",
+      "q_amp_mm": 0.16,
+      "q_second_amp_mm": 0.04,
+      "snr_db": 35.0,
+      "static_phase_rad": [
+        0.0,
+        3.141592653589793
+      ]
+    },
+    {
+      "amplitudes": [
+        1.0,
+        1.0
+      ],
+      "angles_deg": [
+        0.0,
+        0.0
+      ],
+      "expected_route": "negative",
+      "n_sources": 2,
+      "name": "coincident_destructive",
+      "note": "Limit case: exactly coincident opposite phasors cancel in every array channel; both routes should abstain.",
+      "q_amp_mm": 0.16,
+      "q_second_amp_mm": 0.04,
+      "snr_db": 35.0,
+      "static_phase_rad": [
+        0.0,
+        3.141592653589793
+      ]
+    }
+  ],
+  "experiment": "same_range_merge_split_mechanism",
+  "model": {
+    "d_over_lambda": 0.5,
+    "estimator": "array-only Bartlett peaks + conventional beamforming + unwrap + fixed geometric cos(beta)",
+    "fs_hz": 100.0,
+    "guard": "minimum beamformed magnitude >= 5.0x declared complex-noise sigma",
+    "lambda_mm": 4.0,
+    "merge_rule": "strongest detected array-only angle peak; one beamformed phasor",
+    "n_rx": 8,
+    "n_slow": 256,
+    "phase_sign_reference": "phase(y[k]*conj(y[0])); qhat-qhat[0], no sign/refit optimization",
+    "same_range": true,
+    "split_rule": {
+      "grid_deg": [
+        -60.0,
+        60.0,
+        0.25
+      ],
+      "min_second_peak_ratio": 0.18,
+      "min_separation_deg": 12.0
+    },
+    "truth_used_by_estimator": false
+  },
+  "rows": [
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.5484871216111022,
+            "median_abs": 1.5334823704922882,
+            "min_abs": 1.5177504374784494
+          }
+        ],
+        "corr": 0.9999716135162116,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.004755706064822063,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.0018698329578264732,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 0,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8142355482723646,
+            "median_abs": 0.7978188908679827,
+            "min_abs": 0.7836570015110742
+          }
+        ],
+        "corr": 0.9999592546451568,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.011574537114703354,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.004033385551708154,
+        "spectrum_peak_ratio_2nd": 0.7744798319106005
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 0,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8142355482723646,
+            "median_abs": 0.7978188908679827,
+            "min_abs": 0.7836570015110742
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9240704008265642,
+            "median_abs": 0.9065246860405007,
+            "min_abs": 0.8887418516665645
+          }
+        ],
+        "corr": 0.9999859306841618,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.4443999370363271,
+          0.555600062963673
+        ],
+        "max_abs_error_mm": 0.006854519289004268,
+        "mode": "split",
+        "rmse_mm": 0.002674778672750363,
+        "spectrum_peak_ratio_2nd": 0.7744798319106005
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5020598718521979,
+            "median_abs": 0.49023101408324626,
+            "min_abs": 0.4795346241314972
+          }
+        ],
+        "corr": 0.9999366206542085,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.01390378909047732,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.005103824071796331,
+        "spectrum_peak_ratio_2nd": 0.21908674061501812
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 0,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5020598718521979,
+            "median_abs": 0.49023101408324626,
+            "min_abs": 0.4795346241314972
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0602834322619699,
+            "median_abs": 1.0487833827817308,
+            "min_abs": 1.0344592453757862
+          }
+        ],
+        "corr": 0.9999886019626153,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.17950983111666435,
+          0.8204901688833356
+        ],
+        "max_abs_error_mm": 0.004008051231833565,
+        "mode": "split",
+        "rmse_mm": 0.0016474193823064732,
+        "spectrum_peak_ratio_2nd": 0.21908674061501812
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7308345838268162,
+            "median_abs": 0.7156988650904939,
+            "min_abs": 0.6944583701270084
+          }
+        ],
+        "corr": 0.9997343102582377,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.015926944854833147,
+        "merged_angle_deg": 9.75,
+        "mode": "merge",
+        "rmse_mm": 0.008869952400937022,
+        "spectrum_peak_ratio_2nd": 0.9986835593780622
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 0,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7308345838268162,
+            "median_abs": 0.7156988650904939,
+            "min_abs": 0.6944583701270084
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7304508515511655,
+            "median_abs": 0.7162368224515709,
+            "min_abs": 0.6914022973874636
+          }
+        ],
+        "corr": 0.9998261057209172,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.5026168100960425,
+          0.49738318990395736
+        ],
+        "max_abs_error_mm": 0.015890911315124517,
+        "mode": "split",
+        "rmse_mm": 0.007765489262791716,
+        "spectrum_peak_ratio_2nd": 0.9986835593780622
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.021133796289017712,
+            "median_abs": 0.007596156734333613,
+            "min_abs": 0.0008789032608445832
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          12.5,
+          -13.75
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": 12.5,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9002989356270602
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 0,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.021133796289017712,
+            "median_abs": 0.007596156734333613,
+            "min_abs": 0.0008789032608445832
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          12.5,
+          -13.75
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9002989356270602
+      }
+    }
+  ],
+  "seeds": [
+    0
+  ],
+  "summary": {
+    "close_destructive": {
+      "merge": {
+        "coverage_count": 1,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.008869952400937022,
+        "rmse_mm_median_covered": 0.008869952400937022,
+        "rmse_mm_p90_covered": 0.008869952400937022,
+        "trials": 1
+      },
+      "split": {
+        "coverage_count": 1,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.007765489262791716,
+        "rmse_mm_median_covered": 0.007765489262791716,
+        "rmse_mm_p90_covered": 0.007765489262791716,
+        "trials": 1
+      }
+    },
+    "close_same_phase": {
+      "merge": {
+        "coverage_count": 1,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.0018698329578264732,
+        "rmse_mm_median_covered": 0.0018698329578264732,
+        "rmse_mm_p90_covered": 0.0018698329578264732,
+        "trials": 1
+      },
+      "split": {
+        "coverage_count": 0,
+        "coverage_fraction": 0.0,
+        "failure_counts": {
+          "fewer_than_two_array-only_angle_peaks": 1
+        },
+        "rmse_mm_max_covered": null,
+        "rmse_mm_median_covered": null,
+        "rmse_mm_p90_covered": null,
+        "trials": 1
+      }
+    },
+    "coincident_destructive": {
+      "merge": {
+        "coverage_count": 0,
+        "coverage_fraction": 0.0,
+        "failure_counts": {
+          "merged_phasor_amplitude_or_geometry_guard": 1
+        },
+        "rmse_mm_max_covered": null,
+        "rmse_mm_median_covered": null,
+        "rmse_mm_p90_covered": null,
+        "trials": 1
+      },
+      "split": {
+        "coverage_count": 0,
+        "coverage_fraction": 0.0,
+        "failure_counts": {
+          "beamformed_channel_amplitude_or_geometry_guard": 1
+        },
+        "rmse_mm_max_covered": null,
+        "rmse_mm_median_covered": null,
+        "rmse_mm_p90_covered": null,
+        "trials": 1
+      }
+    },
+    "separated_balanced": {
+      "merge": {
+        "coverage_count": 1,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.004033385551708154,
+        "rmse_mm_median_covered": 0.004033385551708154,
+        "rmse_mm_p90_covered": 0.004033385551708154,
+        "trials": 1
+      },
+      "split": {
+        "coverage_count": 1,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.002674778672750363,
+        "rmse_mm_median_covered": 0.002674778672750363,
+        "rmse_mm_p90_covered": 0.002674778672750363,
+        "trials": 1
+      }
+    },
+    "separated_unequal": {
+      "merge": {
+        "coverage_count": 1,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.005103824071796331,
+        "rmse_mm_median_covered": 0.005103824071796331,
+        "rmse_mm_p90_covered": 0.005103824071796331,
+        "trials": 1
+      },
+      "split": {
+        "coverage_count": 1,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.0016474193823064732,
+        "rmse_mm_median_covered": 0.0016474193823064732,
+        "rmse_mm_p90_covered": 0.0016474193823064732,
+        "trials": 1
+      }
+    }
+  }
+}

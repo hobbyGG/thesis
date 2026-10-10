@@ -1,0 +1,3556 @@
+{
+  "cases": [
+    {
+      "amplitudes": [
+        1.0,
+        0.8
+      ],
+      "angles_deg": [
+        -4.0,
+        4.0
+      ],
+      "expected_route": "merge",
+      "n_sources": 2,
+      "name": "close_same_phase",
+      "note": "Close angles below the declared 12 deg peak-separation threshold; non-destructive mixture.",
+      "q_amp_mm": 0.2,
+      "q_second_amp_mm": 0.05,
+      "snr_db": 35.0,
+      "static_phase_rad": [
+        0.15,
+        -0.3
+      ]
+    },
+    {
+      "amplitudes": [
+        1.0,
+        0.9
+      ],
+      "angles_deg": [
+        -25.0,
+        25.0
+      ],
+      "expected_route": "split",
+      "n_sources": 2,
+      "name": "separated_balanced",
+      "note": "Separated same-range angles with comparable amplitudes.",
+      "q_amp_mm": 0.4,
+      "q_second_amp_mm": 0.1,
+      "snr_db": 35.0,
+      "static_phase_rad": [
+        0.15,
+        -0.3
+      ]
+    },
+    {
+      "amplitudes": [
+        1.0,
+        0.35
+      ],
+      "angles_deg": [
+        -18.0,
+        18.0
+      ],
+      "expected_route": "split",
+      "n_sources": 2,
+      "name": "separated_unequal",
+      "note": "Separated angles but a weak second scatterer; tests leakage/conditioning.",
+      "q_amp_mm": 0.4,
+      "q_second_amp_mm": 0.1,
+      "snr_db": 35.0,
+      "static_phase_rad": [
+        0.15,
+        -0.3
+      ]
+    },
+    {
+      "amplitudes": [
+        1.0,
+        1.0
+      ],
+      "angles_deg": [
+        -4.0,
+        4.0
+      ],
+      "expected_route": "negative",
+      "n_sources": 2,
+      "name": "close_destructive",
+      "note": "Negative case: close equal phasors initially cancel; unresolved mixture is not assumed equivalent.",
+      "q_amp_mm": 0.16,
+      "q_second_amp_mm": 0.04,
+      "snr_db": 35.0,
+      "static_phase_rad": [
+        0.0,
+        3.141592653589793
+      ]
+    },
+    {
+      "amplitudes": [
+        1.0,
+        1.0
+      ],
+      "angles_deg": [
+        0.0,
+        0.0
+      ],
+      "expected_route": "negative",
+      "n_sources": 2,
+      "name": "coincident_destructive",
+      "note": "Limit case: exactly coincident opposite phasors cancel in every array channel; both routes should abstain.",
+      "q_amp_mm": 0.16,
+      "q_second_amp_mm": 0.04,
+      "snr_db": 35.0,
+      "static_phase_rad": [
+        0.0,
+        3.141592653589793
+      ]
+    }
+  ],
+  "experiment": "same_range_merge_split_mechanism",
+  "model": {
+    "d_over_lambda": 0.5,
+    "estimator": "array-only Bartlett peaks + conventional beamforming + unwrap + fixed geometric cos(beta)",
+    "fs_hz": 100.0,
+    "guard": "minimum beamformed magnitude >= 5.0x declared complex-noise sigma",
+    "lambda_mm": 4.0,
+    "merge_rule": "strongest detected array-only angle peak; one beamformed phasor",
+    "n_rx": 8,
+    "n_slow": 256,
+    "phase_sign_reference": "phase(y[k]*conj(y[0])); qhat-qhat[0], no sign/refit optimization",
+    "same_range": true,
+    "split_rule": {
+      "grid_deg": [
+        -60.0,
+        60.0,
+        0.25
+      ],
+      "min_second_peak_ratio": 0.18,
+      "min_separation_deg": 12.0
+    },
+    "truth_used_by_estimator": false
+  },
+  "rows": [
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.5484871216111022,
+            "median_abs": 1.5334823704922882,
+            "min_abs": 1.5177504374784494
+          }
+        ],
+        "corr": 0.9999716135162116,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.004755706064822063,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.0018698329578264732,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 0,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8142355482723646,
+            "median_abs": 0.7978188908679827,
+            "min_abs": 0.7836570015110742
+          }
+        ],
+        "corr": 0.9999592546451568,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.011574537114703354,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.004033385551708154,
+        "spectrum_peak_ratio_2nd": 0.7744798319106005
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 0,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8142355482723646,
+            "median_abs": 0.7978188908679827,
+            "min_abs": 0.7836570015110742
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9240704008265642,
+            "median_abs": 0.9065246860405007,
+            "min_abs": 0.8887418516665645
+          }
+        ],
+        "corr": 0.9999859306841618,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.4443999370363271,
+          0.555600062963673
+        ],
+        "max_abs_error_mm": 0.006854519289004268,
+        "mode": "split",
+        "rmse_mm": 0.002674778672750363,
+        "spectrum_peak_ratio_2nd": 0.7744798319106005
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5020598718521979,
+            "median_abs": 0.49023101408324626,
+            "min_abs": 0.4795346241314972
+          }
+        ],
+        "corr": 0.9999366206542085,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.01390378909047732,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.005103824071796331,
+        "spectrum_peak_ratio_2nd": 0.21908674061501812
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 0,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5020598718521979,
+            "median_abs": 0.49023101408324626,
+            "min_abs": 0.4795346241314972
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0602834322619699,
+            "median_abs": 1.0487833827817308,
+            "min_abs": 1.0344592453757862
+          }
+        ],
+        "corr": 0.9999886019626153,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.17950983111666435,
+          0.8204901688833356
+        ],
+        "max_abs_error_mm": 0.004008051231833565,
+        "mode": "split",
+        "rmse_mm": 0.0016474193823064732,
+        "spectrum_peak_ratio_2nd": 0.21908674061501812
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7308345838268162,
+            "median_abs": 0.7156988650904939,
+            "min_abs": 0.6944583701270084
+          }
+        ],
+        "corr": 0.9997343102582377,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.015926944854833147,
+        "merged_angle_deg": 9.75,
+        "mode": "merge",
+        "rmse_mm": 0.008869952400937022,
+        "spectrum_peak_ratio_2nd": 0.9986835593780622
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 0,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7308345838268162,
+            "median_abs": 0.7156988650904939,
+            "min_abs": 0.6944583701270084
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7304508515511655,
+            "median_abs": 0.7162368224515709,
+            "min_abs": 0.6914022973874636
+          }
+        ],
+        "corr": 0.9998261057209172,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.5026168100960425,
+          0.49738318990395736
+        ],
+        "max_abs_error_mm": 0.015890911315124517,
+        "mode": "split",
+        "rmse_mm": 0.007765489262791716,
+        "spectrum_peak_ratio_2nd": 0.9986835593780622
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.021133796289017712,
+            "median_abs": 0.007596156734333613,
+            "min_abs": 0.0008789032608445832
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          12.5,
+          -13.75
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": 12.5,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9002989356270602
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 0,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.021133796289017712,
+            "median_abs": 0.007596156734333613,
+            "min_abs": 0.0008789032608445832
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          12.5,
+          -13.75
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9002989356270602
+      }
+    },
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.547886052169648,
+            "median_abs": 1.5338796093419975,
+            "min_abs": 1.5173383725839875
+          }
+        ],
+        "corr": 0.9999662567181435,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.003499296908532276,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.001289994635478837,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 1,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8127306057030064,
+            "median_abs": 0.7974931652995376,
+            "min_abs": 0.7775752191035034
+          }
+        ],
+        "corr": 0.9999555186005943,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.010231370082735614,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.0036190038378897164,
+        "spectrum_peak_ratio_2nd": 0.7728032505515796
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 1,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8127306057030064,
+            "median_abs": 0.7974931652995376,
+            "min_abs": 0.7775752191035034
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9230514625717516,
+            "median_abs": 0.906731328051744,
+            "min_abs": 0.8928810526628091
+          }
+        ],
+        "corr": 0.9999820480591054,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.4361198712215619,
+          0.563880128778438
+        ],
+        "max_abs_error_mm": 0.006804470983147848,
+        "mode": "split",
+        "rmse_mm": 0.0028116471679061764,
+        "spectrum_peak_ratio_2nd": 0.7728032505515796
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5031950558166367,
+            "median_abs": 0.4903280651298405,
+            "min_abs": 0.4769594701949784
+          }
+        ],
+        "corr": 0.9999383564784885,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.00872410129618613,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.0035429791247909184,
+        "spectrum_peak_ratio_2nd": 0.21904613287101218
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 1,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5031950558166367,
+            "median_abs": 0.4903280651298405,
+            "min_abs": 0.4769594701949784
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0641521982629023,
+            "median_abs": 1.0483785802242052,
+            "min_abs": 1.0354903086604328
+          }
+        ],
+        "corr": 0.9999875325835644,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.17565343891091428,
+          0.8243465610890857
+        ],
+        "max_abs_error_mm": 0.005028141114615886,
+        "mode": "split",
+        "rmse_mm": 0.00181559507833301,
+        "spectrum_peak_ratio_2nd": 0.21904613287101218
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7295943243238129,
+            "median_abs": 0.7147140878040955,
+            "min_abs": 0.6977965850444287
+          }
+        ],
+        "corr": 0.9997270154704117,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.008702352787015949,
+        "merged_angle_deg": 9.75,
+        "mode": "merge",
+        "rmse_mm": 0.003100396940156678,
+        "spectrum_peak_ratio_2nd": 0.9977812213122281
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 1,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7295943243238129,
+            "median_abs": 0.7147140878040955,
+            "min_abs": 0.6977965850444287
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.732481319709458,
+            "median_abs": 0.7151741178482542,
+            "min_abs": 0.6978360014879986
+          }
+        ],
+        "corr": 0.9998152125512277,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.5066878102738434,
+          0.4933121897261567
+        ],
+        "max_abs_error_mm": 0.007423714153604599,
+        "mode": "split",
+        "rmse_mm": 0.0027213759513131,
+        "spectrum_peak_ratio_2nd": 0.9977812213122281
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.022192342386639734,
+            "median_abs": 0.007556626434556141,
+            "min_abs": 0.0006155473797613766
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -41.0,
+          -24.5
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": -41.0,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.976576817416888
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 1,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.022192342386639734,
+            "median_abs": 0.007556626434556141,
+            "min_abs": 0.0006155473797613766
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -41.0,
+          -24.5
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.976576817416888
+      }
+    },
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.553939350637281,
+            "median_abs": 1.5342611035876506,
+            "min_abs": 1.5196745275623182
+          }
+        ],
+        "corr": 0.9999662279141686,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.004356552700092442,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.0013130410855098917,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 2,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8136347887913494,
+            "median_abs": 0.7974691940812066,
+            "min_abs": 0.776463337039656
+          }
+        ],
+        "corr": 0.9999562766344059,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.008858173411241066,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.003496222277841278,
+        "spectrum_peak_ratio_2nd": 0.774223678830191
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 2,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8136347887913494,
+            "median_abs": 0.7974691940812066,
+            "min_abs": 0.776463337039656
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9261527035179135,
+            "median_abs": 0.9051211219223176,
+            "min_abs": 0.8921085585019093
+          }
+        ],
+        "corr": 0.9999810312892986,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.4329808681102378,
+          0.5670191318897622
+        ],
+        "max_abs_error_mm": 0.00957305199047176,
+        "mode": "split",
+        "rmse_mm": 0.003103514356903963,
+        "spectrum_peak_ratio_2nd": 0.774223678830191
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5049972135930122,
+            "median_abs": 0.49092728726098145,
+            "min_abs": 0.4778018349867517
+          }
+        ],
+        "corr": 0.9999362475830609,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.01473935549880814,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.006243157153203798,
+        "spectrum_peak_ratio_2nd": 0.21917499448361502
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 2,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5049972135930122,
+            "median_abs": 0.49092728726098145,
+            "min_abs": 0.4778018349867517
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0616182816655504,
+            "median_abs": 1.0477031566423172,
+            "min_abs": 1.0360372230563213
+          }
+        ],
+        "corr": 0.9999883619632386,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.18090952652476644,
+          0.8190904734752334
+        ],
+        "max_abs_error_mm": 0.0044685432925687385,
+        "mode": "split",
+        "rmse_mm": 0.0016162836661742766,
+        "spectrum_peak_ratio_2nd": 0.21917499448361502
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7309752904600094,
+            "median_abs": 0.714432153012094,
+            "min_abs": 0.6941450121114779
+          }
+        ],
+        "corr": 0.9997227687860232,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.012772210475180318,
+        "merged_angle_deg": 9.75,
+        "mode": "merge",
+        "rmse_mm": 0.00451353150118078,
+        "spectrum_peak_ratio_2nd": 0.9975834076692586
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 2,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7309752904600094,
+            "median_abs": 0.714432153012094,
+            "min_abs": 0.6941450121114779
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7310868233364208,
+            "median_abs": 0.715634672008824,
+            "min_abs": 0.698303292417022
+          }
+        ],
+        "corr": 0.9998124139271397,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.49789958608469637,
+          0.5021004139153036
+        ],
+        "max_abs_error_mm": 0.010457070584988237,
+        "mode": "split",
+        "rmse_mm": 0.003060299520426355,
+        "spectrum_peak_ratio_2nd": 0.9975834076692586
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.021426386928582963,
+            "median_abs": 0.007271232201344874,
+            "min_abs": 0.0002234555550416516
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -22.5,
+          49.0
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": -22.5,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.966778368467896
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 2,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.021426386928582963,
+            "median_abs": 0.007271232201344874,
+            "min_abs": 0.0002234555550416516
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -22.5,
+          49.0
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.966778368467896
+      }
+    },
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.553599734050455,
+            "median_abs": 1.5337334262553637,
+            "min_abs": 1.518019947696781
+          }
+        ],
+        "corr": 0.9999670587005836,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.0057711525445221235,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.0027475525333406072,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 3,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8137976636990979,
+            "median_abs": 0.7976496044892298,
+            "min_abs": 0.7800288219182628
+          }
+        ],
+        "corr": 0.9999597283429592,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.011394651429387836,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.003437949054838453,
+        "spectrum_peak_ratio_2nd": 0.7740632035215032
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 3,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8137976636990979,
+            "median_abs": 0.7976496044892298,
+            "min_abs": 0.7800288219182628
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9248083770092157,
+            "median_abs": 0.9055275212982874,
+            "min_abs": 0.8894936466427644
+          }
+        ],
+        "corr": 0.999983558062512,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.4389133766211023,
+          0.5610866233788978
+        ],
+        "max_abs_error_mm": 0.0066201436488797505,
+        "mode": "split",
+        "rmse_mm": 0.002778676971685193,
+        "spectrum_peak_ratio_2nd": 0.7740632035215032
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5041856784833606,
+            "median_abs": 0.4894561208195003,
+            "min_abs": 0.4767300876245029
+          }
+        ],
+        "corr": 0.9999437708095493,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.012756558553564112,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.0035954573091341226,
+        "spectrum_peak_ratio_2nd": 0.21867137137154727
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 3,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5041856784833606,
+            "median_abs": 0.4894561208195003,
+            "min_abs": 0.4767300876245029
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0603020915461916,
+            "median_abs": 1.0472097881629676,
+            "min_abs": 1.0352385329610916
+          }
+        ],
+        "corr": 0.9999871864407056,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.18085862384394794,
+          0.8191413761560521
+        ],
+        "max_abs_error_mm": 0.00462625663640151,
+        "mode": "split",
+        "rmse_mm": 0.001538480231938504,
+        "spectrum_peak_ratio_2nd": 0.21867137137154727
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7358518684191387,
+            "median_abs": 0.7148435231546788,
+            "min_abs": 0.698900086087791
+          }
+        ],
+        "corr": 0.9996923712729936,
+        "coverage": true,
+        "detected_angles_deg": [
+          -9.75,
+          9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.013855405538684792,
+        "merged_angle_deg": -9.75,
+        "mode": "merge",
+        "rmse_mm": 0.0066550726209675,
+        "spectrum_peak_ratio_2nd": 0.9995547317994435
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 3,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7358518684191387,
+            "median_abs": 0.7148435231546788,
+            "min_abs": 0.698900086087791
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7310685294821556,
+            "median_abs": 0.7160769291969786,
+            "min_abs": 0.700169817614739
+          }
+        ],
+        "corr": 0.9998258045149561,
+        "coverage": true,
+        "detected_angles_deg": [
+          -9.75,
+          9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.5035792189938576,
+          0.49642078100614234
+        ],
+        "max_abs_error_mm": 0.009263879342814585,
+        "mode": "split",
+        "rmse_mm": 0.0031476545347012995,
+        "spectrum_peak_ratio_2nd": 0.9995547317994435
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.023055343929744284,
+            "median_abs": 0.007860019839529081,
+            "min_abs": 0.00021243431624694696
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          2.5,
+          -55.5
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": 2.5,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9633306652152155
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 3,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.023055343929744284,
+            "median_abs": 0.007860019839529081,
+            "min_abs": 0.00021243431624694696
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          2.5,
+          -55.5
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9633306652152155
+      }
+    },
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.5487742620090208,
+            "median_abs": 1.5331591074625364,
+            "min_abs": 1.5193648320095856
+          }
+        ],
+        "corr": 0.9999703512318001,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.003985263469691844,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.0013739975066398844,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 4,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8133348546046404,
+            "median_abs": 0.7971107460674525,
+            "min_abs": 0.7815113707526737
+          }
+        ],
+        "corr": 0.9999551370723091,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.017721765670384415,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.008015618209838525,
+        "spectrum_peak_ratio_2nd": 0.77361381309263
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 4,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8133348546046404,
+            "median_abs": 0.7971107460674525,
+            "min_abs": 0.7815113707526737
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9228667697561992,
+            "median_abs": 0.9068411653925862,
+            "min_abs": 0.8882000073612764
+          }
+        ],
+        "corr": 0.9999842831109571,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.43871995792357765,
+          0.5612800420764223
+        ],
+        "max_abs_error_mm": 0.0076320754031811155,
+        "mode": "split",
+        "rmse_mm": 0.0028964344273515697,
+        "spectrum_peak_ratio_2nd": 0.77361381309263
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5016406009546575,
+            "median_abs": 0.4904786123054052,
+            "min_abs": 0.4798963969008382
+          }
+        ],
+        "corr": 0.9999353410238916,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.012224064499339882,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.00540192707739942,
+        "spectrum_peak_ratio_2nd": 0.21916929284756942
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 4,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5016406009546575,
+            "median_abs": 0.4904786123054052,
+            "min_abs": 0.4798963969008382
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0607277818111458,
+            "median_abs": 1.0482190168461067,
+            "min_abs": 1.0345351558010416
+          }
+        ],
+        "corr": 0.9999884756512226,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.178319395388619,
+          0.821680604611381
+        ],
+        "max_abs_error_mm": 0.004513391156192287,
+        "mode": "split",
+        "rmse_mm": 0.0014963714378218526,
+        "spectrum_peak_ratio_2nd": 0.21916929284756942
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7333023189404827,
+            "median_abs": 0.7143618798206267,
+            "min_abs": 0.6974219474688469
+          }
+        ],
+        "corr": 0.9997608028243271,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.01126997046896519,
+        "merged_angle_deg": 9.75,
+        "mode": "merge",
+        "rmse_mm": 0.004587206955867585,
+        "spectrum_peak_ratio_2nd": 0.99659697332156
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 4,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7333023189404827,
+            "median_abs": 0.7143618798206267,
+            "min_abs": 0.6974219474688469
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7346477850976624,
+            "median_abs": 0.715705579732855,
+            "min_abs": 0.6998316375036271
+          }
+        ],
+        "corr": 0.999842044385156,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.496231924902258,
+          0.503768075097742
+        ],
+        "max_abs_error_mm": 0.009783493050902564,
+        "mode": "split",
+        "rmse_mm": 0.004318806650432883,
+        "spectrum_peak_ratio_2nd": 0.99659697332156
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.019849205712623545,
+            "median_abs": 0.007986883139279486,
+            "min_abs": 0.0006532367754618034
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          32.0,
+          -33.5
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": 32.0,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9917101547609419
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 4,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.019849205712623545,
+            "median_abs": 0.007986883139279486,
+            "min_abs": 0.0006532367754618034
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          32.0,
+          -33.5
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9917101547609419
+      }
+    },
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.5482278982869357,
+            "median_abs": 1.533706981765812,
+            "min_abs": 1.5143888168674553
+          }
+        ],
+        "corr": 0.999968306747863,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.003334200250220798,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.0013340708186273646,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 5,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8175379788982936,
+            "median_abs": 0.7972271799466912,
+            "min_abs": 0.7787551310650183
+          }
+        ],
+        "corr": 0.9999650326117068,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.009570671254800045,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.0033256162762132337,
+        "spectrum_peak_ratio_2nd": 0.7735793945456888
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 5,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8175379788982936,
+            "median_abs": 0.7972271799466912,
+            "min_abs": 0.7787551310650183
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9216429280923755,
+            "median_abs": 0.906088190600155,
+            "min_abs": 0.8918406880148487
+          }
+        ],
+        "corr": 0.9999854859669711,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.43717247998953407,
+          0.562827520010466
+        ],
+        "max_abs_error_mm": 0.010694091962295427,
+        "mode": "split",
+        "rmse_mm": 0.005106164538554109,
+        "spectrum_peak_ratio_2nd": 0.7735793945456888
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.504672156798125,
+            "median_abs": 0.4904464902769873,
+            "min_abs": 0.47880942410237637
+          }
+        ],
+        "corr": 0.9999467728274313,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.00979391511587091,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.0033199373049271263,
+        "spectrum_peak_ratio_2nd": 0.21899729124242195
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 5,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.504672156798125,
+            "median_abs": 0.4904464902769873,
+            "min_abs": 0.47880942410237637
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0627907652119863,
+            "median_abs": 1.0476756652425347,
+            "min_abs": 1.0360943956295705
+          }
+        ],
+        "corr": 0.9999877764260743,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.18022358796064306,
+          0.8197764120393569
+        ],
+        "max_abs_error_mm": 0.004145609873211609,
+        "mode": "split",
+        "rmse_mm": 0.001599311398663475,
+        "spectrum_peak_ratio_2nd": 0.21899729124242195
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7355868627101857,
+            "median_abs": 0.7146454324316123,
+            "min_abs": 0.6999959161906929
+          }
+        ],
+        "corr": 0.9997216463958858,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.00847522928170552,
+        "merged_angle_deg": 9.75,
+        "mode": "merge",
+        "rmse_mm": 0.0032455672163263206,
+        "spectrum_peak_ratio_2nd": 0.9982864041678772
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 5,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7355868627101857,
+            "median_abs": 0.7146454324316123,
+            "min_abs": 0.6999959161906929
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7360903798028562,
+            "median_abs": 0.7159571212016531,
+            "min_abs": 0.6989855623183857
+          }
+        ],
+        "corr": 0.9998207955879163,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.49758698955257546,
+          0.5024130104474245
+        ],
+        "max_abs_error_mm": 0.010267168898759116,
+        "mode": "split",
+        "rmse_mm": 0.0037734855922152504,
+        "spectrum_peak_ratio_2nd": 0.9982864041678772
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.022045251180287436,
+            "median_abs": 0.008158366289377491,
+            "min_abs": 0.0003212333673576592
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -46.5,
+          46.25
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": -46.5,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9949798629378711
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 5,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.022045251180287436,
+            "median_abs": 0.008158366289377491,
+            "min_abs": 0.0003212333673576592
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -46.5,
+          46.25
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9949798629378711
+      }
+    },
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.5464267929007594,
+            "median_abs": 1.533569115263281,
+            "min_abs": 1.5175305079294605
+          }
+        ],
+        "corr": 0.9999666102529376,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.004864235341161899,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.0019626689249240873,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 6,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8142842814822975,
+            "median_abs": 0.7971540283237972,
+            "min_abs": 0.7754440879340445
+          }
+        ],
+        "corr": 0.9999597348917202,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.012223251540877555,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.004410717161831771,
+        "spectrum_peak_ratio_2nd": 0.7711060446534765
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 6,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8142842814822975,
+            "median_abs": 0.7971540283237972,
+            "min_abs": 0.7754440879340445
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9217420996711347,
+            "median_abs": 0.908085075527459,
+            "min_abs": 0.8865128466239901
+          }
+        ],
+        "corr": 0.9999831246551658,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.42562063766492536,
+          0.5743793623350747
+        ],
+        "max_abs_error_mm": 0.012498339325321128,
+        "mode": "split",
+        "rmse_mm": 0.00551519851076367,
+        "spectrum_peak_ratio_2nd": 0.7711060446534765
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5050269884081392,
+            "median_abs": 0.4900649090632771,
+            "min_abs": 0.4754647446335485
+          }
+        ],
+        "corr": 0.9999373904617382,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.010013177845039467,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.0033152507092545505,
+        "spectrum_peak_ratio_2nd": 0.21850422132374395
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 6,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5050269884081392,
+            "median_abs": 0.4900649090632771,
+            "min_abs": 0.4754647446335485
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.060805046054367,
+            "median_abs": 1.04815922077186,
+            "min_abs": 1.0348949952904087
+          }
+        ],
+        "corr": 0.9999876093766081,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.17479325779164429,
+          0.8252067422083557
+        ],
+        "max_abs_error_mm": 0.006491746735143411,
+        "mode": "split",
+        "rmse_mm": 0.0025050539246667127,
+        "spectrum_peak_ratio_2nd": 0.21850422132374395
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.734647390558992,
+            "median_abs": 0.7148024768979884,
+            "min_abs": 0.6977533996845556
+          }
+        ],
+        "corr": 0.9996936039547358,
+        "coverage": true,
+        "detected_angles_deg": [
+          -9.75,
+          9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.008734104382493696,
+        "merged_angle_deg": -9.75,
+        "mode": "merge",
+        "rmse_mm": 0.0032421704232178414,
+        "spectrum_peak_ratio_2nd": 0.9984008658037208
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 6,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.734647390558992,
+            "median_abs": 0.7148024768979884,
+            "min_abs": 0.6977533996845556
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7353879409255333,
+            "median_abs": 0.7155944247421571,
+            "min_abs": 0.6964404165041959
+          }
+        ],
+        "corr": 0.9997962973635725,
+        "coverage": true,
+        "detected_angles_deg": [
+          -9.75,
+          9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.4930975176152905,
+          0.5069024823847096
+        ],
+        "max_abs_error_mm": 0.007068706843059339,
+        "mode": "split",
+        "rmse_mm": 0.0028744893260886665,
+        "spectrum_peak_ratio_2nd": 0.9984008658037208
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.0218038267642338,
+            "median_abs": 0.007110726957445791,
+            "min_abs": 0.0006304693183144774
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -14.25,
+          5.75
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": -14.25,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9008618268208476
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 6,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.0218038267642338,
+            "median_abs": 0.007110726957445791,
+            "min_abs": 0.0006304693183144774
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -14.25,
+          5.75
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9008618268208476
+      }
+    },
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.5479574961878064,
+            "median_abs": 1.5332655463529665,
+            "min_abs": 1.5159599235156629
+          }
+        ],
+        "corr": 0.9999725024178533,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.004388816722093736,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.0012276081497597019,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 7,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8132454083613491,
+            "median_abs": 0.7982044331131912,
+            "min_abs": 0.7841943659588287
+          }
+        ],
+        "corr": 0.9999588050054098,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.010610064042964829,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.004366882548609521,
+        "spectrum_peak_ratio_2nd": 0.7752546830365115
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 7,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8132454083613491,
+            "median_abs": 0.7982044331131912,
+            "min_abs": 0.7841943659588287
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9224897848915418,
+            "median_abs": 0.9066536852964466,
+            "min_abs": 0.8865270946872761
+          }
+        ],
+        "corr": 0.9999854424063239,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.4320983775715304,
+          0.5679016224284695
+        ],
+        "max_abs_error_mm": 0.010731443145659436,
+        "mode": "split",
+        "rmse_mm": 0.004237639998510447,
+        "spectrum_peak_ratio_2nd": 0.7752546830365115
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5028867635584512,
+            "median_abs": 0.49082042447565283,
+            "min_abs": 0.47588066650844485
+          }
+        ],
+        "corr": 0.9999407833597167,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.009460906752376208,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.003520808526257875,
+        "spectrum_peak_ratio_2nd": 0.21953434140888797
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 7,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5028867635584512,
+            "median_abs": 0.49082042447565283,
+            "min_abs": 0.47588066650844485
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0603879938637082,
+            "median_abs": 1.0481298402743255,
+            "min_abs": 1.0320481894023585
+          }
+        ],
+        "corr": 0.9999908240049976,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.17820784533274617,
+          0.8217921546672537
+        ],
+        "max_abs_error_mm": 0.0037262635005571587,
+        "mode": "split",
+        "rmse_mm": 0.001350354902147459,
+        "spectrum_peak_ratio_2nd": 0.21953434140888797
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7388848562332306,
+            "median_abs": 0.7147464914252183,
+            "min_abs": 0.6995908450297894
+          }
+        ],
+        "corr": 0.9997148654797442,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.011853155370627255,
+        "merged_angle_deg": 9.75,
+        "mode": "merge",
+        "rmse_mm": 0.0042577097516434985,
+        "spectrum_peak_ratio_2nd": 0.9989045323197753
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 7,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7388848562332306,
+            "median_abs": 0.7147464914252183,
+            "min_abs": 0.6995908450297894
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.736399592910673,
+            "median_abs": 0.7154735351522287,
+            "min_abs": 0.6990550955704881
+          }
+        ],
+        "corr": 0.9998228462981977,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.5031111619978956,
+          0.4968888380021044
+        ],
+        "max_abs_error_mm": 0.009406282651111209,
+        "mode": "split",
+        "rmse_mm": 0.0037479120988332094,
+        "spectrum_peak_ratio_2nd": 0.9989045323197753
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.02243793970990158,
+            "median_abs": 0.007478665612120745,
+            "min_abs": 0.0008510137164543159
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          7.5,
+          -12.75
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": 7.5,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9561132292439201
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 7,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.02243793970990158,
+            "median_abs": 0.007478665612120745,
+            "min_abs": 0.0008510137164543159
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          7.5,
+          -12.75
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9561132292439201
+      }
+    },
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.5450341487080521,
+            "median_abs": 1.5336102504356952,
+            "min_abs": 1.5219640699160122
+          }
+        ],
+        "corr": 0.9999683849451424,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.003561670444849868,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.0012108101403769211,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 8,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8134551145543579,
+            "median_abs": 0.7973256388587293,
+            "min_abs": 0.7762709769918693
+          }
+        ],
+        "corr": 0.9999470778267007,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.019349029710957866,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.00914844122381985,
+        "spectrum_peak_ratio_2nd": 0.772843803662122
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 8,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8134551145543579,
+            "median_abs": 0.7973256388587293,
+            "min_abs": 0.7762709769918693
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9286889861818174,
+            "median_abs": 0.9064240416070952,
+            "min_abs": 0.8875074382895405
+          }
+        ],
+        "corr": 0.9999809070292589,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.4305013141347796,
+          0.5694986858652203
+        ],
+        "max_abs_error_mm": 0.012292289643504706,
+        "mode": "split",
+        "rmse_mm": 0.005821549679475298,
+        "spectrum_peak_ratio_2nd": 0.772843803662122
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.50035321586529,
+            "median_abs": 0.4905922353891091,
+            "min_abs": 0.4761615674697528
+          }
+        ],
+        "corr": 0.9999320709493342,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.015282664799765255,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.007537278001484825,
+        "spectrum_peak_ratio_2nd": 0.2191721740834517
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 8,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.50035321586529,
+            "median_abs": 0.4905922353891091,
+            "min_abs": 0.4761615674697528
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0599591930813845,
+            "median_abs": 1.048565157739684,
+            "min_abs": 1.035998030574301
+          }
+        ],
+        "corr": 0.9999880505165603,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.1781404324630481,
+          0.821859567536952
+        ],
+        "max_abs_error_mm": 0.005772171169778628,
+        "mode": "split",
+        "rmse_mm": 0.002393453607431912,
+        "spectrum_peak_ratio_2nd": 0.2191721740834517
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7306725301372021,
+            "median_abs": 0.7149447554543171,
+            "min_abs": 0.6972272764483347
+          }
+        ],
+        "corr": 0.999705791366317,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.011814926467462877,
+        "merged_angle_deg": 9.75,
+        "mode": "merge",
+        "rmse_mm": 0.003973831020091142,
+        "spectrum_peak_ratio_2nd": 0.9992396492959844
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 8,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7306725301372021,
+            "median_abs": 0.7149447554543171,
+            "min_abs": 0.6972272764483347
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7355866403185148,
+            "median_abs": 0.7150545531496024,
+            "min_abs": 0.6994654345266123
+          }
+        ],
+        "corr": 0.9998170082897522,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.49821500346030584,
+          0.5017849965396941
+        ],
+        "max_abs_error_mm": 0.009058996942809983,
+        "mode": "split",
+        "rmse_mm": 0.002997369171096605,
+        "spectrum_peak_ratio_2nd": 0.9992396492959844
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.025501988075189563,
+            "median_abs": 0.007758233484995814,
+            "min_abs": 0.0007027577646119871
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -26.0,
+          29.0
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": -26.0,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9592633479157165
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 8,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.025501988075189563,
+            "median_abs": 0.007758233484995814,
+            "min_abs": 0.0007027577646119871
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -26.0,
+          29.0
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9592633479157165
+      }
+    },
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.5502104362818234,
+            "median_abs": 1.533729256276449,
+            "min_abs": 1.519754116845732
+          }
+        ],
+        "corr": 0.9999689203244978,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.004867699138945747,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.0014488802657303377,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 9,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.810931054877276,
+            "median_abs": 0.7973771991144797,
+            "min_abs": 0.7780739618576431
+          }
+        ],
+        "corr": 0.9999561049362501,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.012585651806995335,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.005276551187568861,
+        "spectrum_peak_ratio_2nd": 0.7733478808287246
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 9,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.810931054877276,
+            "median_abs": 0.7973771991144797,
+            "min_abs": 0.7780739618576431
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.920002617749005,
+            "median_abs": 0.905550291527212,
+            "min_abs": 0.8870037087172902
+          }
+        ],
+        "corr": 0.9999801006798116,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.43303300672377343,
+          0.5669669932762265
+        ],
+        "max_abs_error_mm": 0.009753946012856396,
+        "mode": "split",
+        "rmse_mm": 0.003914670452072223,
+        "spectrum_peak_ratio_2nd": 0.7733478808287246
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5013374959534911,
+            "median_abs": 0.4898262511624436,
+            "min_abs": 0.47525728412729457
+          }
+        ],
+        "corr": 0.9999292857298333,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.008882320315307779,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.003445718104574431,
+        "spectrum_peak_ratio_2nd": 0.21856620108060895
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 9,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5013374959534911,
+            "median_abs": 0.4898262511624436,
+            "min_abs": 0.47525728412729457
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0583938187631647,
+            "median_abs": 1.0471006970281826,
+            "min_abs": 1.0311313412004317
+          }
+        ],
+        "corr": 0.9999864549922945,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.17359618883971698,
+          0.8264038111602829
+        ],
+        "max_abs_error_mm": 0.005638964599876228,
+        "mode": "split",
+        "rmse_mm": 0.0015492441326688134,
+        "spectrum_peak_ratio_2nd": 0.21856620108060895
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7311101145929598,
+            "median_abs": 0.7150007814790165,
+            "min_abs": 0.6977063859679303
+          }
+        ],
+        "corr": 0.9997261726286321,
+        "coverage": true,
+        "detected_angles_deg": [
+          -9.75,
+          9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.012653198452395154,
+        "merged_angle_deg": -9.75,
+        "mode": "merge",
+        "rmse_mm": 0.005590295096372603,
+        "spectrum_peak_ratio_2nd": 0.9987862489733637
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 9,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7311101145929598,
+            "median_abs": 0.7150007814790165,
+            "min_abs": 0.6977063859679303
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7340612984179615,
+            "median_abs": 0.7156080634607707,
+            "min_abs": 0.7001647749770259
+          }
+        ],
+        "corr": 0.9998292251002862,
+        "coverage": true,
+        "detected_angles_deg": [
+          -9.75,
+          9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.5024151297303475,
+          0.4975848702696526
+        ],
+        "max_abs_error_mm": 0.011199206032074582,
+        "mode": "split",
+        "rmse_mm": 0.0046325260568637885,
+        "spectrum_peak_ratio_2nd": 0.9987862489733637
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.022058048226492873,
+            "median_abs": 0.007004895672599404,
+            "min_abs": 0.0002341575659684334
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -47.25,
+          -19.25
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": -47.25,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9307906498103485
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 9,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.022058048226492873,
+            "median_abs": 0.007004895672599404,
+            "min_abs": 0.0002341575659684334
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -47.25,
+          -19.25
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.9307906498103485
+      }
+    },
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.5488676349804291,
+            "median_abs": 1.532800178839083,
+            "min_abs": 1.5171283606825028
+          }
+        ],
+        "corr": 0.9999620695606959,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.0038378636915212955,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.00147989186432698,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 10,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8112506596961441,
+            "median_abs": 0.7980127639786968,
+            "min_abs": 0.7703204942226787
+          }
+        ],
+        "corr": 0.9999581327501265,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.009755186120288556,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.00318902415871457,
+        "spectrum_peak_ratio_2nd": 0.7745539266727066
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 10,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8112506596961441,
+            "median_abs": 0.7980127639786968,
+            "min_abs": 0.7703204942226787
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9228208948379204,
+            "median_abs": 0.906013254187477,
+            "min_abs": 0.8890654902356422
+          }
+        ],
+        "corr": 0.9999813500882497,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.44296317588314876,
+          0.5570368241168512
+        ],
+        "max_abs_error_mm": 0.007131691207649338,
+        "mode": "split",
+        "rmse_mm": 0.002862406779662859,
+        "spectrum_peak_ratio_2nd": 0.7745539266727066
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5024262463860545,
+            "median_abs": 0.4898890147909435,
+            "min_abs": 0.475251172571949
+          }
+        ],
+        "corr": 0.9999460211673501,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.009757010208445549,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.0036949826938307835,
+        "spectrum_peak_ratio_2nd": 0.21906710060484458
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 10,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5024262463860545,
+            "median_abs": 0.4898890147909435,
+            "min_abs": 0.475251172571949
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0612607452088079,
+            "median_abs": 1.0474364589987972,
+            "min_abs": 1.0277737888980973
+          }
+        ],
+        "corr": 0.9999876009430696,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.17953479013936144,
+          0.8204652098606386
+        ],
+        "max_abs_error_mm": 0.004354873834238715,
+        "mode": "split",
+        "rmse_mm": 0.0014629003455822432,
+        "spectrum_peak_ratio_2nd": 0.21906710060484458
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7365934531025021,
+            "median_abs": 0.7143906541587554,
+            "min_abs": 0.6952351385486952
+          }
+        ],
+        "corr": 0.9996463508260156,
+        "coverage": true,
+        "detected_angles_deg": [
+          -9.75,
+          9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.011439490416724013,
+        "merged_angle_deg": -9.75,
+        "mode": "merge",
+        "rmse_mm": 0.00420473242486049,
+        "spectrum_peak_ratio_2nd": 0.9978823508402412
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 10,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7365934531025021,
+            "median_abs": 0.7143906541587554,
+            "min_abs": 0.6952351385486952
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7310582679307064,
+            "median_abs": 0.7158311481918784,
+            "min_abs": 0.6976857940918791
+          }
+        ],
+        "corr": 0.9998022976302621,
+        "coverage": true,
+        "detected_angles_deg": [
+          -9.75,
+          9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.4980618514178623,
+          0.5019381485821376
+        ],
+        "max_abs_error_mm": 0.010785493850391417,
+        "mode": "split",
+        "rmse_mm": 0.004478134922828851,
+        "spectrum_peak_ratio_2nd": 0.9978823508402412
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.025578556071657703,
+            "median_abs": 0.0073600698229831715,
+            "min_abs": 0.00028371390428439183
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          46.75,
+          10.75
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": 46.75,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.970298783972355
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 10,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.025578556071657703,
+            "median_abs": 0.0073600698229831715,
+            "min_abs": 0.00028371390428439183
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          46.75,
+          10.75
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.970298783972355
+      }
+    },
+    {
+      "case": "close_same_phase",
+      "expected_route": "merge",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08051502470561117,
+            "max_abs": 1.5519382711312182,
+            "median_abs": 1.5326405646767385,
+            "min_abs": 1.512363085210129
+          }
+        ],
+        "corr": 0.9999674415578121,
+        "coverage": true,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": null,
+        "max_abs_error_mm": 0.005917158928999744,
+        "merged_angle_deg": 0.5,
+        "mode": "merge",
+        "rmse_mm": 0.0031110275413222025,
+        "spectrum_peak_ratio_2nd": null
+      },
+      "noise_std": 0.016103004941122233,
+      "seed": 11,
+      "split": {
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          0.5
+        ],
+        "detected_count": 1,
+        "failure": "fewer_than_two_array-only_angle_peaks",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": null
+      }
+    },
+    {
+      "case": "separated_balanced",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8122343338619171,
+            "median_abs": 0.7968442508864395,
+            "min_abs": 0.7824522308785524
+          }
+        ],
+        "corr": 0.9999585183405147,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.011706490295406602,
+        "merged_angle_deg": 24.25,
+        "mode": "merge",
+        "rmse_mm": 0.0038354983512772288,
+        "spectrum_peak_ratio_2nd": 0.774223213995712
+      },
+      "noise_std": 0.01691703662717671,
+      "seed": 11,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.8122343338619171,
+            "median_abs": 0.7968442508864395,
+            "min_abs": 0.7824522308785524
+          },
+          {
+            "amp_floor": 0.08458518313588355,
+            "max_abs": 0.9259775435136637,
+            "median_abs": 0.9062456348733422,
+            "min_abs": 0.8898349457490372
+          }
+        ],
+        "corr": 0.9999831717654982,
+        "coverage": true,
+        "detected_angles_deg": [
+          24.25,
+          -24.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.4462113778724983,
+          0.5537886221275017
+        ],
+        "max_abs_error_mm": 0.006050468384896146,
+        "mode": "split",
+        "rmse_mm": 0.0026377811245394856,
+        "spectrum_peak_ratio_2nd": 0.774223213995712
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "expected_route": "split",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5026837215530634,
+            "median_abs": 0.49088634712656576,
+            "min_abs": 0.47806250110060255
+          }
+        ],
+        "corr": 0.9999309159014947,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.014232978316765288,
+        "merged_angle_deg": 18.0,
+        "mode": "merge",
+        "rmse_mm": 0.006064090351736647,
+        "spectrum_peak_ratio_2nd": 0.21906619316094483
+      },
+      "noise_std": 0.013322268338272962,
+      "seed": 11,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 0.5026837215530634,
+            "median_abs": 0.49088634712656576,
+            "min_abs": 0.47806250110060255
+          },
+          {
+            "amp_floor": 0.0666113416913648,
+            "max_abs": 1.0605652557588492,
+            "median_abs": 1.0477771844788504,
+            "min_abs": 1.0347898826646438
+          }
+        ],
+        "corr": 0.9999859474858068,
+        "coverage": true,
+        "detected_angles_deg": [
+          18.0,
+          -18.0
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.178502057651717,
+          0.821497942348283
+        ],
+        "max_abs_error_mm": 0.005139596659550841,
+        "mode": "split",
+        "rmse_mm": 0.001778111800437634,
+        "spectrum_peak_ratio_2nd": 0.21906619316094483
+      }
+    },
+    {
+      "case": "close_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7349399322305123,
+            "median_abs": 0.7158745524166443,
+            "min_abs": 0.7007172077509682
+          }
+        ],
+        "corr": 0.9997377803901881,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "max_abs_error_mm": 0.0129040256863516,
+        "merged_angle_deg": 9.75,
+        "mode": "merge",
+        "rmse_mm": 0.0050569928863870425,
+        "spectrum_peak_ratio_2nd": 0.99957450200387
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 11,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7349399322305123,
+            "median_abs": 0.7158745524166443,
+            "min_abs": 0.7007172077509682
+          },
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.7322764256003795,
+            "median_abs": 0.7157864794225645,
+            "min_abs": 0.6987790837146177
+          }
+        ],
+        "corr": 0.9998358946009847,
+        "coverage": true,
+        "detected_angles_deg": [
+          9.75,
+          -9.75
+        ],
+        "detected_count": 2,
+        "failure": null,
+        "fusion_weights": [
+          0.5057190874368117,
+          0.4942809125631882
+        ],
+        "max_abs_error_mm": 0.008598034152208056,
+        "mode": "split",
+        "rmse_mm": 0.0027604862414529296,
+        "spectrum_peak_ratio_2nd": 0.99957450200387
+      }
+    },
+    {
+      "case": "coincident_destructive",
+      "expected_route": "negative",
+      "merge": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.019278696380421657,
+            "median_abs": 0.007226743896853618,
+            "min_abs": 0.0004509952322362686
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -19.0,
+          -41.0
+        ],
+        "detected_count": 2,
+        "failure": "merged_phasor_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "merged_angle_deg": -19.0,
+        "mode": "merge",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.958245642757463
+      },
+      "noise_std": 0.017782794100389226,
+      "seed": 11,
+      "split": {
+        "channel_quality": [
+          {
+            "amp_floor": 0.08891397050194613,
+            "max_abs": 0.019278696380421657,
+            "median_abs": 0.007226743896853618,
+            "min_abs": 0.0004509952322362686
+          }
+        ],
+        "corr": null,
+        "coverage": false,
+        "detected_angles_deg": [
+          -19.0,
+          -41.0
+        ],
+        "detected_count": 2,
+        "failure": "beamformed_channel_amplitude_or_geometry_guard",
+        "max_abs_error_mm": null,
+        "mode": "split",
+        "rmse_mm": null,
+        "spectrum_peak_ratio_2nd": 0.958245642757463
+      }
+    }
+  ],
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "summary": {
+    "close_destructive": {
+      "merge": {
+        "coverage_count": 12,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.008869952400937022,
+        "rmse_mm_median_covered": 0.004385620626412139,
+        "rmse_mm_p90_covered": 0.006548594868508011,
+        "trials": 12
+      },
+      "split": {
+        "coverage_count": 12,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.007765489262791716,
+        "rmse_mm_median_covered": 0.003447783316767254,
+        "rmse_mm_p90_covered": 0.0046170869434602945,
+        "trials": 12
+      }
+    },
+    "close_same_phase": {
+      "merge": {
+        "coverage_count": 12,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.0031110275413222025,
+        "rmse_mm_median_covered": 0.001411438886185111,
+        "rmse_mm_p90_covered": 0.0026690641724989557,
+        "trials": 12
+      },
+      "split": {
+        "coverage_count": 0,
+        "coverage_fraction": 0.0,
+        "failure_counts": {
+          "fewer_than_two_array-only_angle_peaks": 12
+        },
+        "rmse_mm_max_covered": null,
+        "rmse_mm_median_covered": null,
+        "rmse_mm_p90_covered": null,
+        "trials": 12
+      }
+    },
+    "coincident_destructive": {
+      "merge": {
+        "coverage_count": 0,
+        "coverage_fraction": 0.0,
+        "failure_counts": {
+          "merged_phasor_amplitude_or_geometry_guard": 12
+        },
+        "rmse_mm_max_covered": null,
+        "rmse_mm_median_covered": null,
+        "rmse_mm_p90_covered": null,
+        "trials": 12
+      },
+      "split": {
+        "coverage_count": 0,
+        "coverage_fraction": 0.0,
+        "failure_counts": {
+          "beamformed_channel_amplitude_or_geometry_guard": 12
+        },
+        "rmse_mm_max_covered": null,
+        "rmse_mm_median_covered": null,
+        "rmse_mm_p90_covered": null,
+        "trials": 12
+      }
+    },
+    "separated_balanced": {
+      "merge": {
+        "coverage_count": 12,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.00914844122381985,
+        "rmse_mm_median_covered": 0.003934441951492691,
+        "rmse_mm_p90_covered": 0.00774171150761156,
+        "trials": 12
+      },
+      "split": {
+        "coverage_count": 12,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.005821549679475298,
+        "rmse_mm_median_covered": 0.0029999743921277663,
+        "rmse_mm_p90_covered": 0.005474295113542714,
+        "trials": 12
+      }
+    },
+    "separated_unequal": {
+      "merge": {
+        "coverage_count": 12,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.007537278001484825,
+        "rmse_mm_median_covered": 0.0036452200014824533,
+        "rmse_mm_p90_covered": 0.006225250473057083,
+        "trials": 12
+      },
+      "split": {
+        "coverage_count": 12,
+        "coverage_fraction": 1.0,
+        "failure_counts": {},
+        "rmse_mm_max_covered": 0.0025050539246667127,
+        "rmse_mm_median_covered": 0.0016077975324188757,
+        "rmse_mm_p90_covered": 0.0023356677545220217,
+        "trials": 12
+      }
+    }
+  }
+}

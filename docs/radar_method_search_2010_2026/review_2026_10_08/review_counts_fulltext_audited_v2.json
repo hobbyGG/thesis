@@ -1,0 +1,38 @@
+{
+  "input": 1779,
+  "resolution_batches": [
+    "pending_01",
+    "pending_02",
+    "pending_03",
+    "remaining_pending_resolution"
+  ],
+  "counts": {
+    "module": 727,
+    "context": 539,
+    "exclude": 508,
+    "pending": 5
+  },
+  "modules": {
+    "M01": 79,
+    "M02": 101,
+    "M03": 24,
+    "M04": 6,
+    "M05": 119,
+    "M06": 39,
+    "M07": 10,
+    "M08": 150,
+    "M09": 23,
+    "M10": 48,
+    "M11": 69,
+    "M12": 10,
+    "M13": 19,
+    "M14": 80,
+    "M15": 61,
+    "M16": 186,
+    "M17": 151,
+    "M18": 43,
+    "M19": 68,
+    "M20": 171
+  },
+  "status": "stage-1 abstract plus local/official fulltext upgrades and all prior pending records audited; five records remain pending because no algorithm evidence was located"
+}

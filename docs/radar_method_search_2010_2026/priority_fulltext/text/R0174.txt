@@ -1,0 +1,1501 @@
+               remote sensing
+Technical Note
+High Accuracy Motion Detection Algorithm via ISM Band
+FMCW Radar
+Kui Qu 1,2 , Rongfu Zhang 1, *                  and Zhijun Fang 3
+                                          1   School of Optical-Electrical and Computer Engineering, University of Shanghai for Science and Technology,
+                                              Shanghai 200093, China; 181560052@st.usst.edu.cn
+                                          2   School of Physics and Electronic Engineering, Fuyang Normal University, Fuyang 236037, China
+                                          3   School of Electronic and Electrical Engineering, Shanghai University of Engineering Science, Shanghai 201620,
+                                              China; zjfang@sues.edu.cn
+                                          *   Correspondence: zrf@usst.edu.cn
+
+
+                                          Abstract: The conventional frequency modulated continuous wave (FMCW) radar accuracy range
+                                          detection algorithm is based on the frequency estimation and additional phase evaluation which
+                                          contains Fourier transform and frequency refining analysis in each chirp, so it has the disadvantages
+                                          of being computationally expensive, and not being suitable for real-time motion measurement. In
+                                          addition, if there are other objects near the target, the spectra of the clutter and the target will be
+                                          adjacent and affect each other, making it more challenging to estimate the frequency of the target. In
+                                          this paper, the analytical expression of the Fourier transform of the beat signal is presented and it can
+                                          be seen that spectrum leakage makes the phase of Fourier transform no longer consistent with the real
+                                          phase of signal. The change regularities of real and imaginary parts of Fourier transform are studied,
+                                          and the corrected phase of ellipse approximation is given in the industrial, scientific, and medical
+                                          (ISM) band. Accurate displacement can be obtained by accurate phase. The algorithm can filter
+                                          the direct current (DC) offset which is mainly caused by stationary objects. The performance of the
+         
+                                          algorithm is evaluated by a radar system whose center frequency is 24.075 GHz and the bandwidth is
+                                   0.15 GHz; the measurement accuracy of displacement is 0.087 mm and the accuracy of distance is
+Citation: Qu, K.; Zhang, R.; Fang, Z.     0.043 m.
+High Accuracy Motion Detection
+Algorithm via ISM Band FMCW               Keywords: FMCW radar; ISM band; motion detection; phase evaluation
+Radar. Remote Sens. 2022, 14, 58.
+https://doi.org/10.3390/rs14010058
+
+Academic Editors: Danilo Orlando,
+Filippo Biondi, Domenico Ciuonzo          1. Introduction
+and Carmine Clemente                            Motion detection technology can be applied to industry, security, traffic, and health
+Received: 29 November 2021
+                                          monitoring. The contact-free measurements are preferred due to their flexibility and
+Accepted: 20 December 2021
+                                          non-interference with the motion of the object to be measured. Traditional measurement
+Published: 23 December 2021
+                                          methods including optical [1], ultrasonic [2], and laser [3] are vulnerable to the environ-
+                                          ment. For ultrasonic sensors, the measurement accuracy is sensitive to temperature. In the
+Publisher’s Note: MDPI stays neutral
+                                          environment of rain, snow, dust, and fog, optical and laser sensors may be unable to work
+with regard to jurisdictional claims in
+                                          normally, while microwave radar offers a robust way in the above-mentioned environ-
+published maps and institutional affil-
+                                          ments. Frequency modulated continuous wave (FMCW) radar is commonly used in motion
+iations.
+                                          measurement. Compared with continuous wave (CW) radar [4], it has the advantages of
+                                          ranging and multi-target detection [5]. Compared with pulse radar [6], it has no blind
+                                          distance, and the peak power of transmitted wave required for the same detection range is
+Copyright: © 2021 by the authors.
+                                          lower.
+Licensee MDPI, Basel, Switzerland.              For accurate range measurement through FMCW radar [7–9], the main process is firstly
+This article is an open access article    the peak detection of the magnitude spectrum of the beat signal in each chirp, followed by
+distributed under the terms and           fine correction with various methods because the accurate frequency is hard to obtain due to
+conditions of the Creative Commons        the spectrum leakage and fence effect. The common methods are interpolation [10,11], zero
+Attribution (CC BY) license (https://     padding [12–14], and chirp Z-transform [15,16]. In [7,16], an additional phase evaluation
+creativecommons.org/licenses/by/          was applied after frequency estimation. Since the unambiguous range interval of phase
+4.0/).                                    evaluation is half wavelength of the transmitted wave, the distance accuracy calculated
+
+
+
+Remote Sens. 2022, 14, 58. https://doi.org/10.3390/rs14010058                                            https://www.mdpi.com/journal/remotesensing
+Remote Sens. 2022, 14, 58                                                                                             2 of 18
+
+
+
+
+                            by frequency estimation should be within this interval, which is difficult to guarantee. It
+                            is usually difficult to implement real-time motion measurement because the algorithm
+                            contains Fourier transforms and frequency refining analysis in each chirp. Moreover, if
+                            there are other objects near the target, the spectra of the clutter and the target will be
+                            adjacent and affect each other, which will lead to the failure of the spectrum estimation
+                            algorithm.
+                                  High frequency and bandwidth can significantly improve the range resolution; how-
+                            ever, this means a more complex hardware structure [17,18], and the radar system’s band-
+                            width meeting the ISM band rules [19] can have a better practicability.
+                                  Through the analytical expression of the Fourier transform of the beat signal at a spe-
+                            cific frequency, we found that the real and imaginary components of the Fourier transform
+                            are superimposed in vertical direction with an elliptical trajectory in ISM band. More accu-
+                            rate phase can be obtained by ellipse approximation, and high accuracy can be achieved in
+                            lower bandwidth. The displacement of the target relative to its initial position is propor-
+                            tional to the phase change on the ellipse. The distance between the target and the antenna
+                            can be calculated through the ratio of the long and short axes of the ellipse. The algorithm
+                            can filter the DC offset which is mainly caused by stationary objects.
+                                  In this paper, the phase evaluation of the ellipse adopts the arctangent method which
+                            is commonly used in the detection of vital signs using Doppler radar [20,21]. However, it
+                            should be pointed out that for Doppler radar, IQ signals come from two hardware channels.
+                            The circuits of two channels cannot be exactly the same as it will cause an imbalance of the
+                            two output signals, so the constellation will be an ellipse. In this paper, only single output
+                            channel is used, the occurrence of the elliptical trajectory is the result of signal processing.
+
+                            2. Principle of the Proposed Method
+                            2.1. The Beat Signal of FMCW Radar
+                                 The transmitted signal of FMCW radar in a chirp is
+
+                                                                                     πBw 2
+                                                        St = At cos(2π f ini t +        t + Φ0 ),                         (1)
+                                                                                      τ
+                                  With At the amplitude of the transmitted signal, τ the duration of a chirp, f ini the
+                            initial frequency, Bw the bandwidth, and Φ0 the initial phase. The center frequency is
+                            denoted as f c , f c = f ini + Bw /2.
+                                  The echo signal Se is equivalent to the time delayed transmission signal, the delay
+                            time is td = 2R/c, where R is the distance between the object and the antenna, and c is the
+                            propagation velocity of electromagnetic wave.
+
+                                                                                     πBw
+                                                 Se = Ar cos (2π f ini (t − td ) +       ( t − t d )2 + Φ0 ),             (2)
+                                                                                      τ
+                            where Ar is the amplitude of the echo. Because of td  τ, the square term of td can
+                            be omitted. The echo and the transmitted signals are mixed and the beat signal after
+                            down-conversion is
+                                                                                4πBw R    4π f ini R
+                                                     Sbeat ( R, t) = Ab cos (          t+            ).                   (3)
+                                                                                  τc         c
+                            where Ab is the amplitude of the beat signal.
+
+                            2.2. The Change Regularities of Real and Imaginary Components of the DFT of the Beat Signal
+                                 Considering such a case, the displacement of the object is so small that we can regard
+                            R as a constant value within τ.
+                                 N-point discrete Fourier transform (DFT) of a specific frequency for the beat signal in
+                            a chirp is
+                                                         1    N −1
+                                                         N ∑n=0 beat
+                                                                   S ( R, tn )· exp−i2π f k tn ,                     (4)
+Remote Sens. 2022, 14, 58                                                                                            3 of 18
+
+
+
+
+                            where tn = nτ/N is discrete sampling time, n is the number of sampling points. The
+                            specific frequency is f k = k/τ, k is discrete frequency number, 1 ≤ k ≤ N, k ∈ Z.
+                                 Equation (5) is the integral form of (4). The denser the sampling points, the closer the
+                            results of the two Formulas (4) and (5) are. Therefore, the regularity of (4) can be reflected
+                            by (5).
+                                                                  1 τ
+                                                                   Z
+                                                         F (k) =       S ( R, t) exp−i2π f k t dt,                      (5)
+                                                                  τ 0 beat
+                                 Substitute (3) into Equation (5) to obtain
+
+                                                               2BW Rc             2πBw R       4πR
+                                                   Re =                       sin        · cos     ,                    (6)
+                                                           4πBw 2 R2 − k2 πc2       c           λ
+
+                                                                    kc2                 2πBw R       4πR
+                                                   Im =           2 R2 − k2 πC2
+                                                                                  sin          · sin     .              (7)
+                                                           4πBw                           c           λ
+                            Re, Im, are the real part and imaginary part of F (k), respectively. λ is the center wave-
+                            length of the transmitted wave, λ = c/ f c . Equations (6) and (7) are similar in form, they
+                            can be regarded as the product of two factors separated by the dot symbol, i.e., Re =
+                            Ak ( R)· cos 4πR                     4πR
+                                          λ , Im = Bk ( R )· sin λ .
+                                  The conventional phase evaluation of Fourier transform is
+                                                                                                   
+                                                               −1 Im           −1 Bk ( R )         4πR
+                                               FTphase = tan             = tan             · tan          .           (8)
+                                                                    Re             Ak ( R)          λ
+
+                                  The phase is distorted due to the unequal of Ak ( R) and Bk ( R). In order to obtain
+                            accurate phase, the change regularities of Ak ( R) and Bk ( R) must be studied.
+                                  The principle for determining discrete frequency number k is that the specific frequency
+                            f k = k/τ is closest to the frequency of the beat signal 2RBw /(τc), i.e.,
+
+                                                               k − 0.5   2RBw   k + 0.5
+                                                                       ≤      <         ,                               (9)
+                                                                  τ       τc       τ
+                                                        c(k −0.5)
+                                 It can be written as     2Bw
+                                                                            +0.5)
+                                                                  ≤ R < c(k2Bw
+                                                                                  . Let
+
+                                                                    c(k + δ)
+                                                              R=             , δ ∈ [−0.5, 0.5),                       (10)
+                                                                      2Bw
+
+                                 Substitute (9) into Ak ( R) and Bk ( R), we have
+
+                                                                          (k + δ)· sin(πk + πδ)
+                                                             Ak ( R) =                          ,                     (11)
+                                                                               πδ(2k + δ)
+
+                                                                            k ·sin(πk + πδ)
+                                                                Bk ( R) =                   ,                         (12)
+                                                                               πδ(2k + δ)
+                            when |∆R| ≤ λ/2, the relative change rate of Ak and Bk satisfies the following inequalities:
+
+                                            ∆Ak ( R)   2Bw              1        k
+                                                     ≤     · π cot(πδ) − +                    ·|∆R|,                  (13)
+                                             Ak ( R)    c               δ (k + δ)(2k + δ) max
+
+                                                ∆Bk ( R)   2Bw              1    1
+                                                         ≤     · π cot(πδ) − −           ·|∆R|,                       (14)
+                                                 Bk ( R)    c               δ 2k + δ max
+                                By analyzing the regularity of the expression on the right of inequalities (13) and (14),
+                            we can know that the maximum value is obtained when ∆R = λ/2, k = 1, δ = −0.5
+     Remote Sens. 2022, 14, 58                                                                                                      4 of 18
+
+Remote Sens. 2022, 13, x FOR PEER REVIEW                                                                                                      4 of 18
+
+                                   for inequality (13); for inequality (14), the conditions for taking the maximum value are
+                                   ∆R = λ/2, k = 1, δ = 0.5. (13), and (14) can be expressed as
+
+                                                                          ∆Ak (∆R) ( ) 10
+                                                                                       ≤ · Bw∙ , .                                              (16)
+                                                                                   (≤)                                                (15)
+                                                                           Ak ( R)      3 fc
+                                       The maximum of the inequalities for ISM band are shown in Table 1. It can be seen
+                                                                        ∆Bk ( R)     12 Bw
+                                 from Table 1 that the maximum of the          relative
+                                                                                  ≤ ·change .     rate of 𝐴 (𝑅) and 𝐵 (𝑅)(16)         occur in
+                                                                         Bk ( R)      5 f
+                                 2.45 GHz band. Take 𝑅𝑒 as the x-axis          and 𝐼𝑚 asc the y-axis. The simulated trajectory of
+                                        The maximum
+                                 this frequency    bandofisthe inequalities for
+                                                             investigated    whenISM ∆𝐴
+                                                                                      band(𝑅)/𝐴    (𝑅) and
+                                                                                            are shown           ∆𝐵 1.(𝑅)/𝐵
+                                                                                                         in Table     It can (𝑅)
+                                                                                                                               be seen
+                                                                                                                                     take the
+                                   from  Table  1 that the maximum    of the   relative change
+                                 maximum value as shown in Figure 1. The similarity between      rate of  A  ( R ) and  B
+                                                                                                            k the simulated
+                                                                                                                          k ( R ) occur
+                                                                                                                                    trajectory
+                                   in 2.45 GHz band. Take Re as the x-axis and Im as the y-axis. The simulated trajectory
+                                 and the fitting ellipse is very high. It is reasonable to regard the trajectory as an ellipse in
+                                   of this frequency band is investigated when ∆Ak ( R)/Ak ( R) and ∆Bk ( R)/Bk ( R) take the
+                                 the ISM band.
+                                   maximum     value as shown in Figure 1. The similarity between the simulated trajectory and
+                                   the fitting ellipse is very high. It is reasonable to regard the trajectory as an ellipse in the
+                                 Table
+                                   ISM 1.  The maximum of the relative change rate of 𝐴 (𝑅) and 𝐵 (𝑅) for ISM band when ∆𝑅 ≤
+                                        band.
+                                 𝜆/2.
+                                   Table 1. The maximum of the relative change rate of Ak ( R) and Bk ( R) for ISM band when ∆R ≤ λ/2.
+                                                                                   𝟏𝟎 𝑩𝒘                           𝟏𝟐 𝑩𝒘
+                                      𝒇𝒄 (GHz)              𝑩𝒘 (GHz)                    ∙     ·100%Bw                 ∙B𝒇w    ·100%
+                                          f (GHz)
+                                               c                B (GHz)
+                                                                     w              𝟑       𝒇𝒄 10
+                                                                                                3 · fc ·100%
+                                                                                                                   𝟓12
+                                                                                                                    5 · f 𝒄 ·100%
+                                                                                                                          c
+
+                                           0.00678
+                                               0.00678       0.000030.00003             1.47%1.47%                        1.06%
+                                                                                                                          1.06%
+                                           0.01356
+                                               0.01356       0.000014
+                                                                   0.000014             0.34%0.34%                        0.25%
+                                                                                                                          0.25%
+                                           0.02712
+                                               0.02712       0.000326
+                                                                   0.000326             4.01%4.01%                        2.88%
+                                                                                                                          2.88%
+                                           0.04068
+                                               0.04068       0.000040.00004             0.33%0.33%                        0.24%
+                                                                                                                          0.24%
+                                           0.43392
+                                               0.43392       0.001740.00174             1.34%1.34%                        0.96%
+                                                                                                                          0.96%
+                                            0.9150.915         0.0260.026               9.47%9.47%                        6.82%
+                                                                                                                          6.82%
+                                             2.452.45           0.1 0.1                 13.61%
+                                                                                             13.61%                       9.80%
+                                                                                                                          9.80%
+                                              5.8 5.8          0.15 0.15                8.62%8.62%                        6.21%
+                                                                                                                          6.21%
+                                           24.125
+                                                24.125         0.25 0.25                3.45%3.45%                        2.49%
+                                                                                                                          2.49%
+                                            61.2561.25          0.5 0.5                 2.72%2.72%                        1.96%
+                                                                                                                          1.96%
+                                            122.5122.5           1 1                    2.72%2.72%                        1.96%
+                                                                                                                          1.96%
+                                             245245              2 2                    2.72%2.72%                        1.96%
+                                                                                                                          1.96%
+
+
+
+
+                                   Figure 1. Simulations of synthetic trajectory of Re and Im when f c = 2.45 GHz, Bw = 0.1 GHz,
+                                 Figure   ∆RSimulations
+                                   k = 1, 1.             ofδsynthetic
+                                             = λ/2, and (a)                = −0.5. of 𝑅𝑒 and 𝐼𝑚 when 𝑓 = 2.45 GHz, 𝐵 = 0.1 GHz,
+                                                             = 0.5; (b) δtrajectory
+                                 k=1, ∆𝑅 = 𝜆/2, and (a) 𝛿 = 0.5; (b) 𝛿 = −0.5.
+
+                                      It can be seen from (15) and (16) that the greater the bandwidth, the greater the rela-
+                                 tive change rate of 𝐴 (𝑅) and 𝐵 (𝑅), and the more the trajectory deviates from the el-
+                                 lipse. Due to the low bandwidth of ISM band, the trajectory can be regarded as an ellipse.
+Remote Sens. 2022, 14, 58                                                                                                 5 of 18
+
+
+
+
+                                  It can be seen from (15) and (16) that the greater the bandwidth, the greater the relative
+                            change rate of Ak ( R) and Bk ( R), and the more the trajectory deviates from the ellipse.
+                            Due to the low bandwidth of ISM band, the trajectory can be regarded as an ellipse. If
+                            the changes of Ak ( R) and Bk ( R) are ignored under the condition of ∆R ≤ λ/2, Ak ( R)
+                            and Bk ( R) can be regarded as constants, denoted as Ak and Bk , respectively. In the actual
+                            environment, there will be various interferences, if only stationary objects are considered,
+                            the beat signal of stationary objects will be processed into DC offset based on (6) and (7),
+                            denoted as A0 and B0 , respectively. The DC offset will be added to Re and Im as shown in
+                            (17) and (18).
+                                                                                    4πR
+                                                              Re = A0 + Ak · cos(         ),                            (17)
+                                                                                      λ
+                                                                                   4πR
+                                                               Im = B0 + Bk · sin(       ),                             (18)
+                                                                                      λ
+                                  The trajectory equation is
+
+                                                             ( Re − A0 )2 ( Im − B0 )2
+                                                                         +             = 1.                                 (19)
+                                                                  Ak 2        Bk 2
+
+                                 Stationary objects do not affect the shape of the elliptical trajectory, they only affect the
+                            central coordinates of the ellipse. The ellipse parameters, that is, the value of A0 , B0 , Ak , Bk ,
+                            can be obtained by the ellipse fitting.
+
+                            2.3. Principle of Motion Measurement
+                                 According to (17) and (18), the absolute unambiguous phase corresponding to the
+                            point on the elliptical trajectory is:
+                                                                           4πR
+                                                                      Φ=       ,                                  (20)
+                                                                            λ
+                                 After obtaining the parameters of the fitted ellipse, the tangent of the phase can be
+                            obtained as:
+                                                                          Im − B0 Ak
+                                                                 tan(Φ) =        · ,                              (21)
+                                                                          Re − A0 Bk
+                                  Arctangent function is not a single valued function. Generally, the single value range
+                            is limited to 2π. So, the angle ϕ0 obtained by the arctangent function is not necessarily equal
+                            to Φ.
+                                                                       −1 Im − B0 Ak
+                                                                                       
+                                                                0
+                                                              ϕ = tan               ·     ,                            (22)
+                                                                           Re − A0 Bk
+                                 The problem that the range of ϕ0 is limited to 2π can be solved by the phase unwrap-
+                            ping algorithm.
+                                 Rem and Imm denote Re and Im of the m-th sampling chirp, ϕ0m denote ϕ0 of the m-th
+                            sampling arctangent phase, and the ϕ0m is:
+
+                                                                              Imm − B0 Ak
+                                                              ϕ0m = tan−1 (           · ),                                  (23)
+                                                                              Rem − A0 Bk
+
+                                Generally, the range of arctangent function obtained by computer is (−π/2, π/2),
+                            which can be extended to (0, 2π) by (24).
+                                                0
+                                                ϕm ,      f or ( Rem − A0 ) > 0 and ( Imm − B0 ) > 0
+                                          ϕm =   ϕ0m + 2π, f or ( Rem − A0 ) > 0 and ( Imm − B0 ) < 0             ,         (24)
+                                                0
+                                                 ϕm + π,     others
+
+                                 The m-th unwrapping phase is:
+
+                                                                   ϕuw,m = ϕm + 2im π,                                      (25)
+Remote Sens. 2022, 14, 58                                                                                              6 of 18
+
+
+
+
+                                 im is the relative index of the unwrapped phase, for the first value, i1 = 0. The
+                            process of unwrapping is to determine im . The phase jumps when it enters the adjacent 2π
+                            interval and the index should increase or decrease by one. Whether the phase jumps can be
+                            determined by the difference between the current phase and the previous phase.
+                                                    
+                                                     i m −1 ,            f or | ϕm − ϕm−1 | < π
+                                               im =   i       + 1,       f or ( ϕm − ϕm−1 ) > π    m > 1,               (26)
+                                                     m −1
+                                                      im−1 − 1,       f or ( ϕm − ϕm−1 ) < −π
+
+                                Since the initial unambiguous phase is unknown, what we get is a relatively unam-
+                            biguous phase. From the relative phase, the displacement of the m-th sampling chirp is:
+
+                                                                       λ
+                                                              R0m =      ( ϕuw,m − ϕuw,1 ).                             (27)
+                                                                      4π
+                                 The ellipse approximation algorithm also provides an estimation method of the dis-
+                            tance from the target to the antenna. Movement distance of λ/2 can just make the trajectory
+                            of Re and Im form a complete ellipse, it can be seen from (6), (7), (17), and (18) that the long
+                            and short axes of the ellipse satisfy (28).
+
+                                                                Ak  A ( R)   2B R
+                                                                   ≈ k      = W ,                                       (28)
+                                                                Bk  Bk ( R)    kc
+
+                                                                            kc Ak
+                                                                      R≈       · .                                      (29)
+                                                                           2BW Bk
+                                  Equation (29) provides a way for estimating the distance R by the parameters of the
+                            fitting ellipse. Ak and Bk are the parameters of the fitting ellipse when the target has a
+                            displacement not greater than λ/2. Ideally, the distance estimated by Equation (29) is an
+                            average value in the movement, and the accuracy should not be greater than λ/2. However,
+                            the actual measurement accuracy cannot reach the ideal situation because it will be affected
+                            by the nonlinearity of the transmitting wave, signal-to-noise ratio, accuracy of ellipse fitting,
+                            etc. In the experiment part, the measurement accuracy under the given experimental setup
+                            will be shown.
+                                  Sometimes the initial distance, Rini , of the object relative to the radar is known, for
+                            example, in the measurement of vital signs, the position of the people is determined in
+                            advance. In this case, the initial discrete frequency number can be obtained by k ini =
+                            b2Rini Bw /cc according to (9), the symbol b·c indicates rounding the value inside. The value
+                            of k is not large for low bandwidth, e.g., when the bandwidth is 0.15 GHz, the distance
+                            of 5 m corresponds to k = 5. If the value of Rini is unknown, one simple way is to test the
+                            appropriate k by changing it manually. The general way to obtain k is signal processing. The
+                            distance, Rini , can be estimated by the frequency estimation method in [10–14] for the first
+                            chirp, and then calculate k ini . The values of k can be updated by k = b2( Rini + R0m ) Bw /cc,
+                            where R0m is the displacement of the m-th sampling chirp.
+                                  Some details of the algorithm are presented in Appendix A, and a flowchart of the
+                            whole algorithm is given in Appendix B.
+
+                            3. Measurement Results
+                            3.1. Measurement Setup and the Shape of Trajectories
+                                 Commercial chip solutions are now available for key radar components, which greatly
+                            simplifies the design and manufacturing of small radar systems. In this experiment, the
+                            radar system is mainly composed of ADI’s ADF4158 chip and Infineon’s BGT24MTR chip.
+                            The ADF4158 chip generates the modulated signal; the BGT24MTR chip includes a 24 GHz
+                            voltage-controlled oscillator (VCO), a 24 GHz Mixer, a 24 GHz radio frequency power
+                            amplifier (PA) and a 24 GHz low noise amplifier (LNA). The two chips constitute the
+                            waveform generator. The digital acquisition (DAQ) card of Ni’s PXI-4461 is used for signal
+       Remote Sens. 2022, 14, 58                                                                                                   7 of 18
+
+
+
+
+                                           acquisition, and the digital signal analysis is completed by the embedded controller of
+                                           NI’s PXI-8101. The embedded controller acts as a computer, which includes a CPU of Intel
+, 13, x FOR PEER REVIEW                    Celeron 575 and 1 Gb RAM. The software used for signal acquisition is LabVIEW7 of 18and the
+                                            Figure 2. (a) Power, radar, DAQ, and analysis devices. (b) Circuit containing key chips on the back
+                                           software of signal processing is MATLAB. The DAQ card and the embedded controller are
+                                            of radar.
+                                           installed in the chassis of NI’s PXI-1036. The above devices are shown in Figure 2.
+
+                                                A metal plate is fixed on the linear stage as the object to be measured. The moving
+                                           direction of the linear stage is perpendicular to the antenna of the radar. The measuremen
+                                           setup is shown in Figure 3 and the specifications are shown in Table 2.
+
+                                           Table 2. Measuring setup specifications.
+
+                                                              Item                                               Parameter
+                                                   Radar modulation mode                             FMCW sawtooth modulation
+                                                       Center frequency                                         24.075 GHz
+                                                           Bandwidth                                             0.15 GHz
+                                                      Duration of a chirp                                           4 ms
+                                                      Transmitted power                                            15 dBm
+                                                      Size of metal plate                                      15 cm × 15 cm
+                                                (a) Power,
+                                                       andradar,
+                   Figure 2. (a) Power,Figure
+                                        radar,2.DAQ,
+                                                  Resolution   ofDAQ,
+                                                            analysis  and analysis
+                                                                     devices.
+                                                                  linear stage     devices.containing
+                                                                              (b) Circuit   (b) Circuit containing
+                                                                                                         key chips key
+                                                                                                                    on chips
+                                                                                                                  0.01       on the back
+                                                                                                                       the back
+                                                                                                                       mm
+                   of radar.               of radar.
+
+                                             AAs  mentioned
+                                                metal             before,
+                                                        plate is fixed      stationary
+                                                                       on the             objects
+                                                                                 linear stage       doobject
+                                                                                               as the   not affect
+                                                                                                             to be the shape but
+                                                                                                                   measured.   The the center poin
+                                                                                                                                   moving
+                        A metal plate  ofisthe
+                                             fixed
+                                      direction   of on
+                                                      the the
+                                                ellipse.       linear
+                                                           In order
+                                                          linear     tostage
+                                                                 stage  isverifyasthis
+                                                                                    thehypothesis,
+                                                                           perpendicular object
+                                                                                            to thetoantenna
+                                                                                                      be measured.
+                                                                                                       some           The
+                                                                                                             experiments
+                                                                                                            of the radar.   moving
+                                                                                                                            were
+                                                                                                                          The    carried out in the
+                                                                                                                              measurement
+                   direction of the linear
+                                      setup  stage   is perpendicular
+                                              is shown
+                                       environments       inshown
+                                                             Figurein3 and  to
+                                                                       Figurethethe  antenna ofare
+                                                                                  specifications
+                                                                                  3b,c.             the radar.
+                                                                                                      shown  in The
+                                                                                                                Tablemeasurement
+                                                                                                                      2.
+                   setup is shown in Figure 3 and the specifications are shown in Table 2.
+
+                   Table 2. Measuring setup specifications.
+
+                                             Item                                         Parameter
+                                   Radar modulation mode                           FMCW sawtooth modulation
+                                       Center frequency                                  24.075 GHz
+                                          Bandwidth                                       0.15 GHz
+                                      Duration of a chirp                                    4 ms
+                                     Transmitted power                                     15 dBm
+                                      Size of metal plate                               15 cm × 15 cm
+                                   Resolution of linear stage                              0.01 mm
+
+                        As mentioned before, stationary objects do not affect the shape but the center point
+                   of the ellipse. In order
+                                       Figure
+                                       Figureto3.3.verify
+                                                    (a)    this hypothesis,
+                                                     (a) Measurement
+                                                         Measurement setup.  some
+                                                                     setup. (b)
+                                                                             (b) No experimentsmetalwere
+                                                                                    stationary metal
+                                                                                 Nostationary             carried
+                                                                                                     plates;
+                                                                                                     plates; (c)      out in
+                                                                                                              (c) addition
+                                                                                                                   addition ofthe
+                                                                                                                            of stationary
+                                                                                                                                stationary metal
+                   environments shown in Figure 3b,c.
+                                       plates.
+                                       metal plates.
+
+                                                As mentioned before, stationary objects do not affect the shape but the center point of
+                                                 The block diagram of the measurement system is show in Figure 4. The FMCW signa
+                                           the ellipse. In order to verify this hypothesis, some experiments were carried out in the
+                                            produced byshown
+                                           environments    the waveform
+                                                                  in Figure generator
+                                                                            3b,c.       is amplified by the PA and transmitted to the meta
+                                            plate.  The  echo  is  amplified   and  filtered
+                                                The block diagram of the measurement system   by theis LNA,  and
+                                                                                                       show in    mixed
+                                                                                                               Figure      withFMCW
+                                                                                                                       4. The      a part of th
+                                           signal produced by the waveform generator is amplified by the PA and transmitted to the
+                                           metal plate. The echo is amplified and filtered by the LNA, and mixed with a part of the
+                                           transmitted signal to generate the beat signal, which is then converted into a digital signal
+                                           through DAQ card and processed by the computer.
+Remote Sens. 2022, 14, 58                                                                                                        8 of 18
+
+
+
+
+                                  Table 2. Measuring setup specifications.
+
+                                                          Item                                            Parameter
+                                              Radar modulation mode                           FMCW sawtooth modulation
+                                                  Center frequency                                        24.075 GHz
+                                                       Bandwidth                                           0.15 GHz
+                                                 Duration of a chirp                                         4 ms
+                                                 Transmitted power                                          15 dBm
+                                                 Size of metal plate                                     15 cm × 15 cm
+                                              Resolution of linear stage                                   0.01 mm
+
+
+
+
+              Waveform
+                                                     PA
+              Generatoror
+
+
+                   DAQ                        Mixer
+                                                                                                       Metal Plate
+
+
+                 Signal
+                                                  LNA
+               Processing                                                                            Linear Stage
+
+
+                                  Figure 4. Simplified block diagram of measurement system.
+
+                                       Let the metal plate move by λ/2 at 1.7 m, 1.9 m, 2.1 m, and 2.2 m away from the
+                                  antenna, respectively. The synthetic trajectory of Re and Im is shown in Figure 5. The
+                                  trajectory composed of solid lines represents the measurement results without stationary
+                                  metal plates and the trajectory composed of dots represents the results with stationary
+                                  metal plates. It can be seen that the trajectory is indeed in the shape of an ellipse. Two
+                                  trajectories composed of solid lines and dots in each subgraph have the same shape but
+                                  have a different position, which is consistent with the previous hypothesis.
+
+                                  3.2. Motion Measurement
+                                       In order to test the accuracy of the proposed algorithm in motion measurement, the
+                                  following movement process is designed: first, start moving at an acceleration of 5 mm/s2
+                                  for 4 s from a standstill, the speed will reach 20 mm/s, move at this speed for 10 s, then
+                                  move at an acceleration of—5 mm/s2 for 4 s, and at this time, the speed is zero; stand still
+                                  for 2 s, then move at an acceleration of—10 mm/s2 for 2 s, the speed reaches—20 mm/s,
+                                  and then move at this speed for 12 s. Lastly, move at an acceleration of 10 mm/s for 2 s and
+                                  return to the starting point. The whole movement can be divided into seven motion states
+                                  as shown in Table 3.
+
+                                  Table 3. Motion state at different time periods of designed movement.
+
+    Time Periods (s)            0–4           4–14               14–18        18–20          20–22            22–34         34–36
+                              Uniform       Uniform         Uniform                         Uniform         Uniform       Uniform
+     State of motion                                                         standstill
+                            acceleration    velocity       deceleration                   acceleration      velocity     deceleration
+                            metal plates and the trajectory composed of dots represents the results with
+                            metal plates. It can be seen that the trajectory is indeed in the shape of an e
+                            trajectories composed of solid lines and dots in each subgraph have the sam
+Remote Sens. 2022, 14, 58   have a different position, which is consistent with the previous hypothesis.
+                                                                                                9 of 18
+
+
+
+
+                             Figure
+                            Figure  5. 5.
+                                       TheThe  shape
+                                           shape        of synthetic
+                                                  of synthetic          trajectory
+                                                               trajectory with/withoutwith/without       (solid blue/dashed
+                                                                                           (solid blue/dashed    red) interferencered)of interf
+                             tionary metal plates, the change of R is 𝜆/2, the starting distances are (a) 1.7 m; (b) 1.9
+                            stationary metal plates, the change of R is λ/2, the starting distances are (a) 1.7 m; (b) 1.9 m; (c) 2.1 m;
+                            and (d) 2.2 m.
+                            and (d) 2.2 m.
+                                  The sampling rate of displacement is 65 Hz, and the movement lasts for 36 s; there
+                             3.2.2340
+                            are    Motion
+                                      samplingMeasurement
+                                                  values in a complete measurement. The complete measurement was
+                            repeated 50 times in the two environments as shown in Figure 3b,c, which means there
+                                    In order
+                            are 50 values        to test
+                                             in every     the accuracy
+                                                       position             of the proposed
+                                                                during movement.     Figure 6 showsalgorithm       in motion
+                                                                                                        the statistical analysis measu
+                             following
+                            of               movement
+                               deviation between            processvalue
+                                                      the measured    is designed:
+                                                                           and the setfirst,
+                                                                                         value.start   moving
+                                                                                                 The blue          at an acceleration
+                                                                                                           line represents   the
+                            change   of the maximum     absolute measurement    deviation, the  red line represents
+                             for 4 s from a standstill, the speed will reach 20 mm/s, move at this speed fo          the change
+                            of standard deviation. In Figure 6a, the maximum
+                             move at an acceleration of—5 mm/s2 for value                   of the blue line is 0.087 mm, the
+                                                                                      4 s, and    at this time, the speed is zero
+                            maximum value of the red line is 0.036 mm. In Figure 6b, the maximum value is 0.082 mm
+                             forthe
+                            for   2 blue
+                                     s, then     move
+                                           line and 0.037atmman for
+                                                                acceleration
+                                                                    the red line. of—10     mm/s2 for 2the
+                                                                                  In both environments,       s, measurement
+                                                                                                                 the speed reaches
+                             andreached
+                            has     then sub-millimeter
+                                            move at thisaccuracy.
+                                                              speed for    12 s. Lastly,
+                                                                        Considering          move
+                                                                                       that the        at an acceleration
+                                                                                                 positioning   accuracy of theof 10 m
+                            linear stage is 0.01 mm, there is no obvious difference in measurement deviation in the two
+                            environments. It is reasonable to consider that the algorithm can filter the interference of
+                            the stationary object.
+                                  Figure 7 shows one measurement result randomly selected from 50 measurements
+                            without interference of stationary metal plates; the upper figure shows the measured
+                            displacement, and the lower figure shows the deviation between the measured value and
+                            the set value. The maximum value of displacement deviation is 0.061 mm. It can be seen
+                            that the deviation is large in the acceleration period, smaller in uniform in the velocity
+                            period, and is the smallest in the standstill period. The reason is that the metal plate is
+                            fixed on the slider of the linear stage, and when the linear stage drives the metal plate
+                            to move, it vibrates slightly and transfers this vibration to the metal plate resulting in
+                            additional deviation. Accelerated motion causes a stronger vibration than uniform motion,
+                            so the deviation in acceleration period is larger than that of uniform velocity and the
+                            standstill period.
+                                 mm, the maximum value of the red line is 0.036 mm. In Figure 6b, the maximum value is
+                                 0.082 mm for the blue line and 0.037 mm for the red line. In both environments, the meas-
+                                 urement has reached sub-millimeter accuracy. Considering that the positioning accuracy
+                                 of the linear stage is 0.01 mm, there is no obvious difference in measurement deviation in
+                                 the two environments. It is reasonable to consider that the algorithm can filter the inter-
+     Remote Sens. 2022, 14, 58                                                                                      10 of 18
+                                 ference of the stationary object.
+
+
+                                                                                                                                                                      maximum absolute deviation
+
+
+
+
+                                    deviation (mm)
+                                                                                                                                                                      standard deviation
+                                                                                     0.08
+
+
+                                                                                     0.04
+
+
+                                                                                     0.00
+                                                                                                 0      2       4       6       8       10 12 14 16 18 20 22 24 26 28 30 32 34 36
+Remote Sens. 2022, 13, x FOR PEER REVIEW
+                                                                                                                                                           time (s)
+                                                                                                                                                              (a)
+                                                                            maximum absolute deviation
+                                    deviation (mm)
+
+
+
+
+                                                                            standard to
+                                    vibrates slightly and transfers this vibration   deviation
+                                                                                        the metal plate resulting in additi
+                                                                                     0.08
+                                    viation. Accelerated motion causes a stronger vibration than uniform motion, so t
+                                    ation
+                                        0.04 in acceleration period is larger than that of uniform velocity and the stand
+                                    riod.
+                                        0.00If the conventional phase evaluation method is adopted, which means the
+                                             0 2 4 6 8 10 12 14 16 18 20 22 24 26 28 30 32 34 36
+                                    evaluated by (8), the displacement deviations for a complete measurement with/
+                                                                                  time (s)
+                                    interference of stationary metal plates          (b) are shown in Figure 8. The maximum valu
+                                    solute deviation is 1.127 mm and 0.722 mm for Figure 8a,b, respectively. The dev
+                                    Figure
+                                 Figure     6. The
+                                         6. The    statistical analysisofofmeasurement
+                                                statistical                 measurementdeviation.
+                                                                                        deviation. (a)
+                                                                                                   (a) With
+                                                                                                       With interference
+                                                                                                             interferenceofofstationary metal
+                                    about     ten  times analysis
+                                                            that of the phase correction          algorithm.
+                                    plates; and (b) without interference of stationary metal plates.
+                                                                                                                              stationary metal
+                                 plates; and (b) without interference of stationary metal plates.
+
+                                      Figure 7 shows one measurement result randomly selected from 50 measurements
+                                         300
+                                     displacement deviation (mm) displacement (mm)
+
+
+
+
+                                 without interference of stationary metal plates; the upper figure shows the measured dis-
+                                 placement,
+                                         200 and the lower figure shows the deviation between the measured value and the
+                                 set value. The maximum value of displacement deviation is 0.061 mm. It can be seen that
+                                 the deviation
+                                         100    is large in the acceleration period, smaller in uniform in the velocity period,
+                                 and is the smallest in the standstill period. The reason is that the metal plate is fixed on
+                                 the slider0of the linear stage, and when the linear stage drives the metal plate to move, it
+                                                                                      0.08
+
+                                                                                      0.04
+
+                                                                                                0
+
+                                                                                     -0.04
+
+                                                                                     -0.08
+                                                                                                    0       2       4       6       8       10   12   14   16    18   20   22   24   26   28   30   32   34   36
+                                                                                                                                                             time (s)
+
+                                   Figure 7. Measured displacement (top) and the deviation (bottom) of ellipse approximation algorithm.
+                                    Figure 7. Measured displacement (top) and the deviation (bottom) of ellipse approximat
+                                    rithm.
+                                        If the conventional phase evaluation method is adopted, which means the phase is
+                                   evaluated by (8), the displacement deviations for a complete measurement with/without
+                                   interference of stationary metal plates are shown in Figure 8. The maximum value of
+                                   absolute1.0
+                                             deviation is 1.127 mm and 0.722 mm for Figure 8a,b, respectively. The deviation is
+                                                                               deviation (mm)
+
+
+
+
+                                   about ten times that of the phase correction algorithm.
+                                                                                                0.5
+
+                                                                                                0.0
+
+                                                                                                -0.5
+
+                                                                                                -1.0
+                                                                                                        0       2       4       6       8    10 12 14 16 18 20 22 24 26 28 30 32 34 36
+                                                                                                                                                                time (s)
+                                                                                                                                                                   (a)
+                                                                                                1.0
+                                                                               (mm)
+
+
+
+
+                                                                                                0.5
+                            displa
+                                       -0.08
+                                                        0        2       4       6       8       10   12   14   16    18   20   22   24   26   28   30   32   34   36
+                                                                                                                 time (s)
+
+
+Remote Sens. 2022, 14, 58   Figure 7. Measured displacement (top) and the deviation (bottom) of ellipse approximatio
+                                                                                                        11 of 18
+                            rithm.
+
+
+                                                      1.0
+
+
+
+
+                                     deviation (mm)
+                                                      0.5
+
+                                                      0.0
+
+                                                      -0.5
+
+                                                      -1.0
+                                                             0       2       4       6       8    10 12 14 16 18 20 22 24 26 28 30 32 34 36
+                                                                                                                     time (s)
+                                                                                                                        (a)
+                                                      1.0
+                                     deviation (mm)
+
+
+
+
+                                                      0.5
+
+                                                      0.0
+
+                                                      -0.5
+
+                                                      -1.0
+                                                             0       2       4       6       8    10 12 14 16 18 20 22 24 26 28 30 32 34 36
+                                                                                                                     time (s)
+                                                                                                                        (b)
+                                Figure 8. Measurement deviation of conventional phase evaluation method. (a) With interference of
+                            Figure 8. Measurement deviation of conventional phase evaluation method. (a) With interfer
+                              stationary metal plates; (b) without interference of stationary metal plates.
+                            stationary metal plates; (b) without interference of stationary metal plates.
+                                    According to (8), the unequal of Ak ( R) and Bk ( R) does not change the quadrant of
+                                   According
+                              the phase,         to (8), the
+                                          the maximum           unequal
+                                                            deviation        of 𝐴caused
+                                                                       of phase       (𝑅) and
+                                                                                           by it 𝐵  (𝑅) does
+                                                                                                 satisfies ∆ϕmaxnot   change
+                                                                                                                 < π/2,       the quadr
+                                                                                                                         and the
+                                                                                    0       λ ∆ϕmax
+                              maximum
+                            the  phase, displacement
+                                           the maximum     deviation  satisfiesof∆R
+                                                               deviation                      ·
+                                                                                      max <caused
+                                                                                  phase     2   2π   =
+                                                                                                     by  it
+                                                                                                        λ/8. For this
+                                                                                                            satisfies  ∆𝜑      < 𝜋/2, an
+                                                                                                                      experiment,
+                                λ = 12.461 mm, so ∆R0    max                                                                        ∆
+                                                                                                      < 1.558 mm. The above measurement results agree with
+                            maximum
+                              the theory.
+                                          displacement     deviation satisfies ∆𝑅         < ∙          = 𝜆/8. For this exper
+                            𝜆 = 12.461     mm, so ∆𝑅
+                                    The conventional           < 1.558 method
+                                                       phase evaluation mm. The      above
+                                                                                 is more    measurement
+                                                                                         vulnerable          results
+                                                                                                    to DC offset. Thereagree wi
+                              is an
+                            theory. extreme  case that the DC  offset makes the coordinate origin outside the trajectory,
+                               which distorts the quadrant of the phase and makes the phase impossible to estimate
+                               correctly. This case is achieved by placing the stationary metal plate in a specific position,
+                               and the motion measurement is carried out under the condition. The coordinate origin is
+                               outside the trajectory as shown in Figure 9. For conventional phase evaluation method,
+                               the phase range is limited to [ ϕ1 , ϕ2 ], so the displacement is limited to less than half a
+                               wavelength, resulting in a huge measurement deviation that it is completely wrong as
+                               shown in Figure 10a. The results calculated by the ellipse approximation algorithm are
+                               shown in Figure 10b, and compared with Figure 7, it can be seen that the accuracy of the
+                               measurement is not affected by the origin position for the ellipse approximation algorithm.
+                                    The performance of other works is shown in Table 4. It can be seen that the measure-
+                               ment accuracy of [16,22,23], is higher than this work. In [22], the measured distance is only
+                               0.01 mm, it is applicable to the ultra-short distance measurement. Ref. [16] uses a complex
+                               frequency estimation algorithm based on chirp Z-transform. The experiment was carried
+                               out in a special measurement environment with a closed setup and no external influences,
+                               which cannot reflect the anti-interference ability. Ref. [23] uses a phase modulated radar
+                               which has an advantage in that multiple sensors could coexist without interference with
+                               each other; however, in the experiment, the target is measured at several fixed positions,
+                               the performance of motion measurement is not given, and the frequency band does not
+                               belong to ISM band.
+                            shown  in Figure
+                            wavelength,       10a. The
+                                          resulting   in results
+                                                         a huge calculated by the
+                                                                 measurement       ellipse approximation
+                                                                                deviation                     algorithm
+                                                                                              that it is completely   wr
+                            shown  in Figure  10b,  and compared   with Figure 7, it can  be seen  that  the
+                            shown in Figure 10a. The results calculated by the ellipse approximation algorithaccuracy of
+                            measurement
+                            shown in Figureis not
+                                               10b,affected by the origin
+                                                     and compared         position7,for
+                                                                    with Figure          the be
+                                                                                     it can   ellipse
+                                                                                                 seen approximation    al
+                                                                                                       that the accuracy
+                            rithm.
+                            measurement is not affected by the origin position for the ellipse approximation
+Remote Sens. 2022, 14, 58                                                                                                                                                                                                                               12 of 18
+                            rithm.
+                                                 5
+
+                                                      5
+                                                 4
+
+                                                 4
+                                                 3
+
+
+                                                 3
+                                                 2
+
+
+                                                 2
+                                                 1
+
+
+                                                 1
+                                                 0
+                                                                                                                                         (0,0)
+                                                      0 -3.5 -3.0 -2.5 -2.0 -1.5 -1.0 -0.5 0.0 0.5 1.0
+                                                                                                                                              (0,0)
+                            Figure -3.5
+                                      9.-3.0
+                                         The-2.5
+                                             DC -2.0
+                                                  offset-1.5 -1.0 -0.5
+                                                           makes          0.0 0.5 1.0origin be set outside of the trajectory by placing
+                                                                    the coordinate
+                            stationary metal plate in a specific position. The phase range is limited to [𝜑 , 𝜑 ] for the conv
+                                      9. Theevaluation
+                              Figurephase
+                            tional           DC offset makes    the coordinate origin be set outside of the trajectory by placing the
+                                                          method.
+                            Figure    9. metal
+                              stationary  The DC
+                                               plateoffset  makes
+                                                     in a specific    the coordinate
+                                                                   position.             origin
+                                                                             The phase range      be setooutside
+                                                                                             is limited                ofthe
+                                                                                                          [ ϕ1 , ϕ2 ] for theconventional
+                                                                                                                               trajectory by plac
+                            stationary            plate in a specific position. The phase range is limited to [𝜑 , 𝜑 ] for the c
+                                           metalmethod.
+                              phase evaluation
+                            tional phase evaluation method.
+                                                                                                                                                                                                       300
+
+                                                                                                1.2                                                                                                    250
+                                                                                                                                                                                                displacement (mm)
+                                                                                        (mm)
+
+
+
+
+                                                                                                                                                                                            200
+                                                                                                                                                                                              300
+                                                                                                0.8
+                                                                           displacement
+
+
+
+
+                                                                                                                                                                                            150
+                                                                                                1.2                                                                                           250
+                                                                                                                                                                                      displacement (mm)
+                                                                              (mm)
+
+
+
+
+                                                                                                0.4                                                                                         100
+                                                                                                                                                                                              200
+                                                                                                0.8                                                                                          50
+                                                                 displacement
+
+
+
+
+                                                                                                0.0                                                                                           150
+                                                                                                                                                                                              0
+                                                                                                0.4                                                                                           100
+                                                                                                  0
+                                                       deviation (mm)
+
+
+
+
+                                                                                                                                                              displacement deviation (mm)
+
+
+
+
+                                                                                                                                                                                           0.08
+                                                                                                                                                                                                50
+                                                                                                0.0                                                                                        0.04 0
+                                                                                               -100
+                                                                                                  0
+                                          deviation (mm)
+
+
+
+
+                                                                                                                                                  displacement deviation (mm)
+
+
+
+
+                                                                                                                                                                                           0.00
+                                                                                                                                                                                             0.08
+                              displacementdisplacement
+
+
+
+
+                                                                                               -200                                                                            -0.04
+                                                                                                                                                                                  0.04
+                                                                                               -100
+                                                                                                                                                                               -0.08
+                                                                                                                                                                                  0.00
+                                                                                               -300
+                                                                                                    0     5   10   15 20       25   30   35                                                                  0      5   10   15 20       25   30   35
+                                                                                               -200                                                                                                       -0.04
+                                                                                                                    time (s)                                                                                                  time (s)
+
+                                                                                                                   (a)                                                                                    -0.08               (b)
+                                                                                               -300
+                                                  15 20 25 30 35                    0     5           0   5   10
+                                                                                              10 15 20 25 30 35
+                             Figure 10. The measured  displacement (top) and the deviation (bottom)time
+                                                   time (s)
+                                                                                                    when(s)
+                                                                                                            the DC offset makes
+                             the coordinate origin outside the trajectory. (a) Conventional phase evaluation algorithm; (b) ellipse
+                                                    (a)
+                             approximation algorithm.                                                  (b)
+                                  The time complexity represented by big O notation is given in Table 4. Big O notation
+                             can tell us how efficient the algorithm is. It can be seen that the time complexity of [22,24] is
+                             a constant order of O(1). For the CW radar, if the DC offset is not considered, the arctangent
+                             demodulation can be directly used on the echo signals of the IQ channel, which has a fast
+                             response speed, but the measurement results are very sensitive to the noise. The signal
+                             processing of FMCW radar generally has an integral for the beat signal, and compared with
+                             the CW radar, the response speed is slower, but the integration can effectively eliminate
+Remote Sens. 2022, 14, 58                                                                                                                                                                             13 of 18
+
+
+
+
+                                 random noise. The time complexity of the algorithm in this paper is consistent with [23,25],
+                                 and better than [10,16].
+
+                                 Table 4. Comparison of performance with other works.
+
+                                                                                                                                                            Measured               Time
+      Ref.          Waveform    Frequency(GHz)                               Bandwidth (GHz)           Accuracy (um)                                      Distance (mm)          Complexity       ISM Band
+
+      [10]            FMCW                                24                         8                                 250                                       3000            O(N log2 N)        NO
+      [16]            FMCW                                24.3                       1                                            5                               50                  O(N 3/2 )     NO
+      [22]             CW                                 24                    Single tone                               0.5                                    0.01                   O(1)        YES
+      [24]             CW                                 24                    Dual tone                              200                                        60                    O(1)        NO
+      [25]            Pulse                                2                        0.45                               530                                    Static                   O(N)         NO
+
+      [23]           Phase                                80                         2                                            7                               20                   O(N)         NO
+                    modulated
+   This study         FMCW                     24.074                               0.15                                    87                                   280                   O(N)         YES
+
+
+                                 3.3. Distance Measurement
+                                      The distance between the target and the antenna can be calculated according to (20).
+                                 Let the linear stage carrying the metal plate move 0.5 m, and the initial distance from the
+                                 antenna is 1.7 m. Since the measurement results with or without the stationary metal plate
+                                 are almost the same, only the measurement results without the stationary metal plate are
+                                 given, as shown in Figure 11.
+                                                                                                          measured distance deviation (m)
+
+
+
+
+                                                          2.2
+                                                                                                                                            0.04
+                                  measured distance (m)
+
+
+
+
+                                                          2.1
+                                                                                                                                            0.02
+                                                          2.0
+
+                                                          1.9                                                                               0.00
+
+                                                          1.8
+                                                                                                                                            -0.02
+                                                          1.7
+
+                                                                 1.7   1.8    1.9   2.0    2.1   2.2                                                1.7    1.8    1.9     2.0   2.1     2.2
+                                                                       set distance (m)                                                                     set distance (m)
+                                                                              (a)                                                                                       (b)
+                                 Figure 11. Distance measurements of metal plate. (a) Measured distance versus set distance; and (b)
+                                 the deviation of measured distance.
+
+                                      The x-axis of Figure 11a represents the set distance and the y-axis represents the mea-
+                                 sured distance. The curve of Figure 11a would be a straight line if there are no measurement
+                                 deviations. It can be seen that the maximum deviation is 0.043 m as shown in Figure 11b.
+                                 The accuracy of the distance measurement is not high, but the computational complexity
+                                 is low. Different scenarios have different requirements for measurement accuracy. For
+                                 example, the obstacle avoidance of autonomous vehicles requires centimeter accuracy, and
+                                 the motion detection of the robotic arm in remote surgery requires sub-millimeter accuracy.
+                                 Meanwhile, real-time performance is another important consideration. Algorithms with
+                                 high computational complexity require hardware with strong computational power, and
+                                 cannot achieve a good balance between low latency and low cost. This algorithm can be
+                                 used in scenes with low requirements for accuracy but high requirements for real-time
+                                 performance, such as car reversing alarm, indoor robot obstacle avoidance, etc.
+                                      The linear stage we use is 50 cm long, and the experiment was carried out indoors.
+                                 Due to space limitations, the maximum distance is 5 m and the maximum displacement is
+                                 50 cm in the measurement, and within this range, no significant change in accuracy was
+                                 found. However, this does not mean that distance has little effect on accuracy. In general,
+Remote Sens. 2022, 14, 58                                                                                                 14 of 18
+
+
+
+
+                            the maximum measurement distance of the radar is proportional to the transmitted power
+                            and the object’s cross section, and inversely proportional to the noise; in other words, it is
+                            related to the signal-to-noise ratio (SNR). The increase in the distance will reduce the SNR
+                            and have a negative impact on the measurement accuracy, which must be paid attention to,
+                            especially for high accuracy measurement.
+
+                            4. Discussion
+                                  High accuracy phase evaluation is the key to accurate motion detection. The con-
+                            ventional FFT phase algorithm has phase distortion due to spectrum leakage, and cannot
+                            eliminate DC offset. The frequency estimation method contains Fourier transform and
+                            frequency refining analysis in each chirp, which has the disadvantages of being compu-
+                            tationally expensive, and easily disturbed by surrounding objects. In this paper, a more
+                            accurate phase estimation is presented for the ISM band. The algorithm only needs one
+                            receiving channel, and can eliminate the DC offset.
+                                  The proposed algorithm can obtain accurate movement displacement, and can be
+                            applied to scenes where the relative motion needs to be measured remotely and non-
+                            contact, such as life signal detection, robot control, etc. However, the accuracy of absolute
+                            distance is low. The approach to solve this problem can be combined with the frequency
+                            estimation method in [7,16]. There is no need to complete frequency estimation for each
+                            chirp. Instead, just calculate the accurate distance for the first chirp, and then use the sum
+                            of the displacement and the initial distance to obtain the accurate distance.
+                                  The proposed algorithm can eliminate the DC offset caused by a stationary object,
+                            no matter whether the stationary object is close or far away from the target. If there
+                            is interference from a moving object, the situation is more complicated. If the distance
+                            between the moving object and the target is greater than a range bin of FMCW radar,
+                            the frequency difference between their beat signals is greater than the discrete frequency
+                            interval of DFT, and the two motions can be distinguished because of the weak correlation
+                            between their beat signals; if the distance is less than a range bin, it is difficult to distinguish
+                            the two motions because of the strong correlation of their beat signals. It is an effective
+                            method to increase the range resolution by increasing the bandwidth, but it is not suitable
+                            for the ISM band because its bandwidth range is very limited. If the two moving objects do
+                            not block each other, they will be at different angles to the receiving antenna. Increasing
+                            the number of receiving antennas can improve the ability of azimuth resolution, which is a
+                            way to distinguish different moving objects.
+
+                            5. Conclusions
+                                  The proposed algorithm to calculate displacement by accurate phase avoids the use of
+                            complex methods for frequency estimation and reduces the amount of calculation. Since
+                            the beat signal of the stationary object is processed into a fixed DC offset, the interference of
+                            the stationary object can be filtered, which reduces the requirements for the measurement
+                            environment. This algorithm is especially suitable for ISM band, so it has high practicability.
+                            The performance of the algorithm is evaluated by a radar system which the center frequency
+                            is 24.075 GHz and the bandwidth is 0.15 GHz; the measurement accuracy of displacement
+                            is 0.087 mm and the accuracy of distance is 0.043 m.
+
+                            Author Contributions: Conceptualization, R.Z. and K.Q.; methodology, K.Q.; software, K.Q.; valida-
+                            tion, K.Q. and R.Z.; formal analysis, K.Q.; investigation, K.Q.; resources, R.Z.; data curation, K.Q.;
+                            writing—original draft preparation, K.Q.; writing—review and editing, K.Q. and Z.F.; supervision,
+                            R.Z. and Z.F.; and funding acquisition, R.Z. All authors have read and agreed to the published version
+                            of the manuscript.
+                            Funding: This research was funded by the National Key Scientific Instrument and Equipment
+                            Development Project of China, grant number 2016YFF0101402.
+                            Institutional Review Board Statement: Not applicable.
+                            Informed Consent Statement: Not applicable.
+Remote Sens. 2022, 14, 58                                                                                            15 of 18
+
+
+
+
+                            Data Availability Statement: The data presented in this study are available on request from the
+                            corresponding author.
+                            Conflicts of Interest: The authors declare no conflict of interest.
+
+                            Appendix A
+                                  In the following description, the sampling point coordinates of the elliptical trajectory
+                            are the values of each pair of Re and Im. Some sampling points are selected for ellipse fitting,
+                            and these selected sampling points are called effective sampling points. The sampling
+                            points and the effective sampling points are stored as different variables.
+                            (1)   The fitting of the initial ellipse
+                                  Noise will cause the sampling points formed by Re and Im to be randomly distributed
+                            in a small range, and the Euclidean distance between the sampling points is also randomly
+                            distributed. The distribution variance of the Euclidean distance is obtained through statisti-
+                            cal analysis, and then the variance or variance with coefficient is set as a threshold. When
+                            the Euclidean distance between the current sampling point and the previous sampling point
+                            exceeds the threshold, the current sampling point can be stored as an effective sampling
+                            point for ellipse fitting.
+                                  At the beginning, the ellipse has not been formed, and the phase cannot be calculated
+                            immediately. Therefore, it is necessary to accumulate effective sampling points to fit
+                            the initial ellipse. First, set a number Nini , when the number of accumulated effective
+                            sampling points is equal to Nini , then use these effective sampling points to fit the initial
+                            ellipse. The time taken for accumulating effective sampling points and fitting the initial
+                            ellipse constitutes the initial delay time. After the initial ellipse fitting is completed, the
+                            corresponding phase of each sampling point within the initial delay time is calculated and
+                            the displacements are obtained. As for the determination of Nini , if the value is too large,
+                            the delay time will be longer, and the trajectory may contain multiple ellipses; if the value
+                            is too small, the trajectory may be a short arc, resulting in a fitting error. In the experiment
+                            of this paper, the Nini = 50, the accuracy is good, and the initial delay time is 1.5 s.
+                            (2)   The fitting of subsequent ellipse
+                                 If the sampling points enter the adjacent ellipse, the same problem is faced, that is, the
+                            current ellipse has not been formed and the corresponding parameters cannot be obtained
+                            immediately. We can assume that the two adjacent ellipse trajectories are almost the same,
+                            so the phase of current sampling points can be calculated according to the parameters of
+                            the previous ellipse. At the same time, the effective sampling points in the current ellipse
+                            are stored, and once the sampling point enters the adjacent ellipse, these effective sampling
+                            points are immediately used to fit the ellipse whose parameters are used for the phase
+                            calculation of the ongoing sampling points. The above procedure is repeated over time.
+                            (3)   Restriction on the number of effective sampling points
+                                  If the measured object vibrates periodically within a range of less than half a wave-
+                            length for a long time, the sampling points will move periodically on an ellipse for a long
+                            time too, and a large number of effective sampling points will be collected on the ellipse.
+                            The computational cost of ellipse fitting will increase significantly. The solution is to divide
+                            the ellipse into Ns intervals according to the phase, and each phase interval is 2π/Ns . The
+                            rule is that only one effective sampling point is stored in each phase interval. The maximum
+                            number of effective sampling points on an ellipse will not exceed Ns . The value of Ns
+                            determines the sampling density, a large value will increase the computational cost, while
+                            a too small value will lead to a large fitting error. In the experiment of this paper, Ns = 100,
+                            which shows a good balance between accuracy and computational cost.
+                            (4)   Ellipse fitting algorithm
+                                The ellipse parameters can be estimated based on a linear least square (LLS) method,
+                            which is the optimum method for solving linear unbiased estimators.
+Remote Sens. 2022, 14, 58                                                                                                      16 of 18
+
+
+
+
+                                 Expand (19) into the following form:
+
+                                                         Ak 2            2Ak 2 B0                  Ak 2 B0 2
+                                                                                                                  
+                                  Re2 − 2A0 · Re +              · Im 2
+                                                                       −          · Im +   A 0
+                                                                                               2
+                                                                                                 +           − A k
+                                                                                                                   2
+                                                                                                                       = 0,      (A1)
+                                                         Bk 2             Bk 2                      Bk 2
+
+                                 The ellipse parameters are replaced by new linear parameters as follows:
+                                                         
+                                                         
+                                                             α = −2A0
+                                                                     2
+                                                          β= A
+                                                         
+                                                         
+                                                                  k
+                                                                  Bk 2
+                                                                         2             ,                                         (A2)
+                                                             γ = − 2ABk 2B0
+                                                                        k
+                                                         
+                                                         
+                                                          η = A0 2 + Ak 2 B0 2 − A 2
+                                                         
+                                                         
+                                                                             B 2   k
+                                                                                    k
+
+
+                                 Then (A1) can be
+                                                            Re2 + α· Re + β· Im2 + γ· Im + η = 0,                                (A3)
+                                 Let
+                                                                                                                2
+                                                  f (α, β, γ, η ) = ( Re2 + α· Re + β· Im2 + γ· Im + η ) ,                       (A4)
+                                 The new parameters can be estimated based on LLS method as follows:
+
+                                                                     arg min f (α, β, γ, η ),                                    (A5)
+                                                                         α,β,γ,η
+
+                                 The following fourth-order linear equations which expressed by a matrix equation can
+                            be obtained:
+                                                                   Ω = U −1 V,                                   (A6)
+                            where Ω = [α, β, γ, η ] T is a vector containing unknown parameters, V = [ ∑ Rei 3 , ∑
+                                                                         T
+                             Rei 2 · Imi 2 , ∑ ( Rei 2 · Imi ), ∑ Rei 2 ] is a vectors of constant term. Rei and Imi denote the
+                                          
+
+                            coordinate of i-th effective sampling points. Where M is the total number of effective
+                            sampling points, obviously M ≤ Ns . U is the coefficient matrix.
+
+                                                 ∑ Rei 2                        2
+                                                                  ∑ ( Rei ·4Imi )        ∑ ( Rei · Imi )       ∑ Rei
+                                                                                                                         
+                                                ∑ ( Rei · Imi 2
+                                                                   ∑ Imi                  ∑ Imi 3               ∑ Imi 2   
+                                       U=                                                                                ,     (A7)
+                                                ∑ ( Rei · Imi ) ∑ Imi 3                  ∑ Imi 2                ∑ Imi    
+                                                    ∑ Rei          ∑ Imi 2                ∑ Imi                   M
+                                 Since the value of Rei and Imi is affected by random noise, U is a full rank matrix, (A6)
+                            has a solution. The parameters of fitting ellipse can be obtained according to (A8)
+
+                                                           A0 = −α/2
+                                                         
+                                                         
+                                                         
+                                                          B = −γ/(2β)
+                                                             0  p                                           .                    (A8)
+                                                         
+                                                          Ak = p α2 /4 + γ2 /(4β) − η
+                                                                                       p
+                                                           Bk = α2 /4 + γ2 /(4β) − η/ β
+                                                         
+
+                                 The computational cost mainly includes the calculation of the elements of matrices
+                            and solving the fourth-order linear equations.
+                                 In the experiment of this paper, the NI’s PXI-8101 controller is used for computation,
+                            the CPU of the controller is Intel Celeron 575, the clock rate is 2.0 GHz. Set Ns = 100, a
+                            customized program of this algorithm written in MATLAB is used for signal processing.
+                            The consumption time of ellipse fitting was measured many times during the experiment,
+                            and the maximum consumption time is 0.012 s.
+         Remote Sens. 2022, 14, 58                                                                                               17 of 18
+
+mote Sens. 2022, 13, x FOR PEER REVIEW
+
+                                          Appendix B
+
+
+                                                    Initialization                                            Parameters
+                                                                                  Main part
+                                                     parameters                                                 update
+
+                                                                                 m-th Sbeat signal
+
+
+
+
+                                                                                      DAQ
+
+
+
+
+                                                            Rini ;         No
+                                                                                  Is k available?
+                                                    kini = ⌊2RiniBw/c⌋ .
+
+
+                                                                                           Yes
+
+
+
+
+                                                                            Rem = ∑ Sbeat cos(2πkn/N) ;
+                                                                            Imm =∑ Sbeat sin(2πkn/N) .
+
+
+
+
+                                                     Accumulate            No      Are ellipse
+                                                  effective sampling               parameters
+                                                         points                    available?
+
+                                                                                           Yes
+                                                                                                           Fit new ellipse
+                                                   Fit initial ellipse
+
+
+                                                                                                                    Yes
+
+                                                                                                                Is im
+                                                                                                              changed?
+
+                                                                                                     .
+
+                                                                                                             Accumulate
+                                                                                                          effective sampling
+                                                                                                                 points
+
+
+
+
+                                                                                      output
+
+
+
+
+                                           Figure
+                                          Figure A1. A1.  The flowchart
+                                                     The flowchart             of the algorithm.
+                                                                   of the algorithm.
+
+         References
+eferences
+      1. Zhe, T.; Huang, L.; Wu, Q.; Zhang, J.; Pei, C.; Li, L. Inter-Vehicle Distance Estimation Method Based on Monocular Vision Using
+               3D Detection. IEEE Trans. Veh. Technol. 2020, 69, 4907–4919. [CrossRef]
+    Zhe,2. T.;Chew,
+               Huang,       L.; Wu, Q.; Zhang, J.; Pei, C.; Li, L. Inter-Vehicle Distance Estimation Method Based on M
+                      M.T.; Alam, F.; Legg, M.; Sen Gupta, G. Accurate Ultrasound Indoor Localization Using Spring-Relaxation Technique.
+    3D Detection.
+              ElectronicsIEEE    Trans.
+                          2021, 10,        Veh. Technol. 2020, 69, 4907–4919. https://doi.org/10.1109/TVT.2020.2977623.
+                                    1290. [CrossRef]
+    Chew, M.T.; Alam, F.; Legg, M.; Sen Gupta, G. Accurate Ultrasound Indoor Localization Using Spring-
+    Electronics 2021, 10, 1290. https://doi.org/10.3390/electronics10111290.
+    Ma, L.F.; Li, Y.; Li, J.; Wang, C.; Wang, R.S.; Chapman, M.A. Mobile Laser Scanned Point-Clouds for Road
+    Extraction: A Review. Remote Sens. 2018, 10, 1531. https://doi.org/10.3390/rs10101531.
+Remote Sens. 2022, 14, 58                                                                                                            18 of 18
+
+
+
+
+3.    Ma, L.F.; Li, Y.; Li, J.; Wang, C.; Wang, R.S.; Chapman, M.A. Mobile Laser Scanned Point-Clouds for Road Object Detection and
+      Extraction: A Review. Remote Sens. 2018, 10, 1531. [CrossRef]
+4.    Arab, H.; Dufour, S.; Moldovan, E.; Akyel, C.; Tatu, S.O. A 77-GHz Six-Port Sensor for Accurate Near-Field Displacement and
+      Doppler Measurements. Sensors 2018, 18, 2565. [CrossRef] [PubMed]
+5.    Lee, H.; Kim, B.H.; Park, J.K.; Yook, J.G. A Novel Vital-Sign Sensing Algorithm for Multiple Subjects Based on 24-GHz FMCW
+      Doppler radar. Remote Sens. 2019, 11, 1237. [CrossRef]
+6.    Duan, Z.; Liang, J. Non-Contact Detection of Vital Signs Using a UWB Radar Sensor. IEEE Access 2019, 7, 36888–36895. [CrossRef]
+7.    Piotrowsky, L.; Jaeschke, T.; Kueppers, S.; Siska, J.; Pohl, N. Enabling High Accuracy Distance Measurements with FMCW Radar
+      Sensors. IEEE Trans. Microw. Theory Tech. 2019, 67, 5360–5371. [CrossRef]
+8.    Wang, G.C.; Gu, C.Z.; Inoue, T.; Li, C.Z. A Hybrid FMCW-Interferometry Radar for Indoor Precise Positioning and Versatile Life
+      Activity Monitoring. IEEE Trans. Microw. Theory Tech. 2014, 62, 2812–2822. [CrossRef]
+9.    Anghel, A.; Vasile, G.; Cacoveanu, R.; Ioana, C.; Ciochina, S. Short-Range Wideband FMCW Radar for Millimetric Dis-placement
+      Measurements. IEEE Trans. Geosci. Remote Sens. 2014, 52, 5633–5642. [CrossRef]
+10.   Bredendiek, C.; Pohl, N.; Jaeschke, T.; Thomas, S.; Aufinger, K.; Bilgic, A. A 24GHz Wideband Single-Channel SiGe Bipolar
+      Transceiver Chip for Monostatic FMCW Radar Systems. In Proceedings of the 15th European Microwave Week—Space for
+      Microwaves Conference Proceedings, Amsterdam, The Netherlands, 28 October–2 November 2012; pp. 309–312.
+11.   Agrez, D. Weighted multipoint interpolated DFT to improve amplitude estimation of multifrequency signal. IEEE Trans. In-strum.
+      Meas. 2002, 51, 287–292. [CrossRef]
+12.   Guoqing, Q. High accuracy range estimation of FMCW level radar based on the phase of the zero-padded FFT. In Proceedings of
+      the 7th International Conference on Signal Processing, Beijing, China, 31 August–4 September 2004; pp. 2078–2081.
+13.   Jaeschke, T.; Bredendiek, C.; Kuppers, S.; Pohl, N. High-Precision D-Band FMCW-Radar Sensor Based on a Wideband Si-Ge-
+      Transceiver MMIC. IEEE Trans. Microw. Theory Tech. 2014, 62, 3582–3597. [CrossRef]
+14.   Luo, J.F.; Xie, Z.J.; Xie, M. Interpolated DFT algorithms with zero padding for classic windows. Mech. Syst. Signal Proc. 2016,
+      70–71, 1011–1025. [CrossRef]
+15.   Rabiner, L.R.; Schafer, R.W.; Rader, C.M. The chirp z-transform algorithm and its application. Bell Syst. Tech. J. 1969, 48, 1249–1292.
+      [CrossRef]
+16.   Scherr, S.; Ayhan, S.; Fischbach, B.; Bhutani, A.; Pauli, M.; Zwick, T. An Efficient Frequency and Phase Estimation Algorithm with
+      CRB Performance for FMCW Radar Applications. IEEE Trans. Instrum. Meas. 2015, 64, 1868–1875. [CrossRef]
+17.   Scherr, S.; Goettel, B.; Ayhan, S.; Bhutani, A.; Pauli, M.; Winkler, W.; Scheytt, J.C.; Zwick, T. Miniaturized 122 GHz ISM Band
+      FMCW Radar with Micrometer Accuracy. In Proceedings of the 12th European Radar Conference (EuRAD), Paris, France, 9–11
+      September 2015; pp. 277–280.
+18.   Wang, S.Y.; Pohl, A.; Jaeschke, T.; Czaplik, M.; Kony, M.; Leonhardt, S.; Pohl, N. A Novel Ultra-Wideband 80 GHz FMCW
+      Radar System for Contactless Monitoring of Vital Signs. In Proceedings of the 37th Annual International Conference of the
+      IEEE-Engineering-in-Medicine-and-Biology-Society (EMBC), Milan, Italy, 25–29 August 2015; pp. 4978–4981.
+19.   Radio Regulations Articles. Available online: https://www.itu.int/dms_pub/itu-r/opb/reg/R-REG-RR-2020-ZPF-E.zip (ac-
+      cessed on 28 October 2021).
+20.   Li, C.Z.; Lin, J.S. Random Body Movement Cancellation in Doppler radar Vital Sign Detection. IEEE Trans. Microw. Theory Tech.
+      2008, 56, 3143–3152. [CrossRef]
+21.   Zhao, H.; Hong, H.; Miao, D.Y.; Li, Y.S.; Zhang, H.T.; Zhang, Y.M.; Li, C.Z.; Zhu, X.H. A Noncontact Breathing Disorder
+      Recognition System Using 2.4-GHZ Digital-IF Doppler radar. IEEE J. Biomed. Health Inform. 2019, 23, 208–217. [CrossRef]
+      [PubMed]
+22.   Barbon, F.; Vinci, G.; Lindner, S.; Weigel, R.; Koelpin, A. A six-port interferometer based micrometer-accuracy displacement
+      and vibration measurement radar. In Proceedings of the 2012 IEEE/MTT-S International Microwave Symposium—MTT 2012,
+      Montreal, QC, Canada, 17–22 June 2012. [CrossRef]
+23.   Schlegel, A.; Ellison, S.M.; Nanzer, J.A. A Microwave Sensor with Submillimeter Range Accuracy Using Spectrally Sparse Signals.
+      IEEE Microw. Wirel. Compon. Lett. 2020, 30, 120–123. [CrossRef]
+24.   Lindner, S.; Barbon, F.; Mann, S.; Vinci, G.; Weigel, R.; Koelpin, A. Dual Tone Approach for Unambiguous Six-Port Based
+      Interferometric Distance Measurements. In Proceedings of the 2013 IEEE MTT-S International Microwave Symposium Digest
+      (MTT 2013), Seattle, WA, USA, 2–7 June 2013. [CrossRef]
+25.   An, S.N.; He, Z.S.; Li, J.G.; An, J.P.; Zirath, H. Micrometer Accuracy Phase Modulated Radar for Distance Measurement and
+      Monitoring. IEEE Sens. J. 2020, 20, 2919–2927. [CrossRef]
+

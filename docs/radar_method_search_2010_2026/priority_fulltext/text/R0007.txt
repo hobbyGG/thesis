@@ -1,0 +1,908 @@
+                                                                   Engineering Structures 321 (2024) 118926
+
+
+                                                                   Contents lists available at ScienceDirect
+
+
+                                                                   Engineering Structures
+                                                       journal homepage: www.elsevier.com/locate/engstruct
+
+
+
+
+Development and field deployment validation of a low-cost and
+high-precision displacement sensing system by fusing millimeter-wave
+radar and accelerometer
+Zhanxiong Ma a,b, Kyuwon Han c , Jaemook Choi d , Jigu Lee c , Ohjun Kwon c , Hoon Sohn c,*,
+Jingxiao Liu e, Doyun Hwang e, Jatin Aggarwal e , Haeyoung Noh e , Enjian Cai f, Yi Zhang f
+a
+  College of Civil Engineering and Mechanics, Lanzhou University, Lanzhou, Gansu, China
+b
+  Key Laboratory of Mechanics on Disaster and Environment in Western China Attached to The Ministry of Education of China, Lanzhou University, Lanzhou, Gansu,
+China
+c
+  Department of Civil and Environmental Engineering, Korea Advanced Institute of Science and Technology, Daejeon, South Korea
+d
+  Samsung Electronics, Hwaseong, South Korea
+e
+  Department of Civil and Environmental Engineering, Stanford University, Stanford, CA, USA
+f
+  Department of Civil Engineering, Tsinghua University, Beijing, China
+
+
+
+
+A R T I C L E I N F O                                     A B S T R A C T
+
+Keywords:                                                 Although displacement measurements are critical in the health monitoring of civil infrastructure, accurate
+Structural displacement measurement                       monitoring of structural displacements remains a challenge, especially for medium- and small-scale structures
+Accelerometer                                             with only millimeter-scale vibrations. In this study, a high-precision displacement sensing system is developed by
+Millimeter-wave radar
+                                                          integrating millimeter-wave radar, accelerometer, and microprocessor unit (MPU). An automated and efficient
+Data fusion
+Edge computing
+                                                          algorithm is proposed and applied for radar initial calibration, and then displacement is continuously estimated
+                                                          by the built-in displacement sensing algorithm in the MPU. The developed displacement sensing system achieves
+                                                          low cost (< $500), high accuracy (< 0.5 mm), and high sampling rate (100 Hz), and thus can be widely used in
+                                                          medium- and small-scale structures. To validate the performance of the developed sensing system, a series of
+                                                          field tests were conducted on nine structures in the USA, South Korea, and China. For all structures, the
+                                                          developed sensing system was able to accurately measure displacements with a maximum root mean square error
+                                                          of less than 0.06 mm, demonstrating the system’s potential for practical application in long-term continuous
+                                                          displacement monitoring of medium- and small-scale structures.
+
+
+
+
+1. Introduction                                                                                strain-based measurements are noisy because of inherent strain mea­
+                                                                                               surement noise, and GNSS exhibit limitations such as a low sampling
+    Structural health monitoring (SHM) has been commonly applied to                            rate (20 Hz) and limited vertical accuracy (approximately 7–10 mm).
+various forms of structures [1–3]. An accurate displacement response is                        Noncontact sensors, including radar systems [16–18] and vision cam­
+crucial for the health monitoring of civil infrastructures [4] and can be                      eras [19–25], offer alternatives. Radar systems provide high-accuracy
+used in bridge loading tests [5], modal identification [6], damage                             and high-sampling displacement measurements but are expensive,
+detection [7], and finite element model updating [8]. Numerous tech­                           rendering them impractical for civil infrastructure. In addition, the lo­
+niques have been developed to measure or estimate bridge displacement                          cations of the targets detected by radar must be manually identified, and
+and are broadly classified into (1) contact and (2) noncontact tech­                           a conversion factor must be estimated based on the geometrical rela­
+niques. Contact-type sensors, such as linear variable differential trans­                      tionship between the radar and the target, which is used to convert the
+formers (LVDT) [9], accelerometers [10,11], strain gauges [12,13], and                         radar-based displacement from the line-of-sight (LOS) direction to the
+global navigation satellite systems (GNSS) [14,15], directly interact                          actual vibration direction. Vision cameras, installed either at fixed lo­
+with a target structure. However, LVDTs are challenging to install in the                      cations [19–22] or on unmanned aerial vehicles [23–25] are advanta­
+field, accelerometers lack accuracy for low-frequency displacement,                            geous for simultaneous estimation of multi-point displacements.
+
+
+    * Corresponding author.
+      E-mail address: hoonsohn@kaist.ac.kr (H. Sohn).
+
+https://doi.org/10.1016/j.engstruct.2024.118926
+Received 9 February 2024; Received in revised form 31 July 2024; Accepted 3 September 2024
+Available online 6 September 2024
+0141-0296/© 2024 Elsevier Ltd. All rights are reserved, including those for text and data mining, AI training, and similar technologies.
+Z. Ma et al.                                                                                                                Engineering Structures 321 (2024) 118926
+
+
+
+
+                                 Fig. 1. All sensors and devices used in the existing study for displacement estimation [36].
+
+
+However, vision-based techniques face limitations in night conditions             millimeter-wave radar is automatically and efficiently conducted, and
+and may experience degraded performance in varying illumination. In               submillimeter-level accuracy and high sampling rate displacement are
+addition, vision-based techniques have a high computational cost,                 continuously obtained using the built-in displacement sensing technique
+which makes it difficult to apply them to real-time displacement esti­            in the MPU. The main contributions of this study are as follows: (1) a
+mation at a high sampling rate.                                                   low-cost (< $500), high-precision (< 0.5 mm), and high sampling rate
+    Sensor fusion techniques have been explored to improve displace­              (100 Hz) displacement sensing system is developed, which is affordable
+ment estimation capabilities. Accelerometers are often fused with other           for wide applications in small- and medium-scale structures with
+sensors such as GNSS [26–28], vision cameras [29–31], and strain                  millimeter-level displacements; (2) an algorithm is proposed to auto­
+gauges [32–34]. However, fusion with GNSS can only estimate struc­                matically detect an effective time period with a relatively large high-
+tural displacements with millimeter-level accuracy, and fusion with               frequency displacement, and the raw accelerometer and radar data
+vision cameras cannot be used at night in the dark; fusion with strain            recorded during the period are used for automated and efficient initial
+gauges may produce significant errors in long-term continuous moni­               calibration; and (3) the system was successfully applied to eight high­
+toring owing to zero drift caused by changes in ambient temperatures              way bridges and one parking structure. The remainder of this paper is
+and unfavorable heating induced by electrical currents [35]. The au­              organized as follows. Section 2 describes the developed displacement
+thors previously proposed a displacement estimation technique by                  sensing system, followed by lab-scale and field validations in Sections 3
+fusing     a     frequency-modulated       continuous-wave        (FMCW)          and 4, respectively. The concluding remarks are presented in Section 5.
+millimeter-wave radar and an accelerometer [36]. Owing to its high
+accuracy and robustness to temperature and illumination variations, this          2. Development of a low-cost and high-precision displacement
+technique appears to be a candidate solution for long-term continuous             sensing system
+structural displacement monitoring. However, the study focused only on
+methodology development, with less emphasis on the field application                  A new displacement sensing system was developed in this study with
+of this technique. Therefore, not all the sensors and computational               the aim of long-term continuous displacement monitoring. Fig. 2 pre­
+modules are integrated into a single, compact system. Sensors are con­            sents an overview of the structural displacement measurements ob­
+nected to a personal computer (PC), and extensive raw sensor data is              tained using the developed sensing system. The sensing system, which
+captured using specialized software installed on the PC. Instead of               integrates an FMCW millimeter-wave radar, an accelerometer, and an
+processing the data in real time, the raw data is post-processed to obtain        MPU, is installed at each of the displacement measurement location of
+the final displacement. In addition, the devices and sensors used are             the target structure. Raw millimeter-wave radar and acceleration mea­
+relatively expensive (Fig. 1). More importantly, the technique is not fully       surements are processed in real time by the MPU to obtain the structural
+automated, particularly in the initial radar calibration stage. Human             displacement, which is wirelessly transmitted to the USER through a
+interference is required to determine the period when a target structure          Wireless Local Area Network (WLAN) for result storage, visualization,
+exhibits a relatively large high-frequency displacement manually.                 and further processing. The built-in displacement sensing technique of
+    To achieve long-term continuous monitoring of medium- and small-              the system is based on the authors’ previous work [36], with additional
+scale structures, a compact displacement sensing system was developed             improvements for completely automated displacement sensing. With
+in this study by integrating an FMCW millimeter-wave radar, an accel­             edge computing, only the final estimated displacements, instead of the
+erometer, and a microprocessor unit (MPU). Cost-efficient sensors and             raw accelerometer and millimeter-wave radar data, are transmitted to
+MPU were selected to ensure that the developed sensing system is                  the USER, thus significantly reducing the burden on the network and
+affordable for a wide range of applications. The initial calibration of the       servers. Further details of the developed sensing system are provided in
+
+
+
+
+                                 Fig. 2. Overview of the developed sensing system for structural displacement measurement.
+
+                                                                              2
+Z. Ma et al.                                                                                                                Engineering Structures 321 (2024) 118926
+
+
+
+
+Fig. 3. Hardware configuration of the developed displacement sensing system composed of a millimeter-wave radar, an accelerometer, and a microprocessor
+unit (MPU).
+
+
+the following subsections.                                                         development of a displacement sensing system. With the development of
+                                                                                   electronic engineering and computer science, small single-board com­
+                                                                                   puters are becoming more affordable and their computational power is
+2.1. Hardware configuration                                                        increasing [39]. Raspberry Pi boards, jointly developed by the Rasp­
+                                                                                   berry Pi Foundation and Broadcom, are the most popular single-board
+    Fig. 3 shows the hardware configuration of the developed displace­             computers due to their cost-effective features and have been adopted
+ment sensing system, comprising an accelerometer, a millimeter-wave                in various structural health monitoring applications, including
+radar, and an MPU. Raw data from the two sensors are processed in                  vision-based soil strain measurement systems [39] and displacement
+real time by the MPU to obtain structural displacements, which are                 measurement systems [40]. Raspberry Pi 4 Model B [41], the most
+saved to an onboard micro secure digital (microSD) card and periodi­               powerful Raspberry Pi board currently available, was adopted in the
+cally and wirelessly transmitted to the USER for result storage, visuali­          developed sensing system as an MPU. It is powered by a quad-core
+zation, and further processing.                                                    Broadcom BCM2711 processor at 1.5 GHz with 8 GB memory. It offers
+    The first and most important step in developing a displacement                 connectivity features including Gigabit Ethernet, high-speed Universal
+sensing system is to determine the appropriate sensors. There are three            Serial Bus (USB) ports, and WLAN 802.11ac with Bluetooth 5.0. It also
+criteria for sensor selection. First, the sensors must have sufficiently low       offers a 40-pin general-purpose input/output (GPIO) header for sensor
+noise density to be used for structures with millimeter-level displace­            connections, and a microSD card slot for storage. It runs various Linux
+ments. Second, the developed sensing system aims for long-term                     distributions, including the officially supported Raspbian distributions,
+continuous structural displacement monitoring; therefore, low power                making it an ideal platform for diverse projects. For the developed
+consumption of the sensors is preferred. Third, to make the developed              displacement sensing system, both the accelerometer and
+sensors affordable for a large number of small- and medium-scale                   millimeter-wave radar sensor communicated with the MPU via SPI. The
+structures, a displacement sensing system must be developed using                  key specifications of the accelerometer, millimeter-wave radar, and
+cost-efficient sensors.                                                            MPU, including their prices, are summarized in Fig. 3. As only
+    The sensing system developed in this study uses an ADXL355                     cost-efficient components were used in the sensing system, the total
+accelerometer developed by Analog Device Inc [37]. ADXL355 is a                    price was less than $350.
+3-axis MEMS-type accelerometer with a compact size. The accelerom­
+eter provides digital output and features an ultralow noise density of
+22.5 µg/√Hz. It exhibits repeatability of ± 3 mg and low nonlinearity              2.2. Data processing flowchart in the developed sensing system
+of 0.1 %. The accelerometer also offers selectable measurement ranges
+of ± 2 g, ± 4 g, and ± 8 g, thereby providing versatility for different                In radar-based structural displacement estimation, a millimeter-
+application requirements. It operates with a low power consumption of              wave radar emits a frequency-modulated signal and collects re­
+200 μA and has a power supply range of 2.25 V to 3.6 V. It exhibits                flections from the target. Subsequently, an intermediate frequency (IF)
+repeatability of ± 3 mg and low nonlinearity of 0.1 %. ADXL355 sup­                signal is calculated, and the displacement estimated from the variation
+ports both a digital serial peripheral interface (SPI) and an                      in the phase of the IF signal. Further details on radar-based displacement
+inter-integrated circuit (I2C) interface, offering flexibility in communi­         estimation can be found in Guo et al. [42]. However, millimeter-wave
+cation protocols. For the millimeter-wave module, the developed                    radar has a relatively wide field of view (FOV) and typically detects
+sensing system uses XENSIV™ 60 GHz millimeter-wave radar                           multiple targets from the surroundings of the target structure. Therefore,
+BGT60TR13C developed by Infineon Technologies [38]. The board                      it is necessary to select the best target for the structural displacement
+consists of a radar baseboard MCU7 and a BGT60TR13C shield.                        measurements. In addition, it measures the displacement in the LOS
+BGT60TR13C is a sophisticated 60 GHz radar sensor designed for FMCW                direction, and a pre-estimated conversion factor is required to convert
+operation, featuring a broad 5.5 GHz bandwidth. Encased in a compact               the displacement into the actual vibration direction [36].
+antenna-in-package form factor, this sensor incorporates a digital                     The developed sensing system first performs an automated initial
+interface to facilitate chip configuration and streamline the radar data           calibration to select the best target and estimate its conversion factor for
+acquisition processes. The device is equipped with optimized power                 the millimeter-wave radar. Subsequently, structural displacement is
+modes to ensure efficient and low-power operation. In addition, it boasts          continuously estimated using the initial calibration results. Therefore,
+an integrated state machine, enabling independent operation and                    the data-processing flowchart of the developed displacement sensing
+enhancing its overall versatility in various applications.                         system is divided into three stages: (1) initial sensor data recording, (2)
+    The selection of the computational module is also important for the            initial calibration, and (3) continuous displacement sensing and result
+
+                                                                               3
+Z. Ma et al.                                                                                                                 Engineering Structures 321 (2024) 118926
+
+
+
+
+                                   Fig. 4. Overall data processing flowchart of the developed displacement sensing system.
+
+
+
+
+                                                     Fig. 5. Overview of rough selection of time period.
+
+
+transmission, as shown in Fig. 4. All data processing is performed using          target structure. This can be shortened by starting the developed sensing
+the open-source Python language.                                                  system when a relatively large load is applied to the target structure. For
+                                                                                  example, when the developed sensing system is applied to a bridge, it
+2.2.1. Initial data recording                                                     can be activated when a heavy truck arrives at it.
+    The initial calibration uses a short-period raw accelerometer and                 (b) Envelope-based refinement of time period
+millimeter-wave radar data recorded during the period in which the                    After determining the time period, it must be further refined to
+target structure has a relatively large high-frequency displacement. An           include only the time periods with relatively large displacements. It can
+algorithm is proposed to automatically detect the time period and record          be justified that the time required in the calibration performed in the
+raw sensor data during this period without human intervention. The                next step relies on the duration of the time period, and a longer time
+algorithm consists of the following two steps:                                    duration will cause a longer calibration time. The time period without
+    (a) Rough selection of time period and raw sensor data recording              significant high-frequency displacement increases calibration time but
+    The developed sensing system automatically starts operating when              does not improve the calibration results. Fig. 6 shows a flowchart of the
+powered on. Three processors are used, powered by the multicore cen­              time-period refinement. The 1-min acceleration data saved in the pre­
+tral processing unit (CPU) of the Raspberry PI 4 Model B, and two of              vious step is first processed by double integration and high-pass filtering
+them (Processors 1 and 2) simultaneously and continuously record raw              with a cut-off frequency of fc to obtain a high-frequency displacement.
+data from the accelerometer and millimeter-wave radar. Only the last              Subsequently, the Hilbert transform [43] is applied to the
+1 min of the raw data is available in the variable space, and earlier data        high-frequency displacement, and the Hilbert spectral amplitude be­
+is automatically deleted to avoid any potential time delays. Processor 3          comes the envelope of the high-frequency displacement. Assuming that
+estimates the high-frequency displacement from the acceleration mea­              the maximum value of the envelope is A, the effective time period ([T1 ,
+surement using double integration and high-pass filtering every 20 s.             T2 ]) is determined as the time period with an envelope larger than
+The cutoff frequency (fc ) of the high-pass filter should be properly             threshold A/10. Only data recorded during the effective time period are
+determined based on the noise characteristics of the accelerometer to             used for the initial calibration. The envelope of the high-frequency
+completely remove the low-frequency displacement drift caused by                  displacement may have multiple envelope peaks, and only the time
+double integration. For the accelerometer used in this study (i.e.,               period that includes the maximum value is used.
+ADXL355), the value of fc was set to 0.5 Hz after a series of lab-scale
+testing. Every 20 s, the maximum displacement was calculated, and if              2.2.2. Initial calibration
+the maximum displacement was greater than the preset threshold, the                  The developed sensing system then performs automated initial cali­
+raw sensor data recorded in the previous 20 s, the current 20 s, and the          bration using raw sensor data recorded during the effective time period,
+next 20 s (a total of 1 min) were saved as the initial data for later cali­       which includes the following three steps:
+bration. When data saving is complete, raw sensor data logging stops.                (a) Frequency range identification and displacement estimation from
+The threshold depends on the sensing resolution of the developed                  acceleration measurement
+sensing system and was set to 0.4 mm after a series of lab-scale tests. The          The first step is to identify the frequency range of the bandpass filter,
+time required for this step varies with the loading conditions of the             which is the dominant structural displacement. As shown in Fig. 7, the
+
+
+
+
+                                               Fig. 6. Overview of envelope-based refinement of time period.
+
+                                                                              4
+Z. Ma et al.                                                                                                                  Engineering Structures 321 (2024) 118926
+
+
+
+
+                                           Fig. 7. Data processing flowchart of the frequency range identification.
+
+
+
+
+                                   Fig. 8. Radar target identification using the first frame data of millimeter-wave radar.
+
+
+
+
+                                       Fig. 9. Flowchart of the best target selection and conversion factor estimation.
+
+
+acceleration during the effective time period is converted into the fre­          distances. Automated peak selection is then performed on the frequency
+quency domain using Fourier transform, and the dominant frequency                 spectrum to identify all targets detected by the millimeter-wave radar,
+(fd ), probably the first natural frequency of the target structure, is           which determines all local maxima through a simple comparison of
+identified as the frequency with the maximum amplitude. Then, the                 neighboring values [44]. Note that target selection is performed later,
+frequency range is determined as [fd − 0.5, fd + 0.5]. However, (fd −             and it is acceptable to include incorrect peaks. In addition, to reduce the
+ 0.5) may be smaller than fc , and bandpass filtering may fail to                 computational cost of the next step, only the detected targets with re­
+completely remove the low-frequency displacement drift induced by                 flections less than 1/10 of the maximum reflection are retained for
+double integration. Therefore, the frequency range is determined as [fl =         processing.
+      {           }
+ max fd − 0.5, fc , fh = fl + 1]. Finally, the filtered displacement during           (c) Best target selection and conversion factor estimation
+the effective time period is estimated from the acceleration via double               The final step is to select the best target among the identified targets
+integration and a bandpass filter.                                                and estimate the conversion factor. As shown in Fig. 9, there are five sub-
+     (b) Radar target identification                                              steps.
+     The next step is to identify the targets detected by the millimeter-
+wave radar. As shown in Fig. 8, the first frame of the millimeter-wave            1) All millimeter-wave raw radar data are first processed using Fourier
+radar data, i.e., the IF signal, is first transformed into the frequency             transform after mean value removal and windowing to extract the
+domain. Note that mean value removal is performed to reduce the effect               phases of all identified targets.
+of the direct current (DC) components of the IF signal, and a Blackman-           2) The raw phases are unwrapped using an acceleration-aided algo­
+Harris window is applied to reduce spectrum leakage. The peaks in the                rithm [36] with an initial conversion factor value of 0.5.
+frequency spectrum correspond to different targets at different
+
+                                                                              5
+Z. Ma et al.                                                                                                                 Engineering Structures 321 (2024) 118926
+
+
+
+
+                  Fig. 10. Data processing flowchart of the developed displacement sensing system for continuous displacement measurement.
+
+
+3) The unwrapped phases are converted to displacements based on the                  5) Steps 2–4 are repeated with a conversion factor value varying from
+   phase-displacement relationship, and the radar-based displacements                   0.5 to 2, and the best target and its conversion factor (βb ) are ob­
+   are then bandpass filtered. The range of the bandpass filter is [fl , fh ].          tained by finding the smallest RMSE value.
+4) The RMSEs of the filtered radar-based displacements are calculated
+   with respect to those of the filtered acceleration-based                             More details on target selection and conversion factor estimation can
+   displacements.                                                                    be found in Ma et al. [36].
+                                                                                        The estimated conversion factor (βb ) and the distance information of
+                                                                                     the selected target are saved to an onboard microSD card. The conver
+
+
+
+
+Fig. 11. Experimental setup on a four-story building model structure: (a) overview of sensor setup, (b) surrounding environment within the field of view of radar
+sensor, and (c) the developed displacement sensor, data acquisition device, Wi-Fi router, two laptops, and LDV used in this test.
+
+                                                                                 6
+Z. Ma et al.                                                                                                                         Engineering Structures 321 (2024) 118926
+
+
+
+
+Fig. 12. Initial data recording and effective time period detection results in the laboratory test: (a) excitation signal, (b) acceleration automatically saved by the
+developed sensing system, (c) estimated high-frequency displacement, and (d) effective time period identified based on displacement envelope.
+
+
+sion factor estimation and target selection usually take a few minutes                tion and low-frequency displacement estimated from the radar-based
+because of the relatively low computational power of the Raspberry PI 4               displacement are combined as the final displacement:
+Model B, which also depends on the number of targets detected by the
+                                                                                      u k = CH a + CL u
+                                                                                      ̂                                                                                  (4)
+millimeter-wave radar. However, the calibration time is acceptable as it
+is performed only once at the beginning.
+                                                                                      a = [ai− M+1 ,   ai− M+2 , …, ai+M− 1   ]T ; u = [ui− M ,   ui− M+1 , …, ui+M ]T
+2.2.3. Continuous displacement measurement                                                where CH is the combination of a double integrator and high-pass
+    After initial calibration, the displacement is continuously estimated             filter, CL is a low-pass filter, and (2M +1) is the order of the filters.
+using the developed displacement sensing system. Four processors are                  More details can be found in Ma et al. [36,45].
+used, as shown in Fig. 10. Processors 1 and 2 simultaneously record raw                   (c) saving final results to the onboard microSD card and transmitting final
+millimeter-wave radar and acceleration data, and passed on to Processor               results to USER through WLAN:
+3 for displacement estimation. Data transmission between different                        The acceleration and final displacement data are then saved to the
+processors is relatively time-consuming, and frequent data transmission               onboard microSD card by Processor 3 and then transmitted by Processer
+may cause data loss issues. A series of lab-scale tests showed that data              4 to USER through WLAN every 1 min
+loss can be avoided by transferring data every 120-time steps (i.e., 1.2 s)
+or longer for Raspberry PI 4 Model B. Processor 3 sequentially performs               3. Lab-scale experimental validation
+the following three tasks:
+    (a) estimating radar-based displacement with the help of acceleration             3.1. Experimental setup
+[36]:
+    At each time step (e.g., the ith time step), the phase of the selected                The developed displacement sensing system was first validated in a
+target (φi ) is first extracted from raw millimeter-wave radar data using             laboratory environment using a four-story steel building model, as
+Fourier transform. Phase wrapping can occur when the structural                       shown in Fig. 11. The sensor setup is shown in Fig. 11(a). The building
+displacement exceeds the wavelength of the radar. An accelerometer-                   structure was rigidly installed on an ELECTRO-SEIS® APS-400 long-
+aided algorithm is adopted to achieve adaptive phase unwrapping.                      stroke exciter, which moved the structure in a horizontal direction. The
+Based on phases at the (i-1)th and (i-2)th time steps (i.e., ui− 1 and ui− 2 )        developed sensing system was installed on top of the building model to
+and acceleration at the (i-1)th time step (ai− 1 ), the phase (̂
+                                                               φ i ) at current       measure displacement at the same location, and the measured
+time step can be predicted as,                                                        displacement was transmitted to a laptop through a WLAN generated
+       4π fs                                                                          using an ipTime N620SE wireless router. Fig. 11(b) shows the sur­
+φ
+̂i =         (2ui− 1 − ui− 2 + (Δt)2 ai− 1 )                                (1)       roundings of the building structure. A millimeter-wave radar sensor
+       βb c
+                                                                                      integrated into the developed sensing system detects targets from the
+    Then, the unwrapping phase (φi ) is recovered as:                                 surroundings. An RSV-150 laser Doppler Vibrometer (LDV) from Poly­
+                                                                                      tech Inc. was installed approximately 1.5 m away for measuring ground-
+                            φ
+                            ̂ i − φi
+φi = φi + 2π × round(                )                                      (2)       truth displacements of the structures with less than 1 µm resolution
+                               2π
+                                                                                      [46]. Its measurements were digitalized using a USB-6363 Data Acqui­
+    and the radar-based displacement is estimated accordingly:                        sition (DAQ) device from NI Inc. at a sampling rate of 100 Hz. The DAQ
+           c                                                                          device input a given excitation signal into the exciter to generate a
+ui = βb       (φ − φ0 )                                                     (3)       structural horizontal movement. The devices and equipment used in the
+          4πfs i
+                                                                                      test are shown in Fig. 11(c). The displacement sampling rate was set to
+   where φ0 denotes the initial phase.                                                100 Hz for the developed sensing system; however, the actual sampling
+   (b) fusing radar-based displacement and acceleration:                              rate was slightly different from the nominal sampling rate. The
+   The radar-based displacement is further fused with acceleration                    displacement was continuously measured for 30 min under a 1 Hz si­
+using complementary filters to further improve the displacement esti­                 nusoidal excitation using the developed sensing system and LDV, and
+mation. The high-frequency displacement estimated from the accelera­                  the actual sampling rate of the developed sensing system was calibrated
+
+                                                                                  7
+Z. Ma et al.                                                                                                                         Engineering Structures 321 (2024) 118926
+
+
+
+
+      Fig. 13. Initial calibration results in the laboratory test: (a) target detection results and (b) best target selection and conversion factor estimation results.
+
+
+                                                                                              The initial calibration was performed using the raw sensor data
+Table 1
+                                                                                          recorded during the effective time period. Fig. 13(a) shows the fre­
+Comparison in computational costs in the laboratory test.
+                                                                                          quency spectrum of the first frame of the millimeter-wave radar data,
+  # of         Number of targets                 Initial data duration   Time cost        and a total of 29 targets were detected. Targets with reflections below
+  cases
+                                                                                          the threshold were removed; eventually, only 15 targets were retained.
+  1            256 (without target detection)    60 s (without           3017.96 s        The best target selection and conversion factor were then performed
+  2            29 (target detection without      refinement)             353.44 s
+                                                                                          following the procedure described in Section 2.2.2(c). The best target
+               thresholding)
+  3            15 (target detection with                                 189.99 s
+                                                                                          was selected as the ninth target at a distance of 7.5 m and its conversion
+  4            thresholding)                     26.38 s (with           84.83 s          factor was estimated to be 1.01, as shown in Fig. 13(b).
+                                                 refinement)                                  The necessity of effective time period refinement and target detec­
+                                                                                          tion is highlighted by comparing computational costs. As shown in
+                                                                                          Table 1, a total of 3017.96 s was needed without the effective time
+to 99.8154559531149 Hz.
+                                                                                          period refinement and target detection, but the computational time was
+                                                                                          significantly reduced to only 84.83 s after the effective time period
+3.2. Initial calibration results for displacement estimation                              refinement and target detection with thresholding. In the authors’ pre­
+                                                                                          vious study [36], the initial calibration was performed on a powerful
+    A 330-s signal including different sine waves (i.e., 0.1, 0.3, 0.5, 1, and            desktop PC and completed in a few minutes, even without effective time
+2 Hz) as shown in Fig. 12(a) was first input to the exciter. The developed                period refinement and target detection.
+displacement sensing systems detected relatively large high-frequency
+displacements from 190 to 250 s and saved millimeter-wave radar and                       3.3. Displacement measurement results
+accelerometer data recorded during this period. Then, the 1-min accel­
+eration data (Fig. 12(b)) were used to estimate the high-frequency                           After the initial calibration, two tests were conducted to validate the
+structural displacement (Fig. 12(c)). Eventually, an effective time                       displacement measurement performance of the sensing system. First, a
+period was detected as the last 26.38 s based on the envelope of the                      280-s signal including different sinusoidal signals with different domi­
+high-frequency structural displacement (Fig. 12(d)).                                      nant frequencies (i.e., 0.1, 0.3, 0.5, 1, and 2 Hz) was input to the exciter
+
+
+
+
+                               Fig. 14. Short-period displacement measurement results under sinusoidal excitation in the laboratory test.
+
+                                                                                      8
+Z. Ma et al.                                                                                                                 Engineering Structures 321 (2024) 118926
+
+
+
+
+                                         Fig. 15. Long-term displacement measurement results in the laboratory test.
+
+
+                                                                                    signal recorded from an actual bridge was used as the excitation signal.
+Table 2
+                                                                                    As shown in Fig. 15, the developed sensing system accurately measured
+Summary of displacement measurement accuracy in field tests on nine different
+                                                                                    structural displacement with a low RMSE of 0.022 mm. The displace­
+structures in South Korea, the USA, and China.
+                                                                                    ment results measured in three different time periods are shown in
+  Target structures            # of      Absolute Maximum             RMSE          Fig. 15. In the first two time periods, i.e., [0, 10 s] and [1040 s, 1050 s],
+                               tests     displacement (mm)            (mm)
+                                                                                    the structure had a relatively large displacement of up to 4 mm, with no
+                                         Our         LDV     Error                  visible difference between the displacements measured by the devel­
+                                         system
+                                                                                    oped sensing system and the LDV. In the last time period, i.e., [2090 s,
+  Concrete Box-girder Bridge   1         0.530       0.553   0.023    0.009         2100 s], the structure has nearly zero displacement, and a discrepancy is
+    (Weifang, China)           2         0.462       0.485   0.023    0.011
+                                                                                    clearly observed. However, this discrepancy is acceptable considering its
+                               3         0.180       0.182   0.002    0.010
+                               4         1.037       1.005   0.032    0.016
+                                                                                    relatively small amplitude.
+  Steel-concrete Composite     1         0.996       1.042   0.002    0.024
+    Bridge                     2         2.698       2.685   0.013    0.026         4. Field deployment validation
+    (Weifang, China)           3         0.831       0.828   0.003    0.016
+                               4         0.275       0.279   0.004    0.013
+  Concrete Arch Bridge         1         0.674       0.672   0.002    0.016             To validate the practical applicability of the developed sensing sys­
+    (Weifang, China)           2         0.857       0.840   0.017    0.018         tem, it was applied to nine different structures, including four highway
+                               3         0.113       0.152   0.039    0.011         bridges in San Jose, USA, a parking structure in Stanford, USA, the
+                               4         1.110       1.051   0.059    0.026         KAIST highway bridge in Daejeon, South Korea, and three highway
+  KAIST Bridge                 1         0.356       0.354   0.002    0.012
+   (Daejeon, South Korea)      2         0.146       0.139   0.007    0.011
+                                                                                    bridges in Weifang, China. Three or four tests were conducted for each
+                               3         0.159       0.164   0.005    0.012         structure, and the test results are summarized in Table 2. All structures
+  Yerba Buena Road Over        1         0.833       0.757   0.076    0.025         had displacements less than 1 mm. The developed sensing system
+    Coyote Creek               2         0.572       0.613   0.041    0.032         measured the displacements accurately with RMSEs of less than
+    (San Jose, USA)            3         0.717       0.693   0.024    0.030
+                                                                                    0.06 mm and absolute maximum displacement errors of less than
+                               4         0.780       0.770   0.010    0.027
+  Mckee Road Over Coyote       1         0.351       0.420   0.069    0.056         0.08 mm, compared with the ground-truth displacement measured by
+    Creek                      2         0.180       0.166   0.014    0.041         an LDV. Owing to manuscript length constraints, only the field tests on a
+    (San Jose, USA)            3         0.288       0.287   0.001    0.048         110-m-long concrete arch bridge, a 50-m-long steel-concrete composite
+  Tully Road Over Highway      1         0.448       0.412   0.036    0.036         bridge, a 30-m-long concrete box-girder bridge, and a four-story parking
+    101                        2         0.928       0.876   0.052    0.057
+    (San Jose, USA)            3         0.602       0.608   0.006    0.049
+                                                                                    structure are discussed in the following subsection.
+  Mckee Road Over Highway      1         0.400       0.390   0.010    0.025
+    101                        2         0.230       0.221   0.009    0.025
+    (San Jose, USA)            3         0.786       0.744   0.042    0.049         4.1. 50-m-long steel-concrete composite bridge in Weifang, China
+  Via Ortega Garage            1         0.131       0.138   0.007    0.003
+    (Stanford, USA)            2         0.295       0.298   0.003    0.004         4.1.1. Experimental setup
+                               3         0.329       0.327   0.002    0.005
+                                                                                        Fig. 16 presents an overview of the field test conducted on a steel-
+  Average                                0.590       0.586   0.022    0.024
+                                                                                    concrete composite bridge located in Weifang, Shandong, China. The
+                                                                                    bridge is 50 m long, and the distance between the bottom of the bridge
+to excite the target structure. The displacement measurement results of             steel girder and the ground is approximately 10 m. The developed
+the developed sensing system and LDV are compared in Fig. 14. The                   displacement sensing system was installed at half the span of the bridge
+displacement measured using the developed sensing system was                        to measure the displacement at the same location. A Polytech RSV-150
+consistent with that measured using the LDV, and the RMSE was only                  LDV was installed on the ground to measure the ground-truth
+0.052 mm.                                                                           displacement of the bridge. A reflector film was attached to the bot­
+    The displacement measurement performance was further validated                  tom of the developed displacement sensing system to ensure accurate
+by continuously measuring displacement for 35 min. The vibration                    displacement measurements with an extremely high signal-to-noise
+                                                                                    ratio for the LDV. The bridge displacements were recorded when
+
+                                                                                9
+Z. Ma et al.                                                                                                                         Engineering Structures 321 (2024) 118926
+
+
+
+
+                      Fig. 16. Experimental setup on a 50-m-long steel-concrete composite bridge: (a) bridge overview and (b) sensor setup.
+
+
+
+
+Fig. 17. Initial data recording and effective time period detection results in the 50-m-long steel-concrete composite bridge test: (a) acceleration automatically saved
+by the developed sensing system, (b) estimated high-frequency displacement, and (c) effective time period identified based on displacement envelope.
+
+
+
+
+Fig. 18. Initial calibration results in the 50-m-long steel-concrete composite bridge test: (a) target detection results and (b) best target selection and conversion factor
+estimation results.
+
+
+heavy vehicles passed over the bridge.                                                   4.1.3. Displacement measurement results
+                                                                                             The traffic flow on the bridge was very light during the test period,
+4.1.2. Initial calibration results                                                       with no vehicles on the bridge most of the time. Four tests were con­
+    The initial data recording and effective time period detection results               ducted on the bridges, each lasting for 1 min, during which a large
+are shown in Fig. 17. Fig. 17(a) and Fig. 17(b) show the recorded 1-min                  vehicle (e.g., a bus or truck) passed over the bridge. A comparison of the
+raw acceleration data and the corresponding estimated high-frequency                     displacement measurement results are compared in Fig. 19. Different
+displacement, respectively. The effective time period was detected to                    levels of bridge displacement were measured, and the measurements of
+be from 30.89 to 41.94 s. Initial calibration was then performed using                   the developed sensing system and the LDV showed good agreement in all
+data during the effective time period. Fig. 18(a) shows the frequency                    four tests, with a maximum RMSE of only 0.026 mm. For comparison,
+spectrum of the first frame of the millimeter-wave radar data, and a total               the radar-based displacements are also shown in Fig. 19; their signal-to-
+of 25 targets were detected. Because there was no target with a reflection               noise ratios are significantly lower than those of the developed sensing
+below the threshold, all 25 targets were retained. The best target se­                   system. The RMSEs of the radar-based displacements were three times
+lection and conversion factor were then performed following the pro­                     higher than those of the displacements measured using the developed
+cedure described in Section 2.2.2(c). The best target was selected as the                sensing system. The radar-based displacements were estimated using the
+sixteenth target at a distance of 9.8 m, and its conversion factor was                   same target and conversion factors as those of the developed sensing
+estimated to be 0.96, as shown in Fig. 18(b).                                            system.
+
+
+                                                                                    10
+Z. Ma et al.                                                                                                                       Engineering Structures 321 (2024) 118926
+
+
+
+
+                 Fig. 19. Displacement results in the 50-m-long steel-concrete composite bridge test: (a) test 1, (b) test 2, (c) test 3, and (d) test 4.
+
+
+                                                                                        below the design limit during the test.
+Table 3                                                                                     The performance of the developed sensing system was further
+Comparison of bridge maximum displacements and design limit in the 50-m-
+                                                                                        analyzed in the frequency domain, and the displacement spectra of the
+long steel-concrete composite bridge test.
+                                                                                        four tests are shown in Fig. 20. Although there are visible discrepancies
+  # of         Absolute Maximum Displacement               Displacement limit           between the displacement spectra of the developed sensing system and
+  case                                                     [47]
+               Our system        LDV           Error                                    the LDV, especially in the low-frequency range, they still exhibit good
+               (mm)              (mm)          (mm)                                     agreement, and the first natural frequencies of the bridge are clear in the
+  1            0.996             1.042         0.002       L/500 = 100 mm               spectra. However, the spectra of the radar-based displacements are
+  2            2.698             2.685         0.013       L: bridge length             noisy, particularly in the high-frequency range. The first natural fre­
+  3            0.831             0.828         0.003                                    quencies of the bridges identified from the displacement measured by
+  4            0.275             0.279         0.004
+                                                                                        the developed sensing system and the LDV are summarized in Table 4.
+                                                                                        Differences of only up to 0.61 % were observed.
+    For bridge displacement monitoring, the key index is the absolute
+maximum displacement. The safety conditions of the target bridge can
+be evaluated quickly by checking whether the absolute maximum                           4.2. 110-m-long concrete arch bridge in Weifang, China
+displacement is above the design limit. The absolute maximum dis­
+placements in the four tests from the developed sensing system and LDV                  4.2.1. Experimental setup
+are summarized in Table 3; the differences in the absolute maximum                         Fig. 23 shows an overview of the field test conducted on a 110-m-
+displacements are below 0.02 mm, indicating sufficient performance of                   long concrete arch bridge located in Weifang, Shandong, China. The
+the developed sensing system. According to China’s design code (i.e., GB                bridge has a length of 110 m, and the distance between the bottom of the
+55004–2021 General Code for Composite Structures), the displacement                     bridge steel girder and the ground is approximately 6.5 m. The devel­
+of steel-concrete composite bridges during normal traffic must be less                  oped displacement sensing system was installed at one-third of the
+than 1/500 of the bridge length [47]. In the bridge test, the displacement              bridge span. The other setups were identical to those used in the pre­
+limit was 100 mm, and the bridge exhibited displacements significantly                  vious test. Bridge displacements were recorded when heavy vehicles
+                                                                                        passed over the bridge.
+
+                                                                                   11
+Z. Ma et al.                                                                                                                      Engineering Structures 321 (2024) 118926
+
+
+
+
+          Fig. 20. Displacement spectral comparison in the 50-m-long steel-concrete composite bridge test: (a) test 1, (b) test 2, (c) test 3, and (d) test 4.
+
+
+
+
+                           Fig. 21. Experimental setup on a 110-m-long concrete arch bridge: (a) bridge overview and (b) sensor setup.
+
+
+                                                                                        displacements are shown in Fig. 22, where the signal-to-noise ratio is
+Table 4
+                                                                                        significantly lower than that of the developed sensing system. The dis­
+Comparison of the first natural frequencies identified using the developed
+                                                                                        placements measured using the developed sensing system has RMSEs
+sensing system and LDV in the 50-m-long steel-concrete composite bridge test.
+                                                                                        three times lower than those measured using the radar.
+  # of tests     Developed sensing system (Hz)     LDV (Hz)       Difference (%)            The absolute maximum displacements in the four tests are summa­
+  1              2.733                             2.733          0                     rized in Table 5. The differences in the absolute maximum displacements
+  2              2.733                             2.733          0                     are slightly higher than those in the 50-m-long steel-concrete composite
+  3              2.800                             2.783          0.61
+                                                                                        bridge test, but they are still below 0.06 mm. According to China’s
+  4              2.767                             2.767          0
+                                                                                        design code (i.e., JTG 3362－2018 Specifications for Design of Highway
+                                                                                        Reinforced Concrete and Prestressed Concrete Bridges and Culverts), the
+4.2.2. Initial calibration and displacement measurement results                         displacement of concrete bridges during normal traffic must be less than
+    The best millimeter-wave radar target was selected at a distance of                 1/600 [48]. In the bridge test, the displacement limit was 183 mm, and
+6.73 m from the bridge, and its conversion factor was estimated to be                   the bridge exhibited displacements significantly below the design limit
+1.17. Similar to the 50-m-long steel-concrete composite bridge, there                   during the test.
+was very little traffic on the bridge, and it was mostly empty during the                   The performance of the developed sensing system was further
+test period. Four tests, each lasting for 1 min, were conducted on bridges              examined in the frequency domain, and Fig. 23 shows the displacement
+involving the passage of large vehicles such as buses or trucks. Fig. 22                spectra from the four tests. The displacement spectrum of the developed
+shows the displacement measurement results, where the bridge exhibits                   sensing system matched the displacement spectrum of the LDV well, and
+varying levels of movement. In all four tests, there was good agreement                 the first natural frequency of the bridge was well defined in the spectra.
+between the developed sensing system measurement and the LDV, with                      However, similar to the previous test, the spectra of the radar-based
+a maximum RMSE of only 0.026 mm. For comparison, radar-based                            displacements were noisy, particularly in the high-frequency range.
+
+
+                                                                                   12
+Z. Ma et al.                                                                                                                         Engineering Structures 321 (2024) 118926
+
+
+
+
+                        Fig. 22. Displacement results in the 110-m-long concrete arch bridge test: (a) test 1, (b) test 2, (c) test 3, and (d) test 4.
+
+
+                                                                                          The bridge was constructed in 1990. The bridge has a length of 45 m and
+Table 5                                                                                   a width of 8 m. The developed displacement sensing system was
+Comparison of bridge maximum displacements and design limit in the 110-m-                 installed at one-third of the bridge span. Owing to the existence of fences
+long concrete arch bridge test.
+                                                                                          and safety issues, it was not possible to install the developed displace­
+  # of         Absolute Maximum Displacement                   Displacement limit         ment sensing system at the bottom of the bridge girder. Instead, it was
+  case                                                         [48]
+               Developed sensing        LDV        Error                                  installed at a light pole, as shown in Fig. 24. The other setups were
+               system (mm)              (mm)       (mm)                                   identical to those used in the previous tests. Bridge displacements were
+  1            0.674                    0.672      0.002       L/600 = 183 mm             recorded when heavy vehicles passed over the bridge.
+  2            0.857                    0.840      0.017       L: bridge length
+  3            0.113                    0.152      0.039                                  4.3.2. Initial calibration and displacement measurement results
+  4            1.110                    1.051      0.059
+                                                                                             For the bridge, the best target was selected at a distance of 11.22 m,
+                                                                                          and its conversion factor was estimated to be 1.01. Compared with the
+This bridge exhibited a larger displacement than the previous bridge,                     previous two bridges, a much heavier traffic flow was observed on this
+and the noise was less significant. Table 6 compares the identified nat­                  bridge during the test period; however, the bridge was much stiffer than
+ural frequencies of the bridge from the displacements measured using                      the previous two bridges because of the relatively short span length, and
+the developed sensing system and the LDV, and they are identical                          most normal vehicles did not cause any significant bridge vibration.
+without any differences.                                                                  Four tests were conducted on the bridges, each lasting 1 min, during
+                                                                                          which a heavy truck passed over the bridge. A comparison of the
+                                                                                          displacement measurements are shown in Fig. 25. The bridge exhibited
+4.3. 45-m-long concrete box-girder bridge (Yerba Buena Road Over                          displacements at similar levels in all four tests, and the measurements of
+Coyote Creek) in San Jose, USA                                                            the developed sensing system and the LDV were in good agreement, with
+                                                                                          a maximum RMSE of only 0.032 mm. For comparison, the radar-based
+4.3.1. Experimental setup                                                                 displacements are also shown in Fig. 25; their signal-to-noise ratios
+   Fig. 24 shows an overview of the field test conducted on a 45-m-long                   are significantly lower than those of the developed sensing system. The
+concrete box-girder bridge [49] located in San Jose, California, USA.
+
+                                                                                     13
+Z. Ma et al.                                                                                                                      Engineering Structures 321 (2024) 118926
+
+
+
+
+               Fig. 23. Displacement spectral comparison in the 110-m-long concrete arch bridge test: (a) test 1, (b) test 2, (c) test 3, and (d) test 4.
+
+
+                                                                                        girder, which may have introduced additional errors in the measured
+Table 6                                                                                 displacements. According to the USA design code (i.e., LRFD Bridge
+Comparison of first natural frequencies identified using the developed sensing          Design Specifications), the displacement of concrete bridges during
+system and LDV in the 110-m-long concrete arch bridge test.                             normal traffic must be less than 1/800 of the bridge length [50]. In the
+  # of tests     Developed sensing system (Hz)     LDV (Hz)       Difference (%)        bridge test, the displacement limit was 56.26 mm, and the bridge always
+  1              1.383                             1.383          0                     exhibited displacements significantly below the design limit during the
+  2              1.383                             1.383          0                     test.
+  3              1.383                             1.383          0                         The performance of the developed sensing system was further
+  4              1.367                             1.367          0
+                                                                                        analyzed in the frequency domain; the displacement spectra are not
+                                                                                        shown because the overall results are the same as those obtained in the
+RMSEs of the radar-based displacements were three times higher than                     previous two bridge tests. Only the natural frequencies of the bridge
+those of the displacements measured using the developed sensing                         identified from the displacements measured using the developed sensing
+system.                                                                                 system and the LDV are summarized in Table 8, with differences of up to
+    The absolute maximum displacements of the bridge in the four tests                  1.84 %.
+are summarized in Table 7. The differences in the absolute maximum
+displacements were slightly higher than those in the previous two bridge
+tests; however, they were still less than 0.08 mm. The developed sensing
+system was installed on a light pole instead of at the bottom of the bridge
+
+
+
+
+                         Fig. 24. Experimental setup on a 45-m-long concrete box-girder bridge: (a) bridge overview and (b) sensor setup.
+
+                                                                                   14
+Z. Ma et al.                                                                                                                           Engineering Structures 321 (2024) 118926
+
+
+
+
+                       Fig. 25. Displacement results in the 45-m-long concrete box-girder bridge test: (a) test 1, (b) test 2, (c) test 3, and (d) test 4.
+
+
+                                                                                             4.4. Four-story parking structure (Via Ortega Garage) in Stanford, USA
+Table 7
+Comparison of bridge maximum displacements and design limit in the 45-m-
+                                                                                             4.4.1. Experimental setup
+long concrete box-girder bridge test.
+                                                                                                 The developed sensing system was validated on a four-story parking
+  # of         Absolute Maximum Displacement                      Displacement limit         structure, i.e., Via Ortega Garage, at Stanford University. Fig. 26 presents
+  case                                                            [50]
+               Developed sensing         LDV        Error                                    an overview of the field tests conducted on this structure. The developed
+               system (mm)               (mm)       (mm)                                     displacement sensing system was installed under the fourth floor to
+  1            0.572                     0.613      0.041         L/800 = 56.26 mm           measure the vertical displacement at one-third of the bridge span. A
+  2            0.833                     0.757      0.076         L: bridge length           Polytech RSV-150 LDV was installed on the third floor to measure the
+  3            0.717                     0.692      0.025                                    ground-truth displacement. During the test, a researcher derived a me­
+  4            0.780                     0.770      0.010
+                                                                                             dium SUV to simulate typical driver behaviors on the fourth floor to
+                                                                                             generate vertical displacements; a detailed description of the excitations
+                                                                                             is summarized in Table 9.
+Table 8
+Modal frequency identification results in the 45-m-long concrete box-girder                  4.4.2. Displacement measurement results
+bridge test.                                                                                     The displacement measurements under the three different excita­
+  # of tests       Developed sensing system (Hz)       LDV (Hz)        Difference (%)        tions are compared in Fig. 27. The structure exhibited only small vertical
+                                                                                             displacements during the test, with a maximum displacement below
+  1                3.650                               3.650           0
+  2                3.583                               3.650           1.84                  0.4 mm. The developed sensing system accurately measured the dis­
+  3                3.650                               3.650           0                     placements, and the RMSEs of the measured displacements were within
+  4                3.633                               3.617           0.44                  0.005 mm of those measured using the LDV. The distance between the
+                                                                                             radar and target was approximately 3 m, and the radar-based displace­
+                                                                                             ments also exhibited good performance with an RMSE below 0.01 mm.
+
+
+
+                                                                                        15
+Z. Ma et al.                                                                                                                           Engineering Structures 321 (2024) 118926
+
+
+
+
+                               Fig. 26. Experimental setup on a four-story parking structure: (a) structure overview and (b) sensor setup.
+
+
+                                                                                               small structures. The main contributions of this study are the develop­
+Table 9                                                                                        ment of a low-cost (<$500), high-accuracy (<0.5 mm), high-sampling-
+Description of excitations in the four-story parking structure test.
+                                                                                               rate (100 Hz) displacement sensing system; the development of a fully
+  # of         Excitation description                                                          automated and efficient initial system calibration; and field validation of
+  tests
+                                                                                               the developed sensing system on nine different structures. The devel­
+  1            A car slowly passes the sensor installation point                               oped sensing system accurately measured displacements with RMSEs of
+  2            A car quickly approaches the sensor installation point, stays static for        less than 0.1 mm in laboratory and field tests conducted in this study,
+               20 s, and quickly moves away from the point
+  3            Simulate the typical parking behaviors at the sensor installation point.
+                                                                                               suggesting that the system has high potential for use in practical appli­
+                                                                                               cations. Future work will focus on further improvement of this sensing
+                                                                                               system, including consideration of long-range wireless communication
+5. Conclusions                                                                                 techniques such as Long Range (LoRa) techniques and self-powering
+                                                                                               such as using solar panels. In addition, there is a need to experimen­
+    In this study, a compact displacement sensing system was developed                         tally validate the performance of the system in estimating long-term
+by integrating millimeter-wave radar, accelerometers, and computa­                             displacements due to concrete creep and shrinkage, etc.
+tional modules, aimed at long-term continuous monitoring of medium/
+
+
+
+
+                        Fig. 27. Displacement measurement results in the four-story parking structure test: (a) test 1, (b) test 2, and (c) test 3.
+
+                                                                                          16
+Z. Ma et al.                                                                                                                                       Engineering Structures 321 (2024) 118926
+
+
+CRediT authorship contribution statement                                                         [12] Xia Y, Zhang P, Ni Y, Zhu H. Deformation monitoring of a super-tall structure using
+                                                                                                      real-time strain data. Eng Struct 2014;67:29–38. https://doi.org/10.1016/j.
+                                                                                                      engstruct.2014.02.009.
+    Haeyoung Noh: Supervision, Resources, Project administration.                                [13] Chang S-J, Kim N-S. Estimation of displacement response from FBG strain sensors
+Jatin Aggarwal: Investigation, Data curation. Zhanxiong Ma: Writing                                   using empirical mode decomposition technique. Exp Mech 2012;52:573–89.
+– review & editing, Writing – original draft, Visualization, Validation,                              https://doi.org/10.1007/s11340-011-9522-z.
+                                                                                                 [14] Yu J, Meng X, Shao X, Yan B, Yang L. Identification of dynamic displacements and
+Methodology, Investigation, Formal analysis, Data curation, Conceptu­                                 modal frequencies of a medium-span suspension bridge using multimode GNSS
+alization. Enjian Cai: Investigation, Data curation. Kyuwon Han:                                      processing. Eng Struct 2014;81:432–43. https://doi.org/10.1016/j.
+Methodology, Conceptualization. Yi Zhang: Supervision, Resources,                                     engstruct.2014.10.010.
+                                                                                                 [15] Shen N, Chen L, Chen R. Displacement detection based on Bayesian inference from
+Project administration. Jigu Lee: Writing – review & editing, Investi­                                GNSS kinematic positioning for deformation monitoring. Mech Syst Signal Process
+gation, Data curation. Jaemook Choi: Investigation, Data curation,                                    2022;167:108570. https://doi.org/10.1016/j.ymssp.2021.108570.
+Conceptualization. Hoon Sohn: Writing – review & editing, Supervi­                               [16] Chen Z, Xu W, Dong S, Ma R, Gu C, Zhang X. Radar sensing of displacement
+                                                                                                      motions with high robustness against additive noise. IEEE Trans Microw Theory
+sion, Resources, Project administration, Funding acquisition, Concep­                                 Tech 2023;71:3678–90. https://doi.org/10.1109/TMTT.2023.3284264.
+tualization. Ohjun Kwon: Investigation, Data curation. Doyun Hwang:                              [17] Pramudita AA, Lin D-B, Dhiyani AA, Ryanu HH, Adiprabowo T, Yudha EA. FMCW
+Investigation, Data curation. Jingxiao Liu: Investigation, Data curation.                             radar for noncontact bridge structure displacement estimation. IEEE Trans Instrum
+                                                                                                      Meas 2023;72:1–14. https://doi.org/10.1109/TIM.2023.3292960.
+                                                                                                 [18] Zhang G, Wu Y, Zhao W, Zhang J. Radar-based multipoint displacement
+Declaration of Competing Interest                                                                     measurements of a 1200-m-long suspension bridge. ISPRS J Photogramm Remote
+                                                                                                      Sens 2020;167:71–84. https://doi.org/10.1016/j.isprsjprs.2020.06.017.
+                                                                                                 [19] Cai E, Zhang Y, Lu X, Li P, Zhao T, Lin G, et al. A target-free video structural motion
+    The authors declare that they have no known competing financial                                   estimation method based on multi-path optimization. Mech Syst Signal Process
+interests or personal relationships that could have appeared to influence                             2023;198:110452.
+the work reported in this paper.                                                                 [20] Yoneyama S, Kitagawa A, Iwata S, Tani K, Kikuta H. Bridge deflection
+                                                                                                      measurement using digital image correlation. Exp Tech 2007;31.
+                                                                                                 [21] Tian L., Pan B., Cai Y., Liang H., Zhao Y. Application of digital image correlation
+Data Availability                                                                                     for long-distance bridge deflection measurement. International Conference on
+                                                                                                      Optics in Precision Engineering and Nanotechnology (icOPEN2013), vol. 8769,
+                                                                                                      SPIE; 2013, p. 736–742. https://doi.org/10.1117/12.2020139.
+    Data will be made available on request.
+                                                                                                 [22] Ri S, Wang Q, Tsuda H, Shirasaki H, Kuribayashi K. Displacement measurement of
+                                                                                                      concrete bridges by the sampling Moiré method based on phase analysis of
+Acknowledgments                                                                                       repeated pattern. Strain 2020;56:e12351. https://doi.org/10.1111/str.12351.
+                                                                                                 [23] Ri S, Ye J, Toyama N, Ogura N. Drone-based displacement measurement of
+                                                                                                      infrastructures utilizing phase information. Nat Commun 2024;15:395. https://doi.
+    This research was supported by a grant (RS-2023–00269547) from                                    org/10.1038/s41467-023-44649-2.
+the International Cooperation Research and Development Program,                                  [24] Yoon H, Shin J, Spencer JrBF. Structural displacement measurement using an
+funded by the Ministry of Land, Infrastructure, and Transport of the                                  unmanned aerial system. Comput-Aided Civ Infrastruct Eng 2018;33:183–92.
+                                                                                                      https://doi.org/10.1111/mice.12338.
+Korean Government. The authors thank the California Department of                                [25] Ribeiro D, Santos R, Cabral R, Saramago G, Montenegro P, Carvalho H, et al. Non-
+Transportation (Caltrans) and the Shandong High-speed Group Inno­                                     contact structural displacement measurement using Unmanned Aerial Vehicles and
+vation Research Institute for their help during the field tests conducted                             video-based systems. Mech Syst Signal Process 2021;160:107869. https://doi.org/
+                                                                                                      10.1016/j.ymssp.2021.107869.
+in the USA and China.                                                                            [26] Paziewski J, Stepniak K, Sieradzki R, Yigit CO. Dynamic displacement monitoring
+                                                                                                      by integrating high-rate GNSS and accelerometer: on the possibility of
+References                                                                                            downsampling GNSS data at reference stations. GPS Solut 2023;27:157. https://
+                                                                                                      doi.org/10.1007/s10291-023-01500-x.
+                                                                                                 [27] Shen N, Chen L, Chen R. Multi-route fusion method of GNSS and accelerometer for
+ [1] Li Y, Minh H-L, Cao M, Qian X, Abdel Wahab M. An integrated surrogate model-
+                                                                                                      structural health monitoring. J Ind Inf Integr 2023;32:100442. https://doi.org/
+     driven and improved termite life cycle optimizer for damage identification in dams.
+                                                                                                      10.1016/j.jii.2023.100442.
+     Mech Syst Signal Process 2024;208:110986. https://doi.org/10.1016/j.
+                                                                                                 [28] Chan WS, Xu YL, Ding XL, Dai WJ. An integrated GPS–accelerometer data
+     ymssp.2023.110986.
+                                                                                                      processing technique for structural deformation monitoring. J Geod 2006;80:
+ [2] Sang-To T, Le-Minh H, Abdel Wahab M, Thanh C-L. A new metaheuristic algorithm:
+                                                                                                      705–19. https://doi.org/10.1007/s00190-006-0092-2.
+     Shrimp and Goby association search algorithm and its application for damage
+                                                                                                 [29] Ma Z, Choi J, Liu P, Sohn H. Structural displacement estimation by fusing vision
+     identification in large-scale and complex structures. Adv Eng Softw 2023;176:
+                                                                                                      camera and accelerometer using hybrid computer vision algorithm and adaptive
+     103363. https://doi.org/10.1016/j.advengsoft.2022.103363.
+                                                                                                      multi-rate Kalman filter. Autom Constr 2022;140:104338. https://doi.org/
+ [3] Ho LV, Trinh TT, De Roeck G, Bui-Tien T, Nguyen-Ngoc L, Abdel Wahab M. An
+                                                                                                      10.1016/j.autcon.2022.104338.
+     efficient stochastic-based coupled model for damage identification in plate
+                                                                                                 [30] Ma Z, Choi J, Sohn H. Three-dimensional structural displacement estimation by
+     structures. Eng Fail Anal 2022;131:105866. https://doi.org/10.1016/j.
+                                                                                                      fusing monocular camera and accelerometer using adaptive multi-rate Kalman
+     engfailanal.2021.105866.
+                                                                                                      filter. Eng Struct 2023;292:116535. https://doi.org/10.1016/j.
+ [4] Ma Z, Choi J, Sohn H. Structural displacement sensing techniques for civil
+                                                                                                      engstruct.2023.116535.
+     infrastructure: A review. J Infrastruct Intell Resil 2023;2:100041. https://doi.org/
+                                                                                                 [31] Ma Z, Choi J, Sohn H. Real-time structural displacement estimation by fusing
+     10.1016/j.iintel.2023.100041.
+                                                                                                      asynchronous acceleration and computer vision measurements. Comput-Aided Civ
+ [5] Hester D, Brownjohn J, Bocian M, Xu Y. Low cost bridge load test: calculating
+                                                                                                      Infrastruct Eng 2022;37:688–703. https://doi.org/10.1111/mice.12767.
+     bridge displacement from acceleration for load assessment calculations. Eng Struct
+                                                                                                 [32] Ma Z, Chung J, Liu P, Sohn H. Bridge displacement estimation by fusing
+     2017;143:358–74. https://doi.org/10.1016/j.engstruct.2017.04.021.
+                                                                                                      accelerometer and strain gauge measurements. Struct Control Health Monit 2021;
+ [6] Zare Hosseinzadeh A, Tehrani MH, Harvey PS. Modal identification of building
+                                                                                                      28:e2733. https://doi.org/10.1002/stc.2733.
+     structures using vision-based measurements from multiple interior surveillance
+                                                                                                 [33] He W-Y, Liu P, Cheng H-C, Li Z-B, Bu J-Q. Displacement reconstruction of beams
+     cameras. Eng Struct 2021;228:111517. https://doi.org/10.1016/j.
+                                                                                                      subjected to moving load using data fusion of acceleration and strain response. Eng
+     engstruct.2020.111517.
+                                                                                                      Struct 2022;268:114693. https://doi.org/10.1016/j.engstruct.2022.114693.
+ [7] Ge L, Koo KY, Wang M, Brownjohn J, Dan D. Bridge damage detection using precise
+                                                                                                 [34] Zhou Q, Li Q-S, Han X-L, Wan J-W, Xu K. Horizontal displacement estimation of
+     vision-based displacement influence lines and weigh-in-motion devices:
+                                                                                                      high-rise structures by fusing strain and acceleration measurements. J Build Eng
+     experimental validation. Eng Struct 2023;288:116185. https://doi.org/10.1016/j.
+                                                                                                      2022;57:104964. https://doi.org/10.1016/j.jobe.2022.104964.
+     engstruct.2023.116185.
+                                                                                                 [35] Lee J, Jeong S, Kim H, Lee KC, Sim S-H. Comparative study of long-term
+ [8] Martini A, Tronci EM, Feng MQ, Leung RY. A computer vision-based method for
+                                                                                                      displacement measurement methods − Focusing on a Pre-stressed concrete bridge
+     bridge model updating using displacement influence lines. Eng Struct 2022;259:
+                                                                                                      under construction. Measurement 2022;201:111691. https://doi.org/10.1016/j.
+     114129. https://doi.org/10.1016/j.engstruct.2022.114129.
+                                                                                                      measurement.2022.111691.
+ [9] Roy Santhosh KV. BK. Online implementation of an adaptive calibration technique
+                                                                                                 [36] Ma Z, Choi J, Yang L, Sohn H. Structural displacement estimation using
+     for displacement measurement using LVDT. Appl Soft Comput 2017;53:19–26.
+                                                                                                      accelerometer and FMCW millimeter wave radar. Mech Syst Signal Process 2023;
+     https://doi.org/10.1016/j.asoc.2016.12.032.
+                                                                                                      182:109582. https://doi.org/10.1016/j.ymssp.2022.109582.
+[10] Arias-Lara D, De-la-Colina J. Assessment of methodologies to estimate
+                                                                                                 [37] ADXL355 Datasheet and Product Info | Analog Devices n.d. https://www.analog.
+     displacements from measured acceleration records. Measurement 2018;114:
+                                                                                                      com/en/products/adxl355.html (accessed December 22, 2023).
+     261–73. https://doi.org/10.1016/j.measurement.2017.09.019.
+                                                                                                 [38] DEMO BGT60TR13C | Getting started with the XENSIV™ 60GHz BGT60TR13C
+[11] Gomez F, Park J, Spencer JrBF. Reference–free structural dynamic displacement
+                                                                                                      radar sensor demo board for advanced sensing - Infineon Technologies n.d. https://
+     estimation method. Struct Control Health Monit 2018;25:e2209. https://doi.org/
+     10.1002/stc.2209.
+
+
+                                                                                            17
+Z. Ma et al.                                                                                                                               Engineering Structures 321 (2024) 118926
+
+     www.infineon.com/cms/en/product/evaluation-boards/demo-bgt60tr13c/                       [44] The SciPy community. scipy.signal.find_peaks 2023. https://docs.scipy.org/doc/
+     (accessed December 22, 2023).                                                                 scipy/reference/generated/scipy.signal.find_peaks.html (accessed December 22,
+[39] Eichhorn GN, Bowman A, Haigh SK, Stanier S. Low-cost digital image correlation                2023).
+     and strain measurement for geotechnical applications. Strain 2020;56:e12348.             [45] Ma Z, Choi J, Jang J, Kwon O, Sohn H. Simultaneous estimation of submerged
+     https://doi.org/10.1111/str.12348.                                                            floating tunnel displacement and mooring cable tension through FIR filter based
+[40] Wang M, Koo K-Y, Liu C, Xu F. Development of a low-cost vision-based real-time                strain and acceleration fusion. Struct Control Health Monit 2023;2023:e7803876.
+     displacement system using Raspberry Pi. Eng Struct 2023;278:115493. https://doi.              https://doi.org/10.1155/2023/7803876.
+     org/10.1016/j.engstruct.2022.115493.                                                     [46] Polytech GmbH. RSV-150 Scanning Vibrometer Datasheet 2019.
+[41] Raspberry Pi Foundation. Raspberry Pi 4 Model B specifications. Raspberry Pi n.d.        [47] MOHURD. GB 55004–2021 General Code for Composite Structures (in Chinese).
+     https://www.raspberrypi.com/products/raspberry-pi-4-model-b/specifications/                   Beijing: China Architecture Publishing & Media Co., Ltd; 2021.
+     (accessed December 22, 2023).                                                            [48] MOT. JTG 3362–2018 Specifications for Design of Highway Reinforced Concrete
+[42] Guo J, He Y, Jiang C, Jin M, Li S, Zhang J, et al. Measuring Micrometer-Level                 and Prestressed Concrete Bridges and Culverts (In Chinese). Beijing: China
+     Vibrations with mmWave Radar. 1–1 IEEE Trans Mob Comput 2021. https://doi.                    Communications Press Co., Ltd; 2018.
+     org/10.1109/TMC.2021.3118349.                                                            [49] YERBA BUENA RD over COYOTE CREEK n.d. https://data.redding.com/bridge/
+[43] Ulrich T.J. Envelope calculation from the Hilbert transform. Techanical Report;               california/santa-clara/yerba-buena-rd-over-coyote-creek/06–37C0375/ (accessed
+     2006.                                                                                         December 22, 2023).
+                                                                                              [50] AASHTO. LRFD Bridge Design Specifications, Washington, D.C.: the American
+                                                                                                   Association of State Highway and Transportation Officials; 2017.
+
+
+
+
+                                                                                         18
+

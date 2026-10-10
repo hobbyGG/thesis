@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-04",
+  "status": "completed_one_seed_scratch_check",
+  "scope": "truth-free same-range split/merge/abstain selector",
+  "execution": {
+    "seed": 212,
+    "scenes": 6,
+    "new_trials": 6,
+    "old_72_trials_modified": false,
+    "production_algorithm_modified": false,
+    "large_matrix_run": false,
+    "commit_or_push": false,
+    "archive_download": false
+  },
+  "command": "capture_program/.venv/bin/python experiments/innovation1_selector_check_2026-10-04/run_selector_check.py --seed 212 --out experiments/innovation1_selector_check_2026-10-04/selector_seed212.json",
+  "files": {
+    "protocol": "PROTOCOL.md",
+    "runner": "run_selector_check.py",
+    "output": "selector_seed212.json",
+    "report": "REPORT.md"
+  },
+  "hashes": {
+    "protocol_sha256": "3f4986660cf8ae1582365c9002570b109478418edcce3ab0d9be18f62c661532",
+    "runner_sha256": "a0a8277123545e70b46314974e38cef6c918ba26b505a252432510aed68b4449",
+    "output_sha256": "d25b0dd7259d30037a088c09529bf2541f75e5ddbbbc4714a04a21d44bd12952"
+  },
+  "environment": {
+    "python": "capture_program/.venv/bin/python",
+    "numpy": "2.0.2",
+    "scipy": "unavailable; local NumPy-only peak-rule reimplementation used"
+  },
+  "selector_contract": {
+    "inputs": ["calibration IQ", "test IQ", "fixed instrument constants"],
+    "truth_free": true,
+    "truth_access": "post-run score only",
+    "routes": ["merge", "split_ls", "abstain"],
+    "fallback_from_failed_split": false,
+    "score_frames": "128 test frames (frame 128 through 255) for selected and independent routes"
+  },
+  "counts": {
+    "selected_accepted": 5,
+    "selected_rejected": 1,
+    "selected_high_error_gt_0p01mm": 1,
+    "accepted_rows_suboptimal_vs_other_route_postrun": 2
+  },
+  "rows": [
+    {"case": "close_benign", "decision": "merge", "selected_covered": true, "selected_rmse_mm": 0.0013101492805655652, "merge_rmse_mm": 0.0013101492805655652, "split_rmse_mm": null, "failure": null},
+    {"case": "separated_benign", "decision": "split_ls", "selected_covered": true, "selected_rmse_mm": 0.0022202443653815667, "merge_rmse_mm": 0.01749621723449114, "split_rmse_mm": 0.0022202443653815667, "failure": null},
+    {"case": "separated_unequal", "decision": "split_ls", "selected_covered": true, "selected_rmse_mm": 0.002395009023963871, "merge_rmse_mm": 0.010332292218932388, "split_rmse_mm": 0.002395009023963871, "failure": null},
+    {"case": "close_destructive", "decision": "split_ls", "selected_covered": true, "selected_rmse_mm": 0.024400860026356375, "merge_rmse_mm": 0.01757963194308019, "split_rmse_mm": 0.024400860026356375, "failure": null},
+    {"case": "coincident_cancel", "decision": "split_ls", "selected_covered": false, "selected_rmse_mm": null, "merge_rmse_mm": null, "split_rmse_mm": null, "failure": "test_amplitude_guard"},
+    {"case": "symmetric_control", "decision": "split_ls", "selected_covered": true, "selected_rmse_mm": 0.004499277991794632, "merge_rmse_mm": 0.0036975460270525394, "split_rmse_mm": 0.004499277991794632, "failure": null}
+  ]
+}

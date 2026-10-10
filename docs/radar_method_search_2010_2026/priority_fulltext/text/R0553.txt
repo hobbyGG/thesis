@@ -1,0 +1,1375 @@
+                                    communications engineering                                                                                                                         Article
+                                    A Nature Portfolio journal
+
+
+
+
+                                                                                                                                                   https://doi.org/10.1038/s44172-025-00402-9
+
+
+                                    A method for reconstructing the dynamic
+                                    displacement of ﬂoating structures based
+                                    on acceleration measurements and
+                                    comparison with data-reconstruction
+                                    techniques
+                                                                                                                                                                                Check for updates
+
+                                    Shujian Gao        , Xi Chen, Zewen Pan, Zhe Tian & Fushun Liu
+                  1234567890():,;
+1234567890():,;
+
+
+
+
+                                    Accurately measuring the dynamic response in marine structures is crucial for ensuring service safety.
+                                    Here we developed a method for reconstructing the dynamic displacement of ﬂoating structures
+                                    based on acceleration measurements, addressing the challenges posed by the limitations of non-
+                                    contact measurement devices due to the absence of ﬁxed reference points in marine environments.
+                                    This method avoids the issues of transition and low-frequency component loss typically encountered
+                                    in integration-based reconstruction methods by the precise removal of drift terms, while achieving
+                                    dual improvements in both reconstruction accuracy and efﬁciency compared to recent methods. A
+                                    comprehensive comparison is made between the proposed method and widely used displacement
+                                    measurement devices in physical model testing and ﬁeld applications of offshore ﬂoating structures,
+                                    validating the broad potential for applications requiring structural displacement measurement in
+                                    complex marine environments.
+
+
+                                    During the operation of offshore ﬂoating structures, dynamic displacement          be converted into displacement values through elastic and thermoelastic
+                                    information serves as a crucial indicator of structural motion                     components. As a result, displacement sensors are among the most widely
+                                    characteristics1,2, directly reﬂecting operational status and service safety3,4.   used sensors. Current displacement measurement devices can be classiﬁed
+                                    Furthermore, dynamic displacement measurement is in high demand                    into two categories: contact sensors and non-contact measuring devices.
+                                    across several ﬁelds, including structural monitoring5,6, system                   Non-contact structural dynamic displacement measurement devices,
+                                    identiﬁcation7,8, and so on. For example, during multi-body installation           including total stations, laser displacement sensors, and close-range pho-
+                                    operations, accurate dynamic displacement measurement can enhance both             togrammetry, have been extensively employed in displacement testing for
+                                    the efﬁciency and precision of structural movement control9. In modal              bridge structures15,16, building structures17,18, tunnel engineering19,20, and
+                                    parameter analysis, displacement data is more effective than acceleration          slope deformations21,22. Although non-contact measurement technologies
+                                    data for producing stable modal damping ratios10. Additionally, precise            offer high accuracy, achieving millimeter-level precision, they are not sui-
+                                    displacement boundary conditions are commonly required as inputs in                table for real marine environments, primarily due to the lack of ﬁxed
+                                    structural transient response analysis11. In system identiﬁcation, displace-       reference points.
+                                    ments serve as valuable inputs for generating state-space models, thereby               Contact displacement sensors typically rely on measuring structural
+                                    facilitating the interpretation of physical parameters12. As a result, obtaining   motion acceleration, using techniques such as integration, ﬁltering, and
+                                    accurate dynamic displacement data for ﬂoating structures, particularly in         baseline correction to reconstruct displacement23. However, due to tech-
+                                    deep-sea operational environments, has become a critical issue13,14.               nological limitations, these sensors often produce measurement errors that
+                                          Displacement is one of the most easily convertible physical quantities.      do not accurately reﬂect the true motion of the structure24. Given the unique
+                                    Kinematic quantities such as velocity, acceleration, and angle can be directly     challenges of the marine environment and the limitations of contact sensors,
+                                    derived from changes in displacement, while pressure and temperature can           the use of Digital Global Positioning System (DGPS) technology for
+
+
+                                    Shandong Province Key Laboratory of Ocean Engineering, Ocean University of China, 266100 Qingdao, China.            e-mail: gaoshujian@ouc.edu.cn
+
+
+                                    Communications Engineering | (2025)4:68                                                                                                                        1
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                                                     Article
+
+displacement measurement provides a means to correct for drift                    marine environment, mooring systems, risers, and other auxiliary struc-
+displacement25. While this method effectively reduces drift issues in offshore    tures. Acceleration is the most easily obtainable and reliable physical
+structure displacement measurement, it remains vulnerable to factors such         quantity for measuring offshore structures, facilitating the reconstruction of
+as occlusion and harsh environmental conditions, which can impact data            other physical quantities. However, two key challenges arise: (1) How to
+transmission. Additionally, the accuracy of DGPS is limited, typically            achieve normalized characterization of the motion response with drift terms
+achieving only meter-level precision in deep-sea environments. Especially in      after integration? (2) How to accurately identify and remove these drift
+the vertical direction, although differential systems have been used to           terms? As shown in Eqs. (2) and (3), both velocity and displacement
+improve the testing accuracy, the accuracy for the heave response is still        obtained through integration share these issues, though the displacement is
+insufﬁcient compared to the horizontal direction26. Also, data can suffer         more complex after integration. The following derivation uses the integrated
+from issues like jumps27, drift28, instability, and even complete loss29. These   displacement as an example for analysis. The proposed method is universal
+challenges can lead to structural misalignment or cause the structure to be       and also applicable to velocity-related issues; however, details will not be
+driven to an incorrect position. As a result, multiple offshore platform          provided here. The scheme of the proposed method can be found in Sup-
+accidents have been attributed to errors in motion displacement testing30.        plementary Fig. 2.
+      In addition to employing DGPS technology to correct the integral
+displacement of offshore structures, technological advancements have been         Drift displacement after integration
+made in reconstructing motion displacement from measured acceleration.            Marine structures are subjected to complex impact during service, including
+While there is a strict theoretical relationship between acceleration and         forces from mechanical equipment and various environmental factors such
+displacement through integration, actual sea conditions introduce several         wind, waves, and currents. As a result, the measured acceleration includes
+challenges, such as the unknown initial motion state, environmental noise,        not only the actual structural vibration or motion but also several additional
+sensor baseline offsets, and other factors, leading to drift during the inte-     components: harmonic components generated by equipment operation
+gration process. This drift leads to inaccuracies in the reconstructed motion     (denoted as h(t)), transient attenuation components due to ship impact or
+displacement, failing to accurately reﬂect the true state of structures31.        ice-induced load (denoted as a(t)), slow variation components caused by
+Currently, approaches for reconstructing motion displacement from                 tidal range changes (denoted as v(t)), and other complex noise components.
+acceleration include ﬁltering techniques32–34, baseline correction                This can be described as
+techniques35,36, and polynomial ﬁtting techniques37,38. Low-frequency drift, a
+common cause of integration errors, can be mitigated through high-pass                            €xðtÞ ¼ €xðtÞ þ hðtÞ þ aðtÞ þ vðtÞ þ ns ðtÞ þ ne ðtÞ þ b                             ð1Þ
+ﬁltering applied to the integrated displacement. However, for offshore
+ﬂoating structures, which exhibit low-frequency motion, ﬁltering approa-          where €xðtÞ and €xðtÞ represent the actual and measured structural accel-
+ches may not only eliminate the drift components, but also lead to the loss of    erations, respectively. b denotes the baseline bias of the accelerometer. ns(t)
+real motion response components. This limitation is particularly proble-          represents sensor noise components that affect data quality but not cause
+matic when dealing with issues under complex marine conditions. Fur-              structural movement, while ne(t) refers to noise components in the marine
+thermore, challenges related to the transition section and initial parameter      environment that interfere with structural movement.
+selection also contribute to errors in displacement reconstruction39. Baseline         In theory, the structural velocity can be calculated by integrating the
+correction approaches, commonly used in seismic response analysis, ﬁt the         measured acceleration:
+baseline of the integrated data; however, it merely ﬁts the baseline of the
+                                                                                               Z t
+integration result and fails to capture detailed information regarding the
+                                                                                   _ ¼
+                                                                                   xðtÞ              €        _
+                                                                                                     xðτÞdτ þ xð0Þ
+structural motion response. This limitation results in errors when applied to                    0
+                                                                                               Z t
+offshore structures subject to complex noise conditions. Polynomial-based
+                                                                                           ¼                                                                   _
+                                                                                                     ½€xðτÞ þ hðτÞ þ aðτÞ þ vðτÞ þ ns ðτÞ þ ne ðτÞ þ b dτ þ xð0Þ
+approaches, which remove drift terms by ﬁtting integrated drift displace-                        0
+ment with polynomials, are inadequate for ﬂoating structures that exhibit                      Z t                         Z t
+strong nonlinear behavior. Additionally, Liu et al.40,41 proposed a non-                   ¼         ½€xðτÞ þ ne ðτÞ dτ þ                                        _ þ bt
+                                                                                                                               ½hðτÞ þ aðτÞ þ vðτÞ þ ns ðτÞ dτ þ xð0Þ
+                                                                                                 0                            0
+integral displacement reconstruction approace that achieves high-precision                                                                                                             ð2Þ
+reconstruction for ﬁxed offshore structures. However, this approach relies
+on ﬁtting the acceleration using a state-space model. When applied to the                 _
+                                                                                  where xð0Þ    represents the initial velocity of the structure at the start of the
+displacement reconstruction of offshore ﬂoating structures, it encounters         test. It is clear that the integration process introduces two unexpected
+challenges such as limited processing of long-term signals and reduced            components in the calculated velocity: one is the mean deviation caused by
+analysis efﬁciency.                                                                                    _
+                                                                                  the initial velocity xð0Þ, and the other is the linear drift term b resulting from
+      To enhance the long-term stability and high-precision measurement of        the baseline bias of the accelerometer. It is worth noting that the term b is
+displacement in offshore ﬂoating structures, this paper proposes a dis-           more complex in real measurements and may vary with time (i.e., b(t) in
+placement reconstruction method based on the precise removal of integral          theory). However, because it typically represents a very low-frequency
+drift terms. The method is compared with widely used displacement testing         variation, it is often simpliﬁed as b for clearer formula derivation.
+devices and reconstruction approaches across several key performance                    The structural displacement can then be calculated through the integral
+aspects. The comparison reveals three contributions of the proposed               process as follows:
+method: (1) Under experimental conditions, the proposed method effec-
+                                                                                           Z t
+tively addresses data loss issues encountered by traditional non-contact          xðtÞ ¼     _
+                                                                                            xðτÞdτ    þ xð0Þ
+optical devices, which are inﬂuenced by environmental light and the limited               0
+                                                                                        Z t Z t                        Z t
+range of structural motion amplitude; (2) In practical marine environments,           ¼     f ½€xðτÞ þ ne ðτÞ dτ þ                                             _ þ btg dτ þ xð0Þ
+                                                                                                                           ½hðτÞ þ aðτÞ þ vðτÞ þ ns ðτÞ dτ þ xð0Þ
+                                                                                          0     0                        0
+                                                                                        Z tZ t                           Z tZ t
+the proposed method overcomes the challenge of missing ﬁxed reference                                                                                                                 1
+                                                                                      ¼          ½€xðτÞ þ ne ðτÞ dτdτ þ                                                       _
+                                                                                                                                  ½hðτÞ þ aðτÞ þ vðτÞ þ ns ðτÞ dτ dτ þ xð0Þ þ xð0Þt þ bt 2
+points for non-contact devices; (3) Compared to traditional approaches, this              0    0                            0   0                                                     2
+method not only improves computational accuracy but also enhances cal-                ¼ xreal ðtÞ þ xnoise ðtÞ þ xdrift ðtÞ
+
+culation efﬁciency.                                                                                                                                                                    ð3Þ
+
+Methods                                                                           where x(0) represents the initial displacement at the start of the measure-
+Accurately obtaining the motion response of ﬂoating structures is crucial for     ment. It should beR tnoted that the integrated displacement consists of three
+their safe operation, especially under the combined inﬂuence of a complex         parts: xreal ðtÞ ¼ 0 ½€xðτÞ þ hðτÞ þ aðτÞ þ vðτÞ þ ne ðτÞ dτ represents the
+
+
+Communications Engineering | (2025)4:68                                                                                                                                                   2
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                                                                                                       Article
+                                                            Rt Rt
+true structural dynamic displacement; xnoise ðtÞ ¼ 0 0 ½hðτÞ þ aðτÞ þ                                               introduces Eq. (8) as
+vðτÞ þ ns ðτÞ dτ dτ represents the noise inﬂuence from various factors, and
+                    _
+xdrift ðtÞ ¼ xð0Þ þ xð0Þt                                                 _
+                          þ 12 bt 2 represents the drift terms. The terms xð0Þt                                        x1 ¼ xð0Þ ; e
+                                                                                                                       e           x2 ¼ xð1Þ ; e
+                                                                                                                                               x3 ¼ xð2Þ ; :::; e
+                                                                                                                                                                xN j 1 ¼ xðN j 2Þ ; e
+                                                                                                                                                                                      xN j ¼ xðN j 1Þ                                       ð8Þ
+and 12 bt2 account for the inﬂuences of the initial velocity and the baseline
+bias of the accelerometer, resulting in linear and exponential drift trends in                                      and Eq. (7) can be transformed into a ﬁrst-order matrix differential equation
+the integral results. Additionally, x(0) represents the inﬂuence of the initial                                     as follows:
+displacement, which leads to a constant deviation.                                                                  8         9
+                                                                                                                    > dex1    >
+                                                                                                                    >
+                                                                                                                    >
+                                                                                                                    >  dt     >
+                                                                                                                              >
+                                                                                                                              >      2                                                                                   38 e       9
+Accurate characterization of the integrated-displacement                                                            >
+                                                                                                                    >         >
+                                                                                                                              >            0           1            0             0                    0            0  >
+                                                                                                                                                                                                                          >
+                                                                                                                                                                                                                              x1 >
+                                                                                                                                                                                                                                    >
+                                                                                                                    >
+                                                                                                                    > de      >
+                                                                                                                              >                                                                                           >
+                                                                                                                                                                                                                          >         >
+                                                                                                                                                                                                                              x2 >
+                                                                                                                        x2
+                                                                                                                    >
+                                                                                                                    >         >
+                                                                                                                              >  6 0                                                                              0 7  > e       >
+The primary challenge, as shown in Eq. (3), lies in effectively extracting the                                      >
+                                                                                                                    >
+                                                                                                                       dt
+                                                                                                                              >
+                                                                                                                              >  6                     0            1             0                       0              7>
+                                                                                                                                                                                                                          >         >
+                                                                                                                                                                                                                                    >
+                                                                                                                    >
+                                                                                                                    >  ex3    >
+                                                                                                                              >  6                                                                                       7>
+                                                                                                                                                                                                                          >         >
+                                                                                                                                                                                                                                    >
+drift term xdrift(t). Removing this drift term would isolate the real displace-                                     < ddt     =  6 0                   0            0             1                    0          0 7< 3 >
+                                                                                                                                                                                                                          >   e
+                                                                                                                                                                                                                              x     =
+                                                                                                                                 6                                                                                       7
+ment. However, estimating and extracting xdrift(t) is challenging, because it is                                         . >¼6      .                  ..           ..            ..        ..            ..         ..  7     ..
+                                                                                                                    >
+                                                                                                                    >    .     > 6 ..                   .            .             .           .           .          .  7>     . >
+not purely harmonic. Traditional signal decomposition methods, such as                                              >
+                                                                                                                    >    .     >
+                                                                                                                               > 6                                                                                       7>
+                                                                                                                                                                                                                          >
+                                                                                                                                                                                                                          >
+                                                                                                                                                                                                                                    >
+                                                                                                                                                                                                                                    >
+                                                                                                                                                                                                                                    >
+                                                                                                                    >
+                                                                                                                    >          > 6 0                                                                                 1 7  >         >
+Fourier and wavelet decomposition42,43, which represent signals as sums of                                          >
+                                                                                                                    >  xN j 1 >
+                                                                                                                      de       >
+                                                                                                                               > 4                     0            0             0                    0               >
+                                                                                                                                                                                                                         5>
+                                                                                                                                                                                                                          > xN j 1 >
+                                                                                                                                                                                                                            e       >
+                                                                                                                                                                                                                                    >
+                                                                                                                    >
+                                                                                                                    >   dt >
+                                                                                                                               >                                                                                          >
+                                                                                                                                                                                                                          >         >
+                                                                                                                                                                                                                                    >
+sine or cosine functions, are not suitable for this extraction. To account for                                      >
+                                                                                                                    >          >
+                                                                                                                               >   a0             a1          a2              a3        ...        aN j 2    aN 1 : ex ;
+                                                                                                                    >          >
+                                                                                                                    : dexN j >
+                                                                                                                    >          ;                                                                                           j           Nj
+the various characteristics of the structural motion response, x(t) is                                                   dt
+expressed as follows:                                                                                                                                                                                                                        ð9Þ
+
+  xðtÞ ¼ xreal ðtÞ þ xnoise ðtÞ þ xdrift ðtÞ                                                                        where aN j is commonly set to 1 for generality. Theoretically, the Nj eigen-
+                                                                                                                    roots of the matrix formed by the coefﬁcients a. in Eq. (9) correspond to the
+           X
+           Nd                                 X
+                                              Nn                               X
+                                                                               Nr
+       ¼         Ad eiθd eðξ d þiωd Þt þ           An eiθn eðξ n þiωn Þt þ         Ar eiθr eðξ r þiωr Þt         Nj roots of the eigenpolynomial in Eq. (7). Therefore, a Hankel matrix can be
+           d¼1                                n¼1                              r¼1                            ð4Þ   deﬁned as
+           X
+           Nj
+                                                                                                                                                 2                                                          3
+       ¼         Aj eiθj eðξ j þiωj Þt                                                                                                          e
+                                                                                                                                                 xj                      e
+                                                                                                                                                                         xjþ1                    e
+                                                                                                                                                                                                    xjþη1
+           j¼1                                                                                                                               6 e                         e                        xjþη 7
+                                                                                                                                                                                                     e
+                                                                                                                                             6 jþ1
+                                                                                                                                                x                        xjþ2                               7
+                                                                                                                                             6                                                              7   ξ×η
+where Nr, Nn, and Nd denote the number of the components in the true                                                              H ex ðjÞ ¼ 6 .                            ..         ..              ..   72R                             ð10Þ
+                                                                                                                                             6 ..                            .           .              .   7
+displacement, noise terms, and drift terms, respectively, with                                                                               4                                                              5
+Nj = Nr + Nn + Nd. The variables A(.), θ(.), ξ(.), and ω(.) represent the                                                                      e
+                                                                                                                                               xjþξ1                    e
+                                                                                                                                                                         xjþξ                   e
+                                                                                                                                                                                                   xjþξþη2
+amplitude, phase, damping ratio, and angular frequency of the corre-
+sponding components. The following relationships are deﬁned:
+                                                                                                                    where η and ξ represent the selected number of rows and columns,
+                                          (                                                                         respectively. Corresponding to the three parts in Eq. (4), the singular value
+                                              αj ¼ Aj eiθj                                                          decomposition is applied, allowing H(0) to be rewritten as follows:
+                                                                                                              ð5Þ
+                                              βj ¼ ξ j þ iωj
+                                                                                                                                                                               2 d                                   32 d T 3
+                                                                                                                                                                                 Smo1              0           0   0     ðVmo1 Þ
+                                                                                                                                                                               6 0                                     6 r T7
+                                                                                                                                                                               6               Srmo2           0   07766
+                                                                                                                                                                                                                         ðVmo2 Þ 7
+                                                                                                                                                                                                                                   7
+                                                                                                                      H ex ð0Þ ¼ ½ Udmo1       Urmo2        Unmo3        e
+                                                                                                                                                                         Umo4 6                                     7
+                                                                                                                                                                                                                   0 56
+     Consequently, the real part of αj represents the amplitude of the                                                                                                         4 0                                               T7
+                                                                                                                                                                                                                       4 ðVmo3 Þ 5
+                                                                                                                                                                                                                            n
+                                                                                                                                                                                                   0      Snmo3
+component, while the imaginary part of βj corresponds to the component’s                                                                                                               0           0           0   0      e mo4 ÞT
+                                                                                                                                                                                                                         ðV
+frequency, as expressed in the following equation:                                                                            ¼ Udmo1 Srmo1 ðVnmo1 ÞT þ Udmo2 Srmo2 ðVnmo2 ÞT þ Udmo3 Srmo3 ðVnmo3 ÞT ¼ Umo    T
+                                                                                                                                                                                                         e Smo
+                                                                                                                                                                                                            e Vmo
+                                                                                                                                                                                                               e
+                                      (                                                                                                                                                                                                     ð11Þ
+                                          Aj ¼ Reðαj Þ
+                                                                                                              ð6Þ
+                                          ωj ¼ 2πf j ¼ Imðβj Þ                                                      where T denotes the transpose of a vector, and mo1, mo2, and mo3 corre-
+                                                                                                                    spond to the model orders for drift terms, real dynamic displacement terms,
+                                                                                                                    and noise terms, respectively. Additionally, mo    f ¼ mo1 þ mo2 þ mo3
+where fj denotes the frequency of the corresponding component, and Re(. )
+                                                                                                                    represents the total number of non-zero singular values. The singular
+and Im(. ) represent the real and imaginary parts, respectively. Therefore,
+                                                                                                                    vectors Umoe and Vmoe have dimensions of η × mof and mof × ξ, while Smo e has a
+when αj and βj are accurately estimated, the drift terms can be effectively
+                                                                                                                    dimension of mo f × mo.
+                                                                                                                                          f The singular values Smo    e are assumed to be zero
+removed using the corresponding component’s frequency and amplitude.
+                                                                                                                                                             f In theory, the model order mo
+                                                                                                                    when the rank of the matrix is exceeded mo.                               f is
+                                                                                                                    equal to the number of non-zero singular values shown in Eq. (11). It is
+Solution to the characterization parameters
+                                                                                                                    important to note that due to noise interference and computational errors,
+In Eq. (4), the exponential functions eðξ j þiωj Þt forms a basis on the open
+                                                                                                                    the singular value corresponding to mo4 may not be zero, but it is typically
+interval 0 < t < T, and the variables αj and βj in Eq. (5) can be interpreted as
+                                                                                                                    very small. To ensure the inclusion of all Nj singular values, the dimensions
+the general solutions to pth-order ordinary differential homogeneous linear
+                                                                                                                    of H ex ð0Þ must be selected such that η and ξ are at least Nj.
+equations, characterized by the coefﬁcients aj, as follows:
+                                                                                                                          According to realization theory, a relationship between H ex ð0Þ and
+                                                                                                                    H ex ð1Þ can be established by substituting j = 1 into Eq. (10), as follows:
+                              X
+                              Nj
+                                          dj x       XNj
+                                     aj        ðtÞ ¼     aj xðjÞ ðtÞ ¼ 0                                      ð7Þ
+                                                                                                                                                                                                                                            ð12Þ
+                                          dt j                                                                                                   H ex ð1Þ ¼ Umo Smo 1=2 PSmo
+                                                                                                                                                                          1=2
+                                                                                                                                                                              ðVmo ÞT
+                               j¼1                   j¼1
+
+                                                                                                                    where P represents the state matrix. Its realization can be estimated through
+     However, the polynomial root-ﬁnding process for Eq. (7) is highly                                              matrix multiplication as follows:
+sensitive to errors due to its poor numerical conditioning, which can lead to
+inaccurate parameter estimation, especially in the presence of noise inter-                                                                      P ¼ Smo 1=2 UTmo H ex ð1ÞVmo S1=2
+                                                                                                                                                                                mo                                                          ð13Þ
+ference. This is often a critical issue when analyzing the dynamic responses
+of offshore ﬂoating structures. To address this issue, the proposed method
+
+
+Communications Engineering | (2025)4:68                                                                                                                                                                                                       3
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                                                                                                                                     Article
+
+    According to the mathematical relationship, the eigenroot of the                                                                 boundary Fs as follows:
+matrix P is given by eβj Δt , allowing for the calculation of the frequency and
+damping ratio of each component using Eq. (5). Furthermore, Eq. (4) can be                                                                                                                                     j ef j j ≤ F s                                     ð16Þ
+expressed as
+                                                                                                                                          For terms that cause drift, their frequency is usually low, close to 0.
+   2                                                                                            38 A eiθ1 9 8                 9      After this frequency screening step, the Nd components corresponding to
+           eβ1                                          eβ2                        e j
+                                                                                         βN      >
+                                                                                                 >              >
+                                                                                                                >   >
+                                                                                                                    >  x0 >   >
+                                                                                                 >    1
+                                                                                                                >   >         >
+   6                                                                                   βN Δt    7>
+                                                                                                 >
+                                                                                                 <  A   e iθ2 > >
+                                                                                                                =
+                                                                                                                    >
+                                                                                                                    >
+                                                                                                                    <  x
+                                                                                                                              >
+                                                                                                                              >
+                                                                                                                              =
+                                                                                                                                     the drift terms will be removed, leaving only the components that
+   6      eβ1 Δt                                       eβ2 Δt                     e    j     7     2                   1
+   6                                                                                            7       .         ¼     .
+                                                                                                                                     represent the actual dynamic behavior of the structure. These remaining
+   6        ..                                           ..                ..           ..      7>      .       >       .
+   4         .                                            .                   .          .      5>
+                                                                                                 >      .       >   > . >
+                                                                                                                    >         >      components can then be used to reconstruct the actual dynamic dis-
+                                                                                                 >              >
+                                                                                                                > > >         >
+                                                                                                                              >
+                                                                                   βN ðN k 1ÞΔt >
+                                                                                                 :        iθN j >
+                                                                                                                ;   >
+                                                                                                                    :x        >
+                                                                                                                              ;      placement as follows:
+       eβ1 ðN k 1ÞΔt               eβ2 ðN k 1ÞΔt                             e j              AN j e              N k 1
+
+                                                                                                                             ð14Þ
+                                                                                                                                                                                               X
+                                                                                                                                                                                               Nn                               X
+                                                                                                                                                                                                                                Nr
+                                                                                                                                                                                 e
+                                                                                                                                                                                 xreal ðtÞ ¼         An eiθn eðξ n þiωn Þt þ         Ar eiθr eðξ r þiωr Þt      ð17Þ
+and the amplitude and phase can be estimated using the least squares                                                                                                                           n¼1                              r¼1
+algorithm.
+
+Drift terms removal and displacement reconstruction
+                                                                                                                                     Results and discussion
+Once the parameters for angular frequencies ωj and amplitudes Aj are
+                                                                                                                                     Application to a numerical semi-submersible platform
+estimated, the frequencies of each component can be calculated using Eq. (6)
+                                                                                                                                     This section presents a case study using a semi-submersible platform
+as follows:
+                                                                                                                                     simulated using Orcaﬂex software to obtain the 6 DOF motion response of
+                                                                                                                                     the structure under irregular wave conditions. The calculation process is
+                                                              Imðβj Þ          ωj                                                    demonstrated, and the accuracy of the proposed method for reconstructing
+                        ef ¼                                               ¼      ; where j ¼ 0; 1; 2; :::; N j              ð15Þ    the motion displacement of marine structures is validated. Furthermore, the
+                          j
+                                                                      2π       2π
+                                                                                                                                     results from the proposed method are compared with those from traditional
+                                                                                                                                     methods, including baseline correction, ﬁltering, polynomial ﬁtting, and
+      Since the frequencies of the drift terms in the displacement are theo-                                                         non-integral approaches. The comparison evaluates computational accu-
+retically zero or much smaller than those of the actual dynamic components,                                                          racy, efﬁciency, and robustness, highlighting the advantages of the proposed
+these drift terms can be eliminated by setting a frequency screening                                                                 method.
+
+                                                                                                 (a)                                                                                                         (d)
+                                                                  1                                                                                      1500
+                                                                                  Calculated acc
+                        Acceleration (m/s 2 )
+
+
+
+
+                                                                                                                                                                                             Baseline-0
+                                                      0.5                         Selected acc
+                                                                                                                                                                                             Baseline-1
+                                                                                                                                                                                             Baseline-2
+                                                                  0                                                                                                                          Baseline-3
+                                                                                                                                    Velocity (m/s)
+
+
+
+
+                                                                                                                                                         1000
+                                                                                                                                                                                             Baseline-4
+                                                  -0.5
+
+                                                            -1
+                                                                      0        2000       4000         6000     8000       10000                                 500
+                                                                                               Time (s)
+                                                                                                 (b)
+                            Response (m-m/s-m/s 2 )
+
+
+
+
+                                                          20
+                                                                                  Acce
+                                                                                  Velo
+                                                          10                                                                                                            0
+                                                                                  Disp
+                                                                                                                                                                             0          50       100         150          200     250           300
+                                                                  0                                                                                                                                      Time (s)
+                                                                                                                                                                                 10 4                      (e)
+                                                      -10                                                                                                               20
+                                                                                                                                                                                             Baseline-0
+                                                      -20                                                                                                                                    Baseline-1
+                                                                      0     50        100        150      200      250      300                                                              Baseline-2
+                                                                                                                                                                        15
+                                                                                                                                                     Displacement (m)
+
+
+
+
+                                                                                               Time (s)                                                                                      Baseline-3
+                                                                                                 (c)
+                                                                                                                                                                                             Baseline-4
+                                                                  4               Baseline
+                                          Acceleration (m/s 2 )
+
+
+
+
+                                                                                  Baseline-0                                                                            10
+                                                                  3               Baseline-1
+                                                                                  Baseline-2
+                                                                  2
+                                                                                  Baseline-3
+                                                                                                                                                                        5
+                                                                  1               Baseline-4
+
+                                                                  0
+                                                                                                                                                                        0
+                                                                      0     50        100        150      200      250      300                                              0          50       100         150          200     250           300
+                                                                                               Time (s)                                                                                                  Time (s)
+
+Fig. 1 | Simulated response and the integrated results. Calculated (a) acceleration, (b) velocity and displacement by Orcaﬂex; (c) Simulated acceleration with baseline bias;
+Comparison of integrated (d) velocity and (e) displacement with different baseline bias.
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                                                                                                                              4
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                                       Article
+
+Introduction to the used numerical semi-submersible platform. The                     illustrated in Fig. 1(a). During the calculation process, the Newmark-β
+numerical model of the platform-mooring coupling system established in                algorithm and the concentrated mass method are used to calculate the
+this study is shown in Supplementary Fig. 3. The platform is symmetrical              responses of the platform and mooring lines, respectively. To clarify the
+designed along both the x-axis and y-axis, and consists of a ﬂoating hull             analysis process of the proposed method and facilitate comparison with
+and supporting columns. The main structure measures 124.21 m in                       traditional methods, a 300 s segment of acceleration data (from 5000 to
+length, 89 m in width, and has a main deck height of 45.30 m. The ﬂoating             5300 s) was selected for further analysis. This segment, along with its
+hull itself has dimensions of 124.21 m in length, 20.50 m in width, and               corresponding velocity and displacement, is shown in Fig. 1b. This
+11.50 m in height, while the columns are 20.50 m long, 25.00 m wide, and              selection implies that the initial velocity and displacement corresponding
+19.25 m high. The platform has a draft of 23 m, a displacement of 74,270.8            to the selected acceleration during the displacement reconstruction
+t, and is designed for a working depth of 1500 m.                                     process are unknown without reference to the calculated answer. To fully
+      The mooring system consists of four groups, each spaced 90 degrees              address the baseline bias issue of the acceleration sensor typically
+apart. Within each grout, two mooring lines are arranged at 22.5 degrees              encountered in ﬁeld tests, multiple baseline bias scales have been estab-
+intervals. Each group is equipped with two cables, symmetrically posi-                lished. The resulting acceleration data with these bias are shown in Fig. 1c,
+tioned along the axis. The cable properties include a wet weight of 61.20             where Baseline-0 represents the original acceleration, and Baseline-1,
+kg m−1, dry weight of 72.60 kg m−1, and an axial stiffness is 8.38 N. The             Baseline-2, Baseline-3, and Baseline-4 represent the acceleration with
+cable has a diameter of 127 mm, an inertia coefﬁcient of 2.0, a resistance            bias of 1 m/s2, 2 m/s2, 3 m/s2, and 4 m/s2. Then, the effects of unknown
+coefﬁcient of 1.8, and a minimum breaking force of 13,160 kN.                         initial velocity, unknown initial displacement, and baseline drift on the
+The positions of the fairleads and anchor points are listed in Supple-                integral results are examined, as shown in Fig. 1d, e. The ﬁgures illustrate
+mentary Table 1.                                                                      the outcomes of the ﬁrst and second integrals of the selected acceleration,
+                                                                                      respectively. It is evident that, due to the unknown initial motion state of
+Displacement reconstruction process of the proposed method. The                       the structure (including initial velocity and displacement) and the
+environmental parameters used in this section correspond to the max-                  inﬂuence of sensor baseline bias, the ﬁrst integration yields a linear drift
+imum sea conditions for structural operation, with a signiﬁcant wave                  trend, while the second integration results in an exponential drift. Fur-
+height of Hs = 12.1 m and a spectral period of Tp = 8.4 s. The calculated             thermore, as the baseline drift’s inﬂuence increases, the drift amplitude
+structural heave acceleration over a total of 3 hours from Orcaﬂex is                 becomes larger.
+
+
+
+
+Fig. 2 | Reconstructed velocity and displacement by the proposed method.              the calculated results by Orcaﬂex; Estimated initial (e) velocity and (f) displacement
+Comparison of the reconstructed results of the integrated (a) velocity and (b) dis-   by the proposed method.
+placement; Comparison of the reconstructed (c) velocity and (d) displacement with
+
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                                   5
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                                                                                                                            Article
+
+     Next, to test the validity of the proposed method, the acceleration data                                                   estimated initial displacement and the actual truncated value. The results
+inﬂuenced by Baseline-1, shown in Fig. 1a, was used as an example to                                                            indicate that the estimated error remains within 6%, demonstrating the high
+reconstruct the real velocity and displacement of the structure. First, Eq. (4)                                                 precision of the initial displacement estimation. Similarly, Fig. 2(a), (c), and
+was employed to characterize the displacement after two integrations, taking                                                    present the velocity reconstruction process using the proposed method,
+into account the effects of Baseline-1, as shown in Fig. 1e. Subsequently, the                                                  along with the corresponding estimated initial velocities. The reconstructed
+parameters α and β were solved, yielding 12 pairs of conjugate parameters,                                                      velocities closely match those calculated by Orcaﬂex, with the estimated
+which are illustrated in the inset of Fig. 2b. The pink shaded areas high-                                                      error for initial velocity being less than 10%. These ﬁndings conﬁrm that the
+light the frequency range below 0.1 Hz, which represent the frequency                                                           proposed method achieves high-precision velocity reconstruction and
+screening boundary. When the estimated α and β values were arranged in                                                          accurate initial velocity estimation.
+ascending order of frequency, the ﬁrst two pairs were found to be
+[ −0.0005 + 0.0000i, −0.0005 − 0.0000i] and [0.0003 + 0.0004i,                                                                  Comparison of the reconstructed results with traditional approa-
+0.0003 − 0.0004i], corresponding to frequencies of 0 Hz and 0.0001 Hz,                                                          ches. To illustrate the advantages of the proposed method over tradi-
+respectively. These values fall within the red region, indicating that they                                                     tional approaches, this section compares the results obtained from four
+represent drift caused by baseline bias and integration effects. The remaining                                                  conventional approaches: baseline correction, ﬁltering, polynomial ﬁt-
+components, marked by purple asterisk (*), correspond to the actual                                                             ting, and non-integral reconstruction. The baseline-correction approach
+dynamic displacement of the structure, can be used to reconstruct the actual                                                    employs second-order polynomial ﬁtting to address the drift issue44. The
+dynamic displacement using Eqs. (17) and (6), as shown in Fig. 2d. The                                                          ﬁltering-based approach applies a third-order Butterworth ﬁlter, with a
+results show that the reconstructed displacement aligns closely with the real                                                   normalized cutoff frequency set to 0.00645. In the polynomial-based
+displacement calculated by Orcaﬂex, conﬁrming the accuracy and validity of                                                      approach, third-order Chebyshev polynomials are used for ﬁtting46. The
+the proposed method.                                                                                                            non-integral reconstruction approach employs a modal order of 60 for
+     In addition to reconstructing the time-domain curve, accurately esti-                                                      signal reconstruction47,48. In the following analysis, symbols of Poly, Base,
+mating the initial displacement is crucial for practical applications. Using the                                                Filt, and Non-I are used to represent the reconstructed results of the
+proposed method, the estimated initial displacement is −0.8100 m, while                                                         previous traditional methods. The results of the reconstructed displace-
+Orcaﬂex calculates it as −0.8821 m, demonstrating good consistency                                                              ments in both the time and frequency domains are shown in Fig. 3a, b,
+between the two results. To further validate the method, the 300-s signal was                                                   respectively. From the analysis, it is evident that while all four approaches
+truncated at various intervals (e.g., from 5 to 300 s, 10 to 300 s, 15 to 300 s).                                               provide similar results in the frequency domain, there are noticeable
+Each truncated segment was then reconstructed independently. The esti-                                                          discrepancies in the time domain. Speciﬁcally, the baseline correction and
+mated initial displacement for each truncated signal is marked with red                                                         non-integral reconstruction approaches exhibit better performance. In
+asterisks * in Fig. 2(f). The blue bar chart shows the error between the                                                        contrast, the polynomial ﬁtting and ﬁltering-based approaches not only
+
+
+                                                                                                                 (a)
+                                                  10
+                               Displacement (m)
+
+
+
+
+                                                                                                                Cal                                                  Poly             Base              Filt        Non-I
+
+
+                                                     0
+
+
+
+                                                  -10
+                                                     0                  50                   100                 150                                                           200                    250                   300
+                                                                                                               Time (s)
+                                                                              (b)                                                                                                              (c)
+                                                                                                                                                                                                                              10
+
+
+
+                                                                                                                                                                                                                                    Amplitude error
+                                                     5                                                                                                      1
+                                                                                                                                              Correlation
+                                         Amplitude
+
+
+
+
+                                                                                                                                                            0                                                                 0
+
+
+                                                     0                                                                                                      -1                                                                -10
+                                                         0        1            2             3             4                                                                Poly     Base      Filt     Non-int   Prop
+                                                                       Frequency (Hz)
+                                                                              (d)                                                                                                              (e)
+                                                  30                                                                                                 10
+                                                                              Cal-vel              Non-I                                                                                       Cal-disp             Non-I
+                                                  20                          Proposed             Base                                                                                        Proposed             Base
+                                                                                                                   Displacement Error (m/s)
+
+
+
+
+                                                                                                                                                            5
+                Velocity Error (m/s)
+
+
+
+
+                                                  10
+
+                                                   0                                                                                                        0
+
+                                         -10
+                                                                                                                                                        -5
+                                         -20
+
+                                         -30                                                                                                      -10
+                                                         0   50       100     150      200       250   300                                                       0           50      100       150       200      250    300
+                                                                            Time (s)                                                                                                         Time (s)
+
+Fig. 3 | Comparison of reconstructed displacement using different approaches. Comparison in the (a) time and (b) frequency domains. (c) Correlation analysis. Estimated
+(d) initial velocity and (e) initial displacement.
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                                                                                                                     6
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                                                               Article
+
+show phase errors but also suffer from increased inaccuracies, particu-                                      Polynomial-based approach yields a negatively correlated result, while the
+larly due to the presence of transition segments.                                                            correlation coefﬁcient for the Filter-based approach is close to 0. In contrast,
+      To quantitatively assess the effectiveness of the various displacement                                 the baseline correction approach, the non-integral approach, and the pro-
+reconstruction approaches, two key metrics are introduced: the cross-                                        posed method exhibit better correlation, with their correlation coefﬁcients
+correlation coefﬁcient and the maximum normalization error. The cross-                                       being 0.8974, 1.0000, and 1.0000, respectively. Furthermore, the maximum
+correlation coefﬁcient is used to evaluate the similarity between the recon-                                 normalization error analysis indicates that both the Non-Integral approach
+structed displacement and the calculated response. It is deﬁned as                                           and the proposed method produced more accurate results than the other
+                                                                                                             approaches.
+                                         !            !
+                  1 X     Nk
+                              xc ðiÞ  xc   xr ðiÞ  xr 
+                                                                                                                  Similarly, truncation analysis was performed to compare the estimated
+                 
+               ρ¼                                                                                 ð18Þ     errors of initial velocity and initial displacement across the various methods.
+                 N k  1 i¼1      σ xc          σ xr                                                       Due to the inherent transition segments and truncation issues in the ﬁltering
+                                                                                                             and polynomial ﬁtting processes, the initial parameters calculated by these
+                                                                                                             approaches consistently started from zero (as shown in Fig. 3a), making
+where xc(t) and xr(t) represent the calculated and reconstructed displace-
+                                                                                                             further comparisons with these approaches irrelevant. The error analysis
+ments. σ xc and σ xr are the standard deviations of the calculated and
+                                                                                                             results of the estimated initial parameters from the Baseline-correction
+reconstructed displacements, respectively. xc and xr are the averages of the
+                                                                                                             approach, the Non-Integral approach, and the proposed method are shown
+calculated and reconstructed displacements. The value of ρ ranges from 0 to
+                                                                                                             in Fig. 3d, e. These results demonstrate that the initial parameters estimated
+1, where values close to 0 indicate low correlation, and values close to 1
+                                                                                                             by the proposed method exhibit higher accuracy compared to the traditional
+indicate a high correlation.
+                                                                                                             methods, highlighting the effectiveness and reliability of the proposed
+     The maximum normalization error quantiﬁes the difference in
+                                                                                                             approach in accurately reconstructing motion responses.
+amplitude between the calculated and reconstructed displacements. It is
+deﬁned as
+                                                                                                             Robust analysis of different methods. In general, noise in acceleration
+                                                                           
+                                                 max½xc ðt i Þ  xr ðt i Þ                                is considered as an unwanted signal that interferes with the true structural
+                                                 
+                                               η¼                                                 ð19Þ
+                                                     max½xc ðt i Þ                                         acceleration signal. As a result, the presence of noise can cause dis-
+                                                                                                             crepancies between the reconstructed displacement and the actual dis-
+    A smaller η value indicates a smaller normalization error between the                                    placement when using acceleration data for displacement reconstruction.
+amplitudes of the two displacements. The quantitative analysis results,                                      The effect of noise makes the true acceleration of the tested structure
+shown in Fig. 3c, reveal that due to the existence of phase error, the                                       unknown. There are various sources of noise that can affect acceleration,
+
+                                                                           (a)                                                                          (b)
+                             6000                                                                                               1
+                                                                                                                                                                       Noise-30%
+                                                                                                                 Acc (m/s 2 )
+
+
+
+
+                                                                          Noise-30            Noise-10
+                             5000                                                                                                                                      Original
+                                                                          Noise-25            Noise-5                           0
+                                                                          Noise-20            Original
+                             4000                                         Noise-15
+                Force (N)
+
+
+
+
+                                                                                                                                -1
+                                                                                                                                  0   100        200          300      400         500
+                             3000                                                                                                                  Time (s)
+                                                                                                                                                     (c)
+                                                                                                                            10
+                             2000                                                                                                                                      Noise-30%
+                                                                                                                   Dis (m)
+
+
+
+
+                                                                                                                                                                       Original
+                                                                                                                                0
+                             1000
+
+                                          0                                                                              -10
+                                               0        100         200           300        400           500              0         100        200          300      400         500
+                                                                       Time (s)                                  (d)                               Time (s)
+                                          8
+                                                    Polynominal                  Filtering                 Baseline                         Non-Inter               Proposed
+                                          6
+
+                                          4
+
+                                          2
+                            Correlation
+
+
+
+
+                                          0
+
+                                          -2
+
+                                          -4
+
+                                          -6
+
+                                          -8
+                                                   10
+                                                   15
+                                                   20
+                                                   25
+                                                   30
+
+
+
+                                                   10
+                                                   15
+                                                   20
+                                                   25
+                                                   30
+
+
+
+                                                   10
+                                                   15
+                                                   20
+                                                   25
+                                                   30
+
+
+
+                                                   10
+                                                   15
+                                                   20
+                                                   25
+                                                   30
+
+
+
+                                                   10
+                                                   15
+                                                   20
+                                                   25
+                                                   30
+                                                    -
+
+
+
+
+                                                    -
+
+
+
+
+                                                    -
+
+
+
+
+                                                    -
+                                                    0
+                                                    5
+
+
+
+
+                                                    0
+                                                    5
+
+
+
+
+                                                    0
+                                                    5
+
+
+
+
+                                                    0
+                                                    5
+
+
+
+
+                                                    0
+                                                    5
+
+
+
+
+                                                                                                   Noise internsity (%)
+
+Fig. 4 | Displacement reconstruction under the ﬁrst noise interference condition.                            d Quantitative evaluation results of displacement reconstructed by different
+a Wave forces acting on structures inﬂuenced by varying noise levels. Comparison of                          approaches under various noise effects.
+the calculated (b) acceleration and (c) displacement under 0% and 30% noise levels.
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                                                        7
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                                                    Article
+
+and this section focuses on two primary types: (1) noise introduced into                                and 30% noise levels. The results reveal that the structural acceleration and
+the excitation signal (i.e., external wave load on the structure), and (2)                              displacement differ when the external load is inﬂuenced by noise, compared
+noise added to the response signal (i.e., the acceleration measured by the                              to when it is unaffected. This discrepancy is attributed to the impact of noise
+sensor). In the ﬁrst case, the inﬂuence of ambient noise on the external                                on the input signal, leading to variations in the calculated acceleration and
+load of the structure is simulated, and the structural response is recorded                             displacement at different noise levels. Figure 4 provides a quantitative
+using an error-free acceleration sensor. In the second case, ambient                                    evaluation of the reconstructed displacement using the proposed method
+noise is simulated in the sensor data, assuming the input signal                                        under various noise levels (0%, 5%, 10%, 15%, 20%, 25%, and 30%),
+remains accurate. This section explores both cases in detail and compares                               represented by Original, Noise-5, Noise-10, Noise-15, Noise-20, Noise-25,
+the results with those obtained from traditional methods, providing a                                   Noise-30. The results show that, among the ﬁve approaches, the
+comprehensive understanding of how noise impacts the proposed                                           polynomial-based and ﬁlter-based approaches exhibit negative or near-zero
+method.                                                                                                 correlation coefﬁcients due to phase errors, leading to more pronounced
+      The impact of noise in the input signal is ﬁrst examined to assess the                            amplitude discrepancies. In contrast, the proposed method consistently
+accuracy of motion response reconstruction when the input load is con-                                  outperforms traditional approaches in both correlation and amplitude
+taminated with noise. The external load on the 6-DOF of the structure is                                accuracy, achieving high-precision displacement reconstruction even under
+derived from Orcaﬂex simulations. While Orcaﬂex provides an idealized                                   increasing noise levels.
+model of the external load during structural motion, real-world external                                      The second case examines the impact of adding varying levels of
+loads are often inﬂuenced by mechanical vibrations, environmental noise,                                Gaussian white noise to the calculated acceleration signal, which is then used
+and other disturbances. These real-world factors are not captured in the                                to reconstruct the displacement of the structure. Before the analysis, the
+Orcaﬂex calculations, which can lead to discrepancies when comparing the                                acceleration signal is modiﬁed as follows: €x  ðtÞ ¼ €xðtÞ þ α€xðtÞ. Figure 5a,
+calculated external loads to those observed on actual offshore structures. To                           b shows the time- and frequency-domains results of heave acceleration with
+simulate external noise pollution in the load, Gaussian white noise n(t), is                            different intensities of Gaussian white noise. In this scenario, the error in
+added to the structural load f(t), yielding a contaminated load,                                        displacement reconstruction arises from the noise introduced into the
+f*(t) = f(t) + αf(t), where α represents the noise level. The external loads                            output signal. The noise-affected acceleration signal is then used for dis-
+acting on the 6-DOF of the structure are then corrected accordingly. Fig-                               placement reconstruction. The evaluation results for various methods are
+ure 4a illustrates the original external loads, alongside the results after                             presented in Fig. 5c. These results reveal that, in comparison to traditional
+contamination with Gaussian white noise of varying intensities.                                         approaches, the proposed method offers superior performance in both
+      By incorporating the noise-corrected external load into Orcaﬂex, the                              correlation and amplitude accuracy, demonstrating its robustness and
+dynamic response of the structure can be recalculated. Figure 4b shows a                                suitability for displacement reconstruction in offshore ﬂoating structures,
+comparison of the calculated heave acceleration and displacement under 0%                               even in environments with substantial noise interference.
+
+                                                                     (a)                                                                  (b)
+                                        1
+                                                                                                                0.3
+                                                                                                                                                           Noise-30
+                                                                                                          0.25                                             Noise-25
+                Acceleration (m/s2)
+
+
+
+
+                                      0.5                                                                                                                  Noise-20
+                                                                                                                                                           Noise-15
+                                                                                                    Amplitude
+
+
+
+
+                                                                                                                0.2
+                                                                                                                                                           Noise-10
+                                        0                                                                 0.15                                             Noise-5
+                                                                                                                                                           Original
+                                                                                                                0.1
+                                      -0.5
+                                                                                                          0.05
+
+                                       -1                                                                        0
+                                             0      100        200          300        400        500                 0   2         4           6         8           10
+                                                                 Time (s)                                (c)                      Frequency (Hz)
+
+                                        6        Polynominal               Filtering              Baseline                    Non-Inter             Proposed
+
+                                        4
+
+                                        2
+                        Correlation
+
+
+
+
+                                        0
+
+                                       -2
+
+                                       -4
+
+                                       -6
+                                                 10
+                                                 15
+                                                 20
+                                                 25
+                                                 30
+
+
+
+                                                 10
+                                                 15
+                                                 20
+                                                 25
+                                                 30
+
+
+
+                                                 10
+                                                 15
+                                                 20
+                                                 25
+                                                 30
+
+
+
+                                                 10
+                                                 15
+                                                 20
+                                                 25
+                                                 30
+
+
+
+                                                 10
+                                                 15
+                                                 20
+                                                 25
+                                                 30
+                                                  -
+
+
+
+
+                                                  -
+
+
+
+
+                                                  -
+
+
+
+
+                                                  -
+                                                  0
+                                                  5
+
+
+
+
+                                                  0
+                                                  5
+
+
+
+
+                                                  0
+                                                  5
+
+
+
+
+                                                  0
+                                                  5
+
+
+
+
+                                                  0
+                                                  5
+
+
+
+
+                                                                                             Noise internsity (%)
+Fig. 5 | Displacement reconstruction under the second noise interference condition. Calculated acceleration affected by varying noise levels in the (a) time and (b)
+frequency domains. c Quantitative evaluation results of displacement reconstructed by different approaches under various noise effects.
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                                               8
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                              Article
+
+Application to a physical model of the semi-submersible platform                   simulation range of the wave generator, a total of 5 wave periods (1.2 s,
+To validate the accuracy of the proposed method experimentally, laboratory         1.6 s, 2.0 s, 2.4 s, 2.8 s) and three wave heights (0.06 m, 0.09 m, 0.12 m)
+tests were conducted using a 1/100 scale model of the semi-submersible             were selected for conducting regular and irregular wave tests, resulting in
+platform (as shown in Supplementary Fig. 4). These tests were carried out in       a total of 15 sets of operational conditions.
+both an indoor wave ﬂume and an outdoor pool. The reconstructed dis-                    Irregular waves, simulated using the JONSWAP spectrum with a sig-
+placement results obtained from the proposed method were then compared             niﬁcant wave height of 0.12 m and a spectral peak period of 2 s, were used to
+with those from commonly used measurement devices, including the optical           excite the platform. The recorded heave accelerations, sampled at a fre-
+system and the INS/DGPS system. Due to the inﬂuence of marine envir-               quency of 50 Hz, are shown in Fig. 6a. For the analysis, data from 500 to 650 s
+onment and distance from the base station on the testing accuracy of INS/          were selected to verify the displacement reconstruction. To reconstruct the
+GPS system, its testing accuracy cannot be directly used to prove the cor-         structural displacement using the proposed method, the measured accel-
+rectness of the reconstruction results of this method. Therefore, in the           eration was ﬁrst integrated. The displacement resulting from this integration
+experiment, we used an optical system to provide a standard answer for the         was characterized using the proposed method, yielding 75 groups of con-
+reconstruction results, as the testing accuracy of the optical system can reach    jugate characterization parameters, including 23 groups of components
+the millimeter level.                                                              with frequencies below 0.1 Hz, as shown in Fig. 6b. The actual structural
+                                                                                   displacement was then reconstructed using the remaining parameters, and
+Displacement testing under indoor pool conditions. First, the semi-                the results are presented in Fig. 6c. For comparison, the ﬁgure also presents
+submersible platform was positioned in a wave ﬂume measuring 60 m ×                the reconstructed displacement using the Non-integral approach. Based on
+3.0 m × 1.5 m. A piston-type wave generator, capable of simulating both            the analysis, both the Non-integral approach and the proposed method
+regular and irregular waves with generation periods ranging from 1 to 3 s          demonstrated clear advantages over the other three approaches, so these
+and a maximum wave height of 0.2 m, was ﬁxed at the end of the wave                methods will not be included in the following comparisons. The time-
+ﬂume. The motion response of the structure was measured using an                   domain results indicate that the displacement reconstruction from the
+accelerometer and an optical 6-DOF system. The accelerometer model                 proposed method aligns more closely with the test results obtained from the
+used was MEAS 4803A-0002C000488, and the recorded response were                    optical system.
+capture by a 16-channel IMC acquisition instrument. The optical 6-DOF                   To further compare the Non-integral approach with the proposed
+system was developed using the commercial HTC Vive Pro kit, which                  method, a comparative analysis was performed from the perspectives of
+consists of one onshore base station and two onboard markers. The                  computational efﬁciency and computational time scale, with the results
+system offers a maximum sampling frequency of 4630 Hz and a mea-                   presented in Fig. 6d. As shown in the ﬁgure, under the same modal order, the
+surement accuracy of 0.01 mm. The layout of the platform and the                   calculation time of the Non-integral approach increases exponentially with
+associated devices are shown in Supplementary Fig. 4. Due to the limited           the time scale, surpassing that of the proposed method. Additionally, the
+
+
+
+
+Fig. 6 | Displacement reconstruction results of the indoor experiment.             measured displacement and the proposed method. d Quantitative evaluation of the
+a Measured acceleration. b Comparison of the integrated displacement, recon-       reconstructed displacement; Comparison of measured and reconstructed accelera-
+structed integrated displacement, and reconstructed drift terms. c Comparison of   tion by the Non-integral approach over a duration of (e) 50 s and (f) 1500 s.
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                         9
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                                                                                                         Article
+
+accuracy of the reconstruction results shows a noticeable decline, as its                                                 platform was relocated to an outdoor pool (10 m × 5 m × 1 m) with no
+decomposition accuracy heavily depends on the selected modal order.                                                       shelter for comparison purposes. During this outdoor testing, an accel-
+Figure 6e, f presents the comparative results of acceleration reconstruction                                              erometer and an INS/DGPS system (model SDI-INS 100) were installed
+using the Non-integral approach at the same modal order. For shorter time                                                 on the platform, as shown in Supplementary Fig. 5. To validate the
+scales (50 s), the reconstruction results are relatively better, but for longer                                           accuracy of the comparison results, the optical 6-DOF system was also
+time scales (1600 s), the reconstruction quality deteriorates. This ill-                                                  employed as a reference measurement. The test, however, highlighted the
+conditioned behavior may severely affect the application of the Non-                                                      limitation of the optical system: excessive ambient light in open envir-
+Integral approach to measured data from offshore ﬂoating structures, as                                                   onments led to data loss, particularly during daylight conditions. To
+selecting the correct modal order becomes increasingly difﬁcult due to the                                                address this, a light mask was constructed to mitigate this issue. Fur-
+interference of complex components. In contrast, both the computational                                                   thermore, due to the lack of a wave generator in the outdoor pool,
+efﬁciency and accuracy of the proposed method remain stable across time                                                   simulating real marine conditions was not feasible. As a result, two
+scales. The inherent advantages of integration in the proposed method                                                     experimental scenarios were considered: simple heave-free attenuation
+reduce the structures sensitivity to high-frequency noise, effectively miti-                                              and artiﬁcial wave testing.
+gating its impact on the motion response.                                                                                       In the experiment, the heave-free motion was simulated by applying a
+     Then, the measured acceleration of the structure obtained under                                                      vertical force to the ﬂoating platform. The measured acceleration is pre-
+different marine environments is used to reconstruct the motion dis-                                                      sented in Fig. 8a. As illustrated in the ﬁgure, the structure was released at 28 s,
+placement, and the error between the reconstructed displacement and                                                       began to move, and stabilized after 60 s. Therefore, acceleration data from
+the measured displacement by the optical system are quantitatively                                                        28 s to 60 s were selected for further analysis. First, the measured acceleration
+evaluated using Eqs. (18) and (19). The results are shown in Fig. 7a.                                                     was integrated, followed by the characterization of the integral displace-
+Figure 7b–d shows the time-domain comparison of reconstructed dis-                                                        ment, as shown in Fig. 8b. After removing frequencies below 0.1 Hz, the
+placement and measured displacement. It can be seen that the correlation                                                  resulting reconstructed displacement is depicted in Fig. 8c. A comparison
+coefﬁcient between the reconstructed displacement and the measured                                                        with the test results from the DGPS, GPS-INS system, and the optical system
+displacement of the proposed method is above 99%, and the maximum                                                         is also provided. It is evident that the small motion amplitude of the model
+normalization error is below 30%, with error accuracy in the mm level,                                                    structure makes the direct use of DGPS unsuitable for the test. While
+which veriﬁes the applicability of the proposed method in different                                                       combining DGPS with INS improves accuracy, it introduces a drift issue
+marine environments.                                                                                                      over time. In contrast, the reconstructed displacement using the proposed
+                                                                                                                          method closely matches the measurements from the optical 6DOF system,
+Displacement testing under outdoor pool conditions. Since the                                                             achieving millimeter-level accuracy. This further demonstrates the super-
+satellite signal for the DGPS system would be obstructed in the sheltered                                                 iority of the proposed method for structural displacement measurement in
+indoor wave ﬂume, rendering the INS/DGPS system unusable, the                                                             real-world marine environments.
+
+
+
+
+                                                                                                                                                                                                 Maximum normalization error (%)
+                                                                                                                    (a)
+                                                                                                                                                                                           1
+                    Correlation coefficient
+
+
+
+
+                                               1
+
+
+                                                                                                                                                                                           0.5
+                                              0.5
+
+
+
+                                               0                                                                                                                                           0
+                                                                H=0.06m                                         H=0.09m                                             H=0.12m
+
+                                                                (b)                                                 (c)                                                   (d)
+                                              0.4
+                                                                                                 0.5                                                   0.5            Meas         Rec
+                                              0.2
+                Disp (m)
+
+
+
+
+                                                                                      Disp (m)
+
+
+
+
+                                                                                                                                            Disp (m)
+
+
+
+
+                                               0                                                   0                                                     0
+
+                                    -0.2
+                                                                                                 -0.5                                                  -0.5
+                                    -0.4
+                                                    110   120    130      140   150                     110   120    130       140    150                     110   120    130   140     150
+                                                          H0.06mT1.6s                                         H0.09mT1.6s                                           H0.12mT1.6s
+                                                              (e)                                                  (f)                                                  (g)
+                                                                                                   1                                                     1
+                                              0.5
+                                                                                                 0.5                                                   0.5
+                Disp (m)
+
+
+
+
+                                                                                      Disp (m)
+
+
+
+
+                                                                                                                                            Disp (m)
+
+
+
+
+                                               0                                                   0                                                     0
+
+                                                                                                 -0.5                                                  -0.5
+                                    -0.5
+                                                                                                  -1                                                    -1
+                                                    110   120    130      140   150                     110   120    130       140    150                     110   120    130   140     150
+                                                          H0.06mT2.4s                                         H0.09mT2.4s                                           H0.12mT2.4s
+
+Fig. 7 | Quantitative evaluation with different wave heights and periods. a Quantitative evaluation of the errors. Reconstructed displacement in the time domain: (b) 0.06
+m and 1.6 s; (c) 0.09 m and 1.6 s; (d) 0.12 m and 1.6 s; (e) 0.06 m and 2.4 s; (f) 0.09 m and 2.4 s; (d) 0.12 m and 2.4 s.
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                                                                                                10
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                                   Article
+
+
+
+
+Fig. 8 | Displacement reconstruction results of the heave-free motion case of the outdoor experiment. a Measured acceleration. b Comparison of integrated displacement,
+reconstructed integrated displacement, and reconstructed drift terms. c Comparison of measured displacement with the reconstructed displacement.
+
+
+
+     The second experiment aimed to simulate irregular waves through                 the results reconstructed by the proposed method with measurements from
+artiﬁcial excitation. The test results obtained using the INS/DGPS system,           the optical 6-DOF system during a test with nearly 50% data loss. The ﬁgure
+the proposed method, and the optical system are illustrated in Fig. 9a. As           demonstrates that during periods of data loss (from 58 to 102 s), the optical
+shown in the ﬁgure, the artiﬁcial wave excitation results in a vertical motion       system fails to capture the motion, but the proposed method successfully
+amplitude only reach a few millimeters, which is below the measurement               estimates the heave response. In contrast, from 36 to 58 s and 102 to 108 s,
+capability of the INS/DGPS system. In contrast, the displacement recon-              where the optical system provides reliable data, the proposed method’s
+struction results from the proposed method align with the measurements               reconstructed results closely align with the measured data, conﬁrming its
+obtained from the optical system.                                                    robustness and accuracy.
+     Another noteworthy phenomenon observed during the experiments
+was the occurrence of breakpoints in the measured results from the optical           Application to ﬁeld test data
+6-DOF system, indicating data loss, as shown in Fig. 9(a). To investigate the        This section presents ﬁeld tests conducted on a real offshore wind
+causes of these breakpoints, Fig. 9b presents the statistics of data loss per-       power installation platform in a marine environment to evaluate the
+centage under conditions of free motion, regular waves, and random waves,            performance of the proposed method in comparison with traditional
+both in the indoor ﬂume and outdoor pool. The results show that in the               approaches and the INS/DGPS system. The objective is to verify the
+indoor ﬂume, the percentage of data loss due to random waves is the highest,         effectiveness of the proposed method in addressing the challenges
+reaching up to 10% in severe cases. The data loss can be attributed to the           associated with ﬂoating structures in engineering applications. The
+working principle of the optical 6DOF tracking system, which requires                sea trials were conducted in areas near Yantai, China, on a platform
+capturing marker points on the structure to accurately track its motion. If          shown in Supplementary Fig. 6. The platform measures 126 m in
+the amplitude of the structural motion exceeds the capture range of the              length, 50 m in width, and 10 m in depth, with an installation
+system’s camera, the marker points may be obscured, leading to data loss.            capacity of over 10 MW for offshore wind turbines. This design is
+Additionally, the problem of data loss is more pronounced in the outdoor             tailored to meet the growing demands of large-scale offshore wind
+pool conditions, where the loss rate can reach nearly 50%. This issue is             power construction operations. During the tests, acceleration sensors
+primarily caused by the unrestricted horizontal movement of the structure            and INS/DGPS systems were installed at key locations, including the
+in the outdoor pool, as there is no mooring system to limit its range of             bow, stern, and deck, to monitor the platform’s structural movement.
+motion. Consequently, the structure’s motion often exceeds the area cov-
+ered by the optical system’s cameras. Moreover, strong ambient light in              Comparison to the measuring equipment
+outdoor environments can interfere with the optical system, preventing it            Figure 10a shows the measured heave acceleration, while Fig. 10b
+from effectively tracking the marker points. As an example, Fig. 9c compares         presents the displacement data recorded by the INS/DGPS system. It
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                             11
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                             Article
+
+
+
+
+Fig. 9 | Displacement reconstruction results of the irregular wave case of the outdoor experiment. (a) Comparison of measured and reconstructed displacement.
+b Statistical analysis of missing data points under different conditions. c Comparison of measured and reconstructed displacement with 50% data loss.
+
+
+
+is observed that the data from the INS/DGPS system is slightly                       previous analysis and the comparative results with the optical 6DOF system
+affected by baseline drift over short periods, but this inﬂuence                     from the experiment, it can be concluded that the proposed method achieves
+becomes more pronounced over longer durations. To minimize drift,                    millimeter-level accuracy, surpassing the accuracy of the INS/DGPS system,
+data from 100 to 400 s were selected for further analysis. Figure 10d                and demonstrates strong potential for reliably estimating heave motion in
+compares the reconstructed displacement by the proposed method                       ﬂoating structures.
+with the DGPS measurements. The results show that the displace-
+ment reconstruction using the proposed method successfully tracks                    Conclusions
+the platforms motion, closely aligning with the DGPS measurements.                   In this paper, a displacement reconstruction method that accurately
+However, due to the lower sampling frequency of the DGPS, much of                    reconstructs the motion response of ﬂoating structures in deep-sea envir-
+the detailed structural motion information can not be captured. This                 onments by precisely removing drift terms is proposed. The method inte-
+highlights that the proposed method not only captures detailed                       grates acceleration data and identiﬁes drift terms through normalized
+motion information with high accuracy, but also effectively mitigates                representation and frequency screening. Simulation results from Orcaﬂex,
+the drift issues commonly associated with DGPS, making it a more                     modeling a semi-submersible platform under various marine environ-
+reliable solution for real-time motion tracking of ﬂoating structures.               mental factors and equipment conditions, demonstrate that the recon-
+                                                                                     struction results from the proposed method align closely with the calculated
+Comparison to traditional methods                                                    data. These results show higher accuracy and greater robustness compared
+Figure 10e–h presents the reconstructed displacements obtained using                 to traditional approaches, achieving reliable estimation of the initial con-
+traditional approaches, along with the corresponding assessment results              ditions of structural motion.
+(Fig. 10c). It is clear that traditional approaches fail to accurately capture the         To further validate the feasibility of this method for complex ocean
+operational behavior of the structure during actual ship tests, with max-            structures, tests were conducted on a 1:100 scale semi-submersible platform
+imum errors exceeding 100% and similarity indices below 50%. In contrast,            and a real offshore platform. The proposed method’s error, when compared
+the displacement reconstruction results obtained using the proposed                  to the optical 6DOF system, was limited to millimeter-level accuracy. The
+method show better alignment with the test data from the INS/DGPS sys-               Pearson correlation coefﬁcient of the displacement reconstruction reached
+tem, achieving a similarity index of 85.71% and a maximum error of 30.97%.           96.62%, with a maximum normalization error of 6.12%. Additionally,
+However, it is important to note that these results do not suggest low               analysis of data from outdoor pool experiments and real ship tests reveals
+amplitude accuracy for the proposed method. The limited accuracy of the              that, compared to commonly used displacement measurement tools (such
+INS/DGPS system in the heave direction means its data should be con-                 as the optical 6DOF system and the INS/DGPS system), the proposed
+sidered as a reference rather than an exact measurement. Based on the                method exhibits superior resistance to environmental interference and data
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                         12
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                                  Article
+
+
+
+
+Fig. 10 | Displacement reconstruction of the ﬁeld test. Measured (a) acceleration and (b) displacement in the time domain. d–h Comparison of the measured displacement
+with the reconstructed displacement. c Quantitative evaluation results of the reconstructed displacement.
+
+
+
+loss, delivering excellent performance and higher accuracy. It must be              3.  Kim, K. Y. & Sohn, H. Dynamic displacement estimation by fusing LDV
+acknowledged that this work is related to heave response, while surge/sway              and LiDAR measurements via smoothing based Kalman ﬁltering.
+response is more complex and can be affected by devices such as thrusters               Mech. Syst. Signal Process. 82, 339–355 (2017).
+and propellers, resulting in uniform or quasi-uniform motion. This may              4. Gao, S. J., Feng, G. N. & Liu, F. S. Investigation to the nonlinearity
+lead to the absence of acceleration characteristics in the structural surge/            evolution of offshore wind turbines using ﬁeld data: Application to a 4
+sway response. Therefore, it is impossible to reconstruct the displacement of           MW monopile offshore wind turbine. Appl. Ocean Res. 145, 103918
+the structure through acceleration characteristics. In future research, we also         (2024).
+hope to overcome this limitation and achieve horizontal motion response             5. Dong, X. F., Lian, J. J., Wang, H. J., Yu, T. S. & Zhao, Y. Structural
+reconstruction of structures not based on INS/GPS systems.                              vibration monitoring and operational modal analysis of offshore wind
+                                                                                        turbine structure. Ocean Eng. 150, 280–297 (2018).
+Data availability                                                                   6. Dong, X. F., Lian, J. J. & Wang, H. J. Vibration source identiﬁcation of
+All data used in this research are available from the corresponding authors             offshore wind turbine structure based on optimized spectral kurtosis
+upon reasonable request.                                                                and ensemble empirical mode decomposition. Ocean Eng. 172,
+                                                                                        199–212 (2019).
+Code availability                                                                   7. Mastronardi, N., Kressner, D., Sima, V., Dooren, P. V. & Huffel, S. B. A
+All codes used in this research are available from the corresponding authors            fast algorithm for subspace state-space system identiﬁcation via
+upon reasonable request.                                                                exploitation of the displacement structure. J. Comput. Appl. Math.
+                                                                                        132, 71–81 (2001).
+Received: 7 November 2024; Accepted: 25 March 2025;                                 8. Feng, D. M. & Feng, M. Q. Identiﬁcation of structural stiffness and
+                                                                                        excitation forces in time domain using noncontact vision-based
+                                                                                        displacement measurement. J. Sound Vib. 406, 15–28 (2017).
+References                                                                          9. Hamedani, S. J. & Khedmati, M. R. Optimized planning for weather-
+1.   Anghel, A. et al. Compact ground-based interferometric synthetic                   sensitive offshore construction operations—an application to ﬂoat-
+     aperture radar short-range structural monitoring. IEEE Signal Process.             over installation of super-heavy offshore topsides. Ocean Eng. 297,
+     Mag. 36, 42–52 (2019).                                                             117027 (2024).
+2.   Yangm, L. et al. Large-amplitude rotation of ﬂoating offshore wind             10. Kim, S., Park, K.-Y., Kim, H.-K. & Lee, H. S. Damping estimates from
+     turbines: a comprehensive review of causes, consequences, and                      reconstructed displacement for low-frequency dominant structures.
+     solutions. Renew. Sust. Energy Rev. 211, 115295 (2025).                            Mech. Syst. Signal Process. 136, 106533 (2020).
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                            13
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                          Article
+
+11. Zhu, H., Zhou, Y. J. & Hu, Y. M. Displacement reconstruction from          30. Nezhadshahbodaghi, M. & Mosavi, M. R. A loosely-coupled EMD-
+    measured accelerations and accuracy control of integration based on            denoised stereo VO/INS/GPS integration system in GNSS-denied
+    a low-frequency attenuation algorithm. Soil. Dyn. Earthq. Eng. 133,            environments. Measurement 183, 109895 (2021).
+    106122 (2020).                                                             31. Jaime, D.-L.-C., Damaris, A.-L. & Jesús, V.-G. Effect of noise on the
+12. Kim, J., Kim, K. Y. & Sohn, H. Autonomous dynamic displacement                 assessment of displacements computed from accelerations recorded
+    estimation from data fusion of acceleration and intermittent                   at linear and nonlinear civil engineering structures. Measurement 136,
+    displacement measurements. Mech. Syst. Signal Process. 42,                     724–734 (2019).
+    194–205 (2014).                                                            32. Trifunac, M. D. & Lee, V. M. Routine Computer Processing of Strong-
+13. Gao, S. J., Feng, G. N., Liu, D. Z. & Liu, F. S. Separation and                motion Accelerograms. 73-03 (California Institute of Technology,
+    quantitative evaluation for the nonlinear effects in the motion                Earthquake Engineering Research Laboratory Pasadena, California,
+    response of ﬂoating structures. Ocean Eng. 301, 117549 (2024).                 EERL, 1973).
+14. Gao, S. J., Liu, F. S., Chang, S. & Zhou, L. A dynamic response            33. Converse, A. & Brady, A. G. BAP basic strong-motion accelerogram
+    analysis method with high-order accuracy for ﬁxed offshore                     processing software version 1.0, United States Department of the
+    structures based on a normalised expression of external loadings.              Interior, U.S. Geological survey; Distributed by Books and Open-ﬁle
+    Ocean Eng. 219, 108358 (2021).                                                 Reports Section. USGS Numbered Series 92-296-A (1992).
+15. Adali, T. An exciting juncture for signal processing research: on          34. Wang, W. Y. & Dogancay, K. Widely linear adaptive ﬁltering based on
+    building bridges, challenges, and opportunities. IEEE Signal Process.          clifford geometric algebra: a uniﬁed framework. IEEE Signal Process.
+    Mag. 41, 3–6 (2024).                                                           Mag. 41, 86–101 (2024).
+16. Kwiatkowski, J., Anigacz, W. & Beben, D. A case study on the               35. Park, K.-T., Kim, S.-H., Park, H.-S. & Lee, K.-W. The determination of
+    noncontact inventory of the oldest European cast-iron bridge using             bridge displacement using measured acceleration. Eng. Struct. 27,
+    terrestrial laser scanning and photogrammetric techniques. Remote              371–378 (2005).
+    Sens. 12, 2745 (2020).                                                     36. Wang, R., Schurr, B., Milkereit, C., Shao, Z. & Jin, M. An improved
+17. Gonzlez, C. L. & Valls, P. G. D scanning methodology: bell tower of            automatic scheme for empirical baseline correction of digital
+    Santa Mar de Darocas church (Spain). ISPRS Arch. 44, 373–379                   strong-motion records. Bull. Seismol. Soc. Am. 101, 2029–2044
+    (2020).                                                                        (2011).
+18. He, Z. Z., Zhang, L. X., Gao, H. G., Wang, H. S. & Pan, P. Estimation of   37. Gao, S. J., Liu, F. S. & Jiang, C. Y. Improvement study of modal
+    the displacement time history of high-rise building structures using           analysis for offshore structures based on reconstructed
+    limited measurement data and structural information. Mech. Syst.               displacements. Appl. Ocean Res. 110, 102596 (2021).
+    Signal Process. 202, 110716 (2023).                                        38. Chiu, S. W. & Parhi, K. K. Long polynomial modular multiplication
+19. Fu, Y. B. et al. Analytical solution to the mechanical response of             using low-complexity number theoretic transform. IEEE Signal
+    grouting lifting in existing shield tunnels and engineering case               Process. Mag. 41, 92–102 (2014).
+    veriﬁcation. Tunn. Undergr. Sp. Tech. 145, 105587 (2024).                  39. Gao, S. J. & Liu, F. S. Research on non-stationary characteristic test
+20. Li, J. C., Huang, M. L. & Zhao, Z. Y. Mechanical response and ﬁeld             and decomposition for dynamic response of ﬂoating structures.
+    measurement analysis of custom-shaped steel sleeves during urban               Ocean Eng. 292, 116550 (2024).
+    shield tunnel construction. Tunn. Undergr. Sp. Tech. 143, 105483 (2024).   40. Liu, F. S., Gao, S. J. & Chang, S. Displacement estimation from
+21. Assefa, S., Graziani, A. & Lembo-Fazio, A. A slope movement in a               measured acceleration for ﬁxed offshore structures. Appl. Ocean Res.
+    complex rock formation: deformation measurements and DEM                       113, 102741 (2021).
+    modelling. Eng. Geol. 219, 74–91 (2017).                                   41. Liu, F. S., Gao, S. J., Liu, Y. & Liu, D. Z. A motion tracking approach to
+22. Wang, H. F. et al. A slope deformation measurement method based on             position marine ﬂoating structures based on measured acceleration
+    laser datum and complex target motion model. Measurement 199,                  and angular velocity. Ocean Eng. 257, 111682 (2022).
+    111526 (2022).                                                             42. Roonizi, A. K. Fourier analysis: a new computing approach. IEEE
+23. Wei, D. T., Chen, Y. G., Li, H. K. & Zhang, X. W. Real-time                    Signal Process. Mag. 40, 183–191 (2023).
+    reconstruction method of full-ﬁeld dynamic response of rotating            43. Dizon, D. N. & Hogan, J. A. Holistic processing of color images using
+    bladed disks. Mech. Syst. Signal Process. 188, 109953 (2023).                  novel quaternion-valued wavelets on the plane: a promising
+24. Damaris, A. L. & Jaime, D. L. C. Assessment of methodologies to                transformative tool. IEEE Signal Process. Mag. 41, 51–63 (2024).
+    estimate displacements from measured acceleration records.                 44. Chiu, H. C. Stable baseline correction of digital strong-motion data.
+    Measurement 114, 261–273 (2018).                                               Bull. Seismol. Soc. Am. 87, 932–944 (1997).
+25. Shen, C. et al. Multi-rate strong tracking square-root cubature Kalman     45. Javaid, S., Li, D. Y. & Ukil, A. Transient analysis method using high
+    ﬁlter for MEMS-INS/GPS/polarization compass integrated navigation              pass ﬁlter circuit in VSC interfaced multi-terminal DC system. Electr.
+    system. Mech. Syst. Signal Process. 163, 108146 (2022).                        Pow. Syst. Res. 216, 109062 (2023).
+26. Wu, Q. W., Pan, Y. H., Ding, H., Xiao, Y. X. & He, X. X. Quantifying the   46. Pieper, A. et al. High-performance implementation of Chebyshev ﬁlter
+    effect of non-seasonal non-tidal loadings on background noise                  diagonalization for interior eigenvalue computations. J. Comput.
+    properties of GPS vertical displacements in mainland China.                    Phys. 325, 226–243 (2016).
+    Measurement 217, 113007 (2023).                                            47. Liu, F. S., Gao, S. J., Liu, D. Z. & Zhou, H. A signal decomposition
+27. Teigen, P. & Haver, S. The heidrun TLP: measured versus predicted              method based on repeated extraction of maximum energy
+    response. Appl. Ocean Res. 20, 27–35 (1998).                                   component for offshore structures. Mar. Struct. 72, 102779 (2020).
+28. Liagre, P., Gupta, H. & Banon, H. Monitoring of ﬂoating offshore           48. Liu, F. S., Gao, S. J., Tian, Z. & Liu, D. Z. A new time-frequency analysis
+    installations wave frequency motions. In Proc. Offshore Technology             method based on single mode function decomposition for offshore
+    Conference (OnePetro, 2008).                                                   wind turbines. Mar. Struct. 72, 102782 (2020).
+29. Granados, G. S., Salcedo, J. A. L., Banos, D. J. & Risueno, G. L.
+    Challenges in Indoor Global Navigation Satellite Systems unveiling its     Acknowledgements
+    core features in signal processing. IEEE Signal Process. Mag. 29,          The authors acknowledge the ﬁnancial support of the National Natural
+    108–131 (2012).                                                            Science Foundation of China (52125106, 52201340, U22A20243).
+
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                    14
+https://doi.org/10.1038/s44172-025-00402-9                                                                                                             Article
+
+Author contributions                                                            Publisher’s note Springer Nature remains neutral with regard to
+Shujian Gao: Conceptualization, Methodology, Validation, Data curation,         jurisdictional claims in published maps and institutional afﬁliations.
+Writing-original draft. Xi Chen: Data curation, Formal analysis. Zewen Pan:
+Data curation, Experiment test. Zhe Tian: Project administration. Fushun Liu:   Open Access This article is licensed under a Creative Commons
+Funding acquisition.                                                            Attribution-NonCommercial-NoDerivatives 4.0 International License,
+                                                                                which permits any non-commercial use, sharing, distribution and
+Competing interests                                                             reproduction in any medium or format, as long as you give appropriate
+The authors declare no competing interests.                                     credit to the original author(s) and the source, provide a link to the Creative
+                                                                                Commons licence, and indicate if you modiﬁed the licensed material. You
+Additional information                                                          do not have permission under this licence to share adapted material
+Supplementary information The online version contains                           derived from this article or parts of it. The images or other third party
+supplementary material available at                                             material in this article are included in the article’s Creative Commons
+https://doi.org/10.1038/s44172-025-00402-9.                                     licence, unless indicated otherwise in a credit line to the material. If material
+                                                                                is not included in the article’s Creative Commons licence and your intended
+Correspondence and requests for materials should be addressed to                use is not permitted by statutory regulation or exceeds the permitted use,
+Shujian Gao.                                                                    you will need to obtain permission directly from the copyright holder. To
+                                                                                view a copy of this licence, visit http://creativecommons.org/licenses/by-
+Peer review information Communications Engineering thanks Nianxin               nc-nd/4.0/.
+Ren, Xiaosen Xu, and the other, anonymous, reviewer for their contribution to
+the peer review of this work. Primary Handling Editors: [Anastasiia             © The Author(s) 2025
+Vasylchenkova and Rosamund Daw].
+
+Reprints and permissions information is available at
+http://www.nature.com/reprints
+
+
+
+
+Communications Engineering | (2025)4:68                                                                                                                       15
+

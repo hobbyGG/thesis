@@ -1,0 +1,305 @@
+Anomaly Detection in Bridges Using
+Interferometric Synthetic Aperture
+Radar (InSAR)
+OTHMANE LASRI, ELEONORA CLEMENO
+and MARIA PINA LIMONGELLI
+       ABSTRACT
+
+Structural Health Monitoring (SHM) plays a crucial role in supporting decision-makers
+by providing vital information on the structural integrity of bridges. Traditional SHM
+systems typically rely on in-situ sensors, which can be time-consuming to install and
+vulnerable to failure during extreme weather events. In contrast, Synthetic Aperture
+Radar Interferometry (InSAR), leveraging active radar sensors mounted on satellites,
+has emerged as a promising remote sensing alternative. This technique enables the
+monitoring of any structure visible from the satellite’s orbit, eliminating the need for
+on-site sensor installation. Furthermore, depending on the availability of satellite
+imagery, InSAR allows for retrospective analysis of structural behavior. Historical
+displacement data can be used to detect anomalous trends, potentially serving as an early
+warning for hazardous structural conditions. This paper presents an anomaly detection
+procedure based on InSAR displacement time series. The proposed method is applied
+to a riverine bridge that collapsed in 2023. The displacement datasets are sourced from
+the European Ground Motion Service (EGMS), which utilizes Sentinel-1 satellite
+imagery.
+
+
+   1. INTRODUCTION
+
+Bridges and viaducts play a crucial role in road networks. Their reduced functionality
+or collapse can strongly impact the economy and safety of entire communities [1].
+Several bridge collapses in recent years have shown the societal economic impact of
+bridge closures resulting for example from increased travel distances [1], beyond the
+direct cost of collapse [2]. Due to the aging of those infrastructures and the increase in
+traffic demand, structural degradation of bridges is becoming a crucial problem. Design
+errors, construction mistakes, natural hazards, collision, and overload are the top five
+leading causes of bridge failures, resulting in more than 70% of bridge failures [3].
+Furthermore, leading to flood-induced scour which is one of main causes of riverine
+bridge collapse [3]. In this context, Structural Health Monitoring systems (SHMs)
+provide valid resources to decision-makers. P. Clemente shows how a proper
+maintenance plan combined with a monitoring strategy, could have provided in advance
+valuable information about the operational state of the Polcevera bridge [2].
+Technological evolution has made available a wide choice of SHM devices and
+algorithms [4]. Despite the advantages provided by in-situ SHM systems, their
+widespread adoption is limited by skepticism of owners and decision-makers primarily
+linked to the up-front cost they have to sustain without a consistent estimation of the
+benefit they bring. Recently, due to the development of advanced Differential InSAR
+(DInSAR) algorithms and the increase in the temporal and spatial resolution of SAR
+images, InSAR technology can provide low-cost measurement of deformations of
+human artefacts like bridges and viaducts [5–7]. However, despite several studies have
+shown the capability of InSAR in detecting collapse precursors displacement patterns,
+anomaly detection procedures based on InSAR time series remain undeveloped. The
+aim of this paper is to provide an anomaly detection strategy based on the InSAR time
+series. In the remainder of this paper, Section 2 presents the principles of InSAR,
+Sections 3 and 4 introduce the methodology and the case study, respectively. The results
+are presented in Section 5, and the conclusions are provided in Section 6.
+    2. INSAR PRINCIPLES
+
+    SAR satellites are active devices that irradiate electromagnetic waves at different
+bands of the microwave domain towards a certain area of interest or target. A fraction
+of the signal is backscattered and returned to the sensor, where amplitude and phase are
+recorded. The amplitude of the backscattered signal depends on the amount of
+electromagnetic backscattered energy which depends on acquisition geometry, radar
+carrier frequency, radar resolution, wavelength and polarization, size of the scatterers,
+surface roughness and orientation [8]. Signals backscattered from exposed rocks and
+urban areas show strong amplitudes, whereas smooth flat surfaces (like water basins)
+backscatter low amplitude signals. The phase of the signal is proportional to the target-
+sensor distance. In the ideal case where the phase is correlated only to the target-sensor
+distance, analyzing phase variations among two radar images of the same area of interest
+can inform about the area movement. Based on this concept, DInSAR techniques aim
+at obtaining the deformation rate of the target by analysing radar images acquired over
+the same area at different times. However, the signal phase is also affected by
+atmospheric pressure, water vapour and soil moisture [9,10] may alter the quantification
+of the distance. Furthermore, decorrelations linked to errors in satellite orbit and surface
+elevation determination limit the use of the phase difference between two images to
+assess the target displacement. Accounting for all these factors, the phase change among
+two images can be described as follows [11]:
+
+                                     4𝜋𝜋
+                          𝛥𝛥𝛥𝛥𝑖𝑖 =       𝛥𝛥𝛥𝛥𝑇𝑇𝑇𝑇 + 𝛥𝛥𝛥𝛥𝑖𝑖 + 𝛥𝛥𝛥𝛥𝑖𝑖 + 𝜀𝜀𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡,𝑖𝑖   (1)
+                                      𝜆𝜆
+
+𝛥𝛥𝛥𝛥𝑇𝑇𝑇𝑇 represents the phase change due to the movement in the Line of Sighr (LOS)
+direction, 𝛥𝛥𝛥𝛥𝑖𝑖 the atmospheric phase contribution, 𝛥𝛥𝛥𝛥𝑖𝑖 the decorrelation noise and
+𝜀𝜀𝑡𝑡𝑡𝑡𝑡𝑡𝑡𝑡,𝑖𝑖 is the phase contribution due to possible errors in the Digital Elevation Model
+(DEM). The main challenge of DInSAR techniques is to assess the phase change 𝛥𝛥𝛥𝛥𝑇𝑇𝑇𝑇
+removing or reducing the effect of the other parameters. To address this challenge,
+advanced (or Multi-Temporal) DInSAR techniques have been developed over the past
+decades, supported by the growing availability of SAR satellites with diverse footprint
+sizes, acquisition modes, bandwidths (typically X-, C-, and L-band), and revisit times.
+These methods enable the accurate monitoring of surface displacements over time
+reducing the uncertainty by computing the phase difference between several couples of
+images. They produce displacement time series and mean deformation velocity maps
+achieving up to sub-centimeter accuracy depending on the type of sensor and relevant
+bandwidth. The European Space Agency (ESA) has recently launched the European
+Ground Motion Service (EGMS) as part of the Copernicus program. Operational since
+2022, EGMS utilizes MT-DInSAR techniques combined with GNSS calibration,
+providing user-friendly services through a dedicated portal with annual updates. It
+processes data collected by the Sentinel-1 constellation, which consists of two twin
+satellites operating in the C-band.
+    3. ANOMALY DETECTION
+
+The process used for anomaly detection involves the computation of the time histories
+of the ‘representative’ displacements [12], the computation of the expected
+displacements in reference conditions, based on a regression model and the anomaly
+detection based on control charts. The Measurement Points (MPs) provided by satellites
+acquisitions are generally distributed on the structure in a non-uniform way. To use
+these measurements for the analysis of the structural condition, the MPs are grouped
+into zones. The displacement of each zone is calculated as the average of the LOS
+displacements of the MPs within that zone. Using average MPs time series from the
+ascending and descending tracks and neglecting the displacements along the North-
+South direction, the Up and East deformation components can be estimated using the
+following relationships [7].
+
+                                 𝛿𝛿𝐿𝐿𝐿𝐿𝐿𝐿,𝐴𝐴     𝐶𝐶𝐸𝐸,𝐴𝐴   𝐶𝐶𝑈𝑈,𝐴𝐴 𝛿𝛿𝐸𝐸
+                             �
+                                 𝛿𝛿𝐿𝐿𝐿𝐿𝐿𝐿,𝐷𝐷
+                                             �≅�
+                                                 𝐶𝐶𝐸𝐸,𝐷𝐷
+                                                                  �� �
+                                                           𝐶𝐶𝑈𝑈,𝐷𝐷 𝛿𝛿𝑈𝑈               (2)
+
+where 𝛿𝛿𝐿𝐿𝐿𝐿𝐿𝐿,𝐴𝐴 and 𝛿𝛿𝐿𝐿𝐿𝐿𝐿𝐿,𝐷𝐷 represent the LOS displacements measured from ascending
+and descending tracks, respectively. 𝐶𝐶𝐸𝐸,𝐴𝐴 and 𝐶𝐶𝐸𝐸,𝐷𝐷 represent the cosines of the angle
+between the East and LOS direction, and 𝐶𝐶𝑈𝑈,𝐴𝐴 and 𝐶𝐶𝑈𝑈,𝐷𝐷 are the cosines of the angle
+between the Up and LOS direction for each track. The expected displacements in
+reference condition are computed through a regression model built considering the
+displacement changes in the longitudinal direction due to temperature in the reference
+condition. Following reference [13] in this study, a linear regression model is used to
+represent the relationship between temperature and displacement (dependent variable).
+A training period is defined to identify the regression model for the reference
+displacement. This model is then used to predict expected displacements based on
+temperature data. The regression equation is shown in Equation (3), where 𝑦𝑦 is the
+displacement vector for the training period, 𝑍𝑍 is the matrix of the temperatures and 𝛽𝛽 is
+the unknown vector that offers the relationship between the two variables. The vector 𝜀𝜀
+is included to simulate the variability of the data due to uncertainties connected to the
+measurements and to the process to extract displacement time histories from InSAR
+data. This noise represents random variations of the data, with a distribution that follows
+a normal distribution.
+
+                                     𝑦𝑦 = 𝑍𝑍 · 𝛽𝛽 + 𝜀𝜀                                (3)
+
+The main goal of regression analysis is to estimate the vector 𝛽𝛽 that best fits the observed
+data based on the independent variable. This is typically done using the least squares
+method, which minimizes the sum of squared errors[13]. Using this approach, the
+estimated parameters 𝛽𝛽̂ are calculated with the Equation (4):
+
+                                  𝛽𝛽̂ = (𝑍𝑍 𝑇𝑇 𝑍𝑍)−1 𝑍𝑍 𝑇𝑇 · 𝑦𝑦                       (4)
+
+Once the vector 𝛽𝛽̂ has been obtained, using data relating to the training period, the
+formula (3) can be used to calculate the predicted displacements, using measured
+temperature values. A Control Chart is applied to the residual E between actual and
+predicted displacements and defined as the absolute value of their difference, as shown
+in Equation (4), where 𝛿𝛿𝐸𝐸,𝑀𝑀 and 𝛿𝛿𝐸𝐸;𝑃𝑃 denote respectively the measured and predicted
+displacements obtained from the regression model previously described.
+
+                                𝐸𝐸 = �𝛿𝛿𝐸𝐸,𝑀𝑀 − 𝛿𝛿𝐸𝐸;𝑃𝑃 �                             (5)
+
+The 𝑇𝑇 2 statistic is calculated using Equation (6) [13], where 𝐸𝐸� represents the average of
+residuals over the past 𝑟𝑟 observations, 𝐸𝐸� is the average of residuals when the process is
+under control, and 𝑆𝑆 is the covariance matrix of the process, estimated based on the
+actual displacement vector 𝛿𝛿𝐸𝐸;𝑃𝑃 over the reference period.
+
+                                                𝑇𝑇
+                          𝑇𝑇 2 = 𝑟𝑟� 𝐸𝐸� − 𝐸𝐸� � 𝑆𝑆 −1 � 𝐸𝐸� − 𝐸𝐸� �                  (6)
+
+The normal variability of the structural condition is defined by the range between the
+Lower Control Limit (LCL) and the Upper Control Limit (UCL). Since the 𝑇𝑇 2 statistic
+is always positive, the LCL is assumed to be zero. The UCL, instead, is defined as the
+critical values for 5% observations.
+
+
+    4. THE CASE STUDY
+
+The Ortiano 2 Viaduct, commonly known as the Longobucco Bridge, is located along
+State Road 117 "Sila-Mare." crossing the Trionto River with the axis approximately
+oriented from West to East. The bridge was inaugurated in 2015 to improve connections
+between the Sila Plateau and the Ionian coast. However, the viaduct suffered a structural
+collapse on May 3, 2023, only nine years after its opening. The bridge extends in an
+almost east-west direction, measuring approximately 210 meters in length and 10 meters
+in width (see Figure 1). The bridge was designed with prestressed reinforced concrete
+beams supported by six piers of varying heights. Publicly available information about
+the bridge’s detailed dimensions or structural design is limited. However, based on the
+analysis of images available online, it can be inferred that the beams were simply
+supported by the piers. According to news reports, early signs of failure were observed
+as early as November 2022. The final collapse occurred at the joint between the third
+and fourth spans and was triggered by the flooding of the Trionto River, following heavy
+rainfalls in the region. The analysis in this study focuses on detecting differential
+displacements of the bridge, monitored using Sentinel-1 satellite data from 2018 to
+2022. The study aims to identify any signs of structural anomalies in the years before
+the collapse.
+                             Figure 1: The Longobucco Bridge
+
+
+
+
+   5. RESULTS
+
+In this study, the InSAR data provided by the European Ground Motion Service
+(EGMS) portal are used combining displacements retrieved from ascending (ASC) and
+descending (DESC) tracks. Sentinel 1 data from 03/01/2018 to 31/12/2022 are used in
+this study. The MPs are organized on two zones, namely Zona A and Zona B.
+Combining the displacements from the ascending and descending tracks, the
+displacements in the Up (vertical) and East (approximately longitudinal) bridge
+displacements are estimated. The analysis concentrates on longitudinal (East)
+displacements on which seasonal deformation effects are typically more pronounced
+[6]. Longitudinal displacements are estimated using the procedure described in section
+3. In Figure 2 The triangles indicate MPs from ASC track, the squares MPs from the
+DESC track, respectively. In Figure 3 the West-East displacement of Zone A (in red)
+and Zone B (in blue) are plotted. The displacement predicted using equation (3),
+considering a 10% Gaussian noise is indicated by the dashed line. The measured
+displacement is indicated by the solid line. Both Zone A and Zone B exhibit a deviation
+of the predicted with respect to the measured displacement. However, the deviation
+starts in May 2022 for Zone A and approximately one year before, in May 2021, for
+Zone B.
+
+
+
+
+                          Figure 2: Clustering of MPs in two zones.
+      Figure 3: The West-East displacement time sheets of the two zones defined on the bridge.
+
+This is more clearly shown by the residuals reported in in Figure 4. Figure 5 shows the
+control chart used for anomaly detection. The blue vertical lines indicating heavy rain
+occurred, which could have potentially increased the hydraulic load on the bridge
+substructures. Starting from October 2021, several 𝑇𝑇 2 values exceed the threshold,
+suggesting an anomalous behavior. An analysis of the most significant rainfall events
+showed that in October 2021, there was a heavy rain event.
+
+
+
+
+Figure 4: The red line shows residual time series of zone A, the blue line shows the residual time series
+                                               of zone B.
+        Figure 5: Control chart with a threshold corresponding to the upper 5% of observations.
+
+      6. CONCLUSIONS
+
+In this paper, an anomaly detection procedure based on InSAR is applied to identify
+pre-collapse anomalies in the Longobucco Bridge in Italy, which collapsed on May 3,
+2023, during a flood event involving the Trionto River. The proposed methodology
+employs linear regression to model the bridge’s longitudinal displacements as a function
+of temperature. The residuals—i.e., the differences between the predicted and observed
+displacements—are used as damage indicators. A T² control chart is introduced as the
+statistical detection tool. The results indicate that certain areas of the bridge exhibited
+anomalous displacement trends several months prior to the collapse. Notably, the
+residuals between the predicted and actual displacements began to increase well before
+the failure event. It is important to acknowledge that this study is based on a low-
+resolution InSAR dataset, which provides a limited number of MPs on the structure.
+More precise analyses using high-resolution SAR imagery, in conjunction with physics-
+based modeling, would enable a more detailed assessment and more robust conclusions
+regarding the collapse mechanism. Despite these limitations, the study demonstrates the
+potential of open-access InSAR data for preliminary anomaly detection in riverine
+bridges. This approach could serve as a valuable early warning tool to support
+infrastructure risk management.
+
+
+      7. ACKNOWLEDMENT
+
+This study was carried out within the RETURN Extended Partnership and received
+funding from the European Union Next-GenerationEU (National Recovery and
+Resilience Plan – NRRP, Mission 4, Component 2, Investment 1.3 – D.D. 1243
+2/8/2022, PE0000005).
+
+
+      8. REFERENCES
+
+[1]    B. Kim, S. Shin, D. Kim, Scenario-Based Economic Impact Analysis for Bridge Closures Due
+       to Flooding: A Case Study of North Gyeongsang Province, South Korea, Water (Basel) 10
+       (2018) 981. https://doi.org/10.3390/w10080981.
+[2]    P. Clemente, Monitoring and evaluation of bridges: lessons from the Polcevera Viaduct collapse
+       in Italy, J Civ Struct Health Monit 10 (2020) 177–182. https://doi.org/10.1007/s13349-020-
+       00384-6.
+[3]    G. Zhang, Y. Liu, J. Liu, S. Lan, J. Yang, Causes and statistical characteristics of bridge failures:
+       A review, Journal of Traffic and Transportation Engineering (English Edition) 9 (2022) 388–
+       406. https://doi.org/10.1016/j.jtte.2021.12.003.
+[4]    Y. Yang, Y. Zhang, X. Tan, Review on Vibration-Based Structural Health Monitoring
+       Techniques and Technical Codes, Symmetry (Basel) 13 (2021) 1998.
+       https://doi.org/10.3390/sym13111998.
+[5]    S. Selvakumaran, S. Plank, C. Geiß, C. Rossi, C. Middleton, Remote monitoring to predict
+       bridge scour failure using Interferometric Synthetic Aperture Radar (InSAR) stacking
+       techniques, International Journal of Applied Earth Observation and Geoinformation 73 (2018)
+       463–470. https://doi.org/10.1016/j.jag.2018.07.004.
+[6]    E. Farneti, N. Cavalagli, M. Costantini, F. Trillo, F. Minati, I. Venanzi, F. Ubertini, A method
+       for structural monitoring of multispan bridges using satellite InSAR data with uncertainty
+       quantification and its pre-collapse application to the Albiano-Magra Bridge in Italy, Struct
+       Health Monit 22 (2023) 353–371. https://doi.org/10.1177/14759217221083609.
+[7]    V. Macchiarulo, P. Milillo, C. Blenkinsopp, C. Reale, G. Giardina, Multi-temporal InSAR for
+       transport infrastructure monitoring: recent trends and challenges, Proceedings of the Institution
+       of Civil Engineers - Bridge Engineering 176 (2023) 92–117.
+       https://doi.org/10.1680/jbren.21.00039.
+[8]    R.F. Hanssen, Radar Interferometry, Springer Netherlands, Dordrecht, 2001.
+       https://doi.org/10.1007/0-306-47633-9.
+[9]    A. Ferretti, A. Monti-Guarnieri, C. Prati, F. Rocca, InSAR Principles: Guidelines for SAR
+       Interferometry Processing and Interpretation (TM-19, February 2007), The Netherlands, 2007.
+[10]   D. Cusson, K. Trischuk, D. Hébert, G. Hewus, M. Gara, P. Ghuman, Satellite-Based InSAR
+       Monitoring of Highway Bridges: Validation Case Study on the North Channel Bridge in
+       Ontario, Canada, Transportation Research Record: Journal of the Transportation Research
+       Board 2672 (2018) 76–86. https://doi.org/10.1177/0361198118795013.
+[11]   A. Ferretti, C. Prati, F. Rocca, Permanent scatterers in SAR interferometry, IEEE Transactions
+       on Geoscience and Remote Sensing (2001). https://doi.org/10.1109/36.898661.
+[12]   P.F. Giordano, Z.I. Turksezer, M. Previtali, M.P. Limongelli, Damage detection on a historic
+       iron bridge using satellite DInSAR data, Struct Health Monit 21 (2022) 2291–2311.
+       https://doi.org/10.1177/14759217211054350.
+[13]   F. Magalhães, A. Cunha, E. Caetano, Vibration based structural health monitoring of an arch
+       bridge: From automated OMA to damage detection, Mech Syst Signal Process 28 (2012) 212–
+       228. https://doi.org/10.1016/j.ymssp.2011.06.011.
+

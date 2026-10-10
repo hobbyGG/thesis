@@ -1,0 +1,947 @@
+                                              Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+                                                         Contents lists available at ScienceDirect
+
+
+                                    Mechanical Systems and Signal Processing
+                                                journal homepage: www.elsevier.com/locate/ymssp
+
+
+
+
+Continuous bridge displacement estimation using millimeter-wave
+radar, strain gauge and accelerometer
+Zhanxiong Ma, Jaemook Choi, Hoon Sohn *
+Department of Civil and Environmental Engineering, Korea Advanced Institute of Science and Technology, Daejeon 34141, South Korea
+
+
+
+
+A R T I C L E I N F O                                   A B S T R A C T
+
+Communicated by Wei-Xin Ren                             Monitoring of bridge displacement is essential for providing critical information regarding the
+                                                        health of bridge structures. However, continuous and accurate monitoring of structural
+Keywords:                                               displacement remains challenging. This study proposes a bridge displacement estimation tech­
+Continues bridge displacement estimation                nique that combines an accelerometer, a strain gauge, and a millimeter-wave radar considering
+Accelerometer
+                                                        intermittent radar target occlusion common in long-term displacement monitoring. The technique
+Millimeter-wave radar
+                                                        primarily estimates displacement using radar and accelerometer measurements but switches to
+Strain gauge
+Target occlusion                                        using strain and acceleration measurements when radar targets are occluded. A radar target
+Environmental variation                                 occlusion detection algorithm is developed to automatically achieve this switching. Automated
+                                                        initial calibration is performed to select suitable targets from all radar-detected targets and es­
+                                                        timate the conversion factor for converting radar-based displacement from the line-of-sight di­
+                                                        rection to the actual movement direction. An artificial neural network model is automatically
+                                                        trained for strain–displacement transformation without the need for any pre-knowledge of a
+                                                        target structure. The proposed technique was validated via a laboratory test on a 10-m-long beam-
+                                                        type structure and a field test on a pedestrian steel box-girder bridge. The proposed technique
+                                                        correctly detected the intermittent radar target occlusion, and continuously estimated displace­
+                                                        ments for up to 75 min. The intermittent radar target occlusion leads to errors of a few millimeters
+                                                        in the displacements estimated using radar and accelerometers. However, the proposed method
+                                                        accurately estimates displacements with errors of less than 0.1 mm.
+
+
+
+
+1. Introduction
+
+    Displacement response is essential for bridge loading tests [1], modal identification [2], damage detection [3], and finite element
+model updating [4]. Contact-type techniques using linear variable differential transformers (LVDT) [5], accelerometers [6–8], strain
+gauges [9,10], and real-time kinematic global navigation satellite system (RTK-GNSS) [11,12], and noncontact techniques using laser
+Doppler vibrometers (LDV) [13], radar systems [14,15], and vision cameras [16–18] have been developed for directly measuring or
+indirectly estimating the bridge displacement. However, each of these sensors has its limitations. For example, accelerometers are not
+accurate for estimating low-frequency displacement, while strain-based displacements are noisy because of the high-level noise in
+strain measurements. Although radar systems are capable of high-accuracy and high-sampling displacement measurements, they are
+expensive and require rigid ground for installation, making them impractical for civil infrastructure purposes.
+    Efforts have been made to fuse different sensors for better displacement estimation [19,20]; among the fusion-based techniques,
+
+
+ * Corresponding author.
+   E-mail addresses: mazhanxiong@kaist.ac.kr (Z. Ma), cjmook@kaist.ac.kr (J. Choi), hoonsohn@kaist.ac.kr (H. Sohn).
+
+https://doi.org/10.1016/j.ymssp.2023.110408
+Received 15 January 2023; Received in revised form 31 March 2023; Accepted 26 April 2023
+Available online 4 May 2023
+0888-3270/© 2023 Elsevier Ltd. All rights reserved.
+Z. Ma et al.                                                                                Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+accelerometers are most commonly fused with other types of sensors, such as RTK-GNSS [21,22], vision cameras [23,24], strain gauges
+[25,26], and millimeter-wave radar systems [27]. However, in urban settings, the fusion of RTK-GNSS and accelerometer may result in
+low accuracy owing to multi-path errors; the fusion of vision camera and accelerometer cannot work in poor-illumination environ­
+ments, such as at night, and the fusion of strain gauges and accelerometers may have large errors in long-term continuous monitoring
+owing to the zero-drift of strain measurement induced by environmental temperature variation and adverse heating caused by the
+electric current [28]. Although the fusion of millimeter-wave radar and accelerometer has a high accuracy and robustness to tem­
+perature and illumination variations, it cannot work well with intermittent target occlusion, which is common in long-term continuous
+displacement monitoring. Note that a temporary target occlusion will not only cause displacement loss during the occlusion but also
+cause a displacement drift after the target occlusion period owing to the phase unwrapping failure (Fig. 1).
+    By fusing a collocated accelerometer, strain gauge, and millimeter-wave radar, this study proposes a high-accuracy displacement
+estimation technique specifically for long-term continuous measurement of the vertical movement of a bridge structure (Fig. 2). Fig. 3
+shows a flowchart of the proposed technique. First, the short-period initial measurements from three sensors were used to: (1) select
+multiple good targets and estimate their conversion factors for the millimeter-wave radar, and (2) train an artificial neural network
+(ANN) model for strain–displacement transformation (Section 3.1). Subsequently, the displacement was continuously estimated
+(Section 3.2). Depending on whether all the selected targets are occluded, all time steps can be categorized into three stages:
+
+    Stage I-Radar target available: with at least one of the selected targets available, the proposed technique first estimates a
+    displacement from radar measurement with an acceleration-aided adaptive phase unwrapping algorithm, and then fuses the radar-
+    based displacement with acceleration measurement using finite impulse response (FIR) filters for improved displacement
+    estimation.
+    Stage II- Radar target occlusion: with all selected targets occluded, the proposed technique first estimates a displacement from strain
+    measurements using the trained ANN model, and then fuses the strain-based displacement with acceleration measurement using
+    FIR filters for improved displacement estimation.
+    Stage III-Radar target recover: with at least one of the selected targets recovered, the proposed technique switches to using radar and
+    acceleration measurement for displacement estimation. A large drift in the radar-based displacement caused by radar target oc­
+    clusion is eliminated using strain measurements. Other displacement estimation processes are the same as in Stage I.
+
+    The main contributions of this study are as follows: (1) a special emphasis is laid on the development of a bridge displacement
+estimation technique robust to intermittent radar target occlusion by fusing collocated millimeter-wave radar, strain gauge, and
+accelerometer; (2) an algorithm was developed to automatically detect the occurrence of target occlusion caused by moving objects,
+such as vehicles, and switch to an alternative stationary target available; and (3) even when all the potential stationary targets are
+occluded, bridge displacement is still reliably estimated by fusing strain and acceleration measurements without any prior knowledge
+of mode shapes or the neutral axis location.
+    The remainder of this paper is organized as follows. The research background is presented in section 2, and the working principle of
+the proposed technique is explained in section 3. The feasibility of the proposed technique was experimentally validated via tests on a
+10-m-long beam-type structure and steel box-girder pedestrian bridge, as described in Sections 4 and 5, respectively. The concluding
+remarks are presented in Section 6.
+
+2. Research background
+
+2.1. Radar-based displacement estimation
+
+    Fig. 4 shows a flowchart of the radar-based displacement estimation. At the kth time step, a millimeter-wave radar transmits a
+frequency-modulated signal (ST (t)) with duration of Tc [29],
+
+        ST (t) = ej(2πfs t+πKt ) (kΔt ≤ t ≤ kΔt + Tc )                                                                                           (1)
+                           2
+
+
+
+
+where fs and K denote the starting frequency and the frequency slope of the frequency-modulated signal, respectively. The transmitted
+signal is reflected by multiple targets (Q) in the surroundings of the radar, and the mixed signal (SR (t)) of these reflected signals is
+obtained as follows:
+
+
+
+
+               Fig. 1. Drift caused in the radar-based displacement induced by target occlusion owing to phase unwrapping failure.
+
+                                                                       2
+Z. Ma et al.                                                                                     Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+
+
+ Fig. 2. Sensor setup of the proposed bridge displacement estimation technique using millimeter-wave radar, strain gauge, and accelerometer.
+
+
+
+
+   Fig. 3. Flowchart of the proposed bridge displacement estimation technique using millimeter-wave radar, strain gauge, and accelerometer.
+
+
+
+
+Fig. 4. Flowchart of radar-based displacement estimation: (a) transmission of a frequency modulated signal, (b) reception of signal reflected from
+multiple targets, (c) calculation of an intermediate frequency (IF) signal using transmitted and reflected signals, (d) Fourier transformation of the IF
+signal, and (e) estimation of displacement using the phase extracted from the selected target.
+
+
+                   ∑
+                   Q                 ∑
+                                     Q                          ∑
+                                                                Q
+        SR (t) =         SRm (t) =         δm ST (t − Δtm ) =         δm ST (t − 2Dm /c)                                                              (2)
+                   m=1               m=1                        m=1
+
+
+where δm and Δt m denote the attenuation factor and traveling time of the mth target, respectively; Dm denotes the distance between the
+radar and mth target, and c denotes the speed of light.
+   Next, an intermediate frequency (IF) signal is calculated as,
+
+                                                                                           3
+Z. Ma et al.                                                                                  Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+                                     ∑
+                                     Q
+                                                                   4πKDm m 4πfs Dm
+        IF(t) = ST (t) × SR* (t) =                                                                                                                 (3)
+                                                  m   m
+                                            δm ej(φ +ω t) ; ωm =        ;φ =
+                                      j=1
+                                                                     c        c
+
+   Note that both the frequency (ωm ) and phase (φm ) of the IF signal include the distance information (Dm ). Subsequently, a Fourier
+transform is applied to the IF signal, and the peaks in the amplitude spectrum correspond to targets at different distances. Because the
+radar vibration is insignificant, the phase is commonly adopted to estimate the displacement (u) from the selected target [15]:
+                βc
+        uk =       (φ − φ0 )                                                                                                                       (4)
+               4πfs k
+
+where φ0 and φk denote the initial and current phases extracted from the selected target, respectively. Note that the actual radar
+vibration direction may differ from the light of sight (LOS) direction, and thus a direction conversion factor (β) is included in Equation
+(4).
+    Radars are not affected by weather or light conditions, and extensive studies have been conducted on radar-based structural
+displacement estimation over the last two decades. For example, centimeter wave radars with a radio frequency (RF) within 30 GHz
+have been used to monitor displacements of long-span bridges [15], mid-rise buildings [30], traffic light structures [31], etc. For bridge
+displacement estimation, a radar is installed at a stationary location (e.g., the pier of a target bridge), and the multi-point displace­
+ments of a target bridge are estimated. However, there is no guarantee that a stable reflection could be secured from the desired
+displacement estimation location of the bridge. In such a case, an artificial reflector needs to be placed at the displacement estimation
+location, requiring additional effort. In addition, to select a target near the desired displacement estimation location and then estimate
+the conversion factor (β) for the selected target, the locations of all the radar-detected targets on the bridge should be manually
+identified, which is cumbersome. In addition, when the bridge displacement exceeds the radar wavelength, phase wrapping could be a
+major issue, especially for millimeter-wave radars. Moreover, securing a stationary installation location may not be possible, especially
+for long-term continuous displacement monitoring. A few attempts have been made to install a radar on a target bridge [32,33] to
+eliminate the need for a stationary installation location, but they required the installation of an active transponder at a stationary
+location, which would be cumbersome in practice. Note that all these studies focused on short-period bridge displacement estimation
+and did not consider potential radar target occlusion, which is common in long-term continuous bridge displacement monitoring.
+
+
+2.2. Strain-based bridge displacement estimation
+
+   Fig. 5 shows an overview of the mode-superposition algorithm for the strain-based displacement estimation. According to the
+Euler–Bernoulli beam theory, multiple strain measurements along a bridge (ε(xi , t), i = 1, ⋯N) can be transformed into the
+displacement at any desired location (u(xd , t)) [9]:
+                      1        (           )− 1
+        u(xd , t) =      Ψ(xd ) Φ(x)T Φ(x)      Φ(x)T ε(x, t)                                                                                      (5)
+                      yc
+                                                      ⎡                        ⎤
+                                                  ϕ1 (x1 )          ⋯ ϕN (x1 )
+        Ψ = [ φ1 (xd )     ⋯ φL (xd ) ]1×N ; Φ = ⎣ ⋮                ⋱    ⋮ ⎦                                                                       (6)
+                                                  ϕ1 (xN )          ⋯ ϕN (xN ) N×N
+
+where yc is the vertical distance from the strain sensing location to the neutral axis; φj and ϕj represent the jth displacement and strain
+mode shape, respectively. However, there are the following limitations: (1) modal shapes and the neutral axis location of the target
+structure may not be readily available in practice, which causes difficulties in the application of this algorithm; (2) simultaneous data
+collection at several locations is not convenient; and (3) strain sensors have relatively high noise levels, which deteriorate the accuracy
+of displacement estimation.
+
+
+
+
+                           Fig. 5. Overview of strain-based displacement estimation using the mode superposition algorithm.
+
+                                                                               4
+Z. Ma et al.                                                                              Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+2.3. Improved displacement estimation through finite impulse response filter fusion of acceleration and displacement measurements
+
+    Considering that the displacement estimated from single sensors may have low accuracy, FIR filters have been used to fuse ac­
+celeration and initial displacement measurements [25,34,35] for improved displacement estimation. Fig. 6 presents a flowchart of the
+FIR filter-based structural displacement estimation techniques. Basically, a high-frequency displacement is first estimated from ac­
+celeration measurements using double integration and high-pass filtering, and a low-frequency displacement is estimated from the
+initial displacement estimation through other sensors, such as strain gauges or vision cameras, using low-pass filtering. The final
+displacement is then estimated by combining the low- and high-frequency displacements. Assuming that the acceleration-based
+displacement has a higher accuracy than the initial estimated displacement in the high-frequency band, the final estimated
+displacement has a better accuracy than the initial estimated displacement. Note that the low- and high-pass filters employed here are
+complementary, and the cutoff frequency of the filters is determined as the first natural frequency of the target structure [25] or based
+on the noise characteristics of acceleration and displacement measurements [34].
+    Previously, attempts have been made to fuse millimeter-wave radar and accelerometers, and some of the limitations of using
+millimeter-wave radar have been addressed [27]. However, this technique does not work well with intermittent occlusions of radar
+target. Attempts have also been made to fuse strain gauges and accelerometers, but these techniques require multiple strain sensors and
+high similarity between the mode shapes of the target structure and a simply supported beam [25,35].
+
+3. Development of structural displacement estimation technique by fusing radar, vision camera, and accelerometer
+
+    For the bridges shown in Fig. 2, the road under the bridge acts as a target for the millimeter-wave radar, but moving objects such as
+vehicles may cover these targets. By fusing measurements from collocated millimeter-wave radar, accelerometer, and strain gauge, a
+continuous displacement estimation technique is proposed for bridge structures that considers intermittent target occlusions. Because
+the radar is installed at the displacement estimation location, multiple targets with stable reflection will be available within the field of
+view of the radar. The collocated installation of the radar, accelerometer, and strain gauge on the structure allows for the fusion of
+three sensors, and offers following additional benefits: (1) automatic selection of the best target required for radar-based displacement
+estimation and automatic estimation of the conversion factor, (2) adaptive phase unwrapping with the help of acceleration and strain
+measurements, and (3) continuous displacement estimation even with intermittent radar target occlusion. As shown in Fig. 3, the
+proposed technique consists of two steps: (1) automated initial calibration (Section 3.1), and (2) continuous displacement estimation
+(Section 3.2).
+
+
+3.1. Automated initial calibration
+
+    Because the millimeter-wave radar is installed at the displacement estimation location of the target bridge, as shown in Fig. 2,
+multiple targets are usually available within the field of view of the radar, which are detected by the radar; targets with a stable
+reflection should be selected for bridge displacement estimation. In addition, the radar measures the displacement in the LOS direction,
+and a direction conversion factor is required to convert the estimated displacement from the LOS direction to actual vibration di­
+rection. To estimate the displacement from the strain and acceleration measurements, the strain measurements should be transformed
+into displacements. Therefore, an ANN model is introduced here for the strain–displacement transformation. An automated initial
+calibration algorithm is proposed to (1) select good targets and estimate their conversion factors for the radar (Section 3.1.1) and (2)
+train an ANN model for strain–displacement transformation (Section 3.1.2), assuming that initial measurements from the millimeter-
+wave radar, strain gauge, and accelerometer are recorded for a short period without any target occlusion.
+
+3.1.1. Automated target selection and conversion factor estimation for the radar
+    Target selection and conversion factor estimation are accomplished by minimizing the error between the high-frequency radar-
+based and acceleration-based displacements. The detailed procedure is illustrated in Fig. 7; the first target, i.e., the nearest target, was
+first selected, and the initial conversion factor was set to 0.5. Two high-frequency displacements were estimated from radar and ac­
+celeration measurements, and the root mean square error (RMSE) between them was calculated. Subsequently, by varying the
+
+
+
+
+Fig. 6. Overview of the improved displacement estimation through the FIR filter fusion of acceleration and initial displacement measurements.
+
+                                                                     5
+Z. Ma et al.                                                                               Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+conversion factor value from 0.5 to 2 and repeating the RMSE calculation, the RMSE vs. conversion factor curve was obtained. The final
+conversion factor was estimated as the value corresponding to the smallest RMSE (E). Finally, E values and conversion factors were
+obtained for all targets by repeating the previous steps, and multiple targets with small E values were selected for continuous
+displacement estimation. Note that the selected targets were ranked by their E values, and targets with small E values were preferred
+for displacement estimation.
+
+3.1.2. Fully-automated ANN training for strain–displacement transformation
+    After target selection and conversion factor estimation, the radar-based displacement was estimated from the best target. Fig. 8
+shows an overview of the ANN training for the strain–displacement transformation. Note that both the radar-based displacement and
+strain measurement are low-pass filtered before training the ANN model. The necessity of low-pass filtering can be justified based on
+the following: (1) strain measurement usually has a low signal-to-noise ratio (SNR), and low-pass filtering can significantly improve the
+SNR; and (2) strain measurement only contributes to low-frequency displacement estimation in continuous displacement estimation
+(Section 3.2). Finally, an ANN model was trained to transform low-frequency strain to low-frequency displacement. Training was
+performed in MATLAB using the Neural Network Toolbox, and hyperparameters, such as the number of hidden layers and delayed
+steps, were optimized using cross-validation. Note that the ANN model has been extensively used in the existing literature [36,37];
+thus, the principle of ANN and detailed procedure for ANN training are omitted here.
+
+
+3.2. Continuous bridge displacement estimation
+
+    After the initial calibration, the displacement was estimated continuously. Depending on whether the selected targets are occluded,
+all time steps can be categorized into three stages; the displacement estimation procedure for each stage is explained below.
+
+3.2.1. Stage I: Radar target available
+    At this stage, at least one of the selected radar targets was not occluded, and the displacement could be estimated using millimeter-
+wave radar and accelerometer measurements. Fig. 9 shows a flowchart of the displacement estimation in Stage I. Displacement was
+first estimated from radar measurements. Owing to the phase wrapping issue, an acceleration-aided adaptive phase unwrapping al­
+gorithm is applied here [27]. Subsequently, a low-frequency displacement was estimated from the radar-based displacement, and a
+high-frequency displacement was estimated from the acceleration measurement. The final displacement was estimated by combining
+the low- and high-frequency displacements, which had a better accuracy than the radar-based displacement. Additional details on
+displacement estimation using millimeter-wave radar and accelerometer measurements can be found in Ma et al. [27].
+    As explained in Section 3.1.1, multiple targets were selected and ranked for the millimeter-wave radar. Subsequently, the best
+target was first used, and when the best target is occluded, other targets were used. A key issue here is the automatic detection of target
+occlusion. As shown in Fig. 10, at each time step, an amplitude spectrum can be obtained by applying a Fourier transform to the IF
+signal (Fig. 4(d)). The target occlusion causes a change in the amplitude spectrum around the target. Therefore, a target spectrum can
+be defined as the spectrum in the range [D − ΔD, D + ΔD], as shown in Fig. 10; a similarity score can be calculated between the target
+spectra in the first and current time steps ((F1 (d) and Fi (d), D − ΔD ≤ d ≤ D + ΔD). Here, the best target at a distance of D is used as an
+example, and target occlusion detection is applied for all selected targets. A similarity score other than one indicates occlusion of the
+target. However, the bridge vibration causes a change in the distance between the radar and target, which is reflected by a minor shift
+along the x-axis (i.e., distance axis) in the amplitude spectrum. The spectral shift also triggers a change in the similarity score, causing
+difficulty in target occlusion detection.
+    Fig. 11 shows a flowchart of the proposed target occlusion detection algorithm, which is robust to bridge vibrations. Spline
+interpolation was first applied to the target spectra at the first and current time steps to obtain high-sampled target spectra ((F1,H (d)
+and Fi,H (d), D − ΔD ≤ d ≤ D + ΔD). The spectral shift (Δd) induced by bridge vibration can be estimated by calculating their corre­
+lation coefficients, and the current target spectrum is shifted by Δd to obtain synchronized target spectra (F1,H (d) and Fi,H (d +Δd),
+
+
+
+
+                                     Fig. 7. Automated target selection and conversion factor estimation.
+
+                                                                      6
+Z. Ma et al.                                                                                  Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+
+
+                                    Fig. 8. Overview of ANN training for strain–displacement transformation.
+
+
+
+
+                        Fig. 9. Flowchart of displacement estimation using radar and acceleration measurements in Stage I.
+
+
+
+
+                                  Fig. 10. Target spectrum defined for detecting the occlusion of the best target.
+
+
+D − ΔD ≤ d ≤ D + ΔD). Considering the low distance resolution of the target spectrum and small bridge displacement, spline inter­
+polation is necessary. Finally, a similarity score is calculated from the synchronized target spectra as
+                ∑
+                     |d− D|≤ΔD F1,H (d)Fi,H (d + Δd)
+       R = √̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅
+              ∑                                                                                                               (7)
+                                                   2                               2
+                 |d− D|≤ΔD {F1,H (d)} {Fi,H (d + Δd)}
+
+
+   The calculated similar score is usually noisy and, therefore, smoothed using a moving average filter. Here, a threshold of the
+similarity score (RT ) is required for target occlusion detection, and its value is determined as
+
+        RT = R − 3σ R                                                                                                                              (8)
+
+where R and σR denote the mean and standard derivation of the similarity scores calculated from the radar measurements used for the
+initial calibration. Other algorithms, such as Zoom FFT [38] and Chirp Z-Transform [39], can also be applied here to obtain a high-
+sampled spectral; however, they are not significantly different than spline interpolation. Therefore, spline interpolation is used
+here because of its simplicity in the algorithm implementation.
+    As described in Section 3.1.1, multiple targets are selected and ranked by their E-values. Following the flowchart above, at each
+time step, a similarity score is calculated for each of these selected targets. The best target is initially used for radar-based displacement
+estimation. If its similarity score is less than the threshold value, meaning that the best target is occluded, then the 2nd target is used for
+displacement estimation. This process continues until all targets are occluded.
+
+
+
+
+                                     Fig. 11. Flowchart of the proposed target occlusion detection algorithm.
+
+                                                                         7
+Z. Ma et al.                                                                                 Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+3.2.2. Stage II: Radar target occlusion
+    Once R is smaller than RT for all targets selected from the millimeter-wave radar, displacement is estimated using a strain gauge and
+accelerometer, both of which can be used for displacement estimation without the need for any target. Fig. 12 shows a flowchart of the
+displacement estimation using the strain and acceleration measurements in Stage II. The strain measurement was first low-pass filtered
+and then transformed into low-frequency displacement using the trained ANN model. In contrast, high-frequency displacement is
+estimated from acceleration measurements by double integration and high-pass filtering. The final displacement was estimated by
+combining low- and high-frequency displacements. During the target occlusion, the millimeter-wave radar is still running, and the
+amplitude spectrum extracted from the radar measurement is used for target occlusion detection.
+    However, changes in ambient temperature, self-heating of the strain gauges, and other factors may introduce zero drift in the strain
+measurement [28], resulting in a bias in the estimated displacement. Fig. 13 shows the removal of this potential displacement bias.
+                                                                                    th
+Two displacements (ur+a       s+a
+                    k− 1 and uk− 1 ) at the last time step of Stage I (e.g., (k − 1) time step) can be estimated using radar and accel­
+eration measurements and strain and acceleration measurements, respectively. The bias can be estimated as the difference between
+two displacements.
+
+        Bias = us+a     r+a
+                k− 1 − uk− 1                                                                                                                      (9)
+
+Note that, displacement differences can be estimated for the last several time steps of Stage I, and the averaged displacement difference
+can be used as a bias to improve the robustness of the bias estimation. The final displacement at Stage II can be estimated by removing
+this bias from the displacement estimated using the acceleration and strain measurements.
+
+        ufk = us+a
+               k   − Bias = us+a
+                             k   − us+a     r+a     s+a
+                                    k− 1 + uk− 1 = uk   − us+a     f
+                                                           k− 1 + uk− 1                                                                          (10)
+
+   Here, the zero-drift of the strain measurement is assumed to be constant in the last time steps and in stage II. This assumption is
+reasonable considering that the target occlusion period is typically only several seconds to a few minutes.
+
+3.2.3. Stage III: Radar target recover
+    With R larger than RT for at least one selected radar target, the displacement was estimated again using a millimeter-wave radar and
+accelerometer. However, the acceleration-aided adaptive phase-unwrapping algorithm cannot work because the phase at the last two
+time steps of stage II is not available. To address this issue, the displacement is still estimated at the first two time steps of stage III using
+strain and acceleration measurements, and the estimated displacement is used to recover the unwrapped phase at these two steps (as
+shown in Fig. 14). For the following stages of stage III, the acceleration-aided adaptive phase-unwrapping algorithm [27] can be
+applied without the need for strain measurement. The displacement estimation in this stage is exactly the same as that in Stage I;
+therefore, the details are not repeatedly provided given here.
+
+4. Laboratory test on a 10-m-long beam-type structure
+
+4.1. Experimental setup
+
+    To validate the performance of the proposed technique, a laboratory test was conducted on a 10-m-long beam-type structure, as
+shown in Fig. 15(a). The structure was supported at its two ends to simulate hinge connection. Fig. 15(b) shows the overall setup of the
+10-m-long beam-type structure test. A TI IWR1642 millimeter-wave radar (Fig. 15(c)), PCB Piezotronics 3713B112G MEMS-type
+accelerometer (Fig. 15(d)), and TML FLA-1–11-1LJC resistance-type strain gauge (Fig. 15(e)) were installed approximately at 1/2
+span for displacement estimation. The detailed specifications of the sensors are listed in Table 1. Polytech RSV-150 LDV (Fig. 15(f)) is
+used to measure reference displacement, which evaluates the displacement estimation performance of the proposed technique. All
+acceleration, strain, and LDV measurements were sampled at 100 Hz using a National Instruments data-acquisition device. The
+millimeter-wave radar transmits a frequency-modulated signal with a duration of 60 μ s, frequency slope of 64.985 MHz/μ s, and time
+interval of 0.01 s. To fully validate the proposed technique, a total of nine cases were considered in this test, as shown in Table 2.
+During the test, the structure had millimeter-level vibrations generated by a researcher jumping or walking on the structure.
+
+
+4.2. Initial calibration results
+
+   The strain gauge, millimeter-wave radar, and accelerometer measurements in Case 1 were used for the initial calibration. The
+targets detected by the radar are shown in Fig. 16. Note that this test mainly validates the possibility of switching between the fusion of
+
+
+
+
+                   Fig. 12. Displacement estimation using strain and acceleration measurements during radar target occlusion.
+
+                                                                          8
+Z. Ma et al.                                                                               Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+
+
+Fig. 13. Removal of potential bias in displacement estimated using strain and acceleration measurements induced by zero-drift of strain
+measurement.
+
+
+
+
+     Fig. 14. Phase unwrapping at first two time steps of stage III using displacement estimated from strain and acceleration measurements.
+
+
+
+
+Fig. 15. Laboratory test on a 10-m-long beam-type structure: (a) overview of the structure, (b) overall experimental setup, (c) TI IWR1642
+millimeter-wave radar, (d) PCB MEMS accelerometer, and (e) FLJ-10–111 resistance-type strain gauge installed approximately at 1/2 span for
+displacement estimation, and (f) Polytech RSV-150 LDV for ground-truth displacement measurement.
+
+
+radar and acceleration and that of strain and acceleration. For the fusion of radar and acceleration, the best target selected at a distance
+of 2.27 m was used, and its conversion factor was estimated to be 0.986. The switching between different targets for the radar is
+validated in Section 5.
+
+
+                                                                       9
+Z. Ma et al.                                                                                          Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+               Table 1
+               Detailed specifications of accelerometer, strain gauge, and millimeter-wave radar used in the 10-m-long beam-type structure
+               test.
+                Sensors                                                      Parameters                                           Values
+
+                Accelerometers                                               Bandwidth                                            DC − 250 Hz
+                    (PCB Piezotronics 3713B112G)                             Full-scale range                                     ±2g
+                                                                             Operating temperature                                − 54 ~ 121 ◦ C
+                                                                             Sensitivity                                          1,000 mV/g
+                                                                                                                                           √̅̅̅̅̅̅
+                                                                             Spectral noise                                       22.9 µg / Hz
+                                                                             Linearity                                            <1%
+                Strain gauges                                                Grid material                                        Cu-Ni alloy
+                    (TML FLA-1–11-1LJC)                                      Gauge factor                                         2.10 ± 1%
+                                                                             Gauge resistance                                     120 ± 0.5 Ω
+                                                                             Operating temperature                                − 20 ~ 80 ◦ C
+                                                                             Transverse sensitivity                               − 0.5%
+                Millimeter-wave radar                                        Starting frequency                                   77 GHz
+                    (TI IWR1642)                                             Bandwidth                                            Up to 4 GHz
+                                                                             Transmit power                                       12.5 dBm
+                                                                             RX Noise Figure                                      15 dB
+                                                                             Phase Noise at 1 MHz                                 − 93 dBc/Hz
+                                                                             Operating temperature                                − 40 ~ 105 ◦ C
+
+
+
+
+Table 2
+Descriptions of nine cases in the 10-m-long beam-type structure test.
+  # of          Test duration    Intermittent target       Artificial temperature         Purposes
+  cases         (s)              occlusion                 variation
+
+  1             90               No                        No                             Initial calibration
+  2             90               No                        No                             The performance of displacement estimation using strain gauge and
+  3                                                                                       accelerometer
+  4             90               Yes                       No                             The robustness of the proposed technique to intermittent target
+  5                                                                                       occlusion
+  6
+  7             90               No                        Yes                            The robustness of the proposed technique to environmental
+  8                                                                                       temperature variation
+  9             4500             No                        No                             The robustness of the proposed technique for long-term continuous
+                                                                                          monitoring
+
+
+
+    The displacement estimated from the best target is used as the ground-truth displacement to train an ANN model for the
+strain–displacement transformation. Fig. 17 shows the radar-based displacement estimation process. The raw phase constrained in the
+range [-π, π] (Fig. 17(a)) was successfully recovered by the acceleration-aided adaptive phase unwrapping algorithm (Fig. 17(b)).
+Therefore, displacement is estimated from radar measurements with an RMSE of 0.059 mm (Fig. 17(c)), which is sufficiently accurate
+to act as the ground-truth value for ANN training.
+    Here, low-frequency strain and radar-based displacement were utilized as the input and output of the ANN model, respectively. The
+cutoff frequency of the low-pass filter was set to 1 Hz; Fig. 18 shows the ANN architecture. The delay was set to five, and the number of
+hidden layers was also set to five after trial and error. With a test duration of 90 s and sampling rate of 100 Hz, a total of 9000 data
+points was available. These data points were randomly divided into three parts: 50% were used for training, 25% for validation, and
+25% for testing. The Levenberg–Marquardt algorithm was selected for training, and the mean squared error (MSE), which is a
+commonly used indicator of training results, was utilized. The displacements estimated using the strain and acceleration measurements
+using the trained ANN model and FIR filter are shown in Fig. 17(c), and the RMSE of the estimated displacement is only 0.091 mm.
+
+
+
+
+                                                            Fig. 16. Target detection result.
+
+                                                                             10
+Z. Ma et al.                                                                                Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+
+
+Fig. 17. Displacement estimation result for case 1: (a) raw phase extracted from radar measurement, (b) unwrapped phase using acceleration
+measurement, and (c) estimated displacements.
+
+
+
+
+                                    Fig. 18. ANN architecture used for strain–displacement transformation.
+
+
+4.3. Displacement estimation results
+
+4.3.1. Displacement estimation without target occlusion or artificial temperature variation (cases 1–3)
+    Fig. 19 shows the displacement estimation results for cases 2 and 3 without target occlusion and temperature variation. Although
+displacements estimated from strain and acceleration measurements have a little higher error compared to those estimated by the
+proposed technique, RMSEs are below 0.1 mm. This indicates that displacements can be accurately estimated from collocated strain
+and acceleration measurements with the trained ANN model and FIR filters. Note that without radar target occlusion, displacements
+estimated by the proposed technique are identical to those estimated using radar and accelerometer.
+    In addition, the RMSEs of the displacements estimated from the strain and acceleration measurements using a combination of ANN
+and FIR filters and the existing technique [25] are compared in Table 3. The existing technique transforms the full-band strain to full-
+band displacement using the mode superposition algorithm (MSA) explained in Section 2.2; subsequently, it fuses the strain-based
+displacement with the acceleration using FIR filters. A superior performance is achieved by the combination of ANN and FIR fil­
+ters, and an average of 58% of the errors is reduced. Note that MSA in the existing technique requires multiple distributed strain gauges
+and, therefore, has poor performance when a single strain gauge is used [25].
+    The proposed radar target occlusion detection algorithm was also applied to radar measurements, and the results are shown in
+Fig. 20. A strong reflection was stably observed from the selected target (Fig. 20(a)), and the similarity score was always close to one in
+
+
+
+
+Fig. 19. Displacement estimation results without temperature variation and target occlusion in the test of 10-m-long beam-type structure (Cases 2
+and 3).
+
+                                                                       11
+Z. Ma et al.                                                                                 Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+   Table 3
+   RMSEs of displacements estimated from strain and acceleration measurements using different techniques in the 10-m-long beam-type structure
+   test (Cases 1 ~ 3).
+     # of cases                        MSA + FIR (mm) [25]                           ANN + FIR (mm)                                 Improvement
+
+     1                                 0.224                                         0.091                                          59.38%
+     2                                 0.146                                         0.081                                          44.52%
+     3                                 0.232                                         0.082                                          64.66%
+     Average                           0.201                                         0.085                                          57.71%
+
+
+
+all three cases (Fig. 20(b)); this was consistent with the fact that the best target was not occluded in these tests. Note that the similarity
+score estimated using Equation (8) was relatively noisy, and a moving average filter of the order of 101 was applied.
+
+4.3.2. Displacement estimation with intermittent target occlusion (cases 4–6)
+    Fig. 21 shows radar target occlusion detection results for cases 4–6, where intermittent target occlusion was generated by moving a
+steel box on the ground. The steel box had a length of 90 cm, width of 20 cm, and height of 15 cm. When the selected target was
+occluded by the box, strong reflection was obtained from the box instead of the selected target (Fig. 21(a)); accordingly, extremely low
+similarity was observed during this period (Fig. 21(b)).
+    Fig. 22 shows displacement estimation results for cases 4–6. Owing to the intermittent target occlusion, huge errors are observed in
+displacements estimated from radar and acceleration measurements. Note that the intermittent target occlusion causes incorrect
+displacement during the target occlusion period and a large displacement drift after the target occlusion period. Displacements were
+accurately estimated using strain and acceleration measurements and the proposed technique. However, better performance is ach­
+ieved by the proposed technique fusing three sensors, and the displacements were estimated with an error of approximately 0.1 mm.
+
+4.3.3. Displacement estimation with artificial temperature variation (cases 7–8)
+    Fig. 23 shows displacement estimation results for cases 7–8, where environmental temperature variation was artificially generated
+using a halogen lamp. Because strain measurements are highly sensitive to temperature variation, large errors are observed in dis­
+placements estimated from strain and acceleration measurements. However, the proposed technique estimates displacement accu­
+rately with approximately 0.1-mm error. Again, without target occlusion, displacements estimated by the proposed technique are
+identical to those estimated using radar and accelerometer. Considering that environmental temperature variation is common in
+practice, using only strain and acceleration measurements for long-term continuous displacement monitoring is not feasible.
+
+4.3.4. Continuous displacement estimation for 75 min (case 9)
+   Fig. 24 shows displacement estimation results for case 9, where the displacement was continuously estimated for 4500 s. As pointed
+out by a previous study [28], strain gauge measurement suffers from a low-frequency zero-drift due to the heating by electric current.
+Thus, a low-frequency drift is observed in the displacement estimated from strain and acceleration measurement. This reiterates that
+the combination of strain and acceleration measurements does not apply to long-term continuous displacement monitoring. The
+proposed technique estimates displacement accurately for 4500 s, and the RMSE of the estimated displacement is approximately 0.1
+mm.
+   RMSEs of displacements estimated using strain and acceleration measurements were also calculated for every 15, 45, and 90 s, and
+
+
+
+
+Fig. 20. Target occlusion detection results without intermittent target occlusion in the 10-m-long beam-type structure test (Cases 1–3): (a)
+amplitude spectrum and (b) similarity scores before and after moving average filtering and detected target occlusion period.
+
+                                                                      12
+Z. Ma et al.                                                                                 Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+
+
+Fig. 21. Target occlusion detection results with intermittent target occlusion in the 10-m-long beam-type structure test (Cases 4–6): (a) amplitude
+spectrum and (b) similarity scores before and after moving average filtering.
+
+
+
+
+         Fig. 22. Displacement estimation results with intermittent target occlusion in the 10-m-long beam-type structure test (Case 4–6).
+
+
+the results are shown in Fig. 25. The maximum RMSE of 0.2 mm is acceptable for displacement estimation during the radar target
+occlusion period. Note that the displacement drifts were removed, as explained in Section 3.2.
+
+4.3.5. Displacement estimation summary for all 9 cases
+   Table 4 summarizes the RMSEs of the displacements estimated using different sensor combinations for all 9 cases. The proposed
+technique, which integrates three sensors, is more robust to intermittent target occlusion, environmental temperature variation, and
+long-term continuous monitoring than the other two combinations. The displacements were always estimated accurately with an
+overall RMSE of 0.1 mm.
+
+
+
+
+                                                                        13
+Z. Ma et al.                                                                                  Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+
+
+          Fig. 23. Displacement estimation results with temperature variation in the 10-m-long beam-type structure test (Cases 7 and 8).
+
+
+
+
+               Fig. 24. Displacement estimation results for long-term monitoring in the 10-m-long beam-type structure test (Case 9).
+
+
+
+
+Fig. 25. RMSEs of displacements estimated using strain and acceleration measurements for different short periods: (a) 15 s, (b) 45 s, and (3) 90 s.
+
+
+Table 4
+Summary of RMSEs (mm) of displacements estimated using different sensor combinations.
+  # of cases   Strain gauge +              Millimeter-wave radar and             Millimeter-wave radar + strain gauge + accelerometer (Proposed
+               accelerometer               accelerometer                         technique)
+
+  1            0.091                       0.049                                 0.049
+  2            0.081                       0.06                                  0.06
+  3            0.082                       0.068                                 0.068
+  4            0.113                       7.361                                 0.083
+  5            0.129                       9.902                                 0.08
+  6            0.171                       8.424                                 0.106
+  7            0.977                       0.106                                 0.106
+  8            0.372                       0.048                                 0.048
+  9            0.809                       0.081                                 0.081
+
+
+
+5. Pedestrian steel box-girder bridge test
+
+5.1. Experimental setup
+
+   The proposed technique was further validated on a steel box-girder pedestrian bridge located in Daejeon, Korea (Fig. 26(a)). The
+bridge is 45 m long and 8 m wide having a uniform cross section throughout its length. The distance between the top surface of the
+bridge and ground was approximately 6 m. Fig. 26(b) shows the experimental setup; the millimeter-wave radar, strain gauge, and
+accelerometer identical to those used in the previous test were installed at half span of the bridge (Fig. 26(c)), where the displacement
+was estimated. Polytech RSV-150 LDV was installed under the bridge to measure its reference displacement (Fig. 26(d)). The bridge
+
+
+                                                                        14
+Z. Ma et al.                                                                                   Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+
+
+Fig. 26. Pedestrian steel box-girder bridge test: (a) overview of the bridge, (b) overview of the experimental setup, (c) an accelerometer, a strain
+gauge, and a millimeter-wave radar installed at 1/2 span location for displacement estimation, and (d) LDV for reference displacement
+measurement.
+
+
+vibration was excited by multiple people slowly passing through the bridge and/or jumping at half span. Other experimental setups
+were the same as used in the previous laboratory test.
+    Fig. 27 shows traffic condition of the road under the bridge. The traffic flow was heavy on the right side of the road and light on the
+left side during the test. In addition, there was a stop line at right side of the road, and the vehicles were stopped under the bridge
+during red light period. Note that sensor location corresponds to the central area of the right side of the road.
+
+
+5.2. Initial calibration results
+
+    The initial calibration requires that no occlusion occurs for the millimeter-wave radar. Therefore, sensor data recordings should
+begin when there is no traffic on the road. However, the traffic flow was heavy, particularly on the right side of the road during the test
+period, and it was challenging to continuously obtain radar measurements for a time period (e.g., 1 min) without any radar target
+occlusion. Therefore, we randomly started sensor data recordings and applied the proposed radar target occlusion detection algorithm
+to the recorded radar measurement. Based on the radar target detection results, there was no radar target occlusion from 414 s to 419 s,
+and the data during this period were used for radar target selection and conversion factor estimation. Fig. 28(a) shows the radar target
+detection results, and the best target (i.e., target 1) was automatically selected at a distance of 6.76 m. The second target (i.e., target 2)
+was selected at a distance of 9.57 m, which had a small E value and was relatively far from target 1. Note that several other targets with
+similar RMSE level were available in the distance range of 7–8 m; however, they were near target 1 and were simultaneously occluded
+with target 1 considering the relatively large size of the moving vehicles. Fig. 28(b) and (c) show the estimated conversion factors,
+which are 0.95 and 1.47 for the targets 1 and 2, respectively.
+    For ANN training, the displacements estimated from target 1 should be used as the ground-truth displacement. However, occlusion
+occurred frequently for Target 1, and it was challenging to find a sufficiently long time period when Target 1 was not occluded.
+Therefore, the radar-based displacement estimated from target 2 was used; strain, radar, and acceleration measurements from 170 s to
+250 s were used for ANN training. The ANN structure and training parameters were identical to those used in the lab-scale test;
+
+
+
+
+                                          Fig. 27. Description of traffic condition during the field test.
+
+                                                                        15
+Z. Ma et al.                                                                                    Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+
+
+Fig. 28. Initial calibration results for millimeter-wave radar: (a) target detection and selection results and (b) conversion factor estimation results
+for the two selected targets.
+
+
+therefore, the details are omitted here.
+
+
+5.3. Displacement estimation results
+
+    The test lasted for 600 s. Fig. 29 shows the amplitude spectrum, similarity scores, and unwrapped phases. Target 1, located on the
+right side of the road, is frequently occluded because of heavy traffic flow. Owing to the red light period, the target occlusion period for
+target 1 was up to 70 s; target 2, located on the right side of the road, was rarely occluded. Owing to intermittent target occlusion, the
+unwrapped phases extracted from both the targets have considerably large drifts.
+    Fig. 30 shows displacement estimation procedure step by step for the time period from 310 s to 380 s. Intermittent target occlusion
+occurs for both targets as shown in Fig. 30(a). The displacements estimated from each of the two targets experience large drifts (Fig. 30
+(b) and (c)). The use of both targets removed displacement drifts caused by the occlusion of a single target; however, it did not remove
+the displacement drift caused by the occlusion of the two targets (Fig. 30(d)). The drift was removed by further fusing strain mea­
+surement, and the displacement was estimated accurately, as shown in Fig. 30(e). The acceleration was also used for phase unwrapping
+while estimating displacement from the radar measurement.
+    Fig. 31 compares the displacements estimated by (1) the fusion of strain and acceleration and (2) the fusion of millimeter-wave
+radar, acceleration, and strain (the proposed technique) for 600 s. Displacement is better estimated using the proposed technique,
+with an RMSE of less than 0.1 mm. The estimated displacement, zoomed into three different periods ([23 s, 33 s], [100 s, 110 s], and
+[430 s 440 s]), clearly indicates a better agreement between the displacement estimated by the proposed technique and reference
+displacement.
+
+
+
+
+Fig. 29. Estimation results from radar measurement: (a) amplitude spectrum, (b) similarity scores for targets 1 and 2, and (c) unwrapped phase of
+targets 1 and 2.
+
+                                                                          16
+Z. Ma et al.                                                                                 Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+
+
+Fig. 30. Estimation results from radar measurement from 310 s to 380 s: (a) similarity score for target 1 (blue dot line) and target 2 (black solid
+line), (b) displacement estimated using radar (target 1) and acceleration measurements, (c) displacement estimated using radar (target 2) and
+acceleration measurements, (d) displacement estimated using both targets 1 and 2, and (e) displacement estimated using radar (both targets 1 and
+2), acceleration, and strain measurements. (For interpretation of the references to colour in this figure legend, the reader is referred to the web
+version of this article.)
+
+
+
+
+ Fig. 31. Displacements estimated using (1) strain and acceleration radar measurements and (2) strain, acceleration, and radar measurements.
+
+
+                                                                        17
+Z. Ma et al.                                                                                             Mechanical Systems and Signal Processing 197 (2023) 110408
+
+
+6. Conclusions
+
+    This study proposed a high-accuracy displacement estimation technique specifically for the long-term continuous measurement of
+the vertical movement of a bridge structure through the fusion of collocated accelerometer, strain gauge, and millimeter-wave radar on
+a target bridge. An automated initial calibration was first performed to (1) select the good targets among all targets detected by radar
+from the surroundings of the bridge and estimate conversion factors for the selected targets, and (2) train an ANN model for
+strain–displacement transformation. Subsequently, the displacement was continuously estimated by automated switching between the
+fusion of strain and acceleration and fusion of radar and acceleration, considering the intermittent radar target occlusion. The pro­
+posed technique offers the following advantages: (1) the continuous displacement estimation robust to intermittent radar target oc­
+clusion, (2) automated radar target occlusion detection and switching, and (3) reliable displacement estimation, even during the radar
+target occlusion period. The displacement estimation performance of the proposed technique was experimentally validated on a 10-m-
+long beam-type structure and steel box-girder pedestrian bridge. In both the tests, displacements were accurately estimated with
+RMSEs of approximately 0.1 mm, indicating the potential of the proposed technique in real-world bridge displacement monitoring,
+especially for mid- and small-span bridges.
+    The proposed technique aims at long-term bridge displacement monitoring, then the real-time displacement estimation perfor­
+mance is crucial for the proposed technique. However, in both experiments presented in the study, sensor measurements were pre-
+recorded and then the displacements were estimated by post-processing on a desktop computer. Therefore, the feasibility of the
+proposed technique for real-time bridge displacement estimation has not been fully validated. Efforts are underway to develop a low-
+cost displacement sensor consisting of a millimeter-wave radar, an accelerometer, a strain gauge, and a microcontroller for real-time
+displacement estimation. In addition, the proposed technique trained an ANN model to map the strain–displacement relationship using
+initial short-period sensor measurements, but this relationship may be time-variant, especially for long-term displacement monitoring.
+Future work will focus on the development of an online ANN model update algorithm.
+
+
+Declaration of Competing Interest
+
+    The authors declare that they have no known competing financial interests or personal relationships that could have appeared to
+influence the work reported in this paper.
+
+Data availability
+
+    Data will be made available on request.
+
+
+Acknowledgments
+
+   This study was supported by the National Research Foundation of Korea (NRF) grant funded by the Korean Government (MSIT)
+(No. 2017R1A5A1014883).
+
+
+References
+
+ [1] Z. Sun, D.M. Siringoringo, Y. Fujino, Load-carrying capacity evaluation of girder bridge using moving vehicle, Eng. Struct. 229 (2021), 111645, https://doi.org/
+     10.1016/j.engstruct.2020.111645.
+ [2] S. Bhowmick, S. Nagarajaiah, Spatiotemporal compressive sensing of full-field Lagrangian continuous displacement response from optical flow of edge:
+     Identification of full-field dynamic modes, Mech. Syst. Sig. Process. 164 (2022), 108232, https://doi.org/10.1016/j.ymssp.2021.108232.
+ [3] L. Felipe-Sesé, F.A. Díaz, Damage methodology approach on a composite panel based on a combination of Fringe Projection and 2D Digital Image Correlation,
+     Mech. Syst. Sig. Process. 101 (2018) 467–479, https://doi.org/10.1016/j.ymssp.2017.09.002.
+ [4] A. Martini, E.M. Tronci, M.Q. Feng, R.Y. Leung, A computer vision-based method for bridge model updating using displacement influence lines, Eng. Struct. 259
+     (2022), 114129, https://doi.org/10.1016/j.engstruct.2022.114129.
+ [5] K.V. Santhosh, B.K. Roy, Online implementation of an adaptive calibration technique for displacement measurement using LVDT, Appl. Soft Comput. 53 (2017)
+     19–26, https://doi.org/10.1016/j.asoc.2016.12.032.
+ [6] D. Hester, J. Brownjohn, M. Bocian, Y. Xu, Low cost bridge load test: Calculating bridge displacement from acceleration for load assessment calculations, Eng.
+     Struct. 143 (2017) 358–374, https://doi.org/10.1016/j.engstruct.2017.04.021.
+ [7] M. Gindy, R. Vaccaro, H. Nassif, J. Velde, A state-space approach for deriving bridge displacement from acceleration, Comput.-Aided Civ. Infrastruct. Eng. 23
+     (2008) 281–290, https://doi.org/10.1111/j.1467-8667.2007.00536.x.
+ [8] A.I. Ozdagli, B. Liu, F. Moreu, Low-cost, efficient wireless intelligent sensors (LEWIS) measuring real-time reference-free dynamic displacements, Mech. Syst.
+     Sig. Process. 107 (2018) 343–356.
+ [9] S. Shin, S.-U. Lee, Y. Kim, N.-S. Kim, Estimation of bridge displacement responses using FBG sensors and theoretical mode shapes, Struct. Eng. Mech. 42 (2012)
+     229–245, https://doi.org/10.12989/sem.2012.42.2.229.
+[10] Q. Zhang, J. Zhang, W. Duan, Z. Wu, Deflection distribution estimation of tied-arch bridges using long-gauge strain measurements, Struct. Control Health Monit.
+     25 (3) (2018) e2119.
+[11] S. Nakamura, GPS measurement of wind-induced suspension bridge girder displacements, J. Struct. Eng. 126 (2000) 1413–1419, https://doi.org/10.1061/
+     (ASCE)0733-9445(2000)126:12(1413).
+[12] J.R. Vazquez-Ontiveros, G.E. Vazquez-Becerra, J.A. Quintana, F.J. Carrion, G.M. Guzman-Acevedo, J.R. Gaxiola-Camacho, Implementation of PPP-GNSS
+     measurement technology in the probabilistic SHM of bridge structures, Measurement 173 (2021), 108677, https://doi.org/10.1016/j.
+     measurement.2020.108677.
+[13] P.L. Reu, D.P. Rohe, L.D. Jacobs, Comparison of DIC and LDV for practical vibration and modal measurements, Mech. Syst. Sig. Process. 86 (2017) 2–16, https://
+     doi.org/10.1016/j.ymssp.2016.02.006.
+
+
+                                                                                 18
+Z. Ma et al.                                                                                              Mechanical Systems and Signal Processing 197 (2023) 110408
+
+[14] C. Gentile, G. Bernardini, Output-only modal identification of a reinforced concrete bridge from radar-based measurements, NDT and E Int. 41 (2008) 544–553,
+     https://doi.org/10.1016/j.ndteint.2008.04.005.
+[15] G. Zhang, Y. Wu, W. Zhao, J. Zhang, Radar-based multipoint displacement measurements of a 1200-m-long suspension bridge, ISPRS J. Photogramm. Remote
+     Sens. 167 (2020) 71–84, https://doi.org/10.1016/j.isprsjprs.2020.06.017.
+[16] D. Lydon, M. Lydon, S. Taylor, J.M. Del Rincon, D. Hester, J. Brownjohn, Development and field testing of a vision-based displacement system using a low cost
+     wireless action camera, Mech. Syst. Sig. Process. 121 (2019) 343–358, https://doi.org/10.1016/j.ymssp.2018.11.015.
+[17] R. Yang, S. Wang, X. Wu, T. Liu, X. Liu, Using lightweight convolutional neural network to track vibration displacement in rotating body video, Mech. Syst. Sig.
+     Process. 177 (2022), 109137, https://doi.org/10.1016/j.ymssp.2022.109137.
+[18] E. Cai, Y. Zhang, Gaussian mixture model based phase prior learning for video motion estimation, Mech. Syst. Sig. Process. 175 (2022), 109103, https://doi.org/
+     10.1016/j.ymssp.2022.109103.
+[19] Y.H. Hong, S.G. Lee, H.S. Lee, Design of the FEM-FIR filter for displacement reconstruction using accelerations and displacements measured at different
+     sampling rates, Mech. Syst. Sig. Process. 38 (2013) 460–481, https://doi.org/10.1016/j.ymssp.2013.02.007.
+[20] K. Kim, H. Sohn, Dynamic displacement estimation by fusing LDV and LiDAR measurements via smoothing based Kalman filtering, Mech. Syst. Sig. Process. 82
+     (2017) 339–355, https://doi.org/10.1016/j.ymssp.2016.05.027.
+[21] F. Moschas, S. Stiros, Measurement of the dynamic displacements and of the modal frequencies of a short-span pedestrian bridge using GPS and an
+     accelerometer, Eng. Struct. 33 (2011) 10–17, https://doi.org/10.1016/j.engstruct.2010.09.013.
+[22] K. Kim, J. Choi, J. Chung, G. Koo, I.-H. Bae, H. Sohn, Structural displacement estimation through multi-rate fusion of accelerometer and RTK-GPS displacement
+     and velocity measurements, Measurement 130 (2018) 223–235, https://doi.org/10.1016/j.measurement.2018.07.090.
+[23] Z. Ma, J. Choi, H. Sohn, Real-time structural displacement estimation by fusing asynchronous acceleration and computer vision measurements, Comput.-Aided
+     Civ. Infrastruct. Eng. 37 (2022) 688–703, https://doi.org/10.1111/mice.12767.
+[24] Z. Ma, J. Choi, P. Liu, H. Sohn, Structural displacement estimation by fusing vision camera and accelerometer using hybrid computer vision algorithm and
+     adaptive multi-rate Kalman filter, Autom. Constr. 140 (2022), 104338, https://doi.org/10.1016/j.autcon.2022.104338.
+[25] Z. Ma, J. Chung, P. Liu, H. Sohn, Bridge displacement estimation by fusing accelerometer and strain gauge measurements, Struct. Control Health Monit. 28
+     (2021) e2733, https://doi.org/10.1002/stc.2733.
+[26] H. Zhu, K. Gao, Y. Xia, F. Gao, S. Weng, Y. Sun, Q. Hu, Multi-rate data fusion for dynamic displacement measurement of beam-like supertall structures using
+     acceleration and strain sensors, Struct. Health Monitor. Internat. J. 19 (2020) 520–536, https://doi.org/10.1177/1475921719857043.
+[27] Z. Ma, J. Choi, L. Yang, H. Sohn, Structural displacement estimation using accelerometer and FMCW millimeter wave radar, Mech. Syst. Sig. Process. 182
+     (2023), 109582, https://doi.org/10.1016/j.ymssp.2022.109582.
+[28] J. Lee, S. Jeong, H. Kim, K.C. Lee, S.-H. Sim, Comparative study of long-term displacement measurement methods − Focusing on a Pre-stressed concrete bridge
+     under construction, Measurement 201 (2022), 111691, https://doi.org/10.1016/j.measurement.2022.111691.
+[29] J. Guo, Y. He, C. Jiang, M. Jin, S. Li, J. Zhang, R. Xi, Y. Liu, Measuring micrometer-level vibrations with mmwave radar, IEEE Trans. Mob. Comput. 22 (4) (2023)
+     2248–2261.
+[30] R.E. Alva, L.G. Pujades, R. González-Drigo, G. Luzi, O. Caselles, L.A. Pinzón, Dynamic monitoring of a mid-rise building by real-aperture radar interferometer:
+     advantages and limitations, Remote Sens. (Basel) 12 (2020) 1025, https://doi.org/10.3390/rs12061025.
+[31] D.V.Q. Rodrigues, D. Zuo, C. Li, Wind-induced displacement analysis for a traffic light structure based on a low-cost doppler radar array, IEEE Trans. Instrum.
+     Meas. 70 (2021) 1–9, https://doi.org/10.1109/TIM.2021.3098380.
+[32] S. Guan, J.A. Rice, C. Li, Y. Li, G. Wang, Structural displacement measurements using DC coupled radar with active transponder, Struct. Control Health Monit.
+     24 (2017) e1909.
+[33] S. Guan, J.A. Bridge, C. Li, N.J. DeMello, Smart radar sensor network for bridge displacement monitoring, J. Bridg. Eng. 23 (2018) 04018102.
+[34] J.-W. Park, D.-S. Moon, H. Yoon, F. Gomez, B.F. Spencer Jr, J.R. Kim, Visual–inertial displacement sensing using data fusion of vision-based displacement with
+     acceleration, Struct. Control Health Monit. 25 (2018) e2122.
+[35] Z. Ma, J. Choi, J. Jang, O. Kwon, H. Sohn, Y. Yang, Simultaneous estimation of submerged floating tunnel displacement and mooring cable tension through FIR
+     filter based strain and acceleration fusion, Struct. Control Health Monit. 2023 (2023) 7803876, https://doi.org/10.1155/2023/7803876.
+[36] P. Ramasamy, S.S. Chandel, A.K. Yadav, Wind speed prediction in the mountainous region of India using an artificial neural network model, Renew. Energy 80
+     (2015) 338–347, https://doi.org/10.1016/j.renene.2015.02.034.
+[37] A.M. Zain, H. Haron, S. Sharif, Prediction of surface roughness in the end milling machining using Artificial Neural Network, Expert Syst. Appl. 37 (2010)
+     1755–1768, https://doi.org/10.1016/j.eswa.2009.07.033.
+[38] R. Lyons, Understanding Digital Signal Processing, 3rd ed., Pearson, Upper Saddle River, NJ, 2010.
+[39] L. Rabiner, R. Schafer, C. Rader, The chirp z-transform algorithm, IEEE Trans. Audio Electroacoust. 17 (1969) 86–92, https://doi.org/10.1109/
+     TAU.1969.1162034.
+
+
+
+
+                                                                                  19
+

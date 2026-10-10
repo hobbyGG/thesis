@@ -1,0 +1,224 @@
+Structural Displacement Estimation of Rail
+Bridges Through Millimeter-Wave Radar,
+Accelerometers, and Non-Dedicated
+Multi-Modal Sensing
+HOON SOHN, JIGU LEE, SUGNDONG IL, SANGJIN LEE,
+TACKWOO LEE and JUNHO LEE
+ABSTRACT
+
+       Rail bridges are essential components of modern transportation networks but
+often operate beyond their intended service life, leading to growing concerns about
+structural integrity and public safety. Traditional structural health monitoring (SHM)
+systems can be prohibitively expensive and complex, limiting their widespread use—
+especially for smaller rail bridges with constrained budgets. To address these
+challenges, we present a novel, cost-effective radar–accelerometer fusion sensor
+designed to provide real-time, high-precision displacement and acceleration
+measurements. Our approach integrates a millimeter-wave frequency-modulated
+continuous-wave (FMCW) radar module with a three-axis MEMS accelerometer,
+enabling accurate detection of even the slightest structural movements. Specifically,
+our sensor achieves a root-mean-square error for displacement below 0.1 mm, which
+is suitable for capturing subtle deformations that may indicate underlying structural
+issues. The hardware leverages off-the-shelf components, including an Infineon
+60 GHz radar chipset and a microcontroller equipped with wireless interfaces
+(2.4/5.0 GHz Wi-Fi, Bluetooth, and Gigabit Ethernet), all housed in a compact
+(100 × 80 × 50 mm³) enclosure. Due to its streamlined design and off-the-shelf parts,
+mass production costs can be kept under $1,000, making it feasible for large-scale
+deployments. To enhance measurement fidelity, the sensor employs automatic radar
+target selection, guided by initial radar and acceleration data, to overcome multiple
+reflections and phase ambiguity in FMCW signals. This ensures robust performance
+under a range of field conditions and traffic scenarios. Beyond local displacement and
+acceleration measurements, our framework incorporates existing fiber-optic cables—
+originally installed for telecommunications—to form wide-area strain gauges. By
+using distributed fiber-optic sensing, rail bridge operators gain a broader, continuous
+view of structural behavior across extensive spans without requiring further dedicated
+sensor installations. These data sources are synchronized with a common NTP server,
+enabling advanced analytics that fuse displacement, strain, and vibration information
+into a unified, real-time rail bridge monitoring platform. Through this multi-modal
+integration, our radar–accelerometer fusion sensor not only addresses critical cost and
+scalability concerns but also provides a transformative leap in monitoring accuracy
+and operational efficiency. By integrating cost-effective hardware and distributed
+fiber-optic sensing, rail bridge stakeholders can pursue more precise, data-driven
+maintenance strategies, leveraging highly accurate displacement and acceleration
+measurements to proactively address structural concerns and extend service life
+
+INTRODUCTION
+
+      Accurate displacement measurement of railway bridges is essential for evaluating
+their structural integrity and ensuring public safety, particularly under dynamic loads
+induced by high-speed train operations. Reliable monitoring systems provide critical
+insights into bridge behavior, informing proactive maintenance and helping prevent
+structural failures. However, current displacement monitoring technologies face
+challenges, such as sensitivity to environmental variations, operational complexities,
+and high deployment costs, limiting their widespread implementation.
+       Millimeter-wave frequency-modulated continuous-wave (FMCW) radar sensors
+offer a promising solution due to their inherent advantages, including compact size, high
+accuracy, and resilience to environmental disturbances. Their short-wavelength radar
+signals enable the detection of subtle structural movements, essential for precise
+structural assessments. Nonetheless, radar-based measurements face challenges such as
+phase ambiguity and reliance on optimal reflection targets, which complicate long-term
+monitoring and accuracy under dynamic conditions. To address these limitations, the
+integration of radar sensors with complementary measurement technologies is
+necessary.
+       This study presents an advanced displacement measurement system primarily
+leveraging FMCW radar sensors, designed explicitly for rail bridge monitoring. Our
+approach employs an adaptive algorithm that automatically selects optimal radar
+reflection targets, effectively addressing phase ambiguity through complementary
+displacement estimation techniques. These methods significantly enhance accuracy,
+providing reliable displacement measurements suitable for safety-critical rail
+infrastructure.
+       Furthermore, to expand the spatial coverage and enhance the accuracy of
+distributed displacement assessments, we propose future integration with distributed
+fiber-optic sensing techniques. By utilizing pre-existing fiber-optic cables initially
+installed for telecommunications purposes, the bridge’s structural deformation across
+extended spans can be continuously monitored, enabling a comprehensive and detailed
+evaluation of structural performance. This integrated approach promises not only
+improved monitoring accuracy but also a scalable, cost-effective solution for
+widespread deployment on railway bridge networks.
+
+
+
+
+Figure 1. Overview of the proposed displacement estimation approach integrating FMCW radar and
+accelerometer: (a) schematic illustration of sensor installation on a rail bridge structure, and (b) data
+fusion workflow highlighting automated calibration, phase-unwrapping, and FIR-based displacement
+estimation.
+METHODOLOGY
+
+         The proposed displacement measurement approach integrates a compact
+millimeter-wave FMCW radar sensor with a high-precision MEMS accelerometer, co-
+located at strategic positions on rail bridge structures. This integrated sensor
+arrangement simplifies installation, eliminates the need for external reference targets,
+and supports reliable, long-term monitoring. The radar component utilizes an Infineon
+60 GHz FMCW chipset, selected for its high accuracy, robustness in outdoor
+environments, and minimal power consumption. A MEMS accelerometer complements
+the radar by providing stable acceleration measurements, crucial for enhancing
+displacement measurement reliability and resolving radar ambiguities.
+         An essential initial step involves automatic calibration to identify optimal radar
+reflection targets. Initially, synchronized short-duration radar and accelerometer data
+are collected (typically under one minute). During this calibration, the system
+automatically selects the optimal radar target by minimizing the root mean square error
+(RMSE) between high-frequency displacement estimates independently derived from
+radar and accelerometer measurements. This process generates a precise conversion
+factor, translating radar-measured line-of-sight displacement into the actual structural
+displacement direction. This automatic calibration significantly reduces manual setup
+efforts and ensures consistent performance in varying operational conditions.
+         A critical limitation of radar-based displacement measurements is phase
+ambiguity (phase wrapping), particularly under conditions involving substantial
+structural movements exceeding radar wavelength constraints. To address this challenge,
+we implement an accelerometer-aided adaptive phase-unwrapping algorithm. The
+algorithm employs current accelerometer data and previous radar displacement
+estimations to predict structural displacement at each measurement step. By comparing
+this predicted displacement against radar’s measured wrapped phase, the algorithm
+accurately determines necessary multiples of 2π corrections, effectively resolving phase
+ambiguities and ensuring accurate displacement measurements even under large
+dynamic vibrations.
+         Once the radar-based displacement is accurately estimated using the
+accelerometer-aided phase-unwrapping method, further refinement is conducted using
+advanced sensor data fusion techniques. A finite impulse response (FIR) filter
+systematically combines radar and accelerometer measurements, significantly reducing
+measurement noise and drift. The FIR filter leverages radar's precise high-frequency
+displacement detection and the accelerometer's stable low-frequency characteristics,
+achieving robust and accurate displacement estimations suitable for real-time structural
+monitoring under typical dynamic loads induced by high-speed trains.
+         To enhance spatial resolution and provide comprehensive distributed
+displacement profiles, future implementations will integrate radar-based point
+measurements with distributed strain data from existing telecommunication fiber-optic
+cables. By applying distributed fiber-optic sensing methods, such as Rayleigh-based
+optical frequency domain reflectometry (OFDR), the bridge’s structural deformation
+can be continuously monitored along extensive spans, significantly augmenting the
+spatial coverage and resolution of displacement monitoring. This future integration aims
+to create a robust, cost-effective, and high-resolution multi-modal structural monitoring
+platform for rail bridge infrastructure.
+Figure 2. Automated calibration workflow illustrating the selection of optimal radar reflection targets.
+Radar displacement data undergo low-pass filtering to remove high-frequency noise, while
+accelerometer displacement data are processed through high-pass filtering to mitigate low-frequency
+drift. The optimal radar target and conversion factor are automatically determined by minimizing
+differences between filtered accelerometer and radar displacement signals, ensuring accurate translation
+of radar line-of-sight measurements into structural displacement.
+
+
+EXPERIMENTAL VALIDATION
+
+        The validation experiment was conducted on a prestressed concrete railway
+bridge spanning approximately 36 meters, representing typical high-speed railway
+infrastructure. To evaluate the accuracy and reliability of the proposed radar-based
+displacement measurement system, integrated sensor units consisting of FMCW radar
+and MEMS accelerometers were installed at strategic locations beneath the bridge
+deck. These sensor units were securely fixed directly onto the structure to effectively
+capture maximum structural displacement induced by passing trains.
+        For reference measurements, a high-precision Laser Doppler Vibrometer
+(LDV) was positioned at ground level, directly beneath the midpoint of the bridge
+span, aligned accurately with the primary sensor unit. The LDV provided reliable
+reference displacement data against which the performance of the proposed radar-
+accelerometer system could be evaluated.
+Figure 3. Experimental setup on the Gongju-Osong High-Speed Rail Bridge: (a) Elevation view
+indicating sensor positions and the Laser Doppler Vibrometer (LDV) reference measurement location,
+along with relevant distances. (b) Detailed illustration showing precise sensor installation and alignment
+beneath the bridge structure.
+
+         The displacement monitoring setup included an Infineon XENSIV™
+BGT60TR13C 60 GHz FMCW radar chipset, chosen for its superior precision and
+robustness in outdoor environments, and an Analog Devices ADXL355 MEMS
+accelerometer, noted for its low noise and high stability. These sensors were
+connected to an integrated Microprocessor Unit (MPU), enabling synchronized real-
+time data acquisition. Edge computing capabilities allowed initial displacement data
+processing directly at the sensor nodes, significantly reducing the amount of data
+transmitted wirelessly to the centralized monitoring system, thus improving overall
+system efficiency.
+         To assess sensor accuracy under realistic operational conditions, the bridge
+underwent dynamic load testing with passing high-speed trains, including the Korea
+Train eXpress (KTX) and Super Rapid Train (SRT). Tests were systematically
+conducted at varying train speeds and frequencies, ensuring comprehensive evaluation
+across diverse operational scenarios. Throughout testing, displacement measurements
+obtained from the radar-accelerometer system were continuously compared against
+LDV reference measurements to quantify accuracy and reliability.
+The experimental results consistently demonstrated high agreement between the
+proposed radar-based displacement measurements and LDV reference data. Figure 4
+illustrates representative displacement responses induced by passing KTX and SRT
+trains, clearly showing the close correspondence between radar-accelerometer fusion
+measurements and the LDV reference. Quantitative evaluations confirmed excellent
+system performance, with RMSE values below 0.05 mm, validating the system’s
+precision and reliability under typical dynamic loads of high-speed rail traffic.
+   Figure 4. Comparison of displacement measurements from dynamic load tests: (a) bridge response
+  induced by a passing Korea Train eXpress (KTX), and (b) response induced by a Super Rapid Train
+(SRT). The proposed radar-accelerometer fusion sensor results (green dashed lines) closely match LDV
+   reference data (black solid lines). Root mean square error (RMSE) values indicate the accuracy and
+                               reliability of the proposed monitoring system.
+
+        Future integration of distributed fiber-optic sensing techniques is planned.
+Leveraging existing telecommunication fiber-optic cables installed along rail bridges
+can provide continuous distributed strain data across extensive spans. By combining
+localized radar-accelerometer measurements with spatially continuous fiber-optic data,
+bridge operators could achieve a more comprehensive and detailed assessment of
+structural performance, significantly enhancing monitoring coverage and resolution.
+
+CONCLUSIONS
+
+        This study presented an advanced radar-based displacement monitoring
+method for railway bridges using integrated millimeter-wave FMCW radar and
+MEMS accelerometer sensors. The proposed method effectively addressed traditional
+measurement limitations by employing automatic calibration, accelerometer-assisted
+adaptive phase-unwrapping, and FIR filtering techniques. Field validation conducted
+on the Gongju-Osong High-Speed Rail Bridge demonstrated the system’s excellent
+accuracy, achieving displacement measurement errors below 0.05 mm when
+compared to LDV reference data. Future studies will expand the proposed
+methodology by integrating distributed fiber-optic sensing, leveraging existing
+telecommunication cables for spatially continuous strain measurements. This multi-
+modal sensing approach is expected to significantly enhance structural health
+monitoring capabilities, providing comprehensive, high-resolution assessments of
+railway bridge infrastructure.
+REFERENCES
+
+1.   Guo, J., He, Y., Jiang, C., Jin, M., Li, S., Zhang, J., Xi, R., & Liu, Y. (2023). Measuring micrometer-
+     level vibrations with mmWave radar. IEEE Transactions on Mobile Com-puting, 22(4), 2248-2259.
+2.   Lee, H. S., Hong, Y. H., & Park, H. W. (2010). Design of an FIR filter for the displace-ment
+     reconstruction using measured acceleration in low-frequency dominant structures. International
+     Journal for Numerical Methods in Engineering, 82(4), 403-434.
+3.   Ma, Z., Choi, J., Yang, L., & Sohn, H. (2023). Structural displacement estimation using ac-
+     celerometer and FMCW millimeter wave radar. Mechanical Systems and Signal Pro-cessing, 182,
+     109582.
+4.   Ma, Z., Han, K., Choi, J., Lee, J., Kwon, O., Sohn, H., Liu, J., Hwang, D., Aggarwal, J., Noh, H., Cai,
+     E., & Zhang, Y. (2024). Development and field deployment validation of a low-cost and high-
+     precision displacement sensing system by fusing millimeter-wave radar and accelerometer.
+     Engineering Structures, 321, 118926.
+

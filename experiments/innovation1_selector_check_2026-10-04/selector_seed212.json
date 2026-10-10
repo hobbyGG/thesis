@@ -1,0 +1,573 @@
+{
+  "constants": {
+    "cal_samples": 128,
+    "fs_hz": 100.0,
+    "lambda_mm": 4.0,
+    "noise_sigma": 0.012574334296829354,
+    "samples": 256,
+    "sensors": 8
+  },
+  "protocol_sha256": "3f4986660cf8ae1582365c9002570b109478418edcce3ab0d9be18f62c661532",
+  "rows": [
+    {
+      "case": "close_benign",
+      "independent": {
+        "merge": {
+          "amplitude_floor": [
+            0.022228492625486537
+          ],
+          "angles_deg": [
+            26.75
+          ],
+          "covered": true,
+          "failure": null,
+          "high_error_gt_0p01mm": false,
+          "max_abs_error_mm": 0.0038449312306624017,
+          "min_test_abs": [
+            1.6851722452164923
+          ],
+          "mode": "merge",
+          "noise_gain": [
+            0.3535533905932738
+          ],
+          "rmse_mm": 0.0013101492805655652,
+          "weights": [
+            1.0
+          ]
+        },
+        "split_ls": {
+          "angles_deg": [
+            26.75
+          ],
+          "covered": false,
+          "failure": "fewer_than_two_calibration_angle_peaks",
+          "high_error_gt_0p01mm": null,
+          "max_abs_error_mm": null,
+          "mode": "split_ls",
+          "rmse_mm": null
+        }
+      },
+      "seed": 212,
+      "selected": {
+        "amplitude_floor": [
+          0.022228492625486537
+        ],
+        "angles_deg": [
+          26.75
+        ],
+        "covered": true,
+        "failure": null,
+        "high_error_gt_0p01mm": false,
+        "max_abs_error_mm": 0.0038449312306624017,
+        "min_test_abs": [
+          1.6851722452164923
+        ],
+        "mode": "merge",
+        "noise_gain": [
+          0.3535533905932738
+        ],
+        "rmse_mm": 0.0013101492805655652,
+        "weights": [
+          1.0
+        ]
+      },
+      "selector": {
+        "angles_deg": [
+          26.75
+        ],
+        "candidate_count": 1,
+        "selected_route": "merge",
+        "selector_failure": null
+      }
+    },
+    {
+      "case": "separated_benign",
+      "independent": {
+        "merge": {
+          "amplitude_floor": [
+            0.022228492625486537
+          ],
+          "angles_deg": [
+            -10.25,
+            45.25
+          ],
+          "covered": true,
+          "failure": null,
+          "high_error_gt_0p01mm": true,
+          "max_abs_error_mm": 0.028308325369600817,
+          "min_test_abs": [
+            0.8879551003865553
+          ],
+          "mode": "merge",
+          "noise_gain": [
+            0.3535533905932738
+          ],
+          "rmse_mm": 0.01749621723449114,
+          "weights": [
+            1.0
+          ]
+        },
+        "split_ls": {
+          "amplitude_floor": [
+            0.022404873171594505,
+            0.02240487317159452
+          ],
+          "angles_deg": [
+            -10.25,
+            45.25
+          ],
+          "covered": true,
+          "failure": null,
+          "high_error_gt_0p01mm": false,
+          "max_abs_error_mm": 0.006813933042093323,
+          "min_test_abs": [
+            0.9878312398153315,
+            0.7862529915580684
+          ],
+          "mode": "split_ls",
+          "noise_gain": [
+            0.35635879630214606,
+            0.3563587963021463
+          ],
+          "rmse_mm": 0.0022202443653815667,
+          "steering_condition": 1.1341598182244468,
+          "weights": [
+            0.6100686648881918,
+            0.38993133511180816
+          ]
+        }
+      },
+      "seed": 212,
+      "selected": {
+        "amplitude_floor": [
+          0.022404873171594505,
+          0.02240487317159452
+        ],
+        "angles_deg": [
+          -10.25,
+          45.25
+        ],
+        "covered": true,
+        "failure": null,
+        "high_error_gt_0p01mm": false,
+        "max_abs_error_mm": 0.006813933042093323,
+        "min_test_abs": [
+          0.9878312398153315,
+          0.7862529915580684
+        ],
+        "mode": "split_ls",
+        "noise_gain": [
+          0.35635879630214606,
+          0.3563587963021463
+        ],
+        "rmse_mm": 0.0022202443653815667,
+        "steering_condition": 1.1341598182244468,
+        "weights": [
+          0.6100686648881918,
+          0.38993133511180816
+        ]
+      },
+      "selector": {
+        "angles_deg": [
+          -10.25,
+          45.25
+        ],
+        "candidate_count": 2,
+        "selected_route": "split_ls",
+        "selector_failure": null,
+        "steering_condition": 1.1341598182244468
+      }
+    },
+    {
+      "case": "separated_unequal",
+      "independent": {
+        "merge": {
+          "amplitude_floor": [
+            0.022228492625486537
+          ],
+          "angles_deg": [
+            -10.0,
+            45.75
+          ],
+          "covered": true,
+          "failure": null,
+          "high_error_gt_0p01mm": true,
+          "max_abs_error_mm": 0.017072152341115032,
+          "min_test_abs": [
+            0.9255734110117682
+          ],
+          "mode": "merge",
+          "noise_gain": [
+            0.3535533905932738
+          ],
+          "rmse_mm": 0.010332292218932388,
+          "weights": [
+            1.0
+          ]
+        },
+        "split_ls": {
+          "amplitude_floor": [
+            0.022403244476265606,
+            0.022403244476265606
+          ],
+          "angles_deg": [
+            -10.0,
+            45.75
+          ],
+          "covered": true,
+          "failure": null,
+          "high_error_gt_0p01mm": false,
+          "max_abs_error_mm": 0.007826555940060431,
+          "min_test_abs": [
+            0.9878651220134959,
+            0.4866668049277468
+          ],
+          "mode": "split_ls",
+          "noise_gain": [
+            0.35633289122772305,
+            0.35633289122772305
+          ],
+          "rmse_mm": 0.002395009023963871,
+          "steering_condition": 1.1335001240749767,
+          "weights": [
+            0.8005817326306219,
+            0.19941826736937796
+          ]
+        }
+      },
+      "seed": 212,
+      "selected": {
+        "amplitude_floor": [
+          0.022403244476265606,
+          0.022403244476265606
+        ],
+        "angles_deg": [
+          -10.0,
+          45.75
+        ],
+        "covered": true,
+        "failure": null,
+        "high_error_gt_0p01mm": false,
+        "max_abs_error_mm": 0.007826555940060431,
+        "min_test_abs": [
+          0.9878651220134959,
+          0.4866668049277468
+        ],
+        "mode": "split_ls",
+        "noise_gain": [
+          0.35633289122772305,
+          0.35633289122772305
+        ],
+        "rmse_mm": 0.002395009023963871,
+        "steering_condition": 1.1335001240749767,
+        "weights": [
+          0.8005817326306219,
+          0.19941826736937796
+        ]
+      },
+      "selector": {
+        "angles_deg": [
+          -10.0,
+          45.75
+        ],
+        "candidate_count": 2,
+        "selected_route": "split_ls",
+        "selector_failure": null,
+        "steering_condition": 1.1335001240749767
+      }
+    },
+    {
+      "case": "close_destructive",
+      "independent": {
+        "merge": {
+          "amplitude_floor": [
+            0.022228492625486537
+          ],
+          "angles_deg": [
+            16.75,
+            38.5
+          ],
+          "covered": true,
+          "failure": null,
+          "high_error_gt_0p01mm": true,
+          "max_abs_error_mm": 0.03533822988858171,
+          "min_test_abs": [
+            0.32557489231717146
+          ],
+          "mode": "merge",
+          "noise_gain": [
+            0.3535533905932738
+          ],
+          "rmse_mm": 0.01757963194308019,
+          "weights": [
+            1.0
+          ]
+        },
+        "split_ls": {
+          "amplitude_floor": [
+            0.022773450859048614,
+            0.02277345085904862
+          ],
+          "angles_deg": [
+            16.75,
+            38.5
+          ],
+          "covered": true,
+          "failure": null,
+          "high_error_gt_0p01mm": true,
+          "max_abs_error_mm": 0.04783460768700998,
+          "min_test_abs": [
+            0.2667964192585257,
+            0.2658676616489096
+          ],
+          "mode": "split_ls",
+          "noise_gain": [
+            0.3622211772243242,
+            0.3622211772243243
+          ],
+          "rmse_mm": 0.024400860026356375,
+          "steering_condition": 1.2473018617786895,
+          "weights": [
+            0.5012341235160362,
+            0.49876587648396375
+          ]
+        }
+      },
+      "seed": 212,
+      "selected": {
+        "amplitude_floor": [
+          0.022773450859048614,
+          0.02277345085904862
+        ],
+        "angles_deg": [
+          16.75,
+          38.5
+        ],
+        "covered": true,
+        "failure": null,
+        "high_error_gt_0p01mm": true,
+        "max_abs_error_mm": 0.04783460768700998,
+        "min_test_abs": [
+          0.2667964192585257,
+          0.2658676616489096
+        ],
+        "mode": "split_ls",
+        "noise_gain": [
+          0.3622211772243242,
+          0.3622211772243243
+        ],
+        "rmse_mm": 0.024400860026356375,
+        "steering_condition": 1.2473018617786895,
+        "weights": [
+          0.5012341235160362,
+          0.49876587648396375
+        ]
+      },
+      "selector": {
+        "angles_deg": [
+          16.75,
+          38.5
+        ],
+        "candidate_count": 2,
+        "selected_route": "split_ls",
+        "selector_failure": null,
+        "steering_condition": 1.2473018617786895
+      }
+    },
+    {
+      "case": "coincident_cancel",
+      "independent": {
+        "merge": {
+          "amplitude_floor": [
+            0.022228492625486537
+          ],
+          "angles_deg": [
+            28.75,
+            -31.75
+          ],
+          "covered": false,
+          "failure": "test_amplitude_guard",
+          "high_error_gt_0p01mm": null,
+          "max_abs_error_mm": null,
+          "min_test_abs": [
+            0.0007788732355351892
+          ],
+          "mode": "merge",
+          "noise_gain": [
+            0.3535533905932738
+          ],
+          "rmse_mm": null
+        },
+        "split_ls": {
+          "amplitude_floor": [
+            0.022229911749728604,
+            0.022229911749728604
+          ],
+          "angles_deg": [
+            28.75,
+            -31.75
+          ],
+          "covered": false,
+          "failure": "test_amplitude_guard",
+          "high_error_gt_0p01mm": null,
+          "max_abs_error_mm": null,
+          "min_test_abs": [
+            0.000812444832203781,
+            0.0001188367809998186
+          ],
+          "mode": "split_ls",
+          "noise_gain": [
+            0.3535759623526778,
+            0.3535759623526778
+          ],
+          "rmse_mm": null,
+          "steering_condition": 1.011363808460498
+        }
+      },
+      "seed": 212,
+      "selected": {
+        "amplitude_floor": [
+          0.022229911749728604,
+          0.022229911749728604
+        ],
+        "angles_deg": [
+          28.75,
+          -31.75
+        ],
+        "covered": false,
+        "failure": "test_amplitude_guard",
+        "high_error_gt_0p01mm": null,
+        "max_abs_error_mm": null,
+        "min_test_abs": [
+          0.000812444832203781,
+          0.0001188367809998186
+        ],
+        "mode": "split_ls",
+        "noise_gain": [
+          0.3535759623526778,
+          0.3535759623526778
+        ],
+        "rmse_mm": null,
+        "steering_condition": 1.011363808460498
+      },
+      "selector": {
+        "angles_deg": [
+          28.75,
+          -31.75
+        ],
+        "candidate_count": 2,
+        "selected_route": "split_ls",
+        "selector_failure": "test_amplitude_guard",
+        "steering_condition": 1.011363808460498
+      }
+    },
+    {
+      "case": "symmetric_control",
+      "independent": {
+        "merge": {
+          "amplitude_floor": [
+            0.022228492625486537
+          ],
+          "angles_deg": [
+            -24.25,
+            23.75
+          ],
+          "covered": true,
+          "failure": null,
+          "high_error_gt_0p01mm": false,
+          "max_abs_error_mm": 0.00860069908813954,
+          "min_test_abs": [
+            0.9052670813956317
+          ],
+          "mode": "merge",
+          "noise_gain": [
+            0.3535533905932738
+          ],
+          "rmse_mm": 0.0036975460270525394,
+          "weights": [
+            1.0
+          ]
+        },
+        "split_ls": {
+          "amplitude_floor": [
+            0.022326164375414567,
+            0.022326164375414563
+          ],
+          "angles_deg": [
+            -24.25,
+            23.75
+          ],
+          "covered": true,
+          "failure": null,
+          "high_error_gt_0p01mm": false,
+          "max_abs_error_mm": 0.008671793340788825,
+          "min_test_abs": [
+            0.9697534747565832,
+            0.768758289147321
+          ],
+          "mode": "split_ls",
+          "noise_gain": [
+            0.35510690026817815,
+            0.3551069002681781
+          ],
+          "rmse_mm": 0.004499277991794632,
+          "steering_condition": 1.0982411249520105,
+          "weights": [
+            0.6132738665481088,
+            0.3867261334518913
+          ]
+        }
+      },
+      "seed": 212,
+      "selected": {
+        "amplitude_floor": [
+          0.022326164375414567,
+          0.022326164375414563
+        ],
+        "angles_deg": [
+          -24.25,
+          23.75
+        ],
+        "covered": true,
+        "failure": null,
+        "high_error_gt_0p01mm": false,
+        "max_abs_error_mm": 0.008671793340788825,
+        "min_test_abs": [
+          0.9697534747565832,
+          0.768758289147321
+        ],
+        "mode": "split_ls",
+        "noise_gain": [
+          0.35510690026817815,
+          0.3551069002681781
+        ],
+        "rmse_mm": 0.004499277991794632,
+        "steering_condition": 1.0982411249520105,
+        "weights": [
+          0.6132738665481088,
+          0.3867261334518913
+        ]
+      },
+      "selector": {
+        "angles_deg": [
+          -24.25,
+          23.75
+        ],
+        "candidate_count": 2,
+        "selected_route": "split_ls",
+        "selector_failure": null,
+        "steering_condition": 1.0982411249520105
+      }
+    }
+  ],
+  "scope": "one new seed truth-free same-range route selector check",
+  "seed": 212,
+  "source_sha256": "a0a8277123545e70b46314974e38cef6c918ba26b505a252432510aed68b4449",
+  "truth_access_stage": "post-run score only",
+  "truth_free_selector": true,
+  "unit_checks": {
+    "covariance_vs_direct_max_abs": 2.7755575615628914e-15,
+    "positive_angle_check_deg": 25.0,
+    "single_source_noiseless_rmse_mm": 3.680501298802956e-17
+  }
+}

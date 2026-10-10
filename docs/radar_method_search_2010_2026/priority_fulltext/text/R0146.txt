@@ -1,0 +1,894 @@
+Xia and Huang EURASIP Journal on Advances in Signal Processing (2016) 2016:94
+DOI 10.1186/s13634-016-0390-7
+                                                                                                             EURASIP Journal on Advances
+                                                                                                                      in Signal Processing
+
+
+ RESEARCH                                                                                                                                       Open Access
+
+Target vibration estimation in SAR based
+on phase-analysis method
+Weijie Xia*       and Linlin Huang
+
+
+  Abstract
+  An efficient vibration estimation method for synthetic aperture radar (SAR) systems based on phase-analysis
+  method is presented. Small vibrations, which consist of multiple frequency components and are usually rather
+  weak, introduce phase modulation in radar echoes. They contain important signatures of objects. Extracting and
+  analyzing the phase from radar echoes is one of the significant approaches to acquire vibration characteristics. In
+  order to separate different targets in different range cells, the proposed method acts the range compression and
+  range migration correction on the radar echoes, followed by extracting the phase history of each target’s radar
+  echoes. Since the phase history contains the time-varying ranges from the targets to airborne radar besides the
+  vibration signal, we apply wavelet transform to the phase history to extract the vibration signal. Then the vibration
+  signatures would be estimated quantitatively. The method is a more efficient and convenient approach to estimate
+  the vibration amplitudes and frequencies of one or more targets, whose vibration signal is a single-frequency or
+  multi-frequency signal. Moreover, it can be applied in the case where the airborne radar moves along the desirable
+  or undesirable trajectory. Simulation results indicate that this method provides a larger range of estimable vibration
+  frequency, higher estimation precision, and lower computation complexity.
+  Keywords: Linear frequency modulated (LFM) signal, Phase analysis, Vibration, Wavelet transform (WT)
+
+
+1 Introduction                                                                        signals induced by vibration with Cohen’s class time-fre-
+Vibration is ubiquitous in the real world. Objects’ vibra-                            quency method were analyzed, and the time-frequency
+tion signatures bear vital information about the type of                              signatures and the SAR image of a vibrating target were
+the objects [1]. Spaceborne synthetic aperture radar (SAR)                            studied in [5–7]. In [8] and [9], the Doppler frequency of
+can operate over thousands of kilometers, which is an ef-                             the rotating and vibrating targets was analyzed with
+fective way to acquire vibration signatures of structures                             smoothed pseudo Wigner-Ville distribution. A novel vi-
+placed in remote locations. Small vibrations introduce                                bration estimation method based on the discrete fractional
+phase modulation in the returned SAR signals, which is                                Fourier transform (DFRFT) was presented in [10–12]. The
+often referred to as the micro-Doppler effect [2]. By                                 method in [13] with sinusoidal frequency modulation
+analyzing the micro-Doppler effect, we can identify and                               Fourier transform (SFMFT) was proposed to obtain the
+classify the objects according to the vibration signa-                                frequency spectrum of vibration traces. In [14], the tar-
+tures. In addition, the vibration signatures can be used                              get was processing with autofocus to estimate the phase
+to compensate the phase errors in SAR returns to elim-                                error caused by vibration, and the vibration parameters
+inate the image blur [3, 4]. Therefore, target vibration                              were calculated based on the phase error. Another
+signatures estimation has great significance.                                         extracting method of vibrating features based on slow
+  Several methods have been presented in the literature                               time envelope (STE) signatures was presented in [15].
+which deal with the problem of how to extract the vibra-                              In [16] and [17], a micro-Doppler reconstruction method
+tion signature with SAR systems. The phase-modulated                                  using azimuth time-frequency tracking of the phase his-
+                                                                                      tory was proposed.
+* Correspondence: nuaaxwj@nuaa.edu.cn                                                   In this paper, a vibration estimation method using
+Key Laboratory of Radar Imaging and Microwave Photonics (Nanjing Univ.
+Aeronaut. Astronaut.), Ministry of Education, College of Electronic and               SAR is presented based on phase analysis. In comparison
+Information Engineering, Nanjing University of Aeronautics and Astronautics,          with the previous works, our approach differs in two
+Nanjing 210016, China
+
+                                       © 2016 The Author(s). Open Access This article is distributed under the terms of the Creative Commons Attribution 4.0
+                                       International License (http://creativecommons.org/licenses/by/4.0/), which permits unrestricted use, distribution, and
+                                       reproduction in any medium, provided you give appropriate credit to the original author(s) and the source, provide a link to
+                                       the Creative Commons license, and indicate if changes were made.
+Xia and Huang EURASIP Journal on Advances in Signal Processing (2016) 2016:94                                                                       Page 2 of 11
+
+
+
+
+main ways. On the one hand, this method is applicable
+                                                                                                   Z
+to the case where a single scatterer vibrating in multiple
+                                                                                                                                        A
+frequencies and several scatterers distributed in different
+range cells are placed within a SAR scene. In addition, it
+is also suitable for the situation where the spaceborne
+radar moves along the undesirable trajectory. On the                                                                                        r
+other hand, compared to methods which rely on the
+interpretation of time-frequency representations, the                                              h
+proposed method provides a quantitative estimation of                     B
+the vibration signatures by offering the history of the
+instantaneous displacement and the spectrum of the
+                                                                                                                           y0                   C         Y
+vibrating object. The estimation results contain complete                                          O
+parameters, not only the vibration amplitudes and fre-
+quencies but also the initial phases included.                                  X
+  The procedure of this method is as follows. It starts                 Fig. 1 Three-dimensional SAR flight geometry
+with the conventional SAR processing procedure to ob-
+tain a nonstationary signal from the vibrating target.
+First, the returned SAR signals are demodulated. Second,                             qﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃﬃ
+range compression is acted on the demodulated SAR                          r ðηÞ ¼    x2 ðηÞ þ ðyðηÞ−y0 Þ2 þ h2                                               ð1Þ
+echoes, followed by an application of range cell migra-
+tion correction to range lines. Hence, the signal from a                 Let rv(η) denote the projection of the vibration displace-
+vibrating target is focused on a range line. Since small               ment onto the line of sight (LOS) from the radar sensor to
+vibrations modulate the phase in radar echoes, we ex-                  the target. The instantaneous slant range becomes
+tract the phase history of each range line containing                      RðηÞ ¼ r ðηÞ þ r v ðηÞ ¼ r ðηÞ þ r v0 ðηÞ⋅ cosθðηÞ                                 ð2Þ
+vibrating objects and also analyze the restrictive con-
+dition of phase ambiguity. Next, by performing the                     where θ(η) is the angle between the instantaneous slant
+wavelet transform, the vibration displacement is ac-                   range and the shortest distance from the target to the
+quired and vibration amplitudes and frequencies of                     radar sensor and r v0 represents r v(η) for θ(η) = 0. Since
+each target are estimated quantitatively. The influence                the change of θ(η) is usually small, we obtain that
+of noises on the performance of the proposed approach is               r v(η) ≈ r v0(η). Then R(η) can be approximated by
+also discussed. The method is capable of extracting vibra-
+tion signatures in the case where the airborne radar moves                 RðηÞ≈rðηÞ þ r v0 ðηÞ                                                               ð3Þ
+along the desirable or undesirable trajectory. Finally, the
+                                                                         Most vibration signals are usually referred to as a peri-
+simulation is given and this method has been compared
+                                                                       odic function, which can be expanded in Fourier series.
+with other radar-based vibration estimation method. The
+                                                                       Any vibration that generated in practice satisfies the
+results illustrate the superior of this method.
+                                                                       Dirichlet conditions, and therefore, the Fourier series of
+  The remainder of this paper is organized as follows. In
+                                                                       vibration signal is convergent [18]. Consequently, the
+Section 2, the motion model is established and the math-
+                                                                       traces of the vibration can be concluded into a series of
+ematical formulas of SAR returns containing vibration sig-
+                                                                       periodic sinusoids. Here, we assume that the vibration
+natures are derived. In Section 3, the phase-analysis
+                                                                       displacement projected onto LOS is modeled by
+algorithm including phase extraction and wavelet transform
+is introduced, followed by the discussion related to the                              X
+                                                                           r v0 ðηÞ ¼   ai sinð2πf vi η þ φi Þ                ð4Þ
+signal-to-noise ratio (SNR) in Section 4. Simulations are                                i¼1
+provided and a comparison between the proposed method
+and some of others is presented in Section 5. Section 6                where ai is the projection of the vibration amplitude
+gives the conclusion.                                                  onto LOS, fvi is the vibration frequency, and φi is the ini-
+                                                                       tial phase of the vibration signal.
+2 Signal model                                                            Consider a side-looking strip-mode SAR, whose
+Figure 1 shows a 3-D SAR flight geometry. Aircraft with                transmitting waveform is a chirp signal, with carrier
+the airborne radar sensor flies along the axis OX from                 frequency f0 and chirp rate Kr. Each returned SAR
+the point A to B, whose instantaneous location is (x(η),               pulse is demodulated by the transmitting signal delayed
+y(η), h), where η is the azimuth time. The vibrating target            appropriately by the round-trip time to the center of
+is located at the point C (0, y0, 0). The nominal line-of-             the illuminated patch. A demodulated pulse of a single
+sight distance from the target to the radar sensor is                  point target can be written as [19]
+Xia and Huang EURASIP Journal on Advances in Signal Processing (2016) 2016:94                                                                          Page 3 of 11
+
+
+
+
+                                                                                 matching filtering in frequency domain, we get the result
+                                      2RðηÞ          
+                 s0 ðτ; ηÞ ¼ A0 wr τ−         wa η−ηc                              of the range compression
+                                         c      (                         )
+                                          
+                                      RðηÞ                2RðηÞ       2
+                                                                                                                   X
+                                                                                                                   N
+                        ⋅ exp −j4πf 0        exp jπK r τ−                                         src ðτ; ηÞ ¼           A0n pr ½τ−2Rn ðηÞ=cwa η−ηc           ð7Þ
+                                       c                    c
+                                                                                                                   n¼1
+                                                                           ð5Þ                                   ⋅ expf−j4πf 0 Rn ðηÞ=cg
+
+where A0 is a complex constant, denoting the reflectivity                          where pr[•] is the a sinc function. Then the range migra-
+of the target, c is the propagation speed of the pulse, τ is                       tion correction algorithm can be applied to (7) to correct
+the range time, ηc represents zero Doppler time, wr[•] is                          for range cell migration, the signal becomes
+the envelope of the pulse, usually approximated as a                                                               X
+                                                                                                                   N
+rectangular window and wa[•] is the radiation pattern of                                          src 0 ðτ; ηÞ ¼         srcn 0 ðτ; ηÞ                         ð8Þ
+the radar antenna. If there are more than one point targets,                                                       n¼1
+the SAR returns become                                                                                             XN
+                                                                                                             ¼           A0n pr ½τ−2R0n =cwa η−ηc
+                            X                                                                                    n¼1
+                            N
+                                            2Rn ðηÞ         
+                 s0 ðτ; ηÞ ¼      A0n wr τ−          wa η−ηc                                                  ⋅ expf−j4πf 0 Rn ðηÞ=cg
+                                               c
+                              n¼1
+                                                     (                       )
+                                                                           2
+                                           Rn ðηÞ                2Rn ðηÞ           where R0n is the distance from nth point target to the
+                            ⋅ exp −j4πf 0           exp jπK r τ−
+                                             c                     c               midaperture. Now, the range-compressed phase history
+                                                                                   of one point target is in the same range cell. The phase
+                                                                           ð6Þ
+                                                                                   of the range line containing nth target can be solved by
+  According to (3), (4), and (6), we know that the small                                      ϕn ðηÞ ¼ arg½srcn ʼðτ; ηÞjτ¼2R0n =c                             ð9Þ
+range perturbation of vibrating targets modulates the
+phase term in radar echo, which is referred to as the                                i.e.,
+micro-Doppler effect. Figure 2 shows a reconstructed                                          ϕn ðηÞ ¼ −4πf 0 Rn ðηÞ=c                                        ð10Þ
+SAR image of a vibrating target. Due to the micro-
+Doppler effect, azimuth compression cannot focus the                                  Figure 3 shows the range lines of two vibrating targets,
+vibrating scatterer on the correct cross-range position,                           which can be obtained by applying range compression
+with some significant sidelobes nearby, which is com-                              and range migration correction to the SAR returns. The
+monly called ghost targets [20]. Consequently, we can                              two point targets are separated in range.
+extract some information related to micro-motion by                                   Since the measured phase is limited only between − π
+analyzing the phase of the SAR returns.                                            and π, the phase ambiguity occurs when some values of
+                                                                                   the real phase − 4πf0Rn(η)/c are over this range. The phase
+3 Algorithm                                                                        total shift between the measured phase and the real phase
+3.1 Phase extraction                                                               is n times of 2π, where n is an integer to be determined.
+Range compression is applied to the SAR returned signal                            Fortunately, this can be corrected by comparing the
+to separate the scatterers in range. By performing the
+
+
+                      100                                                                              100
+
+                      200                                                                              200
+
+                      300                                                                              300
+                                                                                     Azimuth/sample
+   Cross-range/bin
+
+
+
+
+                      400                                                                              400
+
+                      500                                                                              500
+
+                      600                                                                              600
+
+                      700                                                                              700
+
+                      800                                                                              800
+
+                      900                                                                              900
+
+                     1000                                                                             1000
+                     1100                                                                             1100
+                            50     100    150     200    250    300                                              50        100     150     200   250   300
+                                           Range/bin                                                                                Range/bin
+
+ Fig. 2 SAR image of a vibrating point target                                       Fig. 3 Range lines of two vibrating targets
+Xia and Huang EURASIP Journal on Advances in Signal Processing (2016) 2016:94                                               Page 4 of 11
+
+
+
+
+adjacent samples. Supposing the maximal real phase                        revised phase (point 6 '') is equal to the measured phase
+difference between adjacent samples is below π, a so-                     (point 6 '), but not the real phase (point 6). In order to
+lution of the phase revising function is                                  avoid the occurrence of the above, we need to increase
+             8                                                            pulse repetition frequency (PRF) to make sure that the real
+             < prðηk−1 Þ−2π; ϕ n ðηk Þ−ϕ n ðηk−1 Þ > π                    phase difference between adjacent samples is below π.
+    prðηk Þ ¼ prðηk−1 Þ þ 2π; ϕ n ðηk−1 Þ−ϕ n ðηk Þ > π                   Therefore, the limitation of PRF has to be addressed here.
+             :
+               prðηk−1 Þ;       jϕ n ðηk Þ−ϕ n ðηk−1 Þj < π                 First, we consider the situation where the airborne
+                                                                   ð11Þ   radar moves in a straight line at a constant speed, and
+                                                                          suppose that there is only one vibrating target whose
+where pr(ηk) is the phase total shift between the real                    vibration displacement along the direction of radar in-
+phase and measurements at kth azimuth time. Thus, the                     cidence is a sin(2πf vη). Let fprf denote PRF, and the
+revised phase can be expressed as                                         sampling interval of slow time is
+    ϕ n 0 ðηÞ ¼ ϕ n ðηÞ þ prðηÞ                                    ð12Þ      Δη ¼ 1=f prf                                          ð13Þ
+   However, the discrete signal is subjected to a problem. If               Since the maximal phase difference between adjacent
+the real phase difference between adjacent samples is                     samples is always occurred where the slope of vibration
+greater than π, we cannot acquire the correct real phase                  displacement is maximal, it can be expressed as
+by above phase-revising method. For example, in one case,
+if the adjacent samples’ real phase difference is greater                                 4πf 0 ⋅2asinð2πf v ⋅Δη=2Þ
+                                                                              Δϕ max ¼
+than 2π, like point 2 and 3 in Fig. 4a, the phase shift be-                                           c
+tween the real phase and the measured phase of point 3 is                                 8πf 0 asinðπf v ⋅ΔηÞ
+                                                                                        ¼                                          ð14Þ
+also larger than 2π (actually the phase shift equals 4π                                             c
+here). By applying the above method, we only add 2π to
+the measured phase (point 3') to obtain the revised phase                   Due to Δϕmax must be constrained below π, i.e., 8πf0a
+(point 3 ''), which is not equal to the real phase (point 3).             sin(πfv ⋅ Δη)/c < π, the requirement of PRF can be solved via
+In another case, as shown in Fig. 4b, the adjacent samples’
+                                                                                            πf v
+real phase, like point 5 and 6, whose difference is smaller                  f prf >                                              ð15Þ
+than 2π but larger than π, so that the phase difference be-                            arcsin 8afc
+                                                                                                     0
+tween their measured phase (point 5 ' and 6 ') is below π.
+With application of the above phase-revising method, the                     According to Nyquist sampling theorem, PRF must be
+                                                                          larger than 2f v. And for the vibration amplitude meets
+                                                                                               
+                                                                          a > 0, arcsin 8afc     should be satisfied as 0 < arcsin
+          Real Phase                                                                        0
+
+   Measured Phase
+                                                                             c
+                                                                            8af   < π2 .
+                                                                              0
+    Revised Phase
+                                                                            Then, we take another situation into account. The air-
+      5                                                                   borne radar does not simply move in a straight trajec-
+                           3
+                                                                          tory, while it flies with a velocity vY, which is a velocity
+                                  Revising
+      3                            Phase                                  along axis OY, that leads to the slant range R(η) fluctuat-
+                   2(2')
+                                                              3'          ing with azimuth time. The range of fluctuation is much
+                                                                          larger than vibration amplitude so that we can only take
+      1(1')                                   1'     2'
+                           3'                                             fluctuation into consideration. In this case, the maximal
+                                                                          phase difference between adjacent samples becomes
+                                  a
+      5                                                                                   4πf 0 jvY jmax ⋅Δη
+                                                                             Δϕ max ¼                                              ð16Þ
+                                   Revising
+                                                                                                   c
+      3
+                                                                            According to Δϕmax < π and (13), we can get the limit-
+                                    Phase
+                            6
+                   5(5')
+                                                                          ing condition of PRF
+                                                              6'
+                                                                                       4f 0 jvY jmax
+      4(4')                6'                 4'     5'
+                                                                             f prf >                                               ð17Þ
+                                                                                              c
+                                  b
+ Fig. 4 Two special cases about phase revising. a The adjacent            3.2 Wavelet transform
+ samples’ real phase difference is greater than 2π. b The adjacent
+                                                                          Compared to Fourier transform, wavelet transform (WT)
+ samples’ real phase difference is smaller than 2π but larger than π
+                                                                          is a local transform in time and frequency domain, which
+Xia and Huang EURASIP Journal on Advances in Signal Processing (2016) 2016:94                                                                                   Page 5 of 11
+
+
+
+
+can be used to extract information from signal effectively.
+                                                                                             150
+Wavelet transform makes a multi-scale analysis of func-
+tions or signals by expansion, translation operations, so
+that some characteristics can be fully highlighted. It is
+known as mathematical microscope.
+                                                                                             100
+  According to (10), the phase of the range line is
+
+
+
+
+                                                                                 Amplitude
+− 4πf0Rn(η)/c, which can be written in                                                                                                   Low-frequency signal
+
+
+
+    ϕ n ðηÞ ¼ −4πf 0 ðr ðηÞ þ r v0 ðηÞÞ=c                               ð18Þ
+                                                                                              50
+   This expression demonstrates that the phase of the
+range line is the sum of two parts: − 4πf0 ⋅ r(η)/c, which is                                                                                Vibration signal
+linear proportional to the nominal line-of-sight distance
+from the target to the radar sensor and − 4πf0 ⋅ rv0(η)/c.                                     0
+                                                                                              -500                              0                                     500
+The former varies slowly with azimuth time referred to as                                                                 Frequency/Hz
+a low-frequency signal. The latter induced by vibration is                      Fig. 6 Spectrum obtained directly by applying FFT to the phase
+equivalent to a high-frequency signal. Here, we extract the
+low-frequency signal from the phase of range line by
+wavelet transform, and the remaining high-frequency sig-                         The amplitudes Ãi in frequency domain are also easy
+nal is the vibration signal that we need. The algorithm                        to obtain. Since the amplitudes in time domain and in
+chart is shown in Fig. 5.                                                      frequency domain have the relationship as (20):
+   If we applied Fourier transform to (18) directly, vibra-
+tion signal would be submerged in the low-frequency                                     ~ i ¼ T =dη⋅~
+                                                                                        A           ai                                                                 ð20Þ
+signal in spectrogram, as shown in Fig. 6. This is because                                    2
+the changed slant distance is equivalent to a low-frequency
+signal, whose amplitude is much larger than vibration amp-                     where T is the total azimuth time and dη is the sample
+litude. In this way, it is not easy to distinguish the vibration               interval in azimuth direction, the estimated amplitudes
+signal and acquire its frequency from the spectrum.                            are acquired.
+Therefore, we have to separate the vibration signal from                         In order to estimate its initial phase, we define the
+the low-frequency signal by WT.                                                basis function as follows:
+
+3.3 Frequency, amplitude, and initial phase estimation                                                                                   
+                                                                                        r vref ðη; φ^ i Þ ¼ a~ i sin 2π ~f vi η þ φ^ i                                 ð21Þ
+After applying the wavelet transform to the phase history
+of range lines, the vibration signal is extracted, which can
+be expressed in the following form                                             where φ^ i ∈½0; 2π  . The projection of estimated vibration
+                X                                                             signal ~r v0 ðηÞ on the basis function can be expressed as
+    ~r v0 ðηÞ ¼   a~ i sin 2π f~vi η þ φ
+                                       ~i               ð19Þ
+                    i¼1
+                                                                                        S ðφ^ i Þ ¼ h~r v0 ðηÞ; r vref ðη; φ^ i Þi                                     ð22Þ
+  By applying the Fourier transform directly to (19), the
+spectrum is obtained. It is convenient to get the esti-                         The estimated initial phase φ~ i is the φ^i in [0, 2π] which
+mated frequencies f~vi from the spectrogram.                                   makes S ðφ^ i Þ achieve the maximum.
+
+                                                                               4 Discussions
+   The phase of                                       Remove high-             In real-world applications, the performance of the pro-
+   the range line
+                          Multi-scale                   frequency              posed method is affected by the presence of noise. If
+                          analysis by                component from
+                             WT                        coefficient of
+                                                                               SAR returns are highly corrupted by noise, some errors
+                                                        each scale             may exist in the estimated vibration displacement. Thus,
+                                                                               we are interested in finding the SNR threshold above
+   High-frequency                           Low-
+   signal (vibration    Subtract low-    frequency                             which the estimation result is acceptable.
+       signal)            frequency        signal    Reconstruct low-            One metric to evaluate the estimation accuracy is the
+                       signal from the               frequency signal
+                       phase of range                 by inverse WT            normalized root-mean-square error (NRMSE) [21]. It
+                             line                                              denotes the normalized Euclidean distance between the
+                                                                               estimated vibration signal ^r v0 ðηÞ and the real vibration
+ Fig. 5 The algorithm chart of separating signal by WT
+                                                                               signal rv0(η). NRMSE can be calculated by
+Xia and Huang EURASIP Journal on Advances in Signal Processing (2016) 2016:94                                                                                    Page 6 of 11
+
+
+
+
+                  k~r v0 ðηÞ−r v0 ðηÞk                                                                                 1.4
+          NRMSE ¼ ————————                                           ð23Þ
+                         kr v0 ðηÞk                                                                                                           Vibration frequency:f=10 Hz
+
+
+
+
+                                                                               The normalized root mean-square-error
+                                                                                                                       1.2                    Vibration frequency:f=20 Hz
+                                                                                                                                              Vibration frequency:f=30 Hz
+
+where ‖ • ‖ denotes the l2 norm operator.                                                                               1
+  Adding a zero-mean complex-valued white Gaussian
+noise to every SAR return, we compute NRMSEs to                                                                        0.8
+
+evaluate the performance of the proposed method in es-
+                                                                                                                       0.6
+timating the vibration signal under different SNR levels.
+Here, we define the SNR as                                                                                             0.4
+
+                             σ2                                                                                        0.2
+          SNR ¼ 10 lg                                                ð24Þ
+                             σ 2w
+                                                                                                                        0
+                                                                                                                        -30   -20   -10            0        10          20
+where σ2 is the power of each return echo and σ 2w is the                                                                                 SNR/dB
+variance of the additive noise.                                              Fig. 8 Normalized root-mean-square errors in estimating vibration
+  Figure 7 shows an example of the vibration signal esti-                    signal for three frequencies under different SNRs using
+mated by the proposed method. The real vibration signal                      phase-analysis-based estimator
+is assumed to be a sinusoidal wave with a frequency of
+20 Hz. Figure 7b shows when SNR = 10 dB, the noise                          5 Simulations
+has a little influence on the estimated signal. When SNR                    5.1 Airborne radar along desirable trajectory
+decreases to 0 dB, the estimated signal is severely cor-                    5.1.1 Single point target
+rupted by the noise.                                                        The simulated SAR is an airborne side-looking strip-
+  In order to assess the SNR threshold clearly, we car-                     mode SAR working in the Ku band. Table 1 lists the key
+ried out a simulations for three vibration frequencies                      system parameters associated with the simulation. The
+under different SNRs. The normalized root-mean-square                       vibrating target with amplitude of 5 mm, a frequency of
+errors are plotted in Fig. 8. The vibration frequencies are                 20 Hz, and initial phase of π rad is located at (0,7000,0).
+10, 20, and 30 Hz, respectively. When SNR is lower than                     After applying range compression and range migration
+−15 dB, the NRMSEs are relatively higher. And with the                      correction to the simulated SAR returns, the range line
+decrease of SNR, the NRMSEs rise extremely fast. In this                    of the vibrating object was obtained. Figure 9a shows the
+case, the estimated frequency may be correct, but it                        time-frequency representation and the real phase of the
+seems not reliable. When SNR is increased to −15 dB,                        vibrating target’s range line. Its time-frequency represen-
+the NRMSEs drop to an acceptable level. But the errors                      tation illustrates that the small vibration modulates the
+plateau as the SNR increases. The results also imply that                   phase history of the radar echoes. The real phase was ac-
+when SNR is larger than −15 dB, the higher the vibra-                       quired by the method proposed in Section 3.1, which
+tion frequency is, the lower the NRMSEs are.                                consists of two components: the variation with azimuth
+                                                                            time of the nominal line-of-sight distance from the tar-
+    a                                                                       get to the radar sensor and the vibration signal, which
+               0.01                                                         are referred to as the low-frequency signal and the high-
+   Magnitude
+
+
+
+
+                   0                                                        frequency signal, respectively. Figure 9b shows the result
+               -0.01
+                                                                            of the estimation. The first figure is the nominal line-of-
+                       0   200      400       600      800   1000   1200
+    b
+               0.01
+                                                                            Table 1 SAR system parameters used in the simulation
+   Magnitude
+
+
+
+
+                   0                                                        Parameter                                                                                Quantity
+               -0.01                                                        Carrier frequency                                                                        15 GHz
+                       0   200      400       600      800   1000   1200
+    c                                                                       Bandwidth                                                                                400 MHz
+               0.02
+   Magnitude
+
+
+
+
+                                                                            Pulse duration                                                                           0.5 μs
+                   0
+                                                                            Range sampling frequency                                                                 420 MHz
+               -0.02
+                       0   200      400       600      800   1000   1200    Range resolution                                                                         0.375 m
+                                      Azimuth time/s
+                                                                            Plane velocity                                                                           100 m/s
+ Fig. 7 Vibration signal estimated by phase-analysis method. a Real
+ vibration signal. b Estimated signal with SNR = 10 dB. c Estimated         Length of the synthetic aperture                                                         125 m
+ signal with SNR = 0 dB                                                     Pulse repetition frequency                                                               880 Hz
+Xia and Huang EURASIP Journal on Advances in Signal Processing (2016) 2016:94                                                                                                                                                    Page 7 of 11
+
+
+
+
+                     a                                                                                                    b
+                                                          Time-frequency representation of the range line                                                    Low-frequency signal
+                                               400                                                                            0
+
+                     Frequency/Hz              200                                                                         -0.2
+
+                                                 0                                                                         -0.4
+                                                                                                                                  0          200            400          600              800          1000          1200
+                                               -200                                                                                                          Azimuth time/sample
+                                               -400                                                                                                            Vibration signal
+                                                                                                                           0.01
+                                                           200        400        600         800            1000
+                                                                      Azimuth time/sample                                     0
+                                                                     Phase of the range line
+                         Amplitude of Phase
+
+
+
+
+                                                 0                                                                        -0.01
+                                                                                                                                  0          200            400          600              800          1000          1200
+                                               -0.1                                                                                                         Azimuth time/sample
+                                                                                                                                                          Spectrum of vibration signal
+                                               -0.2                                                                           4
+
+                                               -0.3                                                                           2                                                X: 20.66
+                                                                                                                                                                               Y: 2.713
+                                               -0.4                                                                            0
+                                                      0   200        400       600      800         1000           1200       -500    -400    -300    -200        -100   0       100       200     300        400     500
+                                                                       Azimuth time/sample                                                                         Frequency/Hz
+
+
+                             c                                                                                            d
+                                                          Time-frequency representation of the range line                                                    Low-frequency signal
+                                                                                                                              0
+                                               400
+                      Frequency/Hz
+
+
+
+
+                                               200                                                                         -0.1
+
+                                                  0                                                                        -0.2
+                                                                                                                                  0          200            400          600              800          1000           1200
+                                               -200                                                                                                          Azimuth time/sample
+                                               -400                                                                                                            Vibration signal
+                                                                                                                          0.02
+                                                           200         400        600         800           1000
+                                                                       Azimuth time/sample                                    0
+                                                                      Phase of the range line
+                          Amplitude of Phase
+
+
+
+
+                                                  0                                                                       -0.02
+                                                                                                                                  0          200            400          600              800          1000           1200
+                                               -0.1                                                                                                          Azimuth time/sample
+                                                                                                                                                          Spectrum of vibration signal
+                                               -0.2                                                                           4
+
+                                               -0.3                                                                           2
+
+                                               -0.4                                                                            0
+                                                      0   200        400       600      800         1000           1200       -200     -150        -100       -50        0          50           100      150         200
+                                                                       Azimuth time/sample                                                                         Frequency/Hz
+
+ Fig. 9 The simulation results for one vibrating point target. a, b Time-frequency representation, the phase of the range line and the vibration
+ estimation results for a target whose vibration signal is a single-frequency sinusoidal. c, d Time-frequency representation, the phase of the range
+ line and the vibration estimation results for a target whose vibration signal is a multi-frequency sinusoidal
+
+
+
+sight distance varied with azimuth time, which is equivalent                                                              2.1, 5.7, and 3.8 mm correspondingly and the estimated
+to a low-frequency signal separated from the phase of the                                                                 initial phase is as Table 2.
+range line by WT. Then subtracting this low-frequency sig-
+nal from the phase of the range line, we obtained the vibra-
+tion signal, as shown in the second figure. After applying                                                                5.1.2 Multiple point targets in different range cells
+fast Fourier transform (FFT) to the estimated vibration sig-                                                              Then we considered the case where multiple point
+nal, the vibration frequency was acquired, as illustrated in                                                              targets in different range cells are contained in the
+the last figure. The estimated amplitude and initial phase is                                                             scene. Suppose that there are three vibrating targets
+4.9 mm and 3.0945 rad by the proposed method.                                                                             O, P, and Q, located at (0,6990,0), (0,7000,0), and
+   Supposing that the vibration signal is a multi-frequency                                                               (0,7005,0). The vibration amplitude, frequency, and
+sinusoidal signal, whose equation is given by                                                                             initial phase of O, P, and Q are shown in Table 3.
+                                                                                                                          The range lines of the three targets are shown in
+    r v0 ðηÞ ¼ 0:003 sinð20πη þ 11π=9Þ                                                                                    Fig. 10a. Applying the proposed method to these range
+               þ 0:006 sinð30πη þ π Þ                                                                                     lines respectively, we got the results of estimation for
+               þ 0:004 sinð40πη þ π=4Þ                                                                      ð25Þ          point O, P, and Q, as shown in Fig. 10b–d. The esti-
+                                                                                                                          mated vibration parameters are listed in Table 4, which
+   Time-frequency representation and phase of the range                                                                   are almost the same as the corresponding parameters set
+line is shown in Fig. 9c. It is clear that a multi-frequency                                                              in Table 3.
+signal modulates the phase history of SAR returned sig-
+nals. Figure 9d demonstrates the result of the estimation,
+from which we know that the estimated vibration signal                                                                    Table 2 Comparison of real phase and estimated phase
+contains three frequencies. The estimated frequencies                                                                     Real phase/rad                                  11π/9 (3.8397)                            π (3.1416)    π/4 (0.7854)
+are 9.917, 15.7, and 20.66 Hz, which are almost the same
+                                                                                                                          Estimated phase/rad                                     3.7856                             3.3929         0.8011
+as the real frequencies. The estimated amplitudes are
+Xia and Huang EURASIP Journal on Advances in Signal Processing (2016) 2016:94                                                                                                                                     Page 8 of 11
+
+
+
+
+Table 3 Vibration parameters of three targets                                                                                    method still holds true in the case of the undesirable
+Targets                         O                                      P                             Q                           trajectory.
+Amplitude/mm                    3                                      6                             4
+Frequency/Hz                    25                                     15                            20
+                                                                                                                                 5.3 Comparison with TF analysis method, DFRFT-based
+                                                                                                                                 method, and HAF-based method
+Initial phase/rad               2π/3 (2.0944)                          π (3.1416)                    π/4 (0.7854)
+                                                                                                                                 As described in Section 1, several methods about extract-
+                                                                                                                                 ing the vibration signatures with SAR systems have been
+                                                                                                                                 proposed during the last few years. The time-frequency
+5.2 Airborne radar along undesirable trajectory                                                                                  (TF) analysis method is an important tool to analyze the
+As mentioned in Section 3.1, if the aircraft flies with a                                                                        micro-Doppler effect. DFRFT is an effective method to
+velocity vY, the slant range R(η) would fluctuate with azi-                                                                      estimate the time-varying accelerations, frequencies, and
+muth time. Suppose that the aircraft’s track is a sinusoid,                                                                      displacements associated with vibrating objects [10–12].
+which can be written as                                                                                                          Moreover, a time-frequency tracking algorithm based on
+                                                                                                                                 the high-order ambiguity function (HAF) is employed to
+                                                                                                                                 reconstruct the instantaneous frequency law of the micro-
+    y ¼ sinðπ=62:5xÞ                                                                                            ð26Þ
+                                                                                                                                 Doppler [16, 17]. In this section, we compare them with
+                                                                                                                                 phase-analysis method.
+  The vibrating target with amplitude of 5 mm and a
+frequency of 10 Hz is located at (0,7000,0). Applying the                                                                        5.3.0.1 Time-frequency analysis method The time-
+same method to the simulated SAR returns, we obtained                                                                            frequency distributions to provide methods use time-
+the result as shown in Fig. 11.                                                                                                  frequency distributions to provide an analysis of the
+  In fact, the aircraft’s fluctuation frequency is very low so                                                                   micro-Doppler effect. The time-frequency representation
+that it is also can be referred to as a low-frequency signal                                                                     of the range line is shown in Fig. 12, which roughly re-
+compared to the vibration signal. Hence, the proposed                                                                            veals a 4-Hz vibration component. However, this is only
+
+
+                               a                                                                                             b
+                                                                                                                                                                 Low-frequency signal
+                                                                                                                              0.2
+
+                                       100                                                                                     0
+
+                                       200                                                                                   -0.2
+                                                                                                                                    0             200       400           600         800     1000         1200
+                                       300                                                                                                                       Azimuth time/sample
+                                                                                                                                           -3
+                                                                                                                                                                   Vibration signal
+                     Azimuth/sample
+
+
+
+
+                                       400                                                 Q                                   5
+                                                                                                                                    x 10
+
+                                       500
+                                                                                                                               0
+                                       600                      O                    P                                         -5
+                                                                                                                                    0             200       400           600         800     1000         1200
+                                       700
+                                                                                                                                                            Azimuth time/sample
+                                       800                                                                                                                Spectrum of vibration signal
+                                                                                                                               2
+                                       900
+                                                                                                                               1
+                                      1000
+                                                                                                                                0
+                                      1100                                                                                     -500        -400    -300   -200     -100   0     100    200   300     400   500
+                                                      50       100           150    200          250         300
+                                                                                                                                                                    Frequency/Hz
+                                                                              Range/bin
+
+                      c                                                                                                       d
+                                                                    Low-frequency signal                                                                         Low-frequency signal
+                               0.2                                                                                            0.2
+
+                                      0                                                                                        0
+
+                           -0.2                                                                                              -0.2
+                                          0          200       400             600         800           1000         1200          0             200       400           600         800     1000         1200
+                                                                    Azimuth time/sample                                                                          Azimuth time/sample
+                                                                      Vibration signal                                                                             Vibration signal
+                        0.01                                                                                                 0.01
+                                      0                                                                                        0
+                     -0.01
+                          0                          200       400             600         800           1000         1200 -0.01
+                                                                                                                                0                 200       400           600         800     1000         1200
+                                                               Azimuth time/sample                                                                          Azimuth time/sample
+                                                             Spectrum of vibration signal                                                                 Spectrum of vibration signal
+                                      4
+                                                                                                                               4
+                                      2
+                                                                                                                               2
+                                       0
+                                      -500    -400    -300   -200     -100     0     100       200     300      400   500       0
+                                                                                                                               -500        -400    -300   -200     -100   0     100    200   300     400   500
+                                                                       Frequency/Hz
+                                                                                                                                                                    Frequency/Hz
+
+ Fig. 10 The simulation results for three vibrating point targets in different range cells. a Shows the range lines of the three targets. b–d The
+ results of vibration estimation for target O, P, and Q
+Xia and Huang EURASIP Journal on Advances in Signal Processing (2016) 2016:94                                                                                                                                   Page 9 of 11
+
+
+
+
+Table 4 Estimated vibration parameters of three targets
+                                                                                                                                                              Time-Frequency Distribution
+Targets                              O                          P                    Q
+                                                                                                                    400
+Amplitude/mm                         2.6                        5.4                  3.8
+                                                                                                                    300
+Frequency/Hz                         25.62                      15.7                 20.66
+Initial phase/rad                    2.0577                     3.2358               0.8482                         200
+                                                                                                                                                                             X: 0.2508 Y: 48.94
+                                                                                                                                                       X: 0.0005687 Y: 17.42 Index: 5635
+                                                                                                                    100                                Index: 8725
+
+
+
+
+                                                                                               Frequency/Hz
+                                                                                                                                                                             RGB: 0.875, 1, 0.125
+                                                                                                                                                       RGB: 0.813, 0, 0
+
+a qualitatively deduced observation. To obtain precise                                                                        0
+estimations of the instantaneous displacement from the                                                            -100
+time-frequency representation, further estimation proce-
+                                                                                                                  -200
+dures are required. In addition, the resolution of time-
+frequency distribution is closely related to the length of                                                        -300
+the time window, and we cannot get optimal time reso-
+                                                                                                                  -400
+lution and frequency resolution at the same time. If the
+                                                                                                                                  -0.5   -0.4      -0.3    -0.2    -0.1        0       0.1     0.2       0.3         0.4    0.5
+vibration frequencies are higher, or there are multiple vi-                                                                                                                 Time/s
+bration components, the time-frequency representation                                         Fig. 12 The time-frequency representation of the range line (the actual
+would not be clear enough to reveal all the vibration                                         vibration frequency is 4 Hz)
+components. Whereas the proposed method provides dir-
+ect quantitative estimations of the vibration displacement
+and a larger range of the estimated vibration frequency.
+
+5.3.0.2 DFRFT-based method The DFRFT-based method                                              a                                         -3
+                                                                                                                                      x 10                Vibration acceleration histroy
+approximates the nonstationary signal by a chirp signal                                                                           4
+in a small time window. DFRFT is applied to estimate                                                                              2
+                                                                                                                  Amplitude
+
+
+
+
+the vibration acceleration. Then the history of the vibra-                                                                        0
+tion acceleration can be reconstructed and the vibration                                                                      -2
+frequency can be obtained by calculating DFT of the ac-
+                                                                                                                              -4
+celeration. The proposed method extracts the phase of                                                                          -0.8           -0.6        -0.4    -0.2      0       0.2                        0.4         0.6
+                                                                                                                                                                 Azimuth time/s
+the global data directly and applies the WT to the phase                                                                                                   Spectrum of vibration signal
+history to obtain the vibration signal.                                                                                   0.4
+   A simulated example is provided to compare the capabil-                                                                0.3
+                                                                                                              Amplitude
+
+
+
+
+ity of the two methods on vibration signal reconstruction                                                                 0.2
+                                                                                                                                                                                  X: 4.355
+                                                                                                                                                                                  Y: 0.289
+
+and spectrum estimation. We assumed that the point tar-                                                                   0.1
+get’s vibration signal is rv0(η) = 0.005 sin(8πη). The estima-
+                                                                                                                               0
+tion results are shown in Fig. 13. The estimated frequency                                                                    -150              -100         -50         0       50                      100               150
+                                                                                                                                                                    Frequency/Hz
+of DFRFT-based method and phase-analysis method is
+                                                                                               b
+                                                                                                                                                                   Vibration signal
+                                    Low-frequency signal                                                             0.02
+      1
+                                                                                               Amplitude
+
+
+
+
+      0                                                                                                              0.01
+
+      -1
+           0        200            400        600              800          1000     1200                                     0
+                                    Azimuth time/sample
+                                      Vibration signal                                                             -0.01
+   0.05                                                                                                                           0           50          100         150            200           250         300         350
+                                                                                                                                                             Azimuth time/sample
+      0
+                                                                                                                                                           Spectrum of vibration signal
+   -0.05                                                                                                                  0.8
+           0        200            400        600              800          1000     1200
+                                                                                                                                                                                  X: 3.931
+                                    Azimuth time/sample                                                                   0.6
+                                                                                                         Amplitude
+
+
+
+
+                                                                                                                                                                                  Y: 0.7398
+                                 Spectrum of vibration signal
+      4                                                                                                                   0.4
+
+      2                                                                                                                   0.2
+                                                    X: 9.253
+       0                                            Y: 2.249                                                                   0
+      -200     -150       -100       -50      0          50           100      150   200                                      -150              -100         -50              0               50           100             150
+                                         Frequency/Hz                                                                                                               Frequency/Hz
+ Fig. 11 The estimation results in the case where airborne radar                              Fig. 13 The estimation results by two different methods. a Obtained
+ moves along undesirable trajectory                                                           by DFRFT-based method. b Obtained by phase-analysis method
+Xia and Huang EURASIP Journal on Advances in Signal Processing (2016) 2016:94                                                             Page 10 of 11
+
+
+
+
+4.355 and 3.931 Hz, and the computation time is 5.7754                 multiple point targets in the same range cell and the
+and 0.4108 s, respectively. It demonstrates that the phase-            models of real-world vibrating objects will be examined
+analysis method does an excellent reconstruction of smooth             carefully, which will have great significance to object
+vibration displacement and provides more accurate estima-              recognition, classification, and SAR imaging.
+tion results. Furthermore, it also implies that the proposed
+                                                                       Acknowledgements
+method in this paper has lower computation complexity.
+                                                                       This work was supported in part by the National Natural Science Foundation
+                                                                       of China under Grant 61201366, in part by the Fundamental Research Funds
+5.3.0.3 HAF-based method The HAF-based method                          for the Central Universities under Grant NS2016040, in part by the Fundamental
+                                                                       Research Funds for the Central Universities under Grant NJ20150020.
+tracks the instantaneous frequency laws by dividing the
+range line of the vibrating target in nonoverlapping win-              Competing interests
+dows and locally approximating the phase with a poly-                  The authors declare that they have no competing interests.
+nomial expression. In each window, HAF algorithm is
+                                                                       Received: 3 March 2016 Accepted: 25 August 2016
+applied, which is an iterative algorithm, to estimate the
+polynomial coefficients. After the initial reconstruction,
+the instantaneous frequency laws must be filtered in                   References
+order to mitigate the possible gaps that may appear at                 1. H Wu, M Siegel, P Khosla, Vehicle sound signature recognition by frequency
+                                                                           vector principal component analysis. IEEE Trans. Instrum. Meas. 48(5),
+the transitions between estimation windows [17]. On the                    1005–1009 (1999)
+other hand, the phase-analysis method needs neither it-                2. VC Chen, F Li, S Ho, H Wechsler, Micro-Doppler effect in radar:
+erative algorithm in each window nor filtering for esti-                   phenomenon, model, and simulation study. IEEE Trans. Aerosp. Elecron.
+                                                                           Syst. 42(1), 2–21 (2006)
+mated instantaneous frequency laws. Instead, it gives the              3. Q Wang, M Pepin, A Wright, R Dunkel, T Atwood, B Santhanam, W Gerstle,
+history of the vibration displacement directly and then                    AW Doerry, MM Hayat, Reduction of vibration-induced artifacts in synthetic
+the vibration amplitudes, frequencies, and initial phases                  aperture radar Imagery. IEEE Trans. Geosci. Remote Sens. 52(6), 3063–3073 (2014)
+                                                                       4. Y Zhang, JP Sun, P Lei, W Hong, SAR-based paired echo focusing and
+can be estimated. Therefore, our proposed method may                       suppression of vibrating targets. IEEE Trans. Geosci. Remote Sens. 52(12),
+have relatively low computation complexity. Besides, our                   7593–7605 (2014)
+method makes use of the global data so that the possible               5. T Sparr, B Krane, Micro-Doppler analysis of vibrating targets in SAR. IEE Proc.
+                                                                           Radar, Sonar Navigat. 150(4), 277–283 (2003)
+errors induced by transitions between the estimation                   6. T Sparr, B Krane, Analysis of phase modulation caused by target motion in
+windows may be avoided.                                                    SAR images. Proc. SPIE 5102, 178–188 (2003)
+                                                                       7. T Sparr, B Krane, Time-frequency analysis of vibrating targets in airborne
+                                                                           SAR systems. IEE Proc. Radar, Sonar Navigat. 150(3), 173–176 (2003)
+6 Conclusions                                                          8. M. Rüegg, E. Meier, D. Nüesch, Constant Motion, Acceleration, Vibration, and
+In this paper, a new method for radar-based vibration                      Rotation of Objects in SAR Data. Proc. SPIE 5980, 598005-1-12 (2005)
+estimation was presented, making the radar capable of                  9. M Rüegg, E Meier, D Nüesch, Vibration and rotation in millimeter-wave SAR.
+                                                                           IEEE Trans. Geosci. Remote Sens. 45(2), 245–255 (2007)
+more accurate vibration measurement. We obtain the                     10. Q. Wang, M. Pepin, R.J. Beach, R. Dunkel, T. Atwood, A.W. Doerry, B.
+SAR phase history by applying the range compression                        Santhanam, W. Gerstle, M.M. Hayat, Demonstration of Target Vibration
+and range migration correction to the SAR returns. Then                    Estimation in Synthetic Aperture Radar Imagery. In Proc. IEEE Int. Geosci.
+                                                                           Remote Sens. Symp. (IGARSS, Vancouver, 2011), pp.4083-4086
+the wavelet transform is acted on the phase history to ex-             11. Q Wang, M Pepin, RJ Beach, R Dunkel, T Atwood, B Santhanam, W Gerstle,
+tract the vibration displacement. This method provides                     AW Doerry, MM Hayat, SAR-based vibration estimation using the discrete
+quantitative estimations of the vibration signature includ-                fractional Fourier transform. IEEE Trans. Geosci. Remote Sens. 50(10),
+                                                                           4145–4156 (2012)
+ing vibration amplitudes, frequencies, and initial phases.             12. A. Jelili, B. Santhanam, M. Hayat, Limitations and Capabilities of the Slanted
+Some simulations provided to demonstrate that it can esti-                 Spectrogram Analysis Tool for SAR-Based Detection Of Multiple Vibrating
+mate the vibration signature of one or several targets vi-                 Targets. 2014 48th Asilomar Conference on Signals, Systems and Computers.
+                                                                           (Pacific Grove, CA, 2014), pp.172-176
+brating in single or multiple frequencies successfully and             13. B Peng, XZ Wei, B Deng, HW Chen, Z Liu, X Li, A sinusoidal frequency
+it also can be used for the case where the aircraft with the               modulation Fourier transform for radar-based vehicle vibration estimation.
+radar sensor moves along desirable or undesirable trajec-                  IEEE Trans. Instrum. Meas. 63(9), 2188–2199 (2014)
+                                                                       14. Y. Zhang, J.P. Sun, Moving Target Vibration Estimation in SAR Using Chirp
+tory. Note that in this paper, we assume that the aircraft                 Modulation and Autofocus. In Proc. IEEE Int. Radar Conf. (RADAR, Lille, 2014),
+flies at a constant speed. When the aircraft flies at the                  pp.1-6
+speed varied with time, the fluctuation of the velocity                15. Y Liang, Q Zhang, Y Luo, YQ Bai, YA Chen, Micro-Doppler features analysis
+                                                                           and extraction of vibrating target in FWCW SAR based on slow time envelope
+would generate a little interference to the phase history,                 signatures. IEEE Geosci. Remote Sens. Lett. 12(10), 2041–2045 (2015)
+but the vibration signal can be still extracted exactly.               16. A. Anghel, G. Vasile, C. Ioana, R. Cacoveanu, S. Ciochina, Vibration Estimation
+Therefore, the influence of the changed velocity can be                    in SAR Images Using Azimuth Time-Frequency Tracking and a Matched
+                                                                           Signal Transform. In Proc. IEEE Int. Geosci. Remote Sens. Symp. (IGARSS,
+neglected.                                                                 Milan, 2015), pp.2576-2579
+   However, this method has limitation that targets have               17. A Anghel, G Vasile, C Loana, R Cacoveanu, S Ciochina, Micro-Doppler
+to be distributed in different range cells. We cannot ex-                  reconstruction in spaceborne SAR images using azimuth time-frequency tracking
+                                                                           of the phase history. IEEE Geosci. Remote Sens. Lett. 13(4), 604–608 (2016)
+tract the vibration displacement of each target which is               18. B.P. Lathi, Signal Processing and Linear Systems (Univ. California,
+in the same range cell. In our future work, the case of                    Berkeley, 1998)
+Xia and Huang EURASIP Journal on Advances in Signal Processing (2016) 2016:94                                                        Page 11 of 11
+
+
+
+
+19. G. Cumming, F.H. Wong, Digital Processing of Synthetic Aperture Radar
+    Data: Algorithms and Implementation (Publishing House of Electronics
+    Industry, Beijing, 2012), pp. 154-191
+20. RK Raney, Synthetic aperture imaging radar and moving targets. IEEE Trans.
+    Aerosp. Electron. Syst. AES-7(3), 499–505 (1971)
+21. H. Kaibaf, J.T. Case, Y.R. Zheng, S. Kharkovsky, R. Zoughi, Quantitative and
+    Qualitative Comparison of SAR Images from Incomplete Measurements
+    Using Compressed Sensing and Nonuniform FFT. In Proc. Radar Conf.
+    (RADAR, Kansas City, 2011), pp. 592-596
+
+
+
+
+                                                                                   Submit your manuscript to a
+                                                                                   journal and beneﬁt from:
+                                                                                   7 Convenient online submission
+                                                                                   7 Rigorous peer review
+                                                                                   7 Immediate publication on acceptance
+                                                                                   7 Open access: articles freely available online
+                                                                                   7 High visibility within the ﬁeld
+                                                                                   7 Retaining the copyright to your article
+
+
+                                                                                     Submit your next manuscript at 7 springeropen.com
+

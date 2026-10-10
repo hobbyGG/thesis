@@ -1,0 +1,637 @@
+                                                                           Measurement 270 (2026) 120848
+
+
+                                                                      Contents lists available at ScienceDirect
+
+
+                                                                                Measurement
+                                                       journal homepage: www.elsevier.com/locate/measurement
+
+
+
+
+Improved structural acceleration estimation using low-cost MEMS
+accelerometer and FMCW millimeter-wave radar
+Jigu Lee b , Kiyoung Kim b , Daurl Kim b, Zhanxiong Ma a,* , Hoon Sohn b,*
+a
+    College of Civil Engineering and Mechanics, Lanzhou University, Lanzhou, Gansu, China
+b
+    Department of Civil and Environmental Engineering, Korea Advanced Institute of Science and Technology, Daejeon, South Korea
+
+
+
+
+A R T I C L E I N F O                                       A B S T R A C T
+
+Keywords:                                                   Accurate acceleration is fundamental to structural health monitoring. However, microelectromechanical system
+Structural acceleration measurement                         (MEMS) accelerometers, particularly low-cost accelerometers, suffer from low-frequency drift. To address this
+Accelerometer                                               limitation, this study developed an integrated sensing system and fusion technique that estimates the structural
+Millimeter-wave radar
+                                                            acceleration by integrating a frequency-modulated continuous-wave (FMCW) millimeter-wave radar with a low-
+Data fusion
+                                                            cost MEMS accelerometer and an on-board microprocessor. Acceleration data were reconstructed using a finite
+                                                            impulse response complementary filter that combines low-frequency components from the radar with high-
+                                                            frequency components from the accelerometer. The technique and system were validated in the laboratory
+                                                            under excitations at 0.1 Hz and 3.0 Hz, where the estimated acceleration closely aligned with the laser Doppler
+                                                            vibrometer (LDV)-based results in both frequency and time domains, while suppressing accelerometer drifts and
+                                                            radar noises. The robustness of the proposed system was validated employing a dynamic loading test on a
+                                                            highway bridge. Relative to the MEMS accelerometer, the root-mean-square error was reduced by 85.4 % (20
+                                                            km/h), 82.5 % (50 km/h), and 64.5 % (80 km/h) in the DC-2 Hz band. These results demonstrate that the
+                                                            proposed technique yields drift-free and noise-resilient acceleration, making it suitable for large-scale
+                                                            applications.
+
+
+
+
+1. Introduction                                                                                   offs and environmental influences. Specifically, the sensitivity of
+                                                                                                  MEMS accelerometers scales inversely with the proof mass or square of
+    Structural acceleration measurements are fundamental to structural                            the natural frequency, making it challenging to achieve miniaturization
+health monitoring (SHM) [1,2]. Accurate acceleration data facilitate                              and mechanical robustness [12,13]. The small size of the MEMS limits
+system identification and modal analysis, providing critical parameters                           the proof mass, which means that lowering the natural frequency often
+such as natural frequencies, damping ratios, and mode shapes, which                               requires the use of softer springs. Nonlinear springs are often introduced
+serve as essential indicators for detecting damage and evaluating the                             to lower the natural frequency to the few-Hz range required for long-
+overall structural integrity [3–5]. Therefore, the continuous and accu­                           period measurements, thereby increasing the calibration complexity
+rate monitoring of structural acceleration is critical.                                           and intrinsically limit the dynamic range [11,13]. Furthermore, these
+    Conventionally, structural accelerations have been measured                                   fundamental design constraints render MEMS accelerometers suscepti­
+employing several types of accelerometers, including force balance and                            ble to environmental influences (e.g., temperature variations and
+microelectromechanical system (MEMS) accelerometers [6]. Force-                                   package-induced stress), and this susceptibility manifests as low-
+balance accelerometers offer high accuracy; however, they incur high                              frequency drift and noise [14–16]. Addressing these limitations typi­
+costs and bulkiness, thereby limiting their scalability in large monitoring                       cally requires high-end MEMS accelerometers; however, their cost ren­
+networks [7,8]. By contrast, MEMS accelerometers are compact, cost-                               ders them unsuitable for large-scale SHM applications. While
+effective, and energy-efficient, making them attractive for SHM appli­                            metrological calibration can reduce deterministic error sources, main­
+cations [9–11]. However, low-cost MEMS accelerometers may exhibit                                 taining calibrated performance over long-term deployments and large-
+low-frequency drift and degraded accuracy, particularly under long-                               scale sensor networks remains challenging in practice [17,18].
+term or field-deployed conditions, due to fundamental design trade-                                   Alternatively, acceleration can also be obtained by double-
+
+
+    * Corresponding authors.
+      E-mail addresses: mazx@lzu.edu.cn (Z. Ma), hoonsohn@kaist.ac.kr (H. Sohn).
+
+https://doi.org/10.1016/j.measurement.2026.120848
+Received 24 November 2025; Received in revised form 25 January 2026; Accepted 12 February 2026
+Available online 14 February 2026
+0263-2241/© 2026 Elsevier Ltd. All rights are reserved, including those for text and data mining, AI training, and similar technologies.
+J. Lee et al.                                                                                                                   Measurement 270 (2026) 120848
+
+
+differentiating displacement measurements from systems such as vision-            optimal target and estimate the conversion factor for vertical displace­
+based sensors or real-time kinematic global navigation satellite systems          ment. This calibration step pertains to radar-based displacement esti­
+(RTK-GNSS). For instance, Weng et al. [19] proposed a visual–inertial             mation and does not involve dedicated metrological calibration of the
+method that integrated computer vision feature tracking with an                   MEMS accelerometer, which was used based on factory specifications to
+embedded IMU to compensate for camera motion, enabling the recovery               reflect practical large-scale and long-term SHM deployment conditions.
+of structural acceleration from video data. However, displacement-                The radar-based displacement was subsequently combined with accel­
+based acceleration estimation has inherent challenges. First, the mea­            erometer measurements using a finite-impulse-response (FIR) comple­
+surement accuracy of vision-based systems and RTK-GNSS is typically               mentary filter, wherein the low-frequency components from the radar
+limited in the high-frequency range and constrained by factors such as            and high-frequency components from the accelerometer were optimally
+the image sampling rate, camera shake, and GNSS multipath effects                 merged. The filter design incorporates a sliding time-window formula­
+[19–23]. Second, the double-differentiation process amplifies the high-           tion and regularization strategy, ensuring robust suppression of accel­
+frequency noise in displacement measurements, causing severe distor­              erometer drift and radar noise while yielding precise structural
+tion of the high-frequency acceleration signals while preserving low-             acceleration. The primary contributions of this study are as follows: (1)
+frequency trends [23,24]. This presents limitations for structural                the design of a complementary filter to fuse radar and accelerometer
+health monitoring and control applications that require high-precision            measurements, enabling precise structural acceleration estimation; (2)
+dynamic response information.                                                     improvement in measurement accuracy by effectively eliminating low-
+    Considerable research has focused on multi-sensor fusion to exploit           frequency drift in accelerometer data and suppressing high-frequency
+the complementary strengths of different sensing modalities owing to              noise in radar signals, outperforming standalone radar- or
+the inherent limitations of single-sensor techniques in achieving high-           accelerometer-based methods; and (3) implementation of the integrated
+precision dynamic measurements. In particular, displacement mea­                  sensing system and its successful deployment under real-world field
+surement through sensor fusion has attracted increasing attention, with           conditions, demonstrating the practical applicability and reliability of
+efforts made to integrate accelerometers with various sensors capable of          the proposed technique. This study makes a novel contribution to the
+directly sensing structural displacements [25–35]. For instance, RTK-             literature by being the first to employ FMCW millimeter-wave radar
+GNSS and accelerometer fusion techniques offer absolute position ac­              fusion specifically for structural acceleration estimation.
+curacy in conjunction with high-frequency acceleration data and have                  The remainder of this paper is organized as follows. Section 2 pre­
+been demonstrated to enhance displacement accuracy, precision, and                sents the integrated sensing system, data processing flow, and proposed
+sampling rate, while enabling stable long-term monitoring performance             acceleration estimation method. Section 3 describes the laboratory ex­
+through Kalman filter–based fusion. However, their performance is still           periments and validation. Section 4 presents field tests conducted on a
+constrained by the GNSS signal availability and susceptibility to multi­          highway bridge to verify its practical applicability. Section 5 concludes
+path effects, which can reduce their accuracy, particularly in urban or           the paper with a summary and outlook.
+obstructed environments. Recent studies have further shown that
+GNSS–accelerometer fusion frameworks need to account for misalign­                2. Structural acceleration estimation using accelerometer and
+ment- or tilt-induced biases and measurement outliers to ensure reliable          FMCW millimeter wave radar
+long-term displacement and acceleration estimation in SHM applica­
+tions [36–39]. Similarly, the fusion of strain gauges and accelerometers          2.1. Hardware configuration
+provides reference-free displacement measurements [28]. However, this
+method is predominantly effective for beam-like structures, and its ac­               The integrated sensing system integrates an MEMS accelerometer,
+curacy may decrease significantly if the actual mode shapes of the                millimeter-wave radar sensor, and microprocessor unit (MPU) [32].
+structure differ from the assumed mode shapes. Fusion techniques                  Fig. 1 illustrates the hardware components and specifications. Each
+integrating vision systems with accelerometers leverage the non-contact           component was carefully selected based on the measurement accuracy,
+capability of vision and high sampling rate of accelerometers; however,           energy efficiency, compact form factor, and overall cost.
+they suffer from reduced accuracy under variable lighting and adverse                 The MEMS accelerometer utilized in this study is the ADXL355
+weather conditions [31].                                                          sensor from Analog Devices, selected for its low noise density (22.5 µg/
+    Millimeter-wave radar has emerged as a promising technology for               √Hz) which allows for accurate detection of structural vibrations. This
+structural displacement estimation. It offers several distinct advantages,        accelerometer provides three selectable measurement ranges: ±2 g, ±4
+including robustness under a range of weather conditions, suitability for         g, and ± 8 g, ensuring flexibility across various structural monitoring
+remote noncontact measurements, and millimeter-level precision                    applications. It consumes approximately 200 µA, making it highly suit­
+enabled by short wavelengths [32–34]. However, relying solely on radar            able for long-term monitoring. Communication with the sensor was
+presents limitations, including the need for manual calibration of the            achieved via the SPI and I2C protocols. Complementing the accelerom­
+target geometry and vulnerability to phase wrapping. To address these             eter, the XENSIV™ BGT60TR13C FMCW millimeter-wave radar from
+issues, Ma et al. (2023) demonstrated that fusing frequency-modulated             Infineon Technologies is integrated for additional precision in acceler­
+continuous-wave (FMCW) millimeter-wave radar with accelerometer                   ation estimation. This radar sensor operates at 60 GHz with a maximum
+data enabled high-accuracy structural displacement estimation [33].               bandwidth of 5.5 GHz, enabling high-resolution measurements of
+Despite ongoing efforts to utilize sensor fusion techniques primarily for         structural motion. Its compact packaging and low-power operation align
+displacement measurements, research that specifically employs                     with the long-term monitoring requirements. For data processing, a
+millimeter-wave radar fusion methods for structural acceleration esti­            Raspberry Pi 4 Model B was selected as the MPU. Equipped with a quad-
+mation remains unexplored.                                                        core Broadcom BCM2711 processor (1.5 GHz) and 8 GB RAM, it effec­
+    This study aims to achieve improved acceleration measurement ac­              tively handled real-time data analysis. Its communication interfaces,
+curacy in both low- and high-frequency ranges by fusing millimeter-               including Ethernet, WLAN 802.11ac, Bluetooth 5.0, and multiple USB
+wave radar and accelerometer data for long-term monitoring of bridge              ports facilitate efficient data management and transfer. Local storage is
+structures. While the method is designed for broadband acceleration               handled via a microSD card slot. The components communicate through
+estimation, it is particularly beneficial in low-frequency and quasi-static       an SPI interface, ensuring synchronized data collection and processing.
+regimes where standalone low-cost MEMS accelerometers suffer from                 Overall, the assembled hardware cost less than $350, providing an
+drift accumulation and high-end, wired accelerometers are impractical             economical solution suitable for wide deployment in structural accel­
+for large-scale field deployment. Radar measurements were first cali­             eration monitoring.
+brated using a short initial data collection to automatically select the
+
+                                                                              2
+J. Lee et al.                                                                                                                        Measurement 270 (2026) 120848
+
+
+
+
+      Fig. 1. Specification of the integrated sensing system, consisting of a millimeter-wave radar, a MEMS accelerometer, and a microprocessor unit (MPU).
+
+
+2.2. Data processing flowchart in the integrated sensing system                     convert the radar line-of-sight (LOS) displacement into vibration-
+                                                                                    direction displacement and assist in phase unwrapping. Acceleration
+   Fig. 2 shows an overview of the proposed acceleration estimation                 signals were also used to determine the optimal regularization factor
+technique. The system was installed beneath the bridge span with the                through power-law fitting. With these parameters, the radar-based
+radar’s emitting aperture oriented downward toward the ground, and                  displacement and accelerometer data were combined using an FIR
+the radar and accelerometer measurements were collected. During a                   complementary filter, and the fused acceleration was obtained from the
+short initial calibration, acceleration measurements were used to                   center sample of each sliding window. The window then shifts
+
+
+
+
+Fig. 2. Overview of the proposed acceleration estimation technique combining millimeter-wave radar and an accelerometer: (a) sensor setup and (b) flowchart of the
+acceleration estimation process.
+
+                                                                                3
+J. Lee et al.                                                                                                                    Measurement 270 (2026) 120848
+
+
+sequentially, enabling a continuous acceleration estimation.                      unwrapping process [33]. At this stage, the radar measured the
+                                                                                  displacement along the LOS direction. Radar- and accelerometer-
+2.2.1. FMCW radar-based displacement estimation                                   derived displacements were compared in the high-frequency domain
+   Structural displacement was first estimated using FMCW millimeter-             to translate the LOS displacement into the actual structural vibration
+wave radar measurements with the assistance of acceleration measure­              direction, and the amplitude of the radar displacement was adjusted to
+ments. The radar transmitted signals toward the region beneath the                align with that of the accelerometer [33].
+bridge, and the resulting reflections from multiple points were recorded.
+These reflections encode the round–trip time delay (τ) between the radar          2.2.2. Complementary-filter-based acceleration estimation by fusing radar-
+and each reflecting target, from which the distance is obtained following         based displacement and acceleration
+standard FMCW millimeter-wave radar ranging principles.                               Building on the radar-based displacement estimation and collocated
+   Specifically, the distance (d) between the radar and a target is esti­         accelerometer measurements, the structural acceleration was estimated
+mated from the measured round-trip time delay (τ):                                using the proposed time-domain FIR complementary filter. As illustrated
+      cτ                                                                          in Fig. 3, the filter operates on a sliding overlapping window and com­
+d=                                                                     (1)        bines the high-frequency components from acceleration with the low-
+      2
+                                                                                  frequency components from the radar-based displacement. This fusion
+where c denotes the speed of light. The transmitted FMCW chirp signal,            compensates for the low-frequency drift in the accelerometer and the
+characterized by a continuously varying frequency, enables precise                high-frequency noise in the radar signal, thereby providing reliable and
+time-delay measurements and is given by:                                          precise structural acceleration estimation.
+               (            )                                                         Let a and u denote the measured acceleration and the radar-based
+stx (t) = exp[j 2πf0 t + αt2 ]                                     (2)            displacement, respectively, sampled with an interval Δt. Over a win­
+                                                                                  dow [(k − M)Δt, (k +M)Δt], the fusion is defined as the minimization in
+where f0 is the initial frequency, α is the frequency slope, and t is time.
+                                                                                  Equation (11), where the first term enforces fidelity of the estimate a* to
+The corresponding reflected signal from the target can be expressed as
+                                                                                  a and the second term penalizes the mismatch between the displacement
+              {[ (            )            ]}
+srx (t) = δexp j 2π f0 (t − τ) + α(t − τ)2                              (3)       implied by a* (obtained via discrete double integration) and u.
+
+                                                                                               1        2  λ2                  2
+with δ representing the amplitude attenuation factor. An intermediate             MinΠE (a* ) = ‖a* − a‖2 + ‖(Δt)2 L− 1 a* − u‖2 , L = La Lc             (11)
+                                                                                   u           2           2
+frequency (IF) signal was obtained by multiplying the transmitted signal
+by the complex conjugate of the reflected signal:                                 Here, L is the weighting-second-order differential operator: Lc imple­
+                                                                                  ments the central-different second derivative and La is a trapezoidal-rule
+yIF (t) = stx (t) × s*rx (t)                                           (4)        weighting matrix with hale-weights at the window ends.
+                                                                                     Minimizing Equation (11) yields the closed-form expression of
+The IF signal encodes both the frequency and phase information
+                                                                                  Equation (12),
+required for displacement estimation. The angular frequency and phase
+                                                                                       (                     )− 1
+are expressed as follows:                                                                         (    )T
+                                                                                  a* = I+λ2 (Δt)4 L− 1 L− 1       a
+ωIF = 2ατ                                                              (5)               (          (     )T    ) − 1         (    )T
+                                                                                      + I+λ2 (Δt)4 L− 1 L− 1          λ2 (Δt)2 L− 1 u                   (12)
+φIF = 2πf0 τ                                                           (6)
+                                                                                  Retaining only the center sample of each window leads to Equation (13),
+Consequently, the distance can be calculated from either the angular              wherein the estimated acceleration at time k. a*k is expressed as the sum
+frequency or phase:                                                               of two FIR operations: CH a: a high-pass component that preserves the
+       c                                                                          high-frequency content of the accelerometer while attenuating low-
+d=       ωIF                                                           (7)
+      4πα                                                                         frequency drift; CL u: a low-pass component that injects reliable low-
+                                                                                  frequency content from radar-based displacement.
+       c
+d=        φ                                                            (8)
+      4πf0 IF                                                                     a*k = CH a + CL u                                                      (13)
+
+When multiple targets are present, the received radar signal is a super­          The regularization factor λ physically controls the balance between
+position of individual reflections:                                               accelerometer and radar contributions in the complementary filter. A
+            M
+            ∑             {[                                  ]}                  smaller λ places greater weight on the accelerometer, preserving high-
+srx (t) =         δ(m) exp j 2πf0 (t − τ(m) ) + α(t − τ(m) )2          (9)        frequency content but amplifying low-frequency drift, whereas a
+            m=1                                                                   larger λ emphasizes the radar displacement, which is stable at low fre­
+    Let dk denote the instantaneous radar-to-target distance at time step         quencies but noisier at high frequencies. The value of λ depends on both
+k, and let d0 represent the initial distance measured at the beginning of         the number of data points in the window (Nd ) and the accelerometer
+the test. The structural displacement uk is therefore obtained as the             noise level: as Nd changes, the singular values of the operator vary, and
+variation obtained from the continuously transmitted chirp signals,               as noise increases, stronger regularization is required. In our experi­
+expressed as                                                                      ments, the accelerometer noise was fixed once experimentally
+                                                                                  measured, and a 25 % sensor-noise level representative of ADXL355 was
+                      c                                                           used, which was estimated from experimental data by calculating the
+u k = dk − d0 =          φ − φIF,0                                    (10)
+                     4πf0 IF,k                                                    standard deviation of the accelerometer signal and normalizing it by its
+                                                                                  peak amplitude. Therefore, we select the singular value that yields the
+However, radar phase measurements are inherently wrapped within
+                                                                                  smallest root mean square error (RMSE) under this noise level.
+[ − π, π], resulting 2π ambiguities when the motion exceeds the wrapped-
+                                                                                  Following the singular-value-based strategy in the earlier study [40], λ is
+phase range. To address this issue, short measurements of the radar and
+                                                                                  parameterized using singular values of L, and the index that minimizes
+accelerometer data were collected to perform automated calibration. In
+                                                                                  the RMSE of a* is determined. Seven different excitation frequencies
+this step, an acceleration-aided phase-unwrapping algorithm is applied,
+                                                                                  ranging from 0.5 to 6 Hz (i.e., 0.5, 1, 2, 3, 4, 5, 6 Hz) are examined,
+where the collocated accelerometer predicts the phase and guides the
+
+
+                                                                              4
+J. Lee et al.                                                                                                                              Measurement 270 (2026) 120848
+
+
+
+
+                    Fig. 3. Overview of complementary-filter-based acceleration estimation by fusing radar-based displacement and acceleration.
+
+
+covering drift-sensitive low frequencies up to higher-mode dynamics                     dominates the low-frequency range, whereas the accelerometer domi­
+while remaining below the Nyquist limit. For each frequency f, the                      nates the high-frequency range, and their combination remains unity
+window length was fixed to three cycles of the dominant period, cor­                    across the operational band, evidencing complementary behavior. The
+responding to a sample size of Nd = round(3/fdt) + 1, where dt denotes                  blue line represents the high-pass acceleration component CH a, orange
+the sampling interval and +1 accounts for discretizing the time interval                line represents the low-pass displacement with the double-
+into samples. The optimal λ for each case is obtained by solving Equation               differentiation component CL u, and yellow line represents the com­
+(14), where atrue is measured by a laser Doppler vibrometer (LDV) that                  bined components CH a + CL u. Example FIR coefficients are illustrated in
+provides the ground-truth motion with very high velocity resolution (10                 Fig. 5(b) (Nd = 101): CH is sharply localized around the center sample,
+nm/s/√Hz) [41]. The results are averaged over ten trials for each fre­                  whereas CL spans a wider support owing to the low-pass/double-
+quency, and the averaged λ values versus Nd are then fit with a power                   difference operation. In implementation, we use an overlapping win­
+law, which is implemented in the FIR filter to determine the weighting at               dow and retain only the center sample (group delay MΔt) to achieve flat
+each window.                                                                            accuracy over time while keeping boundary effects away from the re­
+                                                                                        ported sample.
+                      ‖a(λ) − atrue ‖22
+λ2opt (Nd , An ) = Min                                                      (14)
+                    λ    ‖atrue ‖22                                                     3. Lab-scale test
+   The outcome is shown in Fig. 4: the eight-singular value γ8 consis­
+tently produced the smallest RMSE under our noise setting, and its                      3.1. Experimental setup
+dependence on Nd is well captured by the power-law fitting in Equation
+(15). This empirical rule is then used to set λ in all subsequent analyses.                 A laboratory experiment was conducted to validate the performance
+                                                                                        of the integrated sensing system using the proposed acceleration esti­
+γ 8 = 3.44 × 106 N−d 1.97                                                   (15)        mation algorithm. Fig. 6 illustrates the experimental setup, including the
+   Using the selected λ, the amplitude responses of CH a + CL u, and their              location of the integrated sensing system and LDV LOS for the moving
+sum are plotted in Fig. 5(a). As intended, the radar-derived component                  target. The integrated sensing system was mounted rigidly on a linear
+                                                                                        shaker that moved the system along the intended vibration direction. A
+
+
+
+
+Fig. 4. Optimal regularization factors for structural acceleration estimation. The eighth singular value (γ8 ) was selected because it resulted in the smallest RMSE at a
+noise level of 25 %, corresponding to the noise level of the ADXL355 accelerometer used in the experiment.
+
+                                                                                    5
+J. Lee et al.                                                                                                                               Measurement 270 (2026) 120848
+
+
+
+
+                Fig. 5. Complementary filters: (a) amplitude responses of CH a, CL u, and their sum; (b) FIR filter coefficients for CH (upper) and CL (lower).
+
+
+
+
+Fig. 6. Experimental setup of the lab-scale test: (a) schematic overview of the experiment configuration, (b) actual arrangement in the laboratory, and (c) sur­
+rounding environment within the integrated sensing system’s field of view.
+
+
+Polytech RSV-150 LDV provided the ground-truth velocity motion and                         at 100 Hz. Two excitations were selected to probe the two regimes
+the acceleration reference was obtained by differentiating the signal.                     targeted by the method: 0.1 Hz (drift-sensitive, low-frequency) and 3.0
+The outputs of the integrated sensing system and the LDV were sampled                      Hz (noise-sensitive, higher-frequency).
+
+
+                                                                                       6
+J. Lee et al.                                                                                                                     Measurement 270 (2026) 120848
+
+
+3.2. Lab scale experiment results                                                 dominant peak (0.641 vs. 0.812 for LDV). Conversely, the fused accel­
+                                                                                  eration spectrum produces a sharp single peak (0.822) that nearly
+    The acceleration estimations or measurements under the two exci­              matches the LDV reference, demonstrating that the complementary filter
+tations are compared in Figs. 7 and 8, respectively. Under 0.1 Hz exci­           anchors the low-frequency band correctly while suppressing both radar
+tation, the radar-based acceleration shows higher-frequency noise                 noise and accelerometer drift. As summarized in Table 1, the fusion
+(Fig. 7(a)), leading to a large RMSE of 278.545 mm/s2. Both accelera­             technique reduces the RMSE and preserves the true low-frequency dy­
+tions measured by the accelerometer and those estimated by the inte­              namics with high fidelity, thereby systematically correcting each
+grated sensing system had a low RMSE of less than 3 mm/s2 compared                modality’s failure mode and producing results that are both phase-
+with the LDV reference. However, a low-frequency bias was clearly                 consistent and spectrally faithful to the reference.
+observed in the accelerometer results (Fig. 7(b)), whereas this drift was
+eliminated in the fusion-based acceleration (Fig. 7(c)). Under a 3.0 Hz           4. Field bridge test
+excitation (Fig. 8), the raw accelerometer signal performed well near the
+driving frequency, but the radar-based acceleration remained noisy and            4.1. Experimental setup
+preserved the high-frequency response while remaining consistent with
+the LDV reference. These comparisons emphasize that the integrated                    A field test was conducted on a concrete deck–steel box-girder
+sensing system clearly outperforms the radar-based acceleration under             highway bridge to validate the integrated sensing system in an opera­
+both low- and high-frequency excitations. It also performed better than           tional environment. The span was approximately 60 m, and the distance
+the accelerometer under low-frequency excitation by suppressing the               between the bottom of the bridge steel girder and the ground was
+drift, whereas at high-frequency excitation, its performance remained             approximately 12 m. The integrated sensing system was mounted
+comparable to that of the accelerometer.                                          beneath the span near the midspan, and a Polytech LDV was set up on
+    The acceleration results were compared in both the time and fre­              the ground directly below to provide a ground-truth reference. A Wi-Fi
+quency domains at 0.1 Hz to highlight the superiority of the integrated           link was used for remote monitoring and data logging. Fig. 10 summa­
+sensing system under low-frequency excitation (Fig. 9). In the time               rizes the configuration, including a site overview, locations of the LDV,
+domain (Fig. 9(a)), the responses are shown with a low-pass filter cutoff         and the integrated sensing system. All channels were sampled at 100 Hz,
+of 0.15 Hz. The fusion output aligns closely with the LDV reference in            which was identical to the laboratory protocol. Three controlled traffic
+both the amplitude and phase, whereas the accelerometer exhibits a                excitations were employed to probe the three regimes targeted by the
+noticeable drift, and the radar suffers from broadband fluctuations. The          fusion: a truck passing at 20 km/h, 50 km/h, and 80 km/h.
+magnified inset on the right side of Fig. 9(a) further highlights this
+difference, showing that the fused signal maintains phase alignment               4.2. Acceleration measurement results
+with the LDV and avoids both the low-frequency bias of the acceler­
+ometer and noise fluctuations of the radar. In the frequency domain                   Figs. 11 and 12 present the time- and frequency-domain results from
+(Fig. 9(b–d)), the unfiltered spectra are magnified into the 0–0.15 Hz            the 20 km/h truck test. In the unfiltered time-domain responses
+band. Here, the radar spectrum shows reasonable agreement with the                (Fig. 11), the radar-based acceleration is dominated by broadband rip­
+LDV but retains residual noise, whereas the accelerometer spectrum                ples that increase the overall error and mask the underlying waveform,
+exhibits drift-related leakage toward zero frequency and a reduced                whereas the accelerometer signal rides on a slowly varying baseline that
+
+
+
+
+Fig. 7. Time-domain acceleration responses under a 0.1 Hz excitation: (a) radar-based acceleration, (b) MEMS accelerometer, and (c) integrated sensing system.
+
+                                                                              7
+J. Lee et al.                                                                                                                     Measurement 270 (2026) 120848
+
+
+
+
+Fig. 8. Time-domain acceleration responses under a 3.0 Hz excitation: (a) radar-based acceleration, (b) MEMS accelerometer, and (c) integrated sensing system.
+
+
+
+
+Fig. 9. Acceleration responses under a 0.1 Hz excitation: (a) time-domain response with a 0.15 Hz low-pass filter cutoff, and (b–d) frequency-domain responses
+(0–0.15 Hz) compared with the LDV reference.
+
+
+
+Table 1
+RMSEs of accelerations estimated using existing methods and integrated sensing system in lab-scale tests.
+  Excitation          Filter           Radar-based acceleration      MEMS accelerometer          Integrated sensing system   Error Reduction vs MEMS
+  Frequency           Condition        (mm/s2 )                      (mm/s2 )                    (mm/s2 )                    accelerometer
+
+  0.1 Hz              None             278.545                       2.879                       2.561                       11.0 %
+  ​                   LPF 0.15 Hz      0.017                         0.299                       0.016                       94.6 %
+  3.0 Hz              None             514.011                       43.543                      42.981                      1.3 %
+
+
+
+
+                                                                                8
+J. Lee et al.                                                                                                                          Measurement 270 (2026) 120848
+
+
+
+
+Fig. 10. Experimental setup of the field test: (a) schematic diagram of the experiment configuration, (b) actual view of the test site, and (c) placement of the LDV
+sensor and the integrated sensing system.
+
+
+subtly distorts the apparent period and causes the positive and negative             near the DC, reflecting the drift that injects spurious low-frequency
+peaks to be uneven over tens of seconds. By contrast, the fused output               content and prevents an accurate representation of the quasi-static
+overlays the LDV throughout, maintaining the overall shape and timing                response. The radar-based acceleration spectrum, while free from
+of each cycle while removing the high-frequency noise of the radar and               drift, showed a relatively elevated and irregular baseline across the
+slow drift of the accelerometer. In the broadband spectra (Fig. 12), the             band, indicating that broadband noise obscured the low-frequency peak
+radar-based acceleration channel exhibited strong high-frequency noise.              structure observed in the LDV. By contrast, the integrated sensing sys­
+The maximum amplitude of the fused response was similar to that of the               tem effectively suppressed both the low-frequency leakage of the
+LDV reference, whereas the accelerometer results exhibited a slightly                accelerometer and the noisy floor of the radar, resulting in a spectrum
+larger peak. This indicates that the fusion approach aligns better with              that remained well aligned with the LDV reference throughout the quasi-
+the LDV reference while mitigating the drift and noise effects. These                static band. An additional experiment was conducted under faster truck
+comparisons emphasize that the proposed technique consistently out­                  passes at 50 km/h and 80 km/h to further examine the robustness.
+performs the radar-based measurements and achieves a lower RMSE                      Similar results were obtained in the time domain with the integrated
+than the accelerometer, providing improved agreement with the LDV in                 sensing system closely aligning with the LDV reference. The results are
+both the time and frequency domains.                                                 summarized in Table 2, which reports the RMSE values for both the
+    To highlight these differences, Figs. 13 and 14 show comparisons in              unfiltered and 2 Hz low-pass cases. At 50 km/h and 80 km/h, the fused
+both the time and frequency domains within the low-frequency band.                   method reduced the RMSE by 82.5 % and 64.5 % under the 2 Hz con­
+With a 2 Hz low-pass filter (Fig. 13), the quasi-static band, where the              dition, respectively, demonstrating consistent improvement across the
+bias is more visible, is isolated. The MEMS accelerometer waveform                   operating speeds. Overall, under all tested conditions, the integrated
+remains tilted about a nonzero mean, but the fused result restores the               sensing system achieved a lower error than either sensor alone.
+motion and symmetry and tracks the LDV on a cycle-by-cycle basis,                        The frequency-domain comparisons are shown in Figs. 15 and 16 for
+reducing the RMSE by more than 85 % relative to the accelerometer                    the 50 km/h and 80 km/h truck excitations, respectively. Fig. 15 is
+alone.                                                                               magnified into the 0–0.8 Hz band for the 50 km/h case. The radar-based
+    In Fig. 14, the frequency-domain comparison is shown magnified                   acceleration followed the LDV trend but exhibited a raised broadband
+into the 0–0.5 Hz band to more closely examine the errors in the quasi-              floor that masked weaker peaks, while the MEMS accelerometer showed
+static range. The MEMS accelerometer spectrum exhibits strong leakage                spectral distortion with residual leakage near the DC. In contrast, the
+
+
+                                                                                 9
+J. Lee et al.                                                                                                                       Measurement 270 (2026) 120848
+
+
+
+
+Fig. 11. Time-domain acceleration responses compared with LDV reference, without filter, under a 20 km/h truck excitation: (a) radar-based acceleration, (b) MEMS
+accelerometer, and (c) integrated sensing system.
+
+
+
+
+Fig. 12. Frequency-domain acceleration responses without filter, under a 20 km/h truck excitation: (a) LDV reference, (b) radar-based acceleration, (c) MEMS
+accelerometer, and (d) integrated sensing system.
+
+
+
+
+                                                                               10
+J. Lee et al.                                                                                                                          Measurement 270 (2026) 120848
+
+
+
+
+Fig. 13. Time-domain acceleration responses compared with LDV reference, with a low-pass filter cutoff of 2 Hz, under a 20 km/h truck excitation: (a) radar-based
+acceleration, (b) MEMS accelerometer, and (c) integrated sensing system.
+
+
+
+
+Fig. 14. Frequency-domain acceleration responses (0–0.5 Hz) compared with LDV reference, under a 20 km/h truck excitation: (a) radar-based acceleration, (b)
+MEMS accelerometer, and (c) integrated sensing system.
+
+
+
+Table 2
+RMSEs of accelerations estimated using existing methods and integrated sensing system in field bridge tests.
+  Test           Filter           Radar-based acceleration        MEMS accelerometer           Integrated sensing system      Error Reduction vs MEMS
+  Condition      Condition        (mm/s2 )                        (mm/s2 )                     (mm/s2 )                       accelerometer
+
+  20 km/h        None             1013.564                        5.264                        4.121                          21.8 %
+  ​              LPF 2 Hz            0.690                        3.222                        0.470                          85.4 %
+  50 km/h        None             1013.734                        6.114                        4.996                          18.3 %
+  ​              LPF 2 Hz            0.732                        3.259                        0.569                          82.5 %
+  80 km/h        None              753.907                        8.838                        8.048                          8.8 %
+  ​              LPF 2 Hz            1.649                        3.577                        1.273                          64.5 %
+
+
+
+integrated sensing system preserved the dominant peaks without                       and the radar response showed irregular fluctuations around 1.3 Hz that
+spurious low-frequency leakage or elevated background noise. Fig. 16 is              were absent in the LDV. In both cases, the integrated sensing system
+magnified into the 0–1.5 Hz band for the 80 km/h case. Here, the MEMS                effectively suppressed both the drift-related bias and radar irregularities,
+accelerometer introduced spurious low-frequency energy owing to drift,               resulting in a profile closely aligned with the LDV spectrum. Table 3 lists
+
+
+                                                                                11
+J. Lee et al.                                                                                                                      Measurement 270 (2026) 120848
+
+
+
+
+Fig. 15. Frequency-domain acceleration responses (0–0.8 Hz) compared with LDV reference, under a 50 km/h truck excitation: (a) radar-based acceleration, (b)
+MEMS accelerometer, and (c) integrated sensing system.
+
+
+
+
+Fig. 16. Frequency-domain acceleration responses (0–1.5 Hz) compared with LDV reference, under an 80 km/h truck excitation: (a) radar-based acceleration, (b)
+MEMS accelerometer, and (c) integrated sensing system.
+
+
+Table 3
+Maximum magnitude of acceleration spectra estimated by different methods and error reduction relative to LDV reference.
+  Test Condition    LDV reference      Radar-based acceleration    MEMS accelerometer        Integrated sensing system    Error Reduction vs MEMS accelerometer
+
+  20 km/h            9.51               9.09                        9.76                      9.37                        44.0 %
+  50 km/h           10.33               9.63                       10.68                     10.36                        91.4 %
+  80 km/h           16.94              14.22                       17.59                     16.76                        72.3 %
+
+
+
+the maximum spectral magnitudes, showing that under all test condi­                results indicate that the integrated sensing system provides a practical
+tions the integrated sensing system produced peak values closer to the             method for monitoring drift-free, noise-resilient acceleration. Despite
+LDV reference than those of MEMS accelerometer.                                    these promising results, several limitations should be noted. The per­
+                                                                                   formance of FMCW millimeter-wave radar may be influenced by envi­
+5. Conclusions                                                                     ronmental factors such as rain, fog, or multipath effects, as well as by
+                                                                                   constraints in measurement range and spatial resolution in complex
+    This study proposed a fusion-based technique and device for struc­             structural environments. In addition, limitations associated with the
+tural acceleration, integrating an FMCW millimeter-wave radar with an              current experimental configuration, including single-axis sensing and
+MEMS accelerometer within an FIR complementary filter framework.                   sensitivity to the local environment beneath the bridge that may intro­
+The FIR filter allocates weights to radar measurements in the low-                 duce multipath effects, should be acknowledged. Large-scale deploy­
+frequency drift-sensitive band and to accelerometer data in the high-              ment is identified as a direction for future research, together with
+frequency noise-sensitive band. This design enables accurate and real-             mitigation of environmental effects and extension to multi-axis accel­
+time acceleration estimation of the embedded hardware. The tech­                   eration estimation, multi-sensor synchronization, and self-powered
+nique and device were first validated via laboratory tests on a moving             operation.
+shaker, and subsequently employing a field test on a highway bridge.
+The acceleration estimated using the proposed technique closely aligned            CRediT authorship contribution statement
+with the LDV in both the time and frequency domains, with a dominant
+peak (0.822) closer to the LDV reference (0.812) than that of the MEMS                 Jigu Lee: Writing – review & editing, Writing – original draft,
+accelerometer (0.641) in the low-frequency excitation. Under traffic               Visualization, Validation, Software, Methodology, Investigation, Formal
+loading at 20, 50, and 80 km/h, the estimated acceleration consistently            analysis, Data curation, Conceptualization. Kiyoung Kim: Writing –
+aligned with the LDV in the low-frequency band. Error was reduced by               review & editing, Investigation. Daurl Kim: Investigation, Data cura­
+85.4 % at 20 km/h, 82.5 % at 50 km/h, and 64.5 % at 80 km/h                        tion. Zhanxiong Ma: Writing – review & editing, Validation, Supervi­
+compared to the MEMS accelerometer under 2 Hz low-pass filtering,                  sion, Conceptualization. Hoon Sohn: Writing – review & editing,
+confirming robust performance across all tested vehicle speeds. These              Supervision,     Project     administration,   Funding      acquisition,
+
+                                                                              12
+J. Lee et al.                                                                                                                                               Measurement 270 (2026) 120848
+
+
+Conceptualization.                                                                                [16] X. Zhang, S. Park, M.W. Judy, Accurate assessment of packaging stress effects on
+                                                                                                       MEMS sensors by measurement and sensor–package interaction simulations,
+                                                                                                       J. Microelectromech. Syst. 16 (2007) 639–649, https://doi.org/10.1109/
+Declaration of competing interest                                                                      JMEMS.2007.897088.
+                                                                                                  [17] X. Ru, N. Gu, H. Shang, H. Zhang, MEMS inertial sensor calibration technology:
+                                                                                                       current status and future trends, Micromachines 13 (2022) 879, https://doi.org/
+    The authors declare that they have no known competing financial                                    10.3390/mi13060879.
+interests or personal relationships that could have appeared to influence                         [18] A. Harindranath, M. Arora, A systematic review of user-conducted calibration
+the work reported in this paper.                                                                       methods for MEMS-based IMUs, Measurement 225 (2024) 114001, https://doi.
+                                                                                                       org/10.1016/j.measurement.2023.114001.
+                                                                                                  [19] Y. Weng, Z. Lu, X. Lu, B.F. Spencer Jr., Visual–inertial structural acceleration
+Acknowledgements                                                                                       measurement, Computer. Aided Civil Eng. 37 (2022) 1146–1159, https://doi.org/
+                                                                                                       10.1111/mice.12831.
+                                                                                                  [20] B.K. Oh, J.W. Hwang, Y. Kim, T. Cho, H.S. Park, Vision-based system identification
+   This work was supported by KOREA HYDRO & NUCLEAR POWER                                              technique for building structures using a motion capture system, J. Sound Vib. 356
+CO., LTD (No. 2024-Tech-03).                                                                           (2015) 72–85, https://doi.org/10.1016/j.jsv.2015.07.011.
+                                                                                                  [21] S. Mittal, A. Sadhu, Fiducial marker-based decentralized computer vision for
+                                                                                                       structural modal identification, J. Sound Vib. 612 (2025) 119152, https://doi.org/
+Data availability                                                                                      10.1016/j.jsv.2025.119152.
+                                                                                                  [22] J. Yu, X. Meng, X. Shao, B. Yan, L. Yang, Identification of dynamic displacements
+    Data will be made available on request.                                                            and modal frequencies of a medium-span suspension bridge using multimode GNSS
+                                                                                                       processing, Eng. Struct. 81 (2014) 432–443, https://doi.org/10.1016/j.
+                                                                                                       engstruct.2014.10.010.
+References                                                                                        [23] M. Ostrowski, B. Blachowski, G. Mikułowski, Ł. Jankowski, Influence of noise in
+                                                                                                       computer-vision-based measurements on parameter identification in structural
+ [1] O. Avci, O. Abdeljaber, S. Kiranyaz, M. Hussein, M. Gabbouj, D.J. Inman, A review                 dynamics, Sensors (basel). 23 (2022) 291, https://doi.org/10.3390/s23010291.
+     of vibration-based damage detection in civil structures: from traditional methods to         [24] Y. Niu, J. Li, S. Zhou, G. Liu, Y. Xiang, H. Zhang, J. Shu, Dynamic displacement
+     machine learning and deep learning applications, Mech. Syst. Signal Process. 147                  estimation and modal analysis of long-span bridges integrating multi-GNSS and
+     (2021) 107077, https://doi.org/10.1016/j.ymssp.2020.107077.                                       acceleration measurements, J. Infrastruct. Preserv. Resil. 4 (2023) 9, https://doi.
+ [2] X. Huang, Z. Zhang, T. Cheng, J. Li, J. Ma, Distributed strain monitoring method                  org/10.1186/s43065-023-00077-6.
+     for structural vibration based on multi-point acceleration measurement,                      [25] K. Kim, J. Choi, J. Chung, G. Koo, I.-H. Bae, H. Sohn, Structural displacement
+     Measurement 230 (2024) 114520, https://doi.org/10.1016/j.                                         estimation through multi-rate fusion of accelerometer and RTK-GPS displacement
+     measurement.2024.114520.                                                                          and velocity measurements, Measurement 130 (2018) 223–235, https://doi.org/
+ [3] M. He, P. Liang, Y. Wang, Z.-L. Xia, X.-Y. Wu, Online automatic monitoring of                     10.1016/j.measurement.2018.07.090.
+     abnormal vibration of stay cables based on acceleration data from structural health          [26] Y.H. Hong, S.G. Lee, H.S. Lee, Design of the FEM-FIR filter for displacement
+     monitoring, Measurement 195 (2022) 111102, https://doi.org/10.1016/j.                             reconstruction using accelerations and displacements measured at different
+     measurement.2022.111102.                                                                          sampling rates, Mech. Syst. Signal Process. 38 (2013) 460–481, https://doi.org/
+ [4] S. Bhowmick, S. Nagarajaiah, Spatiotemporal compressive sensing of full-field                     10.1016/j.ymssp.2013.02.007.
+     Lagrangian continuous displacement response from optical flow of edge:                       [27] Y. Xu, J.M. Brownjohn, F. Huseynov, Accurate deformation monitoring on bridge
+     Identification of full-field dynamic modes, Mech. Syst. Signal Process. 164 (2022)                structures using a cost-effective sensing system combined with a camera and
+     108232, https://doi.org/10.1016/j.ymssp.2021.108232.                                              accelerometers: Case study, J. Bridge Eng. 24 (2019) 05018014, https://doi.org/
+ [5] S.S. Saidin, A. Jamadin, S. Abdul Kudus, N. Mohd Amin, M.A. Anuar, An overview:                   10.1061/(ASCE)BE.1943-5592.0001330.
+     the application of vibration-based techniques in bridge structural health                    [28] Z. Ma, J. Chung, P. Liu, H. Sohn, Bridge displacement estimation by fusing
+     monitoring, Int. J. Concr. Struct. Mater. 16 (2022) 69, https://doi.org/10.1186/                  accelerometer and strain gauge measurements, Struct. Control Health Monit. 28
+     s40069-022-00557-1.                                                                               (2021) e2733.
+ [6] A. Mardanshahi, A. Sreekumar, X. Yang, S.K. Barman, D. Chronopoulos, Sensing                 [29] J.W. Park, S.H. Sim, H.J. Jung, Displacement estimation using multimetric data
+     techniques for structural health monitoring: a state-of-the-art review on                         fusion, IEEE ASME Trans. Mechatron. 18 (2013) 1675–1682, https://doi.org/
+     performance criteria and new-generation technologies, Sensors (basel). 25 (2025)                  10.1109/TMECH.2013.2275187.
+     1424, https://doi.org/10.3390/s25051424.                                                     [30] J. Kim, K. Kim, H. Sohn, Autonomous dynamic displacement estimation from data
+ [7] S. Hassani, U. Dackermann, A systematic review of advanced sensor technologies                    fusion of acceleration and intermittent displacement measurements, Mech. Syst.
+     for non-destructive testing and structural health monitoring, Sensors (Basel) 23                  Signal Process. 42 (2014) 194–205, https://doi.org/10.1016/j.
+     (2023) 2204, https://doi.org/10.3390/s23042204.                                                   ymssp.2013.09.014.
+ [8] I. Koene, V. Klar, R. Viitala, IoT connected device for vibration analysis and               [31] Z. Ma, J. Choi, H. Sohn, Real-time structural displacement estimation by fusing
+     measurement, HardwareX 7 (2020) e00109, https://doi.org/10.1016/j.ohx.2020.                       asynchronous acceleration and computer vision measurements, Computer. Aided
+     e00109.                                                                                           Civil Eng. 37 (2022) 688–703, https://doi.org/10.1111/mice.12767.
+ [9] M. Ghanbari, M. Fathalilou, V.V. Sinitsin, G. Rezazadeh, Utilizing porous dielectric         [32] Z. Ma, K. Han, J. Choi, J. Lee, O. Kwon, H. Sohn, J. Liu, D. Hwang, J. Aggarwal,
+     material to enhance the performance of capacitive MEMS accelerometers for shaft                   H. Noh, E. Cai, Y. Zhang, Development and field deployment validation of a low
+     monitoring, Measurement 242 (2025) 115857, https://doi.org/10.1016/j.                             cost and high-precision displacement sensing system by fusing millimeter-wave
+     measurement.2024.115857.                                                                          radar and accelerometer, Eng. Struct. 321 (2024) 118926, https://doi.org/
+[10] J. Paziewski, R. Sieradzki, J. Rapinski, D. Tomaszewski, K. Stepniak, J. Geng, G. Li,             10.1016/j.engstruct.2024.118926.
+     Integrating low-cost GNSS and MEMS accelerometer for precise dynamic                         [33] Z. Ma, J. Choi, L. Yang, H. Sohn, Structural displacement estimation using
+     displacement monitoring, Measurement 242 (2025) 115798, https://doi.org/                          accelerometer and FMCW millimeter wave radar, Mech. Syst. Signal Process. 182
+     10.1016/j.measurement.2024.115798.                                                                (2023) 109582, https://doi.org/10.1016/j.ymssp.2022.109582.
+[11] M. Muttillo, V. Stornelli, R. Alaggio, R. Paolucci, L. Di Battista, T. de Rubeis,            [34] Z. Ma, J. Choi, J. Lee, H. Sohn, Accelerometer-aided millimeter-wave radar
+     G. Ferri, Structural health monitoring: an IoT sensor system for structural damage                interferometry for uninterrupted bridge displacement estimation considering
+     indicator evaluation, Sensors (basel) 20 (2020) 4908, https://doi.org/10.3390/                    intermittent radar target occlusion, Mech. Syst. Signal Process. 223 (2025) 111888,
+     s20174908.                                                                                        https://doi.org/10.1016/j.ymssp.2024.111888.
+[12] B.E. Boser, R.T. Howe, Surface micromachined accelerometers, IEEE J. Solid State             [35] Z. Ma, J. Lee, J. Choi, H. Sohn, Two-dimensional horizontal displacement
+     Circuits 31 (1996) 366–375, https://doi.org/10.1109/4.494198.                                     estimation for building structures by fusing acceleration and sparse point clouds,
+[13] R.P. Middlemiss, A. Samarelli, D.J. Paul, J. Hough, S. Rowan, G.D. Hammond,                       Mech. Syst. Signal Process. 225 (2025) 112318, https://doi.org/10.1016/j.
+     Measurement of the Earth tides with a MEMS gravimeter, Nature 531 (2016)                          ymssp.2025.112318.
+     614–617, https://doi.org/10.1038/nature17397.                                                [36] X. Qu, X. Ding, X. Li, W. Yu, Y.-L. Xu, Assessing and mitigating impacts of structural
+[14] A. Mustafazade, M. Pandit, C. Zhao, G. Sobreviela, Z. Du, P. Steinmann, X. Zou, R.                inclination on acceleration measurements and estimated displacements using
+     T. Howe, A.A. Seshia, A vibrating beam MEMS accelerometer for gravity and                         integrated GNSS and accelerometer structural health monitoring systems,
+     seismic measurements, Sci. Rep. 10 (2020) 10415, https://doi.org/10.1038/                         Measurement 253 (2025) 117578, https://doi.org/10.1016/j.
+     s41598-020-67046-x.                                                                               measurement.2025.117578.
+[15] Y. Yin, Z. Fang, Y. Liu, F. Han, Temperature-insensitive structure design of                 [37] X. Qu, X. Ding, Y.-L. Xu, W. Yu, Correction of misalignment errors in the integrated
+     micromachined resonant accelerometers, Sensors (basel). 19 (2019) 1544, https://                  GNSS and accelerometer system for structural displacement monitoring, Struct.
+     doi.org/10.3390/s19071544.                                                                        Control Health Monit. 30 (2023) e3042.
+
+
+
+
+                                                                                             13
+J. Lee et al.                                                                                                                                         Measurement 270 (2026) 120848
+
+[38] X. Qu, X. Ding, Y.-L. Xu, Simultaneous monitoring of displacement and rotation of          [40] H.S. Lee, Y.H. Hong, H.W. Park, Design of an FIR filter for the displacement
+     a long-span bridge based on innovative integration of GNSS and accelerometer                    reconstruction using measured acceleration in low-frequency dominant structures,
+     measurements, Eng. Struct. 338 (2025) 120518, https://doi.org/10.1016/j.                        Numerical Meth. Eng. 82 (2010) 403–434, https://doi.org/10.1002/nme.2769.
+     engstruct.2025.120518.                                                                     [41] Polytec GmbH, RSV-150 remote sensing vibrometer: Technical datasheet (OM_DS_
+[39] X. Qu, X. Ding, Y.-L. Xu, W. Yu, Real-time outlier detection in integrated GNSS and             RSV-150_E_42319), Polytec GmbH, Waldbronn, Germany, 2020. https://
+     accelerometer structural health monitoring systems based on a robust multi-rate                 konnexxions.com/wp-content/uploads/edd/2022/04/OM_DS_RSV-150_E_42319.
+     Kalman filter, J. Geod. 97 (2023) 38, https://doi.org/10.1007/s00190-023-01724-                 pdf. (accessed 2 September 2025).
+     2.
+
+
+
+
+                                                                                           14
+

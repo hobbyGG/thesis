@@ -1,0 +1,164 @@
+                  MONITORING BRIDGES VIBRATION USING A GROUND BASED RADAR
+
+                                                                    Armando Marino
+
+                             The University of Stirling, Natural Sciences, Stirling, United Kingdom
+
+
+                                ABSTRACT                                            antennas are large enough) and they can provide quick mea-
+  Monitoring the stability of bridges under heavy traffic con-                      surements that will be able to capture the fast oscillations. Ad-
+  ditions is of paramount importance. Surveyors are interested                      ditionally, they are able to cover extended areas of the bridge,
+  in quantifying the amount of short-term vertical displacement                     providing measurements that are not relative to a single point.
+  due to traffic loads. A common way to measure the vertical
+  oscillation of a bridge is by deploying reflectors/prisms on the                                         2. METHODOLOGY
+  bridge and using a total station. Alternatively lasers can be
+  used to measure vibrations, but these are generally expensive.                    2.1. Basic idea
+      In this work, we are testing the use of relatively inexpen-                   In this work, we propose to measure bridges vibration by us-
+  sive technology based on a Stepped Frequency Continuous                           ing ground radar interferometry and improve the detection
+  Waveform radar. We have acquired radar backscattering un-                         of vibrations in the interferometric phase. The radar will be
+  der bridges in Milton Keynes, UK and validated the results us-                    sending pulses at a frequency that can be set, but it is gen-
+  ing a video camera synchronised with the radar acquisitions.                      erally higher than 10 Hz. The pulses will interact with the
+      Every time a truck was crossing the bridge an oscillation                     target (in our case a bridge) and they will be scattered back to
+  of around a millimetre was observed. Different trucks pro-                        the radar. After the focusing, the phase of the response for a
+  vided slightly different oscillations.                                            defined bin of the signal will be related to the distance of the
+     Index Terms— radar, stepped frequency continuous                               radar to a point on the bridge. If a vibration is present, this
+  waveform, interferometry, buildings, vibration                                    phase will change. Therefore, by subtracting the phases of
+                                                                                    two consecutive pulses we can estimate the movement of the
+                          1. INTRODUCTION                                           bridge between the two time instants where the pulses were
+                                                                                    sent/received. This is assuming that the distance is not too
+  Monitoring the amount of vibration of a bridge is very impor-                     high and the travel time of the wave is much smaller than the
+  tant. This information, accompanied with the temporal trend                       intervals between two pulses. This processing is analogous to
+  of the displacement can be used to evaluate if the bridge re-                     the zero baseline interferometry processing done with SAR
+  quires repairing. Councils need an inexpensive but accurate                       images.
+  way to prioritise the works on bridges that may need earlier                          In [3] a study using radars was proposed to evaluate vi-
+  attention. This is of special interest for new twentieth-century                  brations of bridges due to a train passing. In this work we
+  towns (such as Milton Keynes, UK) since the most of the                           are focusing on smaller traffic (e.g. truck) and designing al-
+  bridges infrastructure were built at around the same time.                        gorithms to improve the detection of smaller vibrations.
+      A common way to measure the vertical oscillation of a
+  bridge is by deploying GPS receivers or prisms on the bridge                      2.2. Radar system
+  and using a total station [1, 2]. This solution is time consum-
+                                                                                    The radar system is based on a Stepped Frequency Continu-
+  ing, since we need to access and solidly install a prism onto
+                                                                                    ous Waveform radar. This means that the radar is transmitting
+  parts of the bridge which are of most interest (often the bot-
+                                                                                    a wave at a fixed frequency (with a very small bandwidth)
+  tom). Alternatively one could use lasers, which will allow to
+                                                                                    and the frequency is changed in steps between an initial and
+  measure vibration without need to directly access the bridge
+                                                                                    final frequency value. This will form the band that the radar
+  deploying prisms. However, lasers of this kind are very ex-
+                                                                                    system is using. This processing has some similarity with a
+  pensive and they need a very careful handling of the equip-
+                                                                                    linear frequency modulation done with pulsed radars (i.e. the
+  ment.
+                                                                                    chirp signal), however the signal is discrete in frequencies and
+      In the recent years, some researchers started using radar
+                                                                                    the radar is transmitting the signal continuously from start to
+  interferometry for this purpose [3]. Radars have the benefit
+                                                                                    end of the frequency sweep.
+  of not necessarily need to deploy a reflector (as long as the
+                                                                                        The processing is simply accomplished by applying an in-
+                                                                                    verse Fast Fourier Transform (iFFT) to the received signal.
+
+© 2018 IEEE. Personal use of this material is permitted. Permission from IEEE must be obtained for all other uses, in any current or future media, including reprinting/
+republishing this material for advertising or promotional purposes, creating new collective works, for resale or redistribution to servers or lists, or reuse of any
+copyrighted component of this work in other works.
+                                                                    ever, some of the small spikes were no due to any heavy ve-
+        Table 1. Parameters used by the SFCW radar
+                                                                    hicle (they are due to noise or movements of the radar).
+                     Parameter          value
+                 Initial frequency     5 GHz
+                 Final Frequency       6 GHz                        3.3. Noise
+              Slant Range resolution 15 cm                          To test the amount of expected noise, we did another experi-
+                       Power           0 dBm                        ment pointing horizontally the radar beam to a concrete pylon
+                        PRF             33 Hz                       of the bridge. This is not supposed to vibrate along the hor-
+                                                                    izontal direction. The measured displacement was then col-
+                                                                    lected to form an histogram that is showed in Figure 3.b. The
+                                                                    histogram is showed as blue dots while the green line rep-
+   The radar system we used considered the parameters
+                                                                    resent the best fit of a Gaussian distribution. It appears that
+showed in Table 1.
+                                                                    the displacement noise is zero mean but it is not Normal dis-
+                                                                    tributed. Although the displacement noise is relatively small
+                        3. RESULTS                                  we can observe few instances showing very large values of
+                                                                    displacement.
+3.1. Measurement setting
+Experiments were performed under concrete bridges in Mil-                         4. IMPROVING DETECTION
+ton Keynes. Here we will present the results obtained during
+the experiments in August 2017 under the road A421 in Mil-          In this section we propose some processing that can improve
+ton Keynes (UK). The bridge is just outside the Open Univer-        the identification of peaks related to genuine displacements.
+sity campus and A421 is a double carriage and is one of the         We have seen that the noise is zero mean, therefore it will
+arteries of Milton Keynes running east-west. On average, it         be beneficial to apply some smoothing box car filter, as long
+has a traffic of 24424 motor vehicles a day and approximately       as the size of the boxcar is not larger than the width of the
+5% of this corresponds to truck and heavy vehicles (data from       peaks corresponding to the vibration. The width depends on
+the Department of Transport, UK).                                   the fundamental frequency of vibration of the bridge. In this
+    Figure 1 shows the setting of the experiment.                   experiment, the width was larger than 3 bins, therefore we ap-
+                                                                    plied a boxcar filter of 3 bins. The result is showed in Figure
+                                                                    4.a.
+3.2. Results                                                             The result improved, but the noise is still high. We can
+Figure 2.a presents the backscattering image after focusing.        notice that all the genuine peaks have the same signature in
+The horizontal axis represents time, while the vertical axis is     time. The duration of one vibration depends on the bridge
+distance to the radar. The backscattering is high at a distance     characteristics, while the amplitude of the vibration depends
+of 1.8 m from the radar. This is due to the first return com-       on the load on the bridge. Therefore we can apply a matched
+ing back to the radar. As expected, the backscattering profile      filter based on the empirical response of a target. Looking at
+looks stationary during the full acquisition. In order to be able   the image this appears to be one period of a triangular wave of
+to use the phase of consecutive pulses it is important to check     around 10 s duration. The matched filter can be accomplished
+that this is coherent in time. A measure of the time coherence      using a convolution in the frequency domain.
+is obtained by performing a coherence estimation along the               The result of this processing is presented in Figure 4.b.
+horizontal axis (i.e. time). This is showed in Figure 2.b using     It can be observed that after the filtering the displacement
+a moving window of 5 bins.                                          presents a peculiar signature (two small peaks down and one
+    To evaluate the displacement we can estimate the phase          up). An automatic system can trigger a detection based on the
+difference between consecutive bins and use the relation with       value of the central peak or the sequence of the three peaks.
+the wavelength to convert this into a displacement. The result      When the filter is applied to data collecting only noise, the
+is showed in Figure 3.a.                                            final signature is not present.
+    The displacement shows a series of peaks. The largest
+peaks have a common behaviour. The bridge moves closer to                                5. CONCLUSION
+the radar then it springs away from the radar. The largest of
+the peak suggests a displacement of around 0.3 mm. Most of          In this work, we utilised a Stepped Frequency Continuous
+these peaks are due to heavy traffic on the bridge. This was        Waveform (SFCW) to monitor vibrations of a bridge. This
+validated by using a camera on the top of the bridge moni-          was done by measuring the phase difference between two
+toring the traffic. This experiment was repeated several times      consecutive acquisitions when a repetition of 33 Hz was used.
+and in each instances we could observe that if an heavy vehi-           The experiments showed that we can monitor vibrations
+cle is crossing the bridge, then an oscillation is visible. How-    of fractions of millimetres. We also analysed the noise as-
+                                           Fig. 1. Setting of the experiments under the
+
+
+
+
+                        (a) Backscattering                                          (b) Temporal coherence
+
+Fig. 2. Results of experiments on 4th August 2017. (a) HH backscattering magnitude; (b) Temporal coherence (Box filter: 5
+bins. The horizontal axis is time in seconds, the vertical axis distance in meters.
+
+
+
+
+                        (a) Displacement                                          (b) Smoothed displacement
+
+Fig. 3. Results of experiments on 4th August 2017. (a) Displacement in mm; (b) Blue dots: Histogram of displacement in mm,
+green line: fitting with Gaussian.
+                          (a) Displacement                                   (b) Smoothed displacement
+
+Fig. 4. Results of experiments on 4th August 2017. (a) Displacement after box car filter (3 bins); (b) Displacement after
+matched filter with triangular wave.
+
+
+sociated to the measurements and devised a filtering stack to
+help extract genuine peaks from the noise background.
+    In the future more experiments will be done with different
+bridges and structures.
+
+                     6. REFERENCES
+
+[1] M. R. Kaloop and H. Li, “Monitoring of bridge deforma-
+    tion using gps technique,” KSCE Journal of Civil Engi-
+    neering, vol. 13, no. 6, 2009.
+[2] H. Lahmus, A. Ellmann, S. Mardla, and S. Idnurm, “Ter-
+    restrial laser scanning for the monitoring of bridge load
+    tests: two case studies,” Survey Review, vol. 0, no. 0, pp.
+    1–15, 2017.
+[3] G. Luzi, M. Crosetto, and E. Fernndez, “Radar inter-
+    ferometry for monitoring the vibration characteristics of
+    buildings and civil structures: Recent case studies in
+    spain.,” Sensors (MDPI), vol. 17, no. 4, 2017.
+

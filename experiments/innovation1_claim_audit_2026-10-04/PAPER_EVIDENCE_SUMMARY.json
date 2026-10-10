@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-04",
+  "status": "read_only_paper_evidence_summary",
+  "scope": "same-range split/merge/abstain corrected v2",
+  "execution": {
+    "new_experiment_run": false,
+    "large_matrix_run": false,
+    "archive_download": false,
+    "tracked_code_changed": false,
+    "commit_or_push": false
+  },
+  "record": {
+    "directory": "experiments/same_range_merge_mechanism_v2",
+    "seeds": [200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211],
+    "seed_count": 12,
+    "scene_count": 6,
+    "trial_count": 72,
+    "frames_per_trial": 256,
+    "calibration_frames": 128,
+    "evaluation_frames": 128,
+    "array_elements": 8,
+    "range_cells": 1,
+    "hashes": {
+      "run_experiment.py": "4d524eab105dac4e2360f2c1aa0b49366a411475307228afd7e973e826bc66c9",
+      "PROTOCOL.md": "e9089a42a90686954dd4b3619ff89a55d42c7c52f340672b8154e708b0ee3ac0"
+    }
+  },
+  "rules": {
+    "bartlett_grid_deg": [-60, 60],
+    "bartlett_step_deg": 0.25,
+    "min_peak_separation_deg": 12,
+    "min_peak_prominence_fraction": 0.01,
+    "second_peak_power_fraction": 0.18,
+    "max_peaks": 2,
+    "merge": "strongest detected angle, one conventional projection, fixed cos(theta_hat) geometry",
+    "split_ls": "two detected angles, steering-matrix pseudoinverse, fixed per-channel geometry, calibration amplitude-squared fusion weights",
+    "split_abstain": [
+      "fewer_than_two_calibration_angle_peaks",
+      "steering_condition_greater_than_20"
+    ],
+    "all_route_abstain": "test amplitude below 5 times fixed noise sigma times extraction noise gain",
+    "truth_role": "post-run waveform scoring only"
+  },
+  "scenes": {
+    "close_benign": {
+      "angles_deg": [25, 29],
+      "amplitudes": [1, 0.8],
+      "phases_rad": [0.15, -0.3],
+      "merge": {"coverage": "12/12", "median_rmse_mm": 0.0014181747620556284, "p90_rmse_mm": 0.0020687829516087635},
+      "split_ls": {"coverage": "0/12", "median_rmse_mm": null, "p90_rmse_mm": null, "failure": "fewer_than_two_calibration_angle_peaks"},
+      "paired": {"n": 0, "median_split_minus_merge_rmse_mm": null}
+    },
+    "separated_benign": {
+      "angles_deg": [-10, 45],
+      "amplitudes": [1, 0.8],
+      "phases_rad": [0.15, -0.3],
+      "merge": {"coverage": "12/12", "median_rmse_mm": 0.023612584855323193, "p90_rmse_mm": 0.025717389978625223},
+      "split_ls": {"coverage": "12/12", "median_rmse_mm": 0.0021457033070516034, "p90_rmse_mm": 0.0031487033151240706},
+      "paired": {"n": 12, "median_split_minus_merge_rmse_mm": -0.021186629060639284, "split_wins": "12/12"}
+    },
+    "separated_unequal": {
+      "angles_deg": [-10, 45],
+      "amplitudes": [1, 0.5],
+      "phases_rad": [0.15, -0.3],
+      "merge": {"coverage": "12/12", "median_rmse_mm": 0.013852369303148128, "p90_rmse_mm": 0.015906105008617142},
+      "split_ls": {"coverage": "12/12", "median_rmse_mm": 0.0026967083027307675, "p90_rmse_mm": 0.0038622676047967573},
+      "paired": {"n": 12, "median_split_minus_merge_rmse_mm": -0.01114835998763974, "split_wins": "12/12"}
+    },
+    "close_destructive": {
+      "angles_deg": [25, 29],
+      "amplitudes": [1, 1],
+      "phases_rad": [0, 3.141592653589793],
+      "merge": {"coverage": "12/12", "median_rmse_mm": 0.08210332671974907, "p90_rmse_mm": 0.09931701542988879},
+      "split_ls": {"coverage": "12/12", "median_rmse_mm": 0.02680824996283319, "p90_rmse_mm": 0.03155827057823794},
+      "paired": {"n": 12, "median_split_minus_merge_rmse_mm": -0.055566942276342256, "split_wins": "11/12", "interpretation": "false peaks and large errors; boundary observation only"}
+    },
+    "coincident_cancel": {
+      "angles_deg": [27, 27],
+      "amplitudes": [1, 1],
+      "phases_rad": [0, 3.141592653589793],
+      "merge": {"coverage": "0/12", "median_rmse_mm": null, "p90_rmse_mm": null, "failure": "test_amplitude_guard"},
+      "split_ls": {"coverage": "0/12", "median_rmse_mm": null, "p90_rmse_mm": null, "failure": "test_amplitude_guard"},
+      "paired": {"n": 0, "median_split_minus_merge_rmse_mm": null}
+    },
+    "symmetric_control": {
+      "angles_deg": [-25, 25],
+      "amplitudes": [1, 0.8],
+      "phases_rad": [0.15, -0.3],
+      "merge": {"coverage": "12/12", "median_rmse_mm": 0.005306883400233319, "p90_rmse_mm": 0.006637062418811574},
+      "split_ls": {"coverage": "12/12", "median_rmse_mm": 0.006872755738598417, "p90_rmse_mm": 0.008365290378185114},
+      "paired": {"n": 12, "median_split_minus_merge_rmse_mm": 0.0015020740427955578, "split_wins": "0/12"}
+    }
+  },
+  "allowed_claims": [
+    "In this bounded eight-element, one-range-cell synthetic mechanism, split-LS beat strongest-peak merge in all 12 paired trials of each of two clearly separated scenes.",
+    "The close benign pair caused split abstention in 12/12 while merge covered 12/12, motivating an explicit split/merge/abstain policy.",
+    "The symmetric same-cosine-projection control showed no split gain; median split-minus-merge RMSE was +0.001502 mm and split won 0/12.",
+    "Destructive and coincident cancellation expose identifiability and amplitude-guard boundaries."
+  ],
+  "forbidden_claims": [
+    "universal angular threshold or resolution guarantee",
+    "split always better or every same-range mixture is equivalent to one target",
+    "coverage proves correct geometry",
+    "real FMCW, field, hardware, multipath, range-leakage, migration, association, Kalman, or ADXL validation",
+    "0.01 mm accuracy guarantee",
+    "statistical generalization beyond the six fixed scenes and 12 seeds",
+    "causal end-to-end gain for the complete thesis pipeline"
+  ]
+}

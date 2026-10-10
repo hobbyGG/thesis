@@ -1,0 +1,1879 @@
+              electronics
+Article
+Bridge Dynamic Cable-Tension Estimation with Interferometric
+Radar and APES-Based Time-Frequency Analysis
+Jian Wang 1, *, Xiang Wang 2 , Chongyi Fan 1 , Yueli Li 1                      and Xiaotao Huang 1
+
+                                          1   College of Electronic Science and Engineering, National University of Defense Technology, Changsha 410073,
+                                              China; chongyifan@nudt.edu.cn (C.F.); liyueli4uwb@nudt.edu.cn (Y.L.); xthuang@nudt.edu.cn (X.H.)
+                                          2   State Key Laboratory for Health and Safety of Bridge Structures, Wuhan 430034, China;
+                                              wangxiang4143@163.com
+                                          *   Correspondence: hurri_can@163.com; Tel.: +86-731-87550334
+
+
+                                          Abstract: Dynamic cable-tension is an important bridge-health indicator. However, it is difficult to be
+                                          measured precisely and efficiently. A remote bridge dynamic cable-tension measurement method is
+                                          proposed. It uses an interferometric radar sensor, a time-frequency analysis technique, and a tension
+                                          estimation approach based on a string-vibration-equation. One radar can measure the displacements
+                                          of multiple cables aligned on one side of a bridge, at the same time. By solving the string vibration
+                                          equation, each cable-tension is calculated from its fundamental frequency, which is obtained by
+                                          time-frequency analyzing a short section of the cable’s whole displacement vector in an overlapped-
+                                          piecewise manner. An adaptive amplitude and phase estimation (APES) algorithm is used to solve
+                                the frequency resolution deterioration problem due to the short duration. Simulations and field
+                                   experiments with a K band interferometric radar validate that the proposed method is superior to
+Citation: Wang, J.; Wang, X.; Fan, C.;    traditional cable-tension measurements in terms of precision, robustness, and efficiency. The proposed
+Li, Y.; Huang, X. Bridge Dynamic          method is of great application value in measuring and monitoring large cable-stayed bridges and
+Cable-Tension Estimation with             cable-suspended bridges.
+Interferometric Radar and
+APES-Based Time-Frequency                 Keywords: K band; interferometric radar; vibration frequency method; dynamic cable-tension
+Analysis. Electronics 2021, 10, 501.      measurement
+https://doi.org/10.3390/
+electronics10040501
+
+
+Academic Editor:                          1. Introduction
+Massimiliano Pieraccini
+                                               Cable-stayed bridges and suspension bridges are the first choices to build long-span
+                                          bridges to cross rivers and seas [1]. Cables are vital structural anchors and force-bearing
+Received: 3 January 2021
+                                          components of a bridge. A long-span bridge is composed of serval groups of cables.
+Accepted: 11 February 2021
+Published: 20 February 2021
+                                          Each cable-tension should be designed appropriately to achieve rational deck alignment
+                                          and internal-force distribution. Many bridge disasters result from cable failures. There-
+Publisher’s Note: MDPI stays neutral
+                                          fore, the cable-tension must be measured accurately during the whole bridge-life-cycle,
+with regard to jurisdictional claims in
+                                          including the construction stage, the traffic-operating period, and the renovation phase [2].
+published maps and institutional affil-
+                                               There are various methods to measure cable-tension, such as the pressure gauge
+iations.                                  measurement, the magneto-elastic based method [3], and the vibration-frequency based
+                                          method [4]. The vibration-frequency based cable-tension measurement is the most widely
+                                          used method due to its simple applicability and good adaptability. Vibration frequency
+                                          measuring sensors can be roughly classified into cable-contact measuring ones and remote
+                                          measuring ones. Sensors of the first kind include accelerometers and vibration pickups [5].
+Copyright: © 2021 by the authors.
+Licensee MDPI, Basel, Switzerland.
+                                          These sensors usually have to be bound near the lower ends of the cables for convenience,
+This article is an open access article
+                                          when no lift truck is available to raise the sensors to higher positions. Because the lower
+distributed under the terms and
+                                          ends are usually connected to various types of vibration absorbers or anchorage devices,
+conditions of the Creative Commons        the sensors mounted at lower positions would fail to get satisfactory measuring results.
+Attribution (CC BY) license (https://     Sensors of the second kind include vision-based sensors and interferometric radars [6–9].
+creativecommons.org/licenses/by/          Vision-based sensors generally require a reflector installed on a cable to improve the
+4.0/).                                    measuring precision. Besides, their performances tend to decrease in adverse weather.
+
+
+
+Electronics 2021, 10, 501. https://doi.org/10.3390/electronics10040501                                    https://www.mdpi.com/journal/electronics
+Electronics 2021, 10, 501                                                                                            2 of 16
+
+
+
+
+                            On the other hand, interferometric radars are immune to adverse weather and require no
+                            additional reflectors. Since they are precise and efficient to measure multiple cables by
+                            only one snapshot, interferometric radars are accepted by more bridge engineers. A rapid
+                            and dynamic cable-tension measurement has drawn more attraction in a bridge health
+                            monitor application. The interferometric radar will be a potential sensor to meet these
+                            special requirements.
+                                  Cable displacements are first measured by an interferometric radar and then trans-
+                            formed into the spectrum domain [8]. The cable-tension can be obtained by solving the
+                            stay-cable free vibration differential equation [5] at last. The first step has been verified by
+                            numerous experiments [10]. The last step is also well studied by taking factors, such as
+                            damper, bending stiffness, and temperature variation, into considerations [4,11]. However,
+                            it is often taken for granted that the middle step works well with the conventional fast
+                            Fourier transform (FFT). The widely used FFT method would be affected by high sidelobes,
+                            which makes it hard to distinguish the peak of a weak target from the sidelobes of a strong
+                            one. Although the sidelobes can be suppressed by weighting the input displacement,
+                            it would cause a main lobe expansion problem at the same time. ZOOM-FFT (ZFFT),
+                            FFT-Fourier Series (FFT-FS), and chirp z-transform (CZT) are proposed to improve the com-
+                            putation resolution. These FFT-based methods still suffer limited frequency resolution that
+                            is in inverse proportion to the time duration [12]. Besides, they cannot give an accurate fre-
+                            quency peak due to sidelobe leakage from a nearby component. Park et al. have proposed
+                            a noniterative frequency estimation method for a single sinusoidal model [13]. By properly
+                            setting the phase interval, it can achieve good performance when Gaussian noise and
+                            harmonic components are present. Giarnetti et al. have proposed a parametric method
+                            to non-recursively estimate the frequency of multi-harmonic sinusoidal, especially with
+                            short duration [14]. The method is computationally efficient and it is very suitable for
+                            time-frequency distribution analysis, as a reference frequency required can be determined
+                            by the last result. However, both models do not match the actual model of bridge-cable
+                            deformation, as there are other unknown sinusoidal interferences. By using fast Hartley’s
+                            transform, the computation efficiency can further be improved since the input vector is
+                            real data [15].
+                                  Adaptive spectral estimation can give more precise results if the time-domain data
+                            can be modeled as a sum of multiple sinusoidal signals. Cable displacement waveforms
+                            can meet the very assumptions. Typical adaptive spectral estimation methods include the
+                            adaptive autoregressive (AR) algorithms, the Capon beamforming method [16], the adap-
+                            tive amplitude, and the phase estimation (APES) method [17,18]. The APES method is of
+                            great interest in a wide range of applications, including time-frequency signal analysis,
+                            speech processing, radar signals analysis, etc. It can provide bias-free spectra estimation,
+                            which is the premier pursuit of cable-tension measurement. Although several fast imple-
+                            mentations of APES are developed to improve the computation efficiency [19–21], we will
+                            only use the basic APES implementation. This paper aims to get the precise fundamental fre-
+                            quency and the resulting cable-tension in a short duration. An APES-based time-frequency
+                            analysis method is proposed to estimate the dynamic cable-tension for dynamic load tests.
+                            Key parameters are analyzed to get better resolution, better signal-to-noise ratio (SNR)
+                            adaptability, and better multi-signal discrimination ability. The performance of the new
+                            method is compared with those of FFT-based methods. The main contributions of this
+                            paper are given below.
+                            •    Systematically describe the principle of a remote dynamic cable-tension measur-
+                                 ing method.
+                            •    An APES-based bridge dynamic cable-tension estimation method is proposed.
+                                 When compared with other cable-tension estimation methods, it can achieve more
+                                 accurate fundamental frequency, especially when there are nearby frequency in-
+                                 terferences. It can also provide improved spectra resolution constrained by the
+                                 duration of the measured displacement.
+Electronics 2021, 10, 501                                                                                                3 of 16
+
+
+
+
+                            •    The cable time-frequency distribution is analyzed with data recorded when a high-
+                                 speed train passed a cable-stayed bridge. The result can reveal the operational condi-
+                                 tion of the bridge, such as cable-tension distribution, dynamic cable-tension variation,
+                                 the fundamental frequency of the bridge deck, etc. These properties can provide
+                                 unprecedented details of the dynamic cable-tension change process.
+                                 The rest of this paper is organized as follows. The diffusion characters of bridge cables,
+                            the principle of a vibrating frequency-based cable-tension measurement method, and the
+                            principle of vibrating frequency measuring interferometric radar are reviewed in Section 2.
+                            Section 3 briefly describes an APES-based time-frequency analysis technique for bridge
+                            cables. Section 4 presents simulations and the cable frequency analysis of a high-speed
+                            railway bridge. Finally, conclusions are drawn in Section 5.
+
+                            2. Interferometric Radar-Based Cable-Tension Measurement
+                            2.1. Principles of the Interferometric Radar
+                            2.1.1. Remote Displacement Measurement
+                                 To distinguish nearby cables, an interferometric radar has to emit wideband sig-
+                            nals. Linear frequency modulation (LFM) signals are the most widely used waveforms.
+                            The frequency of an LFM signal is changing linearly with time, and it can be formulated as:
+                                                                                  
+                                                               t                 1
+                                            St (t) = A · rect     exp j2π f 0 t + kt2       0 <t < T               (1)
+                                                               T                 2
+
+                            where f 0 is the start frequency, T is the sweep period, and k is the chirp rate. A is the
+                            amplitude, and it is often omitted for simplicity. The received signal of a point target at
+                            range R is:
+                                                                  Sr ( t ) = S t ( t − τ )                          (2)
+                            where τ = 2R/c is the round-trip traveling time. c is the speed of light. The bandwidth of
+                            an interferometric radar is usually more than 0.3 GHz, so a dechirp receiver is often used
+                            to reduce the cost of the radar. The received intermediate-frequency signal after a low-pass
+                            filter can be written as:
+                                                                                           
+                                                                                       1
+                                                       S IF (t) = exp j2π f 0 τ + kτt − kτ 2                         (3)
+                                                                                       2
+
+                            where the first exponential component indicates the phase delay. The second component
+                            is a linear phase term and indicates the range of the target. The last component is the
+                            quadratic phase error of a dechirp operation. One dimensional radar image is obtained by
+                            applying the FFT, which is expressed as:
+                                                      RT
+                                        SRC ( f )   = τ S IF (t) exp(− j2π f t)dt
+                                                                                                                            (4)
+                                                    = exp − jπkτ 2 exp[ j2π ( f 0 + f )τ ] sin c[π (kτ + f )( T − τ )]
+                                                                   
+
+
+                                  The maximum peak of the 1D radar image is located at f = −kτ. The resolution of
+                            the radar ρr is proportional to the time duration T − τ. For a cable-tension measuring
+                            interferometric radar, T is much larger than τ, so ρr ≈ c/2kT.
+                                  The cable is measured repeatedly by a radar, and it would output a measured data
+                            matrix, which is donated as SRC ( f , ts ). ts is the time of the measurement. The phase
+                            of the peak is a sensitive range indicator of the measured target. It can be expressed as
+                            ϕ(ts ) = 2π f 0 τ (ts ) − πkτ (ts )2 ≈ 2π f 0 τ (ts ). The interferometric approach is an accurate
+                            phase retrieval method. The detailed implementation of interferometry is composed of
+                            two steps. The first step is a conjugate multiplication. Two terms of the multiplication are
+Electronics 2021, 10, 501                                                                                                   4 of 16
+
+
+
+
+                            SRC ( f , ts ) and SRC ( f , ts + ∆ts ). ∆ts is the repetitive observation time. The first step can be
+                            written as:
+                                                          n                                              o∗
+                                      Se(−kτ, ts ) = exp − jπkτ (ts )2 exp[ j2π ( f 0 − kτ (ts ))τ (ts )] ×
+                                                                                
+                                                     exp − jπkτ (ts + ∆ts )2 exp[ j2π ( f 0 − kτ (ts + ∆ts ))τ (ts + ∆ts )]    (5)
+
+                                                  ≈ exp[ j2π f 0 (τ (ts + ∆ts ) − τ (ts ))]
+
+                                  The approximant in Equation (5) holds true because the term kτ (ts ) is much smaller
+                            than f 0 . For example, kτ (ts ) and f 0 are 0.33 MHz and 24,000 MHz, respectively. Therefore,
+                            the first term is much smaller than the second term. The second step is interferometric phase
+                            extraction and it can be achieved by the arctangent (in radians) operation, as following:
+                                                                n             o
+                                              ∆ϕ(ts ) = arctan Se(−kτ, ts ) ≈ 2π f 0 (τ (ts + ∆ts ) − τ (ts ))         (6)
+
+                                 As ∆ts is small in cable tension measuring radars, the interferometric phase lays in the
+                            principal value section, and no phase unwrapping is required. The interferometric phase is
+                            proportional to the displacement of the target.
+
+                                                           ∆ϕ(ts )          ∆τ (ts )          ∆(ts )
+                                                                   = 2π f 0          = 4π f 0                                  (7)
+                                                            ∆ts              ∆ts              c ∆ts
+
+                                The interferometric phase is usually measured at a fixed pulse repetition frequency
+                            (PRF). The PRF should be set high enough to make sure the interferometric phase is
+                            not wrapped. If the maximum deformation velocity is v∆R , then the minimum PRF is
+                            (4v∆R )/λ. However, the maximum deformation velocity is hard to measure. The PRF is set
+                            no smaller than 200 as a rule of thumb. Equation (7) can be replaced by the time differential
+                            formulation in the following.
+                                                                     n     λ     n 
+                                                               ∆R         =    ∆ϕ                                              (8)
+                                                                     PRF    4π     PRF
+                            where n is the slow-time index. The cable displacement is obtained by integrating the
+                            time differential from the beginning to the nth sampling point. The displacement can be
+                            written as:                                            
+                                                                      n          k
+                                                            d(n) = ∑k=1 ∆R                                       (9)
+                                                                                RRF
+                                 Vibration frequency can be calculated by using spectrum estimation methods, e.g.,
+                            the FFT-based methods.
+
+                            2.1.2. Radar Characteristic of a Bridge Cable
+                                 A typical bridge cable is composed of a group of braided steel cords. If the cable
+                            is uncovered, its periodic structure tends to induce the Bragg diffusion phenomenon.
+                            However, bridge cables are usually covered by polyethylene jackets to improve their
+                            service lifetimes. Then, the bridge cable can be modeled as a finite cylinder. The radar
+                            cross-section (RCS) of a cylinder is formulated as [22]:
+                                                                           "                  #2
+                                                                    D        sin ( kH sin θ )
+                                                            σ = kH 2 cos θ                                                   (10)
+                                                                    2           kH sin θ
+
+                            where k = 2π/λ. H and D are the length and the diameter of the cylinder, respectively.
+                            θ is the incidence angle. Simulation results show that the RCS reaches a maximum when
+                            θ = 0 and decreases when θ increases [23]. To improve displacement precision, the angle
+                            of a radar must be properly adjusted to get an optimal radar image that all the cables have
+                            large peaks.
+Electronics 2021, 10, 501                                                                                                     5 of 16
+
+
+
+
+                            2.2. Principles of Vibration Frequency-Based Cable-Tension Measurement
+                                 A simplified yet satisfactory tension estimation equation is often used in practical en-
+                            gineering, by ignoring the bending stiffness as well as the elastic and damping parameters.
+                            The cable-tension F can be written as [7]:
+                                                                                     2
+                                                                         2       fn
+                                                            F = 4ml                        (n = 1, 2, · · · )                  (11)
+                                                                                 n
+
+                            where m is the cable weight per unit length, l is the cable length, f n is the nth vibration
+                            frequency, and it has a relation with the fundamental frequency f 1 as f 1 = f n /n.
+                                 If more precise tension estimation is a pursuit, we have to solve the micro-vibration
+                            differential equation at a static equilibrium position [11].
+
+                                                        ∂4 v     ∂2 v     ∂2 y     0       0 ∂v     ∂2 v
+                                                   EI        − F      − h      + k   v + c      + m      =0                    (12)
+                                                        ∂4 x     ∂2 x     ∂2 x               ∂t     ∂2 t
+                            where E I is the bending stiffness, v = v( x, t) is the vertical vibration, y = y( x ) is the vertical
+                            displacement due to the cable’s self-weight, h is an additional cable-tension caused by
+                            vibration, and k0 and c0 are the elastic and damping parameters, respectively. t is the time
+                            and x is the longitudinal position.
+
+                            3. APES-Based Time-Frequency Analysis of Bridge Cables
+                            3.1. Cable Displacement Model
+                                Cable displacement can be modeled by a sum of sinusoidal signals. The sinusoidal
+                            signals are the cable fundamental frequency waveform and its harmonic components,
+                            and the bridge deck’s fundamental frequency waveform and its harmonic components.
+                            The displacement is contaminated by white Gauss noise and can be expressed as:
+                                                                     P
+                                                         y(n) = ∑ p=1 α p,n (ω p,n )e jnω p,n + cn (ω p,n )                    (13)
+
+                            where ω p,n and α p,n are the frequency and the amplitude of the pth sinusoidal component,
+                            respectively. cn is a white Gauss noise and P is the total number of sinusoidal signals.
+                            The frequency and amplitude of cable displacement vary due to the fluctuating bridge load.
+                            However, the variations are small. It is rational to assume that the frequency and amplitude
+                            remain stable at a certain period. An instant frequency and amplitude estimation can be
+                            made from a partial observation, and the dynamic frequency and amplitude parameters
+                            can be estimated from the entailed observation in a piecewise manner. For notational
+                            convenience, we drop the dependence on p and n below.
+
+                            3.2. Principles of APES-Based Spectrum Estimation
+                                   Li proposed the first derivation of a maximum likelihood estimation of a complex
+                            sinusoidal signal, called APES [17]. Then, Stoica gave another derivation of the APES [18].
+                            It is similar to the data dependent Capon filter.
+
+                                               1 L −1 H                       2
+                                           min
+                                           h,α L
+                                                 ∑ l = 0
+                                                         h y(l ) − α(ω )e jωl , Subject                 to : hH aM (ω ) = 1    (14)
+
+                                                                         T
+                            where aM = [1, e− jω , · · · e− j( M−1)ω ] ; y(l ) = [y(l ), y(l + 1), · · · y(l + M − 1)]T . M is the
+                            length of the adaptive filter. The minimization of Equation (14) gives:
+
+                                                                                               1 L −1
+                                                    α̂(ω ) = hH g(ω ) ; g(ω ) =                 ∑     y(l )e− jωl              (15)
+                                                                                               L l =0
+Electronics 2021, 10, 501                                                                                                                       6 of 16
+
+
+
+
+                                 Insertion of Equation (15) in Equation (14) yields the following minimization problem
+                            for the determination of h:
+
+                                                       minhH Q̂h            subject          to : hH aM (ω ) = 1                                 (16)
+                                                         h
+
+                                                                  1 L −1
+                            where Q̂ = R̂ − g(ω )gH (ω ) and R̂ =   ∑    y(l )yH (l ). The optimal coefficients can be
+                                                                  L l =0
+                            obtained by a Lagrange multiplication [17].
+                                                                                            −1
+                                                                                       Q̂        aM (ω )
+                                                                    h APES =                      −1
+                                                                                                                                                 (17)
+                                                                                aH
+                                                                                 M ( ω )Q̂             aM (ω )
+
+                                 An optimal complex spectrum estimation is obtained, by inserting Equation (17)
+                            into Equation (15).
+                                                                                                  −1
+                                                                                    aH
+                                                                                     M ( ω )Q̂         g( ω )
+                                                                     α̂(ω ) =             −1
+                                                                                                                                                 (18)
+                                                                                aH
+                                                                                 M ( ω )Q̂ aM ( ω )
+                                 The computation load of APES is large, especially the matrix-inverting operation.
+                            It can be reduced by using the matrix inversion lemma. Then a new formulation of the
+                            inversion of Q̂ is:
+                                                                       −1              −1
+                                                         −1    −1    R̂ g(ω )gH (ω )R̂
+                                                      Q̂ = R̂ −               −1
+                                                                                                              (19)
+                                                                     gH (ω )R̂ g(ω ) − 1
+                                 The computation efficiency is improved as direct matrix inversions are prevented.
+                            By substituting Equation (19) into Equation (18), a new expression of the frequency response
+                            is obtained by using the formula below.
+                                                                                                  −1
+                                                                                    aH
+                                                                                     M ( ω )R̂         g( ω )
+                                      α̂(ω ) =                                                                                             2
+                                                                                                                                                 (20)
+                                                               −1                                −1                           −1
+                                                                                
+                                                   gH (ω )R̂        g ( ω ) − 1 aH
+                                                                                 M ( ω )R̂             aM (ω ) − aH
+                                                                                                                  M ( ω )R̂        g( ω )
+
+                                 Since R̂ is Hermitian and positive definite, we can obtain an upper triangular matrix
+                                                                             −1            −1/2         −1/2 H
+                            by Cholesky factorization, such that R̂                 = R̂          (R̂           ) . Let
+
+                                                                              −1/2 H *
+                                                                                  
+                                                                       b = R̂         aM ( ω )
+                                                                                   H                                                            (21)
+                                                                              −1/2
+                                                                          
+                                                                       d = R̂         Ya*L (ω )
+
+                                                                                                            −1/2 H
+                                                                                                                
+                            where Y = [y(0), · · · y( L − 1)]. Vectors b and d are the spectrum of R̂               and
+                                      H
+                                 −1/2
+                            
+                              R̂         Y, respectively. Equation (21) can be calculated by the FFT to further improve
+                            efficiency. The frequency estimation can be written as:
+
+                                                                                     bH d
+                                                               α̂(ω ) =                        2
+                                                                                                                                                 (22)
+                                                                            dH d − I bH b − bH d
+
+                                 Larsson [20] and Glentis [21] proposed other fast implementations of the APES in
+                            2002 and 2008, respectively. Fast implementation is not the focus of this paper at this stage.
+                            Interested readers can read these papers for further study.
+
+                            3.3. APES-Based Time-Frequency Analysis
+                                 If the dynamic cable-tension is the pursuit, the APES method can be applied repeatedly
+                            to different sections of the displacement vector. Nearby sections can be overlapped to get
+                            smoother results. The main signal processing flow of APES-based time-frequency analysis
+                                 Larsson [20] and Glentis [21] proposed other fast implementations of the APES in
+                            2002 and 2008, respectively. Fast implementation is not the focus of this paper at this stage.
+                            Interested readers can read these papers for further study.
+
+Electronics 2021, 10, 501   3.3. APES-Based Time-Frequency Analysis                                                                             7 of 16
+
+                                  If the dynamic cable-tension is the pursuit, the APES method can be applied repeat-
+                             edly to different sections of the displacement vector. Nearby sections can be overlapped
+                             tosimilar
+                            is  get smoother
+                                        to that results. The main
+                                                 of short-time     signal
+                                                               Fourier     processing flow
+                                                                        transformation       of APES-based
+                                                                                          (STFT).             time-frequency
+                                                                                                   The flow chart  is shown
+                             analysis
+                            in Figure is
+                                       1. similar to that of short-time Fourier transformation (STFT). The flow chart is
+                             shown
+                            1.       in Figure
+                                  A long   input1.displacement vector is filtered by a high-pass filter (HPF). The measured
+                            1.   A  long input displacement
+                                 displacement       always contains   vector
+                                                                           a DCis filtered    by a high-pass
+                                                                                     offset component.              filterwould
+                                                                                                                There       (HPF).beThe   measured
+                                                                                                                                       a large    peak
+                                 displacement
+                                 at 0 Hz in thealwaysspectrum. contains    a DC offset
+                                                                     The sidelobe             component.
+                                                                                          of the   peak would    Therebe would     be a large
+                                                                                                                           much larger      thanpeakthe
+                                 at 0 Hz
+                                 peak   ofinathe   spectrum.
+                                               cable’s            The sidelobe
+                                                          fundamental                 of the peak
+                                                                              frequency        peak.would So, abehigh-pass
+                                                                                                                     much larger      than
+                                                                                                                                 filter  is the
+                                                                                                                                             used peak
+                                                                                                                                                     to
+                                 suppress     the  adverse      influence.     There      are  many      types    of  the
+                                 of a cable’s fundamental frequency peak. So, a high-pass filter is used to suppress the    HPF   filter.  The    HPF
+                                 filter in influence.
+                                 adverse    this manuscriptThere areis performed
+                                                                        many typeswith     of thea HPF
+                                                                                                    MATLAB          function,
+                                                                                                            filter. The          called
+                                                                                                                           HPF filter   in ‘smooth.’
+                                                                                                                                           this man-
+                                 The   operation
+                                 uscript             is formulated
+                                          is performed                  as y(n) =function,
+                                                              with a MATLAB               d(n) − smooth        (d(n), Lsmooth
+                                                                                                     called ‘smooth.’        The).operation
+                                                                                                                                    Where Lsmoothis for-
+                                 is the smooth
+                                 mulated     as y(n)=length     parameter
+                                                       d (n)  smooth( d (n), Lof   the
+                                                                               smooth ) . ‘smooth’
+                                                                                          Where    L    function.
+                                                                                                     smooth
+                                                                                                             is the     The
+                                                                                                                     smooth  smaller
+                                                                                                                                length  the   L
+                                                                                                                                          parameter
+                                                                                                                                                smooth  ,
+                                 the  larger   the   cut-frequency        of  the    HPF     filter.   Then,     the   filtered
+                                 of the ‘smooth’ function. The smaller the Lsmooth , the larger the cut-frequency of the         displacement         is
+                                 decimated by a reasonable factor to reduce the total data length and the computation
+                                 HPF filter. Then, the filtered displacement is decimated by a reasonable factor to re-
+                                 load subsequently.
+                                 duce the total data length and the computation load subsequently.
+                            2.   The new vector is divided into sections of the same length with some proper overlap-
+                            2.   The new vector is divided into sections of the same length with some proper over-
+                                 ping factors.
+                                 lapping factors.
+                            3.   Each section is processed by the APES algorithm.
+                            3.   Each section is processed by the APES algorithm.
+                            4.   Frequency peaks from APES output are extracted. Fundamental frequency can be
+                            4.   Frequency peaks from APES output are extracted. Fundamental frequency can be
+                                 preliminarily identified if its high harmonic frequencies exist. Then, the fundamen-
+                                 preliminarily identified if its high harmonic frequencies exist. Then, the fundamental
+                                 tal frequencies are further judged, according to the relation that they are inversely
+                                 frequencies are further judged, according to the relation that they are inversely pro-
+                                 proportional to the cable length.
+                            5.   portional
+                                 The APESto      the cableand
+                                               algorithm       length.
+                                                                   fundamental frequency identification are applied repeatedly
+                            5.   The
+                                 to all the divided sections. fundamental
+                                       APES     algorithm      and    Then the dynamic    frequency       identification
+                                                                                                  cable-tension       can beare    applied repeat-
+                                                                                                                               obtained.
+                                 edly to all the divided sections. Then the dynamic cable-tension can be obtained.
+
+
+
+
+                             Figure1.
+                             Figure 1. Time-frequency
+                                       Time-frequencyanalysis
+                                                      analysisflow
+                                                               flowcharts
+                                                                    chartsof
+                                                                           ofaabridge
+                                                                                bridgecable.
+                                                                                       cable.
+
+                            4. Results
+                            4. Results
+                                 In this section, the proposed method is evaluated by simulation and real interfero-
+                                  In radar
+                             metric   this section, the proposed method is evaluated by simulation and real interferomet-
+                                             data analysis.
+                            ric radar data analysis.
+                             4.1. Frequency Estimation Precision and Super-Resolution Ablility
+                            4.1. Frequency Estimation Precision and Super-Resolution Ablility
+                                   Three simulation experiments are conducted to demonstrate the characters of APES.
+                             TwoThree     simulation
+                                    of them            experiments
+                                              are to evaluate       are conducted
+                                                               the frequency       to demonstrate
+                                                                              estimation  precisionthe characters
+                                                                                                    under         of APES.
+                                                                                                           single-tone  and
+                            Two    of  them  are to  evaluate the frequency  estimation  precision under  single-tone
+                             double-tone conditions. The third one is to analyze the relations of estimation precision and
+                            double-tone conditions. The third one is to analyze the relations of estimation precision
+                            vs. SNR. Results reveal that the APES can achieve super-resolution ability and higher
+                            frequency estimation precision, especially in multi-tone circumstances. Parameters in these
+                            simulations are the same as those of the later K band interferometric radar.
+                                  Table 1 shows the parameters of APES in the following three simulations. The displace-
+                            ment sampling frequency is 20 Hz and the sampling length is 10 s. Therefore, the length
+                            of an input vector is 200 points. According to the time-frequency theory, the frequency
+                            resolution of the vector is ρ f = 1/10 Hz. ZOOM-FFT (FFT for short), CZT, and APES
+                                     vs. SNR. Results reveal that the APES can achieve super-resolution ability and higher fre-
+                                     quency estimation precision, especially in multi-tone circumstances. Parameters in these
+                                     simulations are the same as those of the later K band interferometric radar.
+
+Electronics 2021, 10, 501                 Table 1 shows the parameters of APES in the following three simulations. The               dis-
+                                                                                                                               8 of 16
+                                     placement sampling frequency is 20 Hz and the sampling length is 10 s. Therefore, the
+                                     length of an input vector is 200 points. According to the time-frequency theory, the fre-
+                                     quency resolution of the vector is ρ𝑓 = 1⁄10 Hz. ZOOM-FFT (FFT for short), CZT, and
+                                  methods    are adopted
+                                     APES methods           to estimate
+                                                       are adopted       the frequency.
+                                                                     to estimate         The spectrum
+                                                                                  the frequency.          analysis analysis
+                                                                                                   The spectrum    interval of these of
+                                                                                                                            interval
+                                  methods   is set to ρ  /160,  which  is fine enough  to  analyze the frequency   resolution
+                                     these methods isf set to ρ𝑓 ⁄160, which is fine enough to analyze the frequency resolutionof the
+                                  three  methods.   Stoica [18] suggests   the APES filter tap to be half the input vector length
+                                     of the three methods. Stoica [18] suggests the APES filter tap to be half the input vector     to
+                                  get an optimum result, so the filter tap is set to be 100 in the simulations.
+                                     length to get an optimum result, so the filter tap is set to be 100 in the simulations.
+                                  Table 1. Parameters  of APES in of
+                                             Table 1. Parameters  these simulations.
+                                                                     APES  in these simulations.
+                            Frequency            Section    Section             Filter                                             Spectrum
+                                                                                                                        SpectrumSpectrum
+        Vector Length                 Vector
+                                           PRF   Frequency                     Section      Section      Filter
+                                                                                                  Spectrum
+                            Resolution           Length       PRF
+                                                            Overlap             Taps                                    Analysis   Analysis
+                                                                                                                             Analysis Interval
+             (s)                     Length
+                                          (Hz)   Resolution                    Length       Overlap       Taps
+                                                                                             Analysis Range (Hz)
+                               (Hz)               (point)     (Hz)
+                                                            (point)           (orders)                                   Range      Interval
+                                                                                                                                  (Hz)
+                                       ( s)         (Hz)                       (point)      (point)     (orders)
+              10                0.1         20      200           180           100                    0–5                            (Hz)
+                                                                                                                          (Hz) 0.000625
+                                       10            0.1           20            200           180           100           0–5        0.000625
+                                         By using the Monte Carlo method, each simulation is conducted 100 times. The mean
+                                    absolute percentage error (MAPE) is used to assess the estimation precision. The MAPE
+                                       By using the Monte Carlo method, each simulation is conducted 100 times. The mean
+                                    is defined as:
+                                  absolute percentage error (MAPE) is used to assess the estimation precision. The MAPE is
+                                                                                     Nsim fi  f real
+                                  defined as:                                1
+                                                                  f MAPE 1=              
+                                                                                Nsim f i − f real      100              (23)
+                                                                       NsimN∑
+                                                           ∆ f MAPE =                i 1             × 100           (23)
+                                                                             simi =1      f realfreal
+                                     where
+                                  where        𝑓𝑖 and
+                                          f i and  f real 𝑓are   areestimated
+                                                           𝑟𝑒𝑎𝑙the   the estimated andreal
+                                                                              and the   thefrequency
+                                                                                             real frequency
+                                                                                                        of the of   the simulated
+                                                                                                                 simulated         tone, re-
+                                                                                                                            tone, respec-
+                                     spectively.
+                                  tively.           𝑁𝑠𝑖𝑚repeated
+                                          Nsim is the        is the repeated simulation
+                                                                     simulation number,number,
+                                                                                         and it is and
+                                                                                                   set toit be
+                                                                                                            is set
+                                                                                                               100.to be 100.
+
+                                  4.1.1. Single-Tone
+                                     4.1.1.  Single-Tone Frequency
+                                                            Frequency  Estimation
+                                                                          Estimation
+                                        The
+                                          The first simulation aims to
+                                              first simulation      aims    to evaluate      single-tonefrequency
+                                                                                evaluate single-tone       frequencyestimation
+                                                                                                                          estimation     accuracy.
+                                                                                                                                      accuracy.   The
+                                  The  frequency     of  simulated    sine  waveform        varies  from  1.0  Hz   to
+                                     frequency of simulated sine waveform varies from 1.0 Hz to 2.0 Hz. A white Gauss  2.0 Hz.   A white    Gauss
+                                                                                                                                                noise
+                                  noise
+                                     withwith    −10−
+                                            the the  dB10relative
+                                                           dB relative
+                                                                    powerpower      is added
+                                                                              is added         to single-tone
+                                                                                          to the  the single-tone    waveform.
+                                                                                                                waveform.
+                                        The   curve   of  MAPE     vs.  frequency       deviation   is shown
+                                          The curve of MAPE vs. frequency deviation is shown in Figure 2.        in Figure   2. The
+                                                                                                                                 Theblue
+                                                                                                                                       bluesolid,
+                                                                                                                                             solid,red
+                                  redsolid,
+                                       solid,and
+                                               andyellow
+                                                     yellow    dash   curves     are  the  results  obtained    by   APES,   FFT,
+                                                            dash curves are the results obtained by APES, FFT, and CZT, respec-    and    CZT,  re-
+                                  spectively.   The  red   solid and   yellow     dash   curves  are  overlapped,     which   indicates
+                                     tively. The red solid and yellow dash curves are overlapped, which indicates that the per-           that the
+                                  performances
+                                     formances of   of FFT
+                                                       FFT and
+                                                             and CZT
+                                                                   CZT are
+                                                                         are the
+                                                                               thesame.
+                                                                                     same.Since
+                                                                                             Sincethetheblue
+                                                                                                         blueand
+                                                                                                               andred   curves
+                                                                                                                      red  curvesareare
+                                                                                                                                      notnot
+                                                                                                                                           always
+                                                                                                                                              always
+                                  superior    to  each  other,  it can  hardly     judge   which    method    is  better.
+                                     superior to each other, it can hardly judge which method is better. Since all the     Since  all the  MAPE
+                                                                                                                                              MAPE
+                                  curves  are   lower   than  0.025%,   all  three    methods   can   achieve  precise   frequency
+                                     curves are lower than 0.025%, all three methods can achieve precise frequency estimation          estimation
+                                  under the single-tone condition.
+                                     under the single-tone condition.
+
+
+
+
+                                     Figure
+                                  Figure  2. 2. Single-tone
+                                              Single-tone    frequency
+                                                           frequency    estimationerror
+                                                                      estimation    errorvs.
+                                                                                          vs.different
+                                                                                              differentfrequency
+                                                                                                        frequency position.
+                                                                                                                    position. The
+                                                                                                                              The blue
+                                                                                                                                  blue solid
+                                                                                                                                        solid
+                                     curve,  the red solid  curve, and the yellow  dash  curve  are the results obtained  by adaptive
+                                  curve, the red solid curve, and the yellow dash curve are the results obtained by adaptive amplitude ampli-
+                                  andtude and
+                                       phase    phase estimation
+                                              estimation           (APES),
+                                                         (APES), fast       fastransform
+                                                                       Fourier  Fourier transform
+                                                                                          (FFT), and(FFT),
+                                                                                                      chirp and  chirp z-transform
+                                                                                                            z-transform             (CZT), re-
+                                                                                                                         (CZT), respectively.
+                                     spectively.
+                                  4.1.2. Double-Tone Signal Frequency Estimation
+                                       The second simulation aims to evaluate the frequency estimation performance when
+                                  multiple tones are present, which is closer to the actual condition of a cable-tension measure-
+                                  ment. The frequency of one tone is fixed at 1 Hz, and that of the other tone exponentially
+                                  changes. The gap between the two tones ranges from 0.05 Hz, which is half the frequency
+                                  resolution, to 3.97 Hz. A white Gauss noise whose power is −20 dB is added to the
+                                  double-tone waveform.
+                              4.1.2. Double-Tone Signal Frequency Estimation
+                                    The second simulation aims to evaluate the frequency estimation performance when
+                              multiple tones are present, which is closer to the actual condition of a cable-tension meas-
+Electronics 2021, 10, 501
+                              urement. The frequency of one tone is fixed at 1 Hz, and that of the other tone exponen-                    9 of 16
+                              tially changes. The gap between the two tones ranges from 0.05 Hz, which is half the fre-
+                              quency resolution, to 3.97 Hz. A white Gauss noise whose power is −20 dB is added to the
+                              double-tone waveform.
+                                  The
+                                    Theresult
+                                          resultofofthe
+                                                      thesecond
+                                                             secondsimulation
+                                                                       simulationisishownshownininFigure
+                                                                                                     Figure3. 3.The
+                                                                                                                 Theperformances
+                                                                                                                       performancesofofthe     the
+                            FFT
+                              FFTandandthe
+                                         the CZT
+                                             CZT are also identical
+                                                                 identicalininthisthissimulation.
+                                                                                         simulation. TheThe
+                                                                                                          MAPEMAPE curve curve   of APES
+                                                                                                                             of APES           is
+                                                                                                                                         is much
+                            much
+                              lowerlower    and keeps
+                                      and keeps             consistent
+                                                     consistent     amongamong     all the
+                                                                              all the       frequency
+                                                                                        frequency        gaps,
+                                                                                                     gaps,  even even   if the
+                                                                                                                   if the    gapgap   is below
+                                                                                                                                  is below     the
+                            the  resolution    limit   ρ
+                              resolution limit ρ𝑓 . This f .  This   indicates   the   super-resolution     ability   of  APES.
+                                                               indicates the super-resolution ability of APES. However, the per-    However,
+                            the  performances
+                              formances     of FFT of and
+                                                       FFT CZTand CZT     fluctuate.
+                                                                    fluctuate.   Their Their
+                                                                                          MAPEsMAPEsare are generally
+                                                                                                         generally    much much    larger
+                                                                                                                               larger   and andcan
+                            can  reach
+                              reach     some
+                                     some      minimums
+                                             minimums           only
+                                                              only  atat specificfrequency
+                                                                       specific    frequencygaps.
+                                                                                                gaps.The
+                                                                                                       Thereason
+                                                                                                            reasonfor forthe
+                                                                                                                           thephenomenon
+                                                                                                                                phenomenon is
+                            isthat
+                               thatZOOM-FFT
+                                    ZOOM-FFT and    and CZTCZT are
+                                                                 are FFT-based
+                                                                       FFT-basedmethods
+                                                                                    methodsand  andthetheFourier
+                                                                                                          Fouriertransformation
+                                                                                                                    transformationsuffers  suffers
+                            sidelobe   leakage.   Both    the  estimation    frequency     of the fixed  tone  and  the
+                              sidelobe leakage. Both the estimation frequency of the fixed tone and the varying tones     varying    tones   are
+                            contaminated     by  each   other’s    sidelobes.   The   simulation    demonstrates     that
+                              are contaminated by each other’s sidelobes. The simulation demonstrates that the perfor-      the performance
+                            ofmance
+                                APES ofis superior    to those of
+                                          APES is superior        to the  twofmethods.
+                                                                      those     the two methods.
+
+
+
+
+                              Figure3.3.Double-tone
+                            Figure       Double-tonefrequency
+                                                      frequencyestimation
+                                                                 estimationerror
+                                                                            errorvs.
+                                                                                  vs. different
+                                                                                      different frequency
+                                                                                                frequency position.
+                                                                                                            position. The
+                                                                                                                      The blue
+                                                                                                                          blue solid
+                                                                                                                               solid
+                            curve, the red solid curve, and the yellow dash curve are the results obtained by APES, FFT, and
+                              curve, the  red solid curve, and the yellow dash curve   are the results obtained by  APES,  FFT, and
+                              CZT,
+                            CZT,    respectively.
+                                 respectively.
+
+                              4.1.3.Frequency
+                            4.1.3.   FrequencyEstimation
+                                               EstimationPerformance
+                                                          Performancevs.
+                                                                      vs.SNR
+                                                                          SNR
+                                   The
+                                     Thethird
+                                          thirdsimulation
+                                                  simulationaims  aimstotoevaluate
+                                                                            evaluatethe  thefrequency
+                                                                                              frequencyestimation
+                                                                                                           estimationrobustness
+                                                                                                                        robustnesswhen  whenthe
+                                                                                                                                              the
+                            power
+                              powerofofthe theadded
+                                                addedwhitewhite Gauss
+                                                                   Gauss noise varies from           −40dB
+                                                                                              from −40     dBtoto0 dB
+                                                                                                                   0 dBat at
+                                                                                                                          a 1adB
+                                                                                                                               1 dB    interval.
+                                                                                                                                   interval. The
+                            The   frequencies
+                              frequencies     of of
+                                                  thethe  twotones
+                                                        two     tonesarearefixed
+                                                                             fixedatat11 Hz
+                                                                                          Hz and 1.1 Hz. Hz. The
+                                                                                                              The gap
+                                                                                                                   gapequals
+                                                                                                                        equalsthethefrequency
+                                                                                                                                       frequency
+                            resolution
+                              resolutionρ fρ. 𝑓 .
+                                   The
+                                     TheMAPE
+                                           MAPE   andandstandard
+                                                             standarddeviation(std)
+                                                                          deviation(std) are chosen    for comparison.
+                                                                                                are chosen                The MAPE
+                                                                                                               for comparison.      Thecurves
+                                                                                                                                           MAPE
+                            and   the std
+                              curves    andcurves
+                                             the td   arecurves
+                                                           shownare  in shown
+                                                                        Figuresin4 and
+                                                                                     Figures5, respectively.   The curvesThe
+                                                                                                 4 and 5, respectively.      of FFT   and of
+                                                                                                                                 curves    CZT
+                                                                                                                                             FFT
+                            are
+                              andtheCZT
+                                      same,
+                                          aresothetheir
+                                                    same, performances        are identical.
+                                                              so their performances         areTheir    MAPE
+                                                                                                 identical.      curves
+                                                                                                             Their  MAPEare curves
+                                                                                                                             nearly constant
+                                                                                                                                       are nearly
+                            with    varying
+                              constant    withSNR      levels,
+                                                  varying     SNRwhich    indicates
+                                                                     levels,            that the two
+                                                                               which indicates      that methods     are robust
+                                                                                                          the two methods       areestimators.
+                                                                                                                                     robust esti-
+                            The   MAPE     curve   of  APES    is  much   lower    than   those  of the  other
+                              mators. The MAPE curve of APES is much lower than those of the other two methods  two methods     at all the SNRat
+                            levels.
+                              all the SNR levels. At the same time, the MAPE curve of APES increases as SNR getsAPES
+                                      At the same     time,   the  MAPE     curve   of  APES    increases   as SNR  gets  lower.   Since   lower.
+                            isSince
+                               a data-dependent          spectrum estimator,
+                                      APES is a data-dependent              spectrum  it isestimator,
+                                                                                            more affected      by theaffected
+                                                                                                        it is more     level ofby input   noise.of
+                                                                                                                                    the level
+                            The   stdnoise.
+                              input    curve The
+                                              of APES       is generally
+                                                    std curve     of APESlarger      than those
+                                                                              is generally    largerofthan
+                                                                                                       the other
+                                                                                                            those two   methods.
+                                                                                                                   of the  other two However,
+                                                                                                                                        methods.
+                            since   the  SNR    is larger    than   0  dB,  it  is the  most    common      cable-tension
+                              However, since the SNR is larger than 0 dB, it is the most common cable-tension estima-        estimation    case.
+                            The
+                              tionAPES
+                                     case.methods
+                                           The APES    can   still achieve
+                                                          methods             superior
+                                                                       can still   achieveresults.
+                                                                                             superior results.
+Electronics 2021, 10, 501                                                                                                                                         10 of 16
+ Electronics 2021, 10, x FOR PEER REVIEW                                                                                                                           10 of 16
+ Electronics 2021, 10, x FOR PEER REVIEW                                                                                                                            10 of 16
+
+
+
+
+                                   Figure4.4.Mean
+                                  Figure     Meanabsolute
+                                                   absolutepercentage
+                                                             percentageerror
+                                                                         error(MAPE)
+                                                                                (MAPE)vs.
+                                                                                        vs.different
+                                                                                            differentsignal
+                                                                                                      signaltotonoise
+                                                                                                                 noiseratio
+                                                                                                                        ratio(SNR).
+                                                                                                                              (SNR).The
+                                                                                                                                      Theblue
+                                   blue solid
+                                   Figure 4.  curve,
+                                             Mean    the red
+                                                   absolute  solid curve,
+                                                             percentage   and
+                                                                         error the yellow
+                                                                                (MAPE)    dash
+                                                                                        vs.     curve
+                                                                                            different  are the
+                                                                                                      signal  toresults
+                                                                                                                 noise   obtained
+                                                                                                                        ratio
+                                  solid curve, the red solid curve, and the yellow dash curve are the results obtained by APES,   by
+                                                                                                                               (SNR). APES,
+                                                                                                                                      TheFFT,
+                                   FFT,
+                                   blue and
+                                        solidCZT, respectively.
+                                              curve, the red solid curve, and  the yellow dash   curve are the  results  obtained  by APES,
+                                  and CZT, respectively.
+                                   FFT, and CZT, respectively.
+
+
+
+
+                                   Figure 5. Standard deviation of frequency estimation error vs. different SNR. The blue solid curve,
+                                   the red5.5.
+                                   Figure
+                                  Figure    solid curve,
+                                               Standard
+                                             Standard    and theofyellow
+                                                         deviation
+                                                       deviation         dashestimation
+                                                                   of frequency
+                                                                   frequency    curve
+                                                                                  estimation                 SNR.by
+                                                                                                    vs.obtained
+                                                                                               results
+                                                                                           theerror
+                                                                                      areerror           different
+                                                                                               vs. different         APES,
+                                                                                                                   SNR.
+                                                                                                                   The   The
+                                                                                                                       blue  FFT,
+                                                                                                                              blue
+                                                                                                                            solid  and
+                                                                                                                                  curve,CZT,
+                                                                                                                                    solid curve,
+                                                                                                                                         the red
+                                   respectively.
+                                   the red
+                                  solid     solid
+                                        curve,    curve,
+                                                and      and the
+                                                    the yellow    yellow
+                                                               dash  curvedash  curve
+                                                                           are the     are obtained
+                                                                                   results the results
+                                                                                                     byobtained
+                                                                                                         APES, FFT,  APES,
+                                                                                                                  by and     FFT,
+                                                                                                                          CZT,     and CZT,
+                                                                                                                                respectively.
+                                   respectively.
+                                  4.2.
+                                   4.2.Dynamic
+                                         DynamicCable-Tension
+                                                     Cable-TensionAnalysisAnalysisunder   underthe theImpact
+                                                                                                         ImpactofofaaHigh-Speed
+                                                                                                                          High-SpeedTrain   Train
+                                    4.2. Dynamic
+                                         The
+                                          The methodsCable-Tension
+                                                 methods     are applied  Analysis    theunder
+                                                                                 to the
+                                                                                to           dataof
+                                                                                            data   the
+                                                                                                     ofaImpact      of a High-Speed
+                                                                                                          acable-stayed
+                                                                                                             cable-stayed        railway
+                                                                                                                               railway      Train
+                                                                                                                                               bridge.
+                                                                                                                                            bridge.     The The   bridge
+                                                                                                                                                              bridge     is 1
+                                  iskm1 km    south
+                                           The methods
+                                          south       of  the
+                                                   of the are   Changsha
+                                                                  appliedsouthern
+                                                              Changsha            southern
+                                                                                to the datarailwayrailway       station.
+                                                                                                   of a cable-stayed
+                                                                                                               station. The  The     bridge,
+                                                                                                                               railway
+                                                                                                                                     bridge,      which
+                                                                                                                                             bridge.
+                                                                                                                                                  which     crosses
+                                                                                                                                                        Thecrosses
+                                                                                                                                                              bridge isthe
+                                                                                                                                                                         the1
+                                    km southhigh-speed
+                                  Wuguang
+                                   Wuguang                      railway
+                                                   of the Changsha
+                                                   high-speed      railway   line,    is an
+                                                                               southern
+                                                                                  line,       import
+                                                                                           is an railway
+                                                                                                   import   node    of the
+                                                                                                               station.
+                                                                                                                node        Hukun
+                                                                                                                         of The      bridge,
+                                                                                                                             the Hukun            whichrailway
+                                                                                                                                          high-speed
+                                                                                                                                                high-speed   crosses  line,
+                                                                                                                                                                  railwaythe
+                                  as   shown
+                                    Wuguang
+                                   line,         inhigh-speed
+                                           as shown Figure    6. Itrailway
+                                                        in Figure   is 6.
+                                                                       composed
+                                                                           It isline,      is
+                                                                                    composed           tower
+                                                                                               oneimport
+                                                                                            ofan       of        and
+                                                                                                            onenode
+                                                                                                                  tower four
+                                                                                                                         ofand
+                                                                                                                             thegroups
+                                                                                                                                    Hukun
+                                                                                                                                   four     of cables.  of Each
+                                                                                                                                                 high-speed
+                                                                                                                                            groups                 group
+                                                                                                                                                                  railway
+                                                                                                                                                            cables.   Each
+                                  contains     8 cables.in
+                                    line, ascontains
+                                   group       shown     8Its  towerIts
+                                                             Figure
+                                                            cables.    6.height
+                                                                           It            72.9 misand
+                                                                               is composed
+                                                                           tower     isheight          of
+                                                                                                       72.9    span
+                                                                                                            itsm
+                                                                                                            one    andlength
+                                                                                                                  tower  itsand
+                                                                                                                              spanisfour
+                                                                                                                                      224   m. An
+                                                                                                                                            groups
+                                                                                                                                       length          interferometric
+                                                                                                                                                  is 224    cables.
+                                                                                                                                                        of m.         Each
+                                                                                                                                                                An inter-
+                                    groupiscontains
+                                  radar
+                                   ferometric placed   by
+                                                   radar    the
+                                                         8 is    footIts
+                                                            cables.
+                                                               placed  ofby the
+                                                                           towerthe tower
+                                                                                        height
+                                                                                       foot    of measure
+                                                                                              to   is
+                                                                                                   the72.9towermthe tocables.
+                                                                                                                   and   its span
+                                                                                                                         measure  Thelength
+                                                                                                                                       theradar    is 224
+                                                                                                                                                  is
+                                                                                                                                              cables. a pointed
+                                                                                                                                                         The    Anramp
+                                                                                                                                                            m. radar inter-
+                                                                                                                                                                        is a
+                                  upwards
+                                    ferometric
+                                   pointed      to make
+                                                   radar
+                                                ramp       sure  that
+                                                            is placed
+                                                       upwards          cables
+                                                                          by thesure
+                                                                     to make         are  within
+                                                                                        footthat
+                                                                                               of the the
+                                                                                                     cables beam
+                                                                                                           tower
+                                                                                                               areto width     of
+                                                                                                                         measure
+                                                                                                                     within       the     antennas.
+                                                                                                                                        the cables.
+                                                                                                                                 the beam               The
+                                                                                                                                                 widthThe     picture
+                                                                                                                                                               radar
+                                                                                                                                                           of the        isofa
+                                                                                                                                                                    anten-
+                                  the   interferometric
+                                    pointed
+                                   nas.   Theramp            used
+                                                       upwards
+                                                 picture            in   the   experiment
+                                                                     to make sure that
+                                                           of the interferometric              used is  placed
+                                                                                                     cables
+                                                                                                         in the    at  the  lower-left
+                                                                                                                     within the is
+                                                                                                                arexperiment            beam corner.
+                                                                                                                                           placedwidth   The   antennas
+                                                                                                                                                           of the
+                                                                                                                                                      at the        anten-
+                                                                                                                                                               lower-left
+                                  used                                                                                                                 ◦ × 15◦ . Due to
+                                    nas. in
+                                   corner.Thethis
+                                              The  experiment
+                                                 picture   of the
+                                                    antennas      are
+                                                                 used   horn
+                                                                         in this  antennas,
+                                                                    interferometric   experiment  and in
+                                                                                                used     their
+                                                                                                          arethe beam
+                                                                                                               horn       width are
+                                                                                                                    experiment
+                                                                                                                       antennas,           about
+                                                                                                                                       isand
+                                                                                                                                           placed
+                                                                                                                                               their15at  the lower-left
+                                                                                                                                                       beam    width are
+                                  the
+                                   aboutblock
+                                    corner.  15°of×the
+                                              The      bridge
+                                                     15°.
+                                                    antennas      body,
+                                                                  to theinthe
+                                                            Dueused           this
+                                                                            block  five oflongest
+                                                                                      experiment
+                                                                                            the bridge cables    are visible
+                                                                                                               horn
+                                                                                                          arebody,     the   fivetolongest
+                                                                                                                        antennas,     theandradar.
+                                                                                                                                                heir  The
+                                                                                                                                                 cablesbeam parameters
+                                                                                                                                                           are  width
+                                                                                                                                                                visibleare  to
+                                  of
+                                   the the
+                                    about  radar   are
+                                             15° The
+                                         radar.        listed
+                                                   × 15°.       in
+                                                        parameters Table
+                                                            Due to theofblock2.   We
+                                                                               the radar recorded
+                                                                                        of theare      their
+                                                                                                  bridge
+                                                                                                       listed  displacements
+                                                                                                              body,     the five
+                                                                                                                 in Table     2. We    at  200
+                                                                                                                                     longest    Hz    for
+                                                                                                                                                 cables
+                                                                                                                                          recorded         186    duringto
+                                                                                                                                                                svisible
+                                                                                                                                                           are displace-
+                                                                                                                                                        their
+                                  which
+                                   ments    aattrain
+                                    the radar.   200 passed
+                                                   The
+                                                     Hz         by. sWe
+                                                        parameters
+                                                          for 186          also
+                                                                          of
+                                                                       during  therecorded
+                                                                                       radar aare
+                                                                                     which          their
+                                                                                                  trainlisted displacements
+                                                                                                                 in Table
+                                                                                                            passed     by. We  2. also
+                                                                                                                                  We without
+                                                                                                                                          recordedpassing
+                                                                                                                                           recorded      theirtrains    for
+                                                                                                                                                                displace-
+                                  comparison and the duration of the recorded data is 300 s.
+                                             at 200 Hzpassing
+                                   ments without          for 186 trains
+                                                                     s during  for which
+                                                                                      comparisona trainand  passed     by. We also
+                                                                                                                 the duration              recorded
+                                                                                                                                      of the    recorded theirdata
+                                                                                                                                                                 displace-
+                                                                                                                                                                     is 300
+                                    ments without passing trains for comparison and the duration of the recorded data is 300
+                                   s.
+                                    s.
+                               Table 2. Parameters of simulation and the K band interferometric radar.
+
+Frequency       Band
+      Electronics 2021, Width
+                        10, 501          Sampling Frequency            Antenna Gain            Transmitting Power             PRF Decimate              11 of 16
+  Range             (GHz)                      (MHz)                       (dBi)                    (dBmW)                    (Hz) Factor
+  K band               1                         10                         22                         27                      200  10:1
+
+
+                              Chansha
+                              Railway
+                               Station
+
+
+
+
+                      Hukun Line
+                        Bridge
+
+
+
+   Figure  6. Experimental
+        Figure              descriptions.
+               6. Experimental            The The
+                                descriptions.  Hukun-Wuguang
+                                                  Hukun-Wuguang bridge is on
+                                                                   bridge  is the south
+                                                                              on the    of the
+                                                                                     south     southern
+                                                                                           of the       Changsha
+                                                                                                  southern       railway
+                                                                                                           Changsha      sta-
+                                                                                                                    railway station. The five
+   tion.longer
+         The five longer cables on the north-east side are
+               cables on the north-east side are measured. measured.
+
+                                          Figure 7 shows the radar image of the experimental scene. We can see the five peaks
+                                               Table 2. Parameters of simulation and the K band interferometric radar.
+                                    marked by blue dash lines correspond to the five cables. These cables are the ones in a red
+                                    color in Figure 6. Their displacement
+                                                                     Band            curves are shown
+                                                                                  Sampling         Antennain Figure      8. These curves vibrate
+                                                                                                                   Transmitting
+                                                 Frequency                                                                             PRF            Decimate
+                                    within smallRange               Width        Frequency           Gain            Power
+                                                      ranges, then change immediately when the train enters the bridge,                (Hz) and re-Factor
+                                    main vibrating with much        (GHz)           (MHz) when(dBi)
+                                                                       larger amplitudes                            (dBmW)
+                                                                                                       the train leaves     the bridge. These ca-
+                                    bles under changing
+                                                    K band ambient     1 load may 10    bear changing  22 force. Dynamic
+                                                                                                                       27      cable-tension
+                                                                                                                                        200      is es- 10:1
+                                    timated by the APES method and the CZT method. Only the nearest and farthest cable is
+                                    analyzed to make  Figurethe  article the
+                                                               7 shows   concise.
+                                                                              radarThe imagetime-frequency     distribution
+                                                                                               of the experimental      scene.images
+                                                                                                                                  We canofsee thethe
+                                                                                                                                                   twofive peaks
+                                    cables aremarked
+                                                 shownby   in blue
+                                                              Figures
+                                                                    dash9 and
+                                                                          lines10.   The spectrum
+                                                                                 correspond      to theobtained     by These
+                                                                                                         five cables.  APES has      much
+                                                                                                                                cables        sharper
+                                                                                                                                         are the   ones in a red
+                                    peaks and      lower
+                                               color       sidelobe
+                                                       in Figure       in both
+                                                                   6. Their      experiments.
+                                                                             displacement          The APES
+                                                                                                curves            method
+                                                                                                          are shown          can resolve
+                                                                                                                       in Figure    8. These thecurves
+                                                                                                                                                   two vibrate
+                                    frequencies     around    1.1 Hz  that  the CZT     method    cannot    do  in Figure   10.  The  superior
+                                               within small ranges, then change immediately when the train enters the bridge, and remain           per-
+                                    formancevibrating
+                                                of APES withis prominent     in these
+                                                                   much larger            experiments.
+                                                                                   amplitudes       when the train leaves the bridge. These cables
+                                          Time-frequency        distribution   is  an    important
+                                               under changing ambient load may bear changing          approach
+                                                                                                             force.toDynamic
+                                                                                                                      analyze cable-tension
+                                                                                                                                  cable’s dynamic   is estimated
+                                    character.byThere     are three
+                                                    the APES    methodbright
+                                                                          andlines
+                                                                               the CZTin Figure   9a,b,
+                                                                                             method.     andthe
+                                                                                                       Only    twonearest
+                                                                                                                     brightand
+                                                                                                                             lines  in Figure
+                                                                                                                                  farthest   cable9c,d.
+                                                                                                                                                     is analyzed
+                                    The extratolinemake the article concise. The time-frequency distribution images of the two is
+                                                        around    1 Hz   is the  fundamental       frequency      of the  bridge    deck,   which      cables are
+                                    excited by shownpassing
+                                                  the            train9 after
+                                                         in Figures           35 s.
+                                                                        and 10.   TheThe    component
+                                                                                          spectrum         can bebyobserved
+                                                                                                     obtained        APES has   inmuch
+                                                                                                                                   all cable’s   time-
+                                                                                                                                           sharper    peaks and
+                                    frequency    distribution
+                                               lower    sidelobeimages.
+                                                                   in bothAt   other times, The
+                                                                             experiments.       the displacement
+                                                                                                     APES methodofcan     theresolve
+                                                                                                                               bridge deck     is triv-
+                                                                                                                                         the two    frequencies
+         Electronics 2021, 10, x FORial, so itsaround
+                                      PEER REVIEWfundamental       frequency
+                                                          1.1 Hz that   the CZT can     hardlycannot
+                                                                                   method        be observed.      When
+                                                                                                        do in Figure    10.the
+                                                                                                                             Thefundamental         fre- 12 ofof16
+                                                                                                                                   superior performance
+                                    quency components          of the deck
+                                               APES is prominent             and experiments.
+                                                                        in these  the shortest cable are separated with a large interval,
+                                    in Figure 9a,b, both the CZT and the APES methods can give good results. On the contrary,
+                                    the fundamental frequency of the deck and the longest cable are adjacent in Figure 10a,b.
+                                    Only the APES can distinguish them. The two frequency components of the shortest cable
+                                    are observed in the interval between 0 Hz to 5 Hz in Figure 9. At the same time, four
+                                    frequency components of the longest cable are observed.
+
+
+
+
+                                               Figure7.7.High
+                                              Figure     Highresolution
+                                                               resolution1D1Dradar
+                                                                               radarimage
+                                                                                     imageofofthe
+                                                                                               thefive
+                                                                                                    fivecables.
+                                                                                                          cables.The
+                                                                                                                  Thefive
+                                                                                                                       fivepeaks
+                                                                                                                            peaksare
+                                                                                                                                  areamong
+                                                                                                                                      among4545mmtoto7070m,
+                                               m, which   correspond  to the five longest cables  in  a red color  in
+                                              which correspond to the five longest cables in a red color in Figure 6. Figure 6.
+Electronics 2021, 10, 501                                                                                                             12 of 16
+                                   Figure 7. High resolution 1D radar image of the five cables. The five peaks are among 45 m to 70
+                                    Figure 7. High resolution 1D radar image of the five cables. The five peaks are among 45 m to 70
+                                   m, which correspond to the five longest cables in a red color in Figure 6.
+                                    m, which correspond to the five longest cables in a red color in Figure 6.
+
+
+
+
+                                  (a)                                                                  (b)
+                                   (a)                                                                  (b)
+      Figure
+      Figure 8.
+              8. The
+                 The cable
+                     cable displacements
+                            displacements of
+                                           of the
+                                               the Hukun-Wuguang
+                                                   Hukun-Wuguang bridge,
+                                                                       bridge, which
+                                                                               which (a)
+                                                                                      (a) is
+                                                                                           is the
+                                                                                              the displacement
+                                                                                                  displacement of
+                                                                                                               of the
+                                                                                                                   the nearest
+                                                                                                                       nearest cable
+                                                                                                                               cable at
+                                                                                                                                     at
+       Figure 8. The cable displacements of the Hukun-Wuguang bridge, which (a) is the displacement of the nearest cable at
+      52.19
+      52.19 m
+            m  and
+               and (b)
+                   (b) is
+                       is the
+                          the displacement
+                              displacement of
+                                           of  the
+                                               the farthest
+                                                   farthest cable
+                                                            cable at
+                                                                  at 67.02
+                                                                     67.02 m.
+                                                                           m.
+       52.19 m and (b) is the displacement of the farthest cable at 67.02 m.
+
+
+
+
+Electronics 2021, 10, x FOR PEER REVIEW                                                                                               13 of 16
+                                    (a)                                                             (b)
+                                     (a)                                                             (b)
+
+
+
+
+                                     (c)                                                             (d)
+      Figure 9.9.Time-frequency
+      Figure      Time-frequencydistribution
+                                   distribution
+                                              of of
+                                                 thethe shortest
+                                                     shortest    cable.
+                                                              cable.      (a) result
+                                                                     (a) result      of CZT-based
+                                                                                of CZT-based        short-time
+                                                                                              short-time  FourierFourier transformation
+                                                                                                                  transformation (STFT)
+      and (b) result of APES-based time-frequency distribution, when a train passes by for 35 s and 40 s. (c) Results.of(c)
+      (STFT)  and   (b) result of APES-based  time-frequency    distribution,   when  a train passes  by for 35 s and 40       Result of
+                                                                                                                             CZT-based
+      CZT-based STFT and (d) result of APES-based time-frequency distribution, when the bridge is on a free condition.
+      STFT and (d) result of APES-based time-frequency distribution, when the bridge is on a free condition.
+                                      (c)                                                                (d)
+        Figure
+Electronics 2021, 9.
+                  10,Time-frequency
+                     501            distribution of the shortest cable. (a) result of CZT-based short-time Fourier transformation
+                                                                                                                               13 of 16
+      (STFT) and (b) result of APES-based time-frequency distribution, when a train passes by for 35 s and 40 s. (c) Result of
+      CZT-based STFT and (d) result of APES-based time-frequency distribution, when the bridge is on a free condition.
+
+
+
+
+                                      (a)                                                                (b)
+
+
+
+
+                                      (c)                                                                (d)
+       Figure10.
+     Figure   10.Time-frequency
+                  Time-frequencydistribution
+                                   distributionofofthe
+                                                    thelongest
+                                                         longestcable.
+                                                                  cable.(a)
+                                                                          (a)Result
+                                                                              ResultofofCZT-based
+                                                                                          CZT-basedSTFT
+                                                                                                      STFTand
+                                                                                                           and(b)
+                                                                                                               (b)result
+                                                                                                                    resultofofAPES-based
+                                                                                                                               APES-based
+       time-frequency  distribution, when   a train passes   by for 35  s and   40 s. (c) The result of CZT-based  STFT
+     time-frequency distribution, when a train passes by for 35 s and 40 s. (c) The result of CZT-based STFT and (d)      and  (d)result
+                                                                                                                                   resultofof
+       APES-based   time-frequency   distribution, when    the bridge  is on  a free
+     APES-based time-frequency distribution, when the bridge is on a free condition.  condition.
+
+                                         Time-frequency distribution is an important approach to analyze cable’s dynamic
+                                   character. There are three bright lines in Figure 9a,b, and two bright lines in Figure 9c,d.
+                                   The extra line around 1 Hz is the fundamental frequency of the bridge deck, which is
+                                   excited by the passing train after 35 s. The component can be observed in all cable’s
+                                   time-frequency distribution images. At other times, the displacement of the bridge deck
+                                   is trivial, so its fundamental frequency can hardly be observed. When the fundamental
+                                   frequency components of the deck and the shortest cable are separated with a large interval,
+                                   in Figure 9a,b, both the CZT and the APES methods can give good results. On the contrary,
+                                   the fundamental frequency of the deck and the longest cable are adjacent in Figure 10a,b.
+                                   Only the APES can distinguish them. The two frequency components of the shortest
+                                   cable are observed in the interval between 0 Hz to 5 Hz in Figure 9. At the same time,
+                                   four frequency components of the longest cable are observed.
+                                         By the analysis tools, dynamic behaviors of the bridge can be observed and analyzed.
+                                   The fundamental frequency is extracted from the time-frequency distribution images in
+                                   Figures 9 and 10. The fundamental frequency curves are shown in Figure 11. The results
+                                   of APES and CZT are displayed as blue lines and red lines, respectively. Some significant
+                                   details of the dynamic fundamental frequency are observed.
+Electronics 2021, 10, x FOR PEER REVIEW                                                                                                    14 of 16
+
+
+
+
+                                        By the analysis tools, dynamic behaviors of the bridge can be observed and analyzed.
+Electronics 2021, 10, 501          The fundamental frequency is extracted from the time-frequency distribution images                      14 of in
+                                                                                                                                                 16
+                                   Figures 9 and 10. The fundamental frequency curves are shown in Figure 11. The results
+                                   of APES and CZT are displayed as blue lines and red lines, respectively. Some significant
+                                   details of the dynamic fundamental frequency are observed.
+                                   1. When
+                                   1.    When thethe frequency
+                                                      frequency of  of interest
+                                                                        interestisisfar
+                                                                                     farfrom
+                                                                                         fromother
+                                                                                                 otherfrequency
+                                                                                                         frequency components,
+                                                                                                                     components,  both  methods
+                                                                                                                                     both  meth-
+                                         can obtain similar estimation performance. The curves in Figure 11b,d and before 30 s
+                                        ods can obtain similar estimation performance. The curves in Figure 11b,d and before
+                                         in Figure 11a,c are the cases.
+                                        30 s in Figure 11a,c are the cases.
+                                   2.    When the frequency of interest is interfered by a nearby frequency component,
+                                   2. When the frequency of interest is interfered by a nearby frequency component, the
+                                         the CZT method suffers fluctuated estimation. The smaller the frequency gap,
+                                        CZT method suffers fluctuated estimation. The smaller the frequency gap, the larger
+                                         the larger the fluctuating amplitude. Fortunately, the APES method can still achieve
+                                        the fluctuating amplitude. Fortunately, the APES method can still achieve fine esti-
+                                         fine estimation. The curves after 50 s in Figure 11a,c are the cases.
+                                        mation. The curves after 50 s in Figure 11a,c are the cases.
+                                   3.    When the train embarks the bridge, the fundamental frequency increases. This means
+                                   3. When the train embarks the bridge, the fundamental frequency increases. This means
+                                         that the cable-tension increases. The increased tension phenomenon is observed
+                                        that the cable-tension increases. The increased tension phenomenon is observed in
+                                         in all the cables, so it is feasible to calculate the bridge load from the sum of all
+                                        all the cables, so it is feasible to calculate the bridge load from the sum of all cables’
+                                         cables’ tension.
+                                        tension.
+                                   4.    The fundamental frequency curve in Figure 11a is complicated a short moment
+                                   4. The    fundamental
+                                         before                 frequency
+                                                  the train enters            curveThe
+                                                                      the bridge.     in Figure    11a is complicated
+                                                                                          cable-tension      undergoes a adecreasing
+                                                                                                                             short moment      be-
+                                                                                                                                        and then
+                                        fore  the train
+                                         increasing        enters the bridge. The cable-tension undergoes a decreasing and then
+                                                       progress.
+                                   5.   increasing    progress.
+                                         Dynamic frequency estimation is also a challenge for the APES method, especially
+                                   5. Dynamic
+                                         when the frequency        estimation is
+                                                     frequency component             alsoaastationary
+                                                                                  is not      challengesinusoidal
+                                                                                                            for the APES
+                                                                                                                      signalmethod,
+                                                                                                                              and be especially
+                                                                                                                                       interfered
+                                        when    the frequency      component      is not  a stationary    sinusoidal  signal
+                                         by closely signals. This is the reason that the frequency curve of APES changes      and  be interfered
+                                                                                                                                          rapidly,
+                                        by  closely 11c.
+                                         in Figure    signals. This is the reason that the frequency curve of APES changes rap-
+                                        idly, in Figure 11c.
+                                        By taking a look at the spectrum slices of the two methods, in Figure 12, we know
+                                   why By
+                                        thetaking    a look outputs
+                                             CZT method        at the spectrum
+                                                                          fluctuated slices  of the two
+                                                                                        frequency           methods,
+                                                                                                     estimation.    Theinslices
+                                                                                                                          Figureare12, we know
+                                                                                                                                    taken   at the
+                                   why  the CZT
+                                   moment    of 47.1method
+                                                       s, 47.2 outputs
+                                                               s, and 47.3fluctuated    frequency
+                                                                             s. The frequency        estimation.
+                                                                                                   peaks            The slices
+                                                                                                            of the APES   methodareare
+                                                                                                                                    taken   at the
+                                                                                                                                        constant,
+                                   moment    of  47.1  s, 47.2 s, and   47.3 s. The  frequency     peaks   of the APES
+                                   but the peaks of the CZT method are not always distinguished. The CZT method would    method    are  constant,
+                                   but
+                                   findthe  peaks peak
+                                        a correct   of theatCZT
+                                                              47.3 method      are not
+                                                                    s, but wrong         always
+                                                                                     peaks         distinguished.
+                                                                                              at 47.1  s and 47.2 s.The CZT method would
+                                   find a correct peak at 47.3 s, but wrong peaks at 47.1 s and 47.2 s.
+
+
+
+
+                                       (a)                                                           (b)
+
+
+
+
+                                       (c)                                                           (d)
+
+      Figure 11. Fundamental frequency curves extracted from the time-frequency distribution images. The blue curve and the
+      red curve
+      red  curve are
+                  are results
+                      results of
+                              of the
+                                 the CZT
+                                      CZT and
+                                          and the
+                                              the APES
+                                                  APES method,
+                                                          method, respectively.
+                                                                  respectively. Dynamic
+                                                                                Dynamic fundamental    frequency of
+                                                                                         fundamental frequency    of the
+                                                                                                                     the shortest
+                                                                                                                         shortest cable
+                                                                                                                                  cable
+      with  the passing
+      with the   passingtrain
+                          train(a)
+                                 (a)and
+                                     andwithout
+                                         without  load
+                                                load (b).(b). Dynamic
+                                                           Dynamic     fundamental
+                                                                    fundamental     frequency
+                                                                                 frequency     of longest
+                                                                                           of the               with with
+                                                                                                          cablecable
+                                                                                                  the longest              the passing
+                                                                                                                      the passing train
+      train (c) and without load (d).
+      (c) and without load (d).
+Electronics 2021, 10, 501                                                                                                                    15 of 16
+ Electronics 2021, 10, x FOR PEER REVIEW                                                                                                      15 of 16
+
+
+
+
+                                    Figure12.
+                                  Figure    12.Spectrum
+                                                Spectrumslices
+                                                           slicesof
+                                                                  ofthe
+                                                                     theCZT
+                                                                          CZTmethod
+                                                                                methodat ataadifferent
+                                                                                              differenttime
+                                                                                                        time(blue
+                                                                                                              (bluesolid
+                                                                                                                    solidline
+                                                                                                                          lineat
+                                                                                                                               at47.1
+                                                                                                                                  47.1s,s,red
+                                                                                                                                           redsolid
+                                                                                                                                               solid
+                                    line at 47.2 s, and orange  solid  line at 47.3 s). Spectrum   slices of the APES  method    at different
+                                  line at 47.2 s, and orange solid line at 47.3 s). Spectrum slices of the APES method at different times
+                                    times are constant.
+                                  are constant.
+
+                                  5.5.Conclusions
+                                      Conclusions
+                                        AAremote
+                                             remotedynamic
+                                                        dynamiccable-tension
+                                                                    cable-tensionestimation
+                                                                                     estimationmethod
+                                                                                                    methodisispresented.
+                                                                                                                 presented.Displacements
+                                                                                                                              Displacementsofofaa
+                                   groupofofcables
+                                  group         cablesare aremeasured
+                                                                measuredby  byaaKKbandbandinterferometry
+                                                                                             interferometryradar radaratatone
+                                                                                                                           onetime.
+                                                                                                                                time.Each
+                                                                                                                                        Eachcable-
+                                                                                                                                                cable-
+                                   tensioncan
+                                  tension     can bebe calculated from the    the cable’s
+                                                                                   cable’sfundamental
+                                                                                            fundamentalfrequency,
+                                                                                                              frequency,based
+                                                                                                                            basedononthethestring
+                                                                                                                                              stringvi-
+                                   bration equation.
+                                  vibration    equation. By   By adopting
+                                                                  adopting a time-frequency analysisanalysis method,
+                                                                                                               method,multiple
+                                                                                                                           multiplefundamental
+                                                                                                                                      fundamental
+                                  frequencies
+                                   frequenciesare   arestimated
+                                                          estimated  from
+                                                                       fromshort  sections
+                                                                              short  sectionsof of
+                                                                                                thethe
+                                                                                                     entire
+                                                                                                       entiremeasured
+                                                                                                                measured displacement
+                                                                                                                             displacement vector   in
+                                                                                                                                               vector
+                                  an
+                                   inoverlapped-piecewise
+                                       an overlapped-piecewise      manner.    The amplitude
+                                                                          manner.                 and phase
+                                                                                      The amplitude      and estimation      (APES) (APES)
+                                                                                                                phase estimation      algorithm     is
+                                                                                                                                                 algo-
+                                  used
+                                   rithm to is
+                                             improve
+                                                used tothe     frequency
+                                                             improve    theestimation
+                                                                             frequencyperformance         in short-time in
+                                                                                           estimation performance          circumstances.      Simu-
+                                                                                                                              short-time circum-
+                                  lations
+                                   stances.and    real data processing
+                                               Simulations                  validate
+                                                                 and real data         that thevalidate
+                                                                                 processing      proposed    method
+                                                                                                           that        is superior
+                                                                                                                 the proposed       to traditional
+                                                                                                                                  method     is supe-
+                                  fundamental        frequency
+                                   rior to traditional             measurements
+                                                             fundamental     frequencyin terms   of precision,
+                                                                                          measurements            robustness,
+                                                                                                             in terms           and efficiency.
+                                                                                                                        of precision,   robustness,
+                                   andThe      proposed interferometry radar and signal processing method can give remote,
+                                         efficiency.
+                                  efficient,
+                                          Theprecise,
+                                                proposed    and  dynamic fundamental
+                                                               interferometry     radar andfrequency        measurements.
+                                                                                                signal processing      method It   is give
+                                                                                                                                 can   of great   ap-
+                                                                                                                                             remote,
+                                  plication    value    in  the  bridge  construction     control   stage,  the  bridge   operation
+                                   efficient, precise, and dynamic fundamental frequency measurements. It is of great appli-           monitoring
+                                  stage,
+                                   cationand     the bridge
+                                             value              refinement
+                                                      in the bridge           stage. Thecontrol
+                                                                         construction      APES algorithm
+                                                                                                    stage, theisbridge
+                                                                                                                   a vitaloperation
+                                                                                                                           part of themonitoring
+                                                                                                                                         proposed
+                                  method,
+                                   stage, and  andtheits   execution
+                                                       bridge           efficiency
+                                                                 refinement    stage.needs    to be algorithm
+                                                                                        The APES     further improved.        Thisofisthe
+                                                                                                                  is a vital part       a research
+                                                                                                                                          proposed
+                                  direction
+                                   method, in   andtheitsfuture.
+                                                           execution efficiency needs to be further improved. This is a research di-
+                                   rection in the future.
+                                  Author Contributions: Conceptualization, J.W. Methodology, J.W. and X.W. Software, J.W. and C.F.
+                                  Validation, J.W., X.W., and
+                                   Author Contributions:      Y.L. Data curation,J.W.
+                                                            Conceptualization,     J.W.Methodology,
+                                                                                        and X.W. Writing—original
+                                                                                                     J.W. and X.W. draft preparation,
+                                                                                                                    Software, J.W. andJ.W.
+                                                                                                                                       C.F.
+                                  and  C.F. Writing—review    and  editing, J.W. and  X.H. Visualization, J.W. All authors have  read and
+                                   Validation, J.W., X.W., and Y.L. Data curation, J.W. and X.W. Writing—original draft preparation,
+                                  agreed  to the
+                                   J.W. and  C.F.published  version of
+                                                  Writing—review    andthediting,
+                                                                           manuscript.
+                                                                                  J.W. and X.H. Visualization, J.W. All authors have read
+                                   and agreed
+                                  Funding:    to research
+                                           This   the published version
+                                                          received      of the manuscript.
+                                                                   no external funding.
+                                   Funding:
+                                  Data       This research
+                                        Availability       received
+                                                     Statement:  Theno external
+                                                                     data       funding.
+                                                                          presented  in this study are available on request from the
+                                  corresponding
+                                   Data Availability Statement: The data presented in thisdue
+                                                 author. The data are not publicly available     to privacy.
+                                                                                              study  are available on request from the
+                                   corresponding
+                                  Conflicts          author.
+                                             of Interest: TheThe  data are
+                                                               authors     not publicly
+                                                                       declare            available
+                                                                                 no conflict          dueThe
+                                                                                             of interest. to privacy.
+                                                                                                              funders had no role in the design
+                                  ofConflicts
+                                     the study,ofinInterest:
+                                                    the collection, analyses,
+                                                             The authors        or interpretation
+                                                                           declare   no conflict ofofinterest.
+                                                                                                       data, in The
+                                                                                                                the writing
+                                                                                                                    fundersof theno
+                                                                                                                            had    manuscript,
+                                                                                                                                      role in the
+                                  ordesign
+                                     in theof
+                                            decision  to publish
+                                              the study,          the results.analyses, or interpretation of data, in the writing of the manu-
+                                                          in the collection,
+                                   script, or in the decision to publish the results.
+References
+1.References
+     List of Longest Bridges. Available online: https://en.wanweibaike.com/wiki-World\T1\textquoterights%20longest%20bridge
+     (accessed on 22 September 2020).
+  1.   List of Longest Bridges. Available online: https://en.wanweibaike.com/wiki-World’s%20longest%20bridge (accessed on 22 Sep-
+2.   Hassan, M.; Nassef, A.; El Damatty, A. Surrogate function of post-tensioning cable forces for cable-stayed bridges. Adv. Struct.
+       tember 2020).
+     Eng. 2013, 16, 559–578. [CrossRef]
+  2.   Hassan, M.; Nassef, A.; El Damatty, A. Surrogate function of post-tensioning cable forces for cable-stayed bridges. Adv. Struct.
+3.   Wu, M.; Tang, D.; Cheng, M. Research of Cable-tension Sensor with Bypass Excitation Structure Based on Magneto-elastic Effect
+       Eng. 2013, 16, 559–578.
+     in Cable-stayed Bridge. In Proceedings of the World Congress on Intelligent Control & Automation, Chongqing, China, 25–27
+  3.   Wu, M.; Tang, D.; Cheng, M. Research of Cable-tension Sensor with Bypass Excitation Structure Based on Magneto-elastic Effect
+     June 2008; pp. 7560–7563.
+       in Cable-stayed Bridge. In Proceedings of the World Congress on Intelligent Control & Automation, Chongqing, China, 25–27
+4.   Kim, B.; Park, T. Estimation of cable-tension force using the frequency-based system identification method. J. Sound Vib. 2007,
+       June 2008; pp. 7560–7563.
+     304, 660–676. [CrossRef]
+  4.   Kim, B.; Park, T. Estimation of cable-tension force using the frequency-based system identification method. J. Sound Vib. 2007,
+5.   Zhao, Z.; Sun, J.; Fei, X.; Liu, W.; Cheng, X.; Wang, Z.; Yang, H. Wireless Sensor Network Based Cable-tension Monitoring
+       304, 660–676.
+     for Cable-stayed Bridges. In Proceedings of the 2012 14th International Conference on Advanced Communication Technology
+     (ICACT), Pyeongchang, Korea, 19–22 February 2012; pp. 527–532.
+Electronics 2021, 10, 501                                                                                                            16 of 16
+
+
+
+
+6.    Shao, Z.; Zhang, X.; Li, Y.; Jiang, J. A Comparative Study on Radar Interferometric for Vibrations Monitoring on Different Types
+      of Bridges. IEEE Access 2018, 6, 29677–29684. [CrossRef]
+7.    Gentile, C. Application of microwave remote sensing to dynamic testing of stay-cables. Remote Sens. 2010, 2, 36–51. [CrossRef]
+8.    Dong, H.; Wang, J.; Song, Q. A way of cable force measurement based on interference radar. In Proceedings of the Electromagnetic
+      Research Symposium (PIERS), Shanghai, China, 8–11 August 2016.
+9.    Zhao, W.; Zhang, G.; Zhang, J. Cable force estimation of a long-span cable-tayed bridge with microwave interferometric radar.
+      Comput. Aided Civ. Infrastruct. Eng. 2020, 35, 1419–1433. [CrossRef]
+10.   Gentile, C.; Bernardini, G. An interferometric radar for non-contact measurement of deflections on civil engineering structures:
+      Laboratory and full-scale tests. Struct. Infrastruct. Eng. 2010, 6, 521–534. [CrossRef]
+11.   Mehrabi, A.B.; Tabatabai, H. A unified finite difference formulation for free vibration of cables. J. Struct. Eng. ASCE 1998, 124,
+      1313–1322. [CrossRef]
+12.   Su, D.; Tu, Y.; Ming, L.; Li, J. Comparative analysis of frequency estimation methods. In Proceedings of the 31st Chinese Control
+      Conference, Hefei, China, 25–27 July 2012; pp. 5442–5447.
+13.   Park, S.Y.; Song, Y.S.; Kim, H.J.; Park, J. Improved method for frequency estimation of sampled sinusoidal signals without
+      iteration. IEEE Trans. Instrum. Meas. 2011, 60, 2828–2834. [CrossRef]
+14.   Giarnetti, S.; Leccese, F.; Caciotta, M. Non recursive nonlinear least squares for periodic signal fitting. Meas. J. Int. Meas. Confed.
+      2017, 103, 208–216. [CrossRef]
+15.   Spagnolo, G.S.; Cozzella, L.; Leccese, F. Phase correlation functions: FFT vs. FHT. Acta IMEKO 2019, 8, 87–92. [CrossRef]
+16.   Li, J.; Stoica, P.; Wang, Z. On robust Capon beamforming and diagonal loading. IEEE Trans. Signal Process. 2003, 51, 1702–1715.
+17.   Li, J.; Stoica, P. An adaptive filtering approach to spectral estimation and SAR imaging. IEEE Trans. Signal Process. 1996, 44,
+      1469–1484.
+18.   Stoica, P.; Li, H.; Li, J. A new derivation of the APES filter. IEEE Signal Processing Letters, Aug. 1999, 6, 205–206. [CrossRef]
+19.   Liu, Z.; Li, H.; Li, J. Efficeint implementation of Capon and APES for spectral estimation. IEEE Trans. AES 1998, 34, 1314–1319.
+20.   Larsson, E.; Stoica, P. Fast implementation of two-dimensional APES and Capon spectral estimators. Multidimens. Syst.
+      Signal Process. 2002, 13, 35–54. [CrossRef]
+21.   Glentis, G. A Fast Algorithm for APES and Capon Spectral Estimation. IEEE Trans. GRS 2008, 56, 4207–4220. [CrossRef]
+22.   Knott, E.F.; Shaeffer, J.F.; Tuley, M.T. Radar Cross Section, 2nd ed.; Scitech Publishing, Inc.: Raleigh, NC, USA, 2004; pp. 195–196.
+23.   Sarabandi, K.; Park, M. Millimeter-wave radar phenomenology of power lines and a polarimetric detection algorithm. IEEE Trans.
+      Antennas Propag. 1999, 47, 1807–1813. [CrossRef]
+

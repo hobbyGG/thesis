@@ -1,0 +1,63 @@
+{
+  "schema": "thesis.profile_ls_initialization_pairing_protocol",
+  "date": "2026-10-04",
+  "status": "blocked_missing_archive",
+  "source_claim": "same_range_geometry_reference_diagnostic/heldout_20261003",
+  "input_required": {
+    "directory": "experiments/same_range_geometry_reference_diagnostic/heldout_20261003",
+    "seeds": [400, 401, 402],
+    "required": [
+      "original runner/source script",
+      "frozen protocol and manifest",
+      "capture-package or compact IQ input for each seed",
+      "calibration/test frame split and physical reference definition",
+      "Bartlett and profile-LS route configuration",
+      "compact prior outputs if available"
+    ]
+  },
+  "local_check_2026_10_04": {
+    "directory_found": false,
+    "matching_400_402_script_or_compact_artifact_found": false,
+    "library_archive_assumed_present": false
+  },
+  "design": {
+    "routes": [
+      "Bartlett-cold",
+      "profile-LS-cold",
+      "Bartlett-warm",
+      "profile-LS-warm"
+    ],
+    "cold": "same common scoring start; estimator state initialized at that start",
+    "warm": "only legal pre-scoring history; if test-prefix 20-frame warmup is used, score every route from frame 220 and state that warmup changes the scoring origin",
+    "geometry": "calibration frames only; same IQ and frozen geometry across all four routes",
+    "downstream": "identical downstream estimator settings and physical reference",
+    "truth": "post-run scoring only",
+    "paired_metrics": [
+      "MSE per route and seed",
+      "D_cold = MSE(Bartlett-cold) - MSE(profile-LS-cold)",
+      "D_warm = MSE(Bartlett-warm) - MSE(profile-LS-warm)",
+      "interaction = D_warm - D_cold",
+      "RMSE per route",
+      "finite coverage and abstention"
+    ],
+    "stopping": [
+      "truth/q_proxy enters estimator input or route selection",
+      "geometry differs between paired routes",
+      "physical reference or scoring frames differ",
+      "state coordinates cannot be aligned without an undocumented transform",
+      "missing seed/protocol/source hash"
+    ]
+  },
+  "claims": {
+    "allowed": ["bounded mechanism comparison when the original 400-402 archive is restored"],
+    "forbidden": ["new held-out validation", "cloud profile-LS reproduction without archive", "field accuracy", "0.01 mm claim"],
+    "classification": "mechanism diagnostic, not new held-out evidence"
+  },
+  "run_policy": {
+    "first_run": "one seed only after all input checks pass",
+    "expansion": "only then expand to seeds 400,401,402",
+    "forty_seed": false,
+    "git_write": false,
+    "push": false
+  }
+}

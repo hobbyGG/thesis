@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en-US" xml:lang="en-US">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>
+		Improving the Accuracy of Ground Displacement Estimation Using IMU with Low-Pass Butterworth Filter
+							| ARRUS Journal of Engineering and Technology
+			</title>
+
+	
+<meta name="generator" content="Open Journal Systems 3.3.0.22" />
+<meta name="keywords" content="ahmar, journal, medical, healt, covid, corona, infection, scopus, web of sciences, sinta, arjuna, clarivate analytic, google scholar, asci" />
+<meta name="description" content="ARRUS Journal of Engineering and Technology |PT ARRUS Intelektual Indonesia" />
+<meta name="author" content="Ansari Saleh Ahmar" />
+<meta name="google-site-verification" content="s-xBqes4zcHVJ9KAWad4EZ9EX3r9cC4PhnX1nDSN6pw" />
+<link rel="schema.DC" href="https://purl.org/dc/elements/1.1/" />
+<meta name="DC.Creator.PersonalName" content="Kartiko Ardi  Widodo"/>
+<meta name="DC.Creator.PersonalName" content="Bima Romadhon Parada Dian  Palevi"/>
+<meta name="DC.Creator.PersonalName" content="Nanta Sigit"/>
+<meta name="DC.Date.created" scheme="ISO8601" content="2025-12-31"/>
+<meta name="DC.Date.dateSubmitted" scheme="ISO8601" content="2026-01-02"/>
+<meta name="DC.Date.issued" scheme="ISO8601" content="2025-12-01"/>
+<meta name="DC.Date.modified" scheme="ISO8601" content="2026-03-08"/>
+<meta name="DC.Description" xml:lang="en" content="Land deformation monitoring generally relies on Global Navigation Satellite System (GNSS) and Interferometric Synthetic Aperture Radar (InSAR) technologies. While accurate, both methods have limitations: GNSS requires relatively expensive permanent infrastructure, while InSAR relies on atmospheric conditions and cannot function optimally in enclosed areas such as caves, tunnels, or areas with dense vegetation. In this context, the Inertial Measurement Unit (IMU) offers a more flexible, portable, and low-cost solution. IMUs can record acceleration data continuously without relying on satellite or radar signals, making them suitable for deformation monitoring in locations difficult to reach by GNSS or InSAR. However, IMU accuracy is often hampered by accumulated noise and multiple integration errors, which cause significant drift in displacement estimates. Previous research has focused on the Zero-Velocity Update (ZUPT) method to reduce errors, but the results still show significant deviations from the true value. The main contribution of this research is proposing the integration of the ZUPT method with a second-order Butterworth low-pass filter to reduce high-frequency noise that triggers error accumulation. Displacement testing results of 10–30 cm show significant accuracy improvements. Without the filter, the displacement estimation yielded an RMSE of 0.4292 m with a Relative Error of Prediction (REP) of –304.8%, indicating a significant deviation. After the application of the Butterworth filter, the accuracy improved dramatically with an RMSE of only 0.002 m and an REP of –0.40%, indicating that the proposed method is capable of reducing the error by more than 99%. Thus, this study not only proves the effectiveness of the integration of ZUPT and the Butterworth filter in improving the accuracy of the IMU, but also confirms the potential of the IMU as a reliable alternative for deformation monitoring in areas with limited access to GNSS or InSAR. These findings open up opportunities for further development towards a real-time, portable, and efficient IMU-based landslide monitoring system."/>
+<meta name="DC.Format" scheme="IMT" content="application/pdf"/>
+<meta name="DC.Identifier" content="4580"/>
+<meta name="DC.Identifier.pageNumber" content="231-242"/>
+<meta name="DC.Identifier.DOI" content="10.35877/jetech4580"/>
+<meta name="DC.Identifier.URI" content="https://journal.arrus.id/index.php/jetech/article/view/4580"/>
+<meta name="DC.Language" scheme="ISO639-1" content="en"/>
+<meta name="DC.Rights" content="Copyright (c) 2025 Kartiko Ardi  Widodo, Bima Romadhon Parada Dian  Palevi, Nanta Sigit"/>
+<meta name="DC.Rights" content="https://creativecommons.org/licenses/by-nc/4.0"/>
+<meta name="DC.Source" content="ARRUS Journal of Engineering and Technology"/>
+<meta name="DC.Source.ISSN" content="2807-3045"/>
+<meta name="DC.Source.Issue" content="2"/>
+<meta name="DC.Source.Volume" content="5"/>
+<meta name="DC.Source.URI" content="https://journal.arrus.id/index.php/jetech"/>
+<meta name="DC.Subject" xml:lang="en" content="Accellerometer"/>
+<meta name="DC.Subject" xml:lang="en" content="Displacement"/>
+<meta name="DC.Subject" xml:lang="en" content="IMU"/>
+<meta name="DC.Subject" xml:lang="en" content="Measurement"/>
+<meta name="DC.Subject" xml:lang="en" content="Noise"/>
+<meta name="DC.Title" content="Improving the Accuracy of Ground Displacement Estimation Using IMU with Low-Pass Butterworth Filter"/>
+<meta name="DC.Type" content="Text.Serial.Journal"/>
+<meta name="DC.Type.articleType" content="Articles"/>
+<meta name="gs_meta_revision" content="1.1"/>
+<meta name="citation_journal_title" content="ARRUS Journal of Engineering and Technology"/>
+<meta name="citation_journal_abbrev" content="ARRUS J. Eng. Tech."/>
+<meta name="citation_issn" content="2807-3045"/> 
+<meta name="citation_author" content="Kartiko Ardi  Widodo"/>
+<meta name="citation_author_institution" content="National Institute of Technology Malang"/>
+<meta name="citation_author" content="Bima Romadhon Parada Dian  Palevi"/>
+<meta name="citation_author_institution" content="National Institute of Technology Malang"/>
+<meta name="citation_author" content="Nanta Sigit"/>
+<meta name="citation_author_institution" content="Universitas Wisnuwardhana"/>
+<meta name="citation_title" content="Improving the Accuracy of Ground Displacement Estimation Using IMU with Low-Pass Butterworth Filter"/>
+<meta name="citation_language" content="en"/>
+<meta name="citation_date" content="2025/12/31"/>
+<meta name="citation_volume" content="5"/>
+<meta name="citation_issue" content="2"/>
+<meta name="citation_firstpage" content="231"/>
+<meta name="citation_lastpage" content="242"/>
+<meta name="citation_doi" content="10.35877/jetech4580"/>
+<meta name="citation_abstract_html_url" content="https://journal.arrus.id/index.php/jetech/article/view/4580"/>
+<meta name="citation_keywords" xml:lang="en" content="Accellerometer"/>
+<meta name="citation_keywords" xml:lang="en" content="Displacement"/>
+<meta name="citation_keywords" xml:lang="en" content="IMU"/>
+<meta name="citation_keywords" xml:lang="en" content="Measurement"/>
+<meta name="citation_keywords" xml:lang="en" content="Noise"/>
+<meta name="citation_pdf_url" content="https://journal.arrus.id/index.php/jetech/article/download/4580/2640"/>
+	<link rel="stylesheet" href="https://journal.arrus.id/index.php/jetech/$$$call$$$/page/page/css?name=stylesheet" type="text/css" /><link rel="stylesheet" href="https://journal.arrus.id/index.php/jetech/$$$call$$$/page/page/css?name=font" type="text/css" /><link rel="stylesheet" href="https://journal.arrus.id/lib/pkp/styles/fontawesome/fontawesome.css?v=3.3.0.22" type="text/css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css?v=3.3.0.22" type="text/css" /><link rel="stylesheet" href="//fonts.googleapis.com/css2?family=Libre+Franklin:wght@300;400;500;600;700;800&family=Lora:ital@0;1&display=swap" type="text/css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css?v=3.3.0.22" type="text/css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css?v=3.3.0.22" type="text/css" /><link rel="stylesheet" href="https://journal.arrus.id/plugins/themes/heliyon/css/heliyon.css?rev=20260916hel24" type="text/css" /><link rel="stylesheet" href="https://journal.arrus.id/plugins/generic/citations/css/citations.css?v=3.3.0.22" type="text/css" /><link rel="stylesheet" href="https://journal.arrus.id/plugins/generic/orcidProfile/css/orcidProfile.css?v=3.3.0.22" type="text/css" /><link rel="stylesheet" href="https://journal.arrus.id/public/journals/12/styleSheet.css?d=2026-02-15+08%3A14%3A49" type="text/css" />
+</head>
+<body class="pkp_page_article pkp_op_view has_site_logo technova heliyon" dir="ltr">
+
+	<div class="pkp_structure_page">
+
+		
+ <nav class="cmp_skip_to_content" aria-label="Jump to content links">
+	<a href="#pkp_content_main">Skip to main content</a>
+	<a href="#siteNav">Skip to main navigation menu</a>
+		<a href="#pkp_content_footer">Skip to site footer</a>
+</nav>
+		
+				<div class="hel-topbar">
+			<div class="hel-container hel-topbar-inner">
+				<a class="hel-brand" href="https://journal.arrus.id/index.php/jetech/index">
+					<span class="hel-brand-mark"><i class="bi bi-braces-asterisk"></i></span>
+					<span class="hel-brand-txt">
+						<strong>ARRUS Journal of Engineering and Technology</strong>
+						<em>An open access journal</em>
+					</span>
+				</a>
+				<div class="hel-topbar-right">
+					<a class="hel-top-link" href="https://journal.arrus.id/index.php/jetech/about/submissions"><i class="bi bi-plus-lg"></i> Submit</a>
+					<a class="hel-top-link" href="https://journal.arrus.id/index.php/jetech/login"><i class="bi bi-person"></i> Login</a>				</div>
+			</div>
+		</div>
+
+				<nav class="hel-subnav" id="elsNav" aria-label="Journal navigation">
+			<div class="hel-container">
+				<div class="navbar navbar-expand-lg p-0 hel-subnav-inner">
+					<button class="navbar-toggler border-0 shadow-none ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#frNavCollapse" aria-controls="frNavCollapse" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="collapse navbar-collapse hel-subnav-collapse" id="frNavCollapse">
+							<ul id="main-navigation" class="navbar-nav hel-menu pkp_nav_list">
+								<li class="">
+				<a href="https://journal.arrus.id/index.php/jetech">
+					Home
+				</a>
+							</li>
+								<li class="">
+				<a href="https://journal.arrus.id/index.php/jetech/issue/current">
+					Current
+				</a>
+							</li>
+								<li class="">
+				<a href="https://journal.arrus.id/index.php/jetech/issue/archive">
+					Archives
+				</a>
+							</li>
+								<li class="">
+				<a href="https://journal.arrus.id/index.php/jetech/about/editorialTeam">
+					Editorial Team
+				</a>
+							</li>
+								<li class="">
+				<a href="https://journal.arrus.id/index.php/jetech/announcement">
+					Announcements
+				</a>
+							</li>
+			</ul>
+
+						<form class="hel-subnav-search" method="get" action="https://journal.arrus.id/index.php/jetech/search/search" role="search">
+							<input type="text" name="query" placeholder="Search" aria-label="Search">
+							<button type="submit" aria-label="Search"><i class="bi bi-search"></i></button>
+						</form>
+						<a class="hel-adv-search" href="https://journal.arrus.id/index.php/jetech/search">Advanced<br>search</a>
+					</div>
+				</div>
+			</div>
+		</nav>
+
+				<div class="pkp_structure_content has_sidebar">
+			<div class="pkp_structure_main" role="main">
+				<a id="pkp_content_main"></a>
+
+<div class="page page_article">
+			<nav class="cmp_breadcrumbs" role="navigation" aria-label="You are here:">
+	<ol>
+		<li>
+			<a href="https://journal.arrus.id/index.php/jetech/index">
+				Home
+			</a>
+			<span class="separator">/</span>
+		</li>
+		<li>
+			<a href="https://journal.arrus.id/index.php/jetech/issue/archive">
+				Archives
+			</a>
+			<span class="separator">/</span>
+		</li>
+					<li>
+				<a href="https://journal.arrus.id/index.php/jetech/issue/view/218">
+					Vol. 5 No. 2 (2025)
+				</a>
+				<span class="separator">/</span>
+			</li>
+				<li class="current" aria-current="page">
+			<span aria-current="page">
+									Articles
+							</span>
+		</li>
+	</ol>
+</nav>
+	
+				
+<article class="obj_article_details hel-fa">
+	<nav class="hel-fa-crumb" aria-label="breadcrumb"><a href="https://journal.arrus.id/index.php/jetech/index">Home</a> <i class="bi bi-chevron-right"></i> <a href="https://journal.arrus.id/index.php/jetech/issue/view/218">Vol. 5 No. 2 (2025)</a> <i class="bi bi-chevron-right"></i> <span>Article</span></nav>
+
+	<div class="hel-fa-grid">
+
+				<aside class="hel-fa-left">
+			<div class="hel-fa-pub">
+				<span class="hel-fa-pub-label">Published in</span>
+								<img class="hel-fa-pub-img" src="https://journal.arrus.id/public/journals/12/pageHeaderLogoImage_en_US.png" alt="">				<a class="hel-fa-pub-name" href="https://journal.arrus.id/index.php/jetech/index">ARRUS Journal of Engineering and Technology</a>
+				<div class="hel-fa-pub-sec">Articles</div>				<div class="hel-fa-pub-facts">
+					<span>Open access</span>					<span>e-ISSN 2807-3045</span>				</div>
+			</div>
+
+			<div class="hel-fa-outline">
+				<h3 class="hel-fa-side-h"><i class="bi bi-list-ul"></i> Outline</h3>
+				<ul>
+					<li class="on"><a href="#hel-abstract">Abstract</a></li>										<li><a href="#hel-keywords">Keywords</a></li>					<li><a href="#hel-cite">Citation</a></li>					<li><a href="#hel-statements">Statements</a></li>				</ul>
+			</div>
+		</aside>
+
+				<div class="hel-fa-main">
+						<div class="hel-fa-artmeta">
+				<span class="hel-fa-type2">ARTICLES</span>
+				<span class="hel-fa-dot">&middot;</span> Volume 5, Issue 2				<span class="hel-fa-dot">&middot;</span> 231-242				<span class="hel-fa-dot">&middot;</span> December 2025				<span class="hel-fa-dot">&middot;</span> <span class="hel-fa-oa2"><i class="bi bi-unlock-fill"></i> Open Access</span>			</div>
+
+			<h1 class="hel-fa-title">Improving the Accuracy of Ground Displacement Estimation Using IMU with Low-Pass Butterworth Filter</h1>
+			
+						<div class="hel-fa-authors">
+				<span class="hel-fa-author">Kartiko Ardi  Widodo<a class="hel-fa-corr" href="/cdn-cgi/l/email-protection#56223f3d39092237163a33352223243324783f2238783735783f32" title="Corresponding author"><i class="bi bi-envelope-fill"></i></a><span class="hel-fa-asep">,</span> </span><span class="hel-fa-author">Bima Romadhon Parada Dian  Palevi<span class="hel-fa-asep">,</span> </span><span class="hel-fa-author">Nanta Sigit</span>			</div>
+			
+			<div class="hel-fa-doi"><i class="bi bi-link-45deg"></i> <a href="https://doi.org/10.35877/jetech4580" target="_blank" rel="noopener">https://doi.org/10.35877/jetech4580</a></div>			<div class="hel-fa-toggles">
+				<button type="button" class="hel-fa-toggle" data-hel-toggle="hel-fa-affs" aria-expanded="false"><i class="bi bi-chevron-down"></i> Affiliations &amp; Notes</button>				<button type="button" class="hel-fa-toggle" data-hel-toggle="hel-fa-info" aria-expanded="false"><i class="bi bi-chevron-down"></i> Article Info</button>
+			</div>
+						<div class="hel-fa-affs hel-fa-panel" id="hel-fa-affs" hidden>
+				<ol>
+										<li><strong>Kartiko Ardi  Widodo</strong> <a class="hel-fa-corr" href="/cdn-cgi/l/email-protection#2a5e434145755e4b6a464f495e5f584f5804435e44044b4904434e" title="Corresponding author"><i class="bi bi-envelope-fill"></i></a> &mdash; National Institute of Technology Malang, Indonesia</li>
+										<li><strong>Bima Romadhon Parada Dian  Palevi</strong> &mdash; National Institute of Technology Malang, Indonesia</li>
+										<li><strong>Nanta Sigit</strong> &mdash; Universitas Wisnuwardhana, Indonesia</li>
+									</ol>
+			</div>
+						<div class="hel-fa-info hel-fa-panel" id="hel-fa-info" hidden>
+				<dl class="hel-fa-info-dl">
+					<dt>Publication History</dt><dd>Published online: December  1, 2025</dd>					<dt>DOI</dt><dd><a href="https://doi.org/10.35877/jetech4580" target="_blank" rel="noopener">https://doi.org/10.35877/jetech4580</a></dd>					<dt>Copyright</dt><dd>Copyright (c) 2025 Kartiko Ardi  Widodo, Bima Romadhon Parada Dian  Palevi, Nanta Sigit</dd>					<dt>User License</dt><dd><a href="https://creativecommons.org/licenses/by-nc/4.0" target="_blank" rel="noopener">https://creativecommons.org/licenses/by-nc/4.0</a></dd>				</dl>
+			</div>
+
+			<div class="hel-fa-actionbar">
+				<a class="hel-fa-ab hel-fa-ab-pdf" href="https://journal.arrus.id/index.php/jetech/article/view/4580/2640"><i class="bi bi-download"></i> Download PDF</a>								<span class="hel-fa-dd">
+					<button type="button" class="hel-fa-ab hel-fa-dd-btn" data-hel-dd aria-expanded="false"><i class="bi bi-quote"></i> Cite <i class="bi bi-chevron-down hel-tool-caret"></i></button>
+					<div class="hel-fa-dd-menu hel-fa-dd-cite" role="menu">
+						<div class="hel-fa-dd-cite-out"><div class="csl-bib-body">
+  <div class="csl-entry">Widodo, K. A. ., Palevi, B. R. P. D. ., &#38; Sigit, N. (2025). Improving the Accuracy of Ground Displacement Estimation Using IMU with Low-Pass Butterworth Filter. <i>ARRUS Journal of Engineering and Technology</i>, <i>5</i>(2), 231–242. https://doi.org/10.35877/jetech4580</div>
+</div></div>
+						<button type="button" data-hel-copy-cite><i class="bi bi-clipboard"></i> Copy citation</button>
+												<div class="hel-fa-dd-cite-dl">
+							<a href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/download/ris?submissionId=4580&amp;publicationId=4132"><i class="bi bi-download"></i> Endnote/Zotero/Mendeley (RIS)</a><a href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/download/bibtex?submissionId=4580&amp;publicationId=4132"><i class="bi bi-download"></i> BibTeX</a>						</div>
+												<a class="hel-fa-dd-more" href="#hel-cite"><i class="bi bi-list-ul"></i> More citation formats</a>
+					</div>
+				</span>
+								<span class="hel-fa-dd">
+					<button type="button" class="hel-fa-ab hel-fa-dd-btn" data-hel-dd aria-expanded="false"><i class="bi bi-share-fill"></i> Share <i class="bi bi-chevron-down hel-tool-caret"></i></button>
+					<div class="hel-fa-dd-menu" role="menu">
+						<a href="https://api.whatsapp.com/send?text=Improving%20the%20Accuracy%20of%20Ground%20Displacement%20Estimation%20Using%20IMU%20with%20Low-Pass%20Butterworth%20Filter%20https%3A%2F%2Fjournal.arrus.id%2Findex.php%2Fjetech%2Farticle%2Fview%2F4580" target="_blank" rel="noopener"><i class="bi bi-whatsapp" style="color:#25d366"></i> WhatsApp</a>
+						<a href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fjournal.arrus.id%2Findex.php%2Fjetech%2Farticle%2Fview%2F4580" target="_blank" rel="noopener"><i class="bi bi-facebook" style="color:#1877f2"></i> Facebook</a>
+						<a href="https://twitter.com/intent/tweet?url=https%3A%2F%2Fjournal.arrus.id%2Findex.php%2Fjetech%2Farticle%2Fview%2F4580&text=Improving%20the%20Accuracy%20of%20Ground%20Displacement%20Estimation%20Using%20IMU%20with%20Low-Pass%20Butterworth%20Filter" target="_blank" rel="noopener"><i class="bi bi-twitter-x"></i> X (Twitter)</a>
+						<a href="https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fjournal.arrus.id%2Findex.php%2Fjetech%2Farticle%2Fview%2F4580" target="_blank" rel="noopener"><i class="bi bi-linkedin" style="color:#0a66c2"></i> LinkedIn</a>
+						<a href="/cdn-cgi/l/email-protection#c5fab6b0a7afa0a6b1f88ca8b5b7aab3acaba2e0f7f5b1ada0e0f7f584a6a6b0b7a4a6bce0f7f5aaa3e0f7f582b7aab0aba1e0f7f581acb6b5a9a4a6a0a8a0abb1e0f7f580b6b1aca8a4b1acaaabe0f7f590b6acaba2e0f7f58c8890e0f7f5b2acb1ade0f7f589aab2e895a4b6b6e0f7f587b0b1b1a0b7b2aab7b1ade0f7f583aca9b1a0b7e3a7aaa1bcf8adb1b1b5b6e0f684e0f783e0f783afaab0b7aba4a9eba4b7b7b0b6ebaca1e0f783acaba1a0bdebb5adb5e0f783afa0b1a0a6ade0f783a4b7b1aca6a9a0e0f783b3aca0b2e0f783f1f0fdf5"><i class="bi bi-envelope"></i> Email</a>
+						<button type="button" data-hel-copy="https://journal.arrus.id/index.php/jetech/article/view/4580"><i class="bi bi-link-45deg"></i> Copy link</button>
+					</div>
+				</span>
+				<a class="hel-fa-ab" href="https://journal.arrus.id/index.php/jetech/user/register"><i class="bi bi-bell"></i> Set Alert</a>
+				<a class="hel-fa-ab" href="https://creativecommons.org/licenses/by-nc/4.0" target="_blank" rel="noopener"><i class="bi bi-c-circle"></i> Get Rights</a>								<span class="hel-fa-ab-nav">
+					<a class="hel-fa-ab-navlink" href="https://journal.arrus.id/index.php/jetech/article/view/4582" title="Visual Screening of Chloride (Cl?) Ions Using a Colorimetric Sensor with Comparative Anion Study"><i class="bi bi-chevron-left"></i> Previous article</a>									</span>
+							</div>
+
+						<section class="hel-fa-section" id="hel-abstract">
+				<h2 class="hel-fa-h">Abstract</h2>
+				<div class="hel-fa-abstract"><p>Land deformation monitoring generally relies on Global Navigation Satellite System (GNSS) and Interferometric Synthetic Aperture Radar (InSAR) technologies. While accurate, both methods have limitations: GNSS requires relatively expensive permanent infrastructure, while InSAR relies on atmospheric conditions and cannot function optimally in enclosed areas such as caves, tunnels, or areas with dense vegetation. In this context, the Inertial Measurement Unit (IMU) offers a more flexible, portable, and low-cost solution. IMUs can record acceleration data continuously without relying on satellite or radar signals, making them suitable for deformation monitoring in locations difficult to reach by GNSS or InSAR. However, IMU accuracy is often hampered by accumulated noise and multiple integration errors, which cause significant drift in displacement estimates. Previous research has focused on the Zero-Velocity Update (ZUPT) method to reduce errors, but the results still show significant deviations from the true value. The main contribution of this research is proposing the integration of the ZUPT method with a second-order Butterworth low-pass filter to reduce high-frequency noise that triggers error accumulation. Displacement testing results of 10–30 cm show significant accuracy improvements. Without the filter, the displacement estimation yielded an RMSE of 0.4292 m with a Relative Error of Prediction (REP) of –304.8%, indicating a significant deviation. After the application of the Butterworth filter, the accuracy improved dramatically with an RMSE of only 0.002 m and an REP of –0.40%, indicating that the proposed method is capable of reducing the error by more than 99%. Thus, this study not only proves the effectiveness of the integration of ZUPT and the Butterworth filter in improving the accuracy of the IMU, but also confirms the potential of the IMU as a reliable alternative for deformation monitoring in areas with limited access to GNSS or InSAR. These findings open up opportunities for further development towards a real-time, portable, and efficient IMU-based landslide monitoring system.</p></div>
+			</section>
+			
+			
+
+			
+						<section class="hel-fa-section" id="hel-keywords">
+				<h3 class="hel-fa-h3">Keywords</h3>
+				<div class="hel-fa-kw-alert" role="note">
+					<i class="bi bi-tags-fill hel-fa-kw-icon" aria-hidden="true"></i>
+					<div class="hel-fa-kw-pills"><a class="hel-fa-kw-pill" href="https://journal.arrus.id/index.php/jetech/search/search?query=Accellerometer">Accellerometer</a><a class="hel-fa-kw-pill" href="https://journal.arrus.id/index.php/jetech/search/search?query=Displacement">Displacement</a><a class="hel-fa-kw-pill" href="https://journal.arrus.id/index.php/jetech/search/search?query=IMU">IMU</a><a class="hel-fa-kw-pill" href="https://journal.arrus.id/index.php/jetech/search/search?query=Measurement">Measurement</a><a class="hel-fa-kw-pill" href="https://journal.arrus.id/index.php/jetech/search/search?query=Noise">Noise</a></div>
+				</div>
+			</section>
+			
+						<section class="hel-fa-section" id="hel-cite">
+				<h3 class="hel-fa-h3">Citation</h3>
+				<div class="item citation">
+					<div id="citationOutput" role="region" aria-live="polite"><div class="csl-bib-body">
+  <div class="csl-entry">Widodo, K. A. ., Palevi, B. R. P. D. ., &#38; Sigit, N. (2025). Improving the Accuracy of Ground Displacement Estimation Using IMU with Low-Pass Butterworth Filter. <i>ARRUS Journal of Engineering and Technology</i>, <i>5</i>(2), 231–242. https://doi.org/10.35877/jetech4580</div>
+</div></div>
+					<div class="citation_formats">
+						<button class="citation_formats_button" aria-controls="cslCitationFormats" aria-expanded="false" data-csl-dropdown="true">More Citation Formats</button>
+						<div id="cslCitationFormats" class="citation_formats_list" aria-hidden="true">
+							<ul class="citation_formats_styles"><li><a rel="nofollow" aria-controls="citationOutput" href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/acm-sig-proceedings?submissionId=4580&amp;publicationId=4132" data-load-citation data-json-href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/acm-sig-proceedings?submissionId=4580&amp;publicationId=4132&amp;return=json">ACM</a></li><li><a rel="nofollow" aria-controls="citationOutput" href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/acs-nano?submissionId=4580&amp;publicationId=4132" data-load-citation data-json-href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/acs-nano?submissionId=4580&amp;publicationId=4132&amp;return=json">ACS</a></li><li><a rel="nofollow" aria-controls="citationOutput" href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/apa?submissionId=4580&amp;publicationId=4132" data-load-citation data-json-href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/apa?submissionId=4580&amp;publicationId=4132&amp;return=json">APA</a></li><li><a rel="nofollow" aria-controls="citationOutput" href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/associacao-brasileira-de-normas-tecnicas?submissionId=4580&amp;publicationId=4132" data-load-citation data-json-href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/associacao-brasileira-de-normas-tecnicas?submissionId=4580&amp;publicationId=4132&amp;return=json">ABNT</a></li><li><a rel="nofollow" aria-controls="citationOutput" href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/chicago-author-date?submissionId=4580&amp;publicationId=4132" data-load-citation data-json-href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/chicago-author-date?submissionId=4580&amp;publicationId=4132&amp;return=json">Chicago</a></li><li><a rel="nofollow" aria-controls="citationOutput" href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/harvard-cite-them-right?submissionId=4580&amp;publicationId=4132" data-load-citation data-json-href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/harvard-cite-them-right?submissionId=4580&amp;publicationId=4132&amp;return=json">Harvard</a></li><li><a rel="nofollow" aria-controls="citationOutput" href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/ieee?submissionId=4580&amp;publicationId=4132" data-load-citation data-json-href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/ieee?submissionId=4580&amp;publicationId=4132&amp;return=json">IEEE</a></li><li><a rel="nofollow" aria-controls="citationOutput" href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/modern-language-association?submissionId=4580&amp;publicationId=4132" data-load-citation data-json-href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/modern-language-association?submissionId=4580&amp;publicationId=4132&amp;return=json">MLA</a></li><li><a rel="nofollow" aria-controls="citationOutput" href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/turabian-fullnote-bibliography?submissionId=4580&amp;publicationId=4132" data-load-citation data-json-href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/turabian-fullnote-bibliography?submissionId=4580&amp;publicationId=4132&amp;return=json">Turabian</a></li><li><a rel="nofollow" aria-controls="citationOutput" href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/vancouver?submissionId=4580&amp;publicationId=4132" data-load-citation data-json-href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/get/vancouver?submissionId=4580&amp;publicationId=4132&amp;return=json">Vancouver</a></li></ul>
+							<div class="label">Download Citation</div><ul class="citation_formats_styles"><li><a href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/download/ris?submissionId=4580&amp;publicationId=4132"><span class="fa fa-download"></span> Endnote/Zotero/Mendeley (RIS)</a></li><li><a href="https://journal.arrus.id/index.php/jetech/citationstylelanguage/download/bibtex?submissionId=4580&amp;publicationId=4132"><span class="fa fa-download"></span> BibTeX</a></li></ul>						</div>
+					</div>
+				</div>
+			</section>
+			
+			<section class="hel-fa-dates">
+				<div class="hel-fa-date"><span>Published</span><strong>December  1, 2025</strong></div>				<div class="hel-fa-date"><span>Volume</span><strong>5 - 2025</strong></div>				<div class="hel-fa-date"><span>Pages</span><strong>231-242</strong></div>			</section>
+
+						<section class="hel-fa-section" id="hel-statements">
+				<h3 class="hel-fa-h3">Statements</h3>
+				<div class="hel-fa-license">Copyright (c) 2025 Kartiko Ardi  Widodo, Bima Romadhon Parada Dian  Palevi, Nanta Sigit <div class="mt-2"><a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/"><img alt="Creative Commons License" src="//i.creativecommons.org/l/by-nc/4.0/88x31.png" /></a><p>This work is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by-nc/4.0/">Creative Commons Attribution-NonCommercial 4.0 International License</a>.</p></div></div>
+			</section>
+					</div>
+
+				<aside class="hel-fa-right" id="hel-art-info">
+						<div class="hel-fa-metrics">
+				<div class="hel-fa-metrics-head"><span><i class="bi bi-bar-chart"></i> Article metrics</span></div>
+				<div class="hel-fa-metrics-nums">
+					<div><strong>0</strong><span>Views</span></div>
+					<div><strong>0</strong><span>Downloads</span></div>
+				</div>
+				<div class="hel-fa-dim"><span class="__dimensions_badge_embed__" data-doi="10.35877/jetech4580" data-style="small_circle" data-legend="always"></span></div>			</div>
+
+			<a class="hel-fa-dl" href="https://journal.arrus.id/index.php/jetech/article/view/4580/2640"><i class="bi bi-download"></i> Download PDF</a>			<a class="hel-fa-btn" href="#hel-cite"><i class="bi bi-quote"></i> Cite article</a>			<a class="hel-fa-btn" href="https://api.whatsapp.com/send?text=Improving%20the%20Accuracy%20of%20Ground%20Displacement%20Estimation%20Using%20IMU%20with%20Low-Pass%20Butterworth%20Filter%20https%3A%2F%2Fjournal.arrus.id%2Findex.php%2Fjetech%2Farticle%2Fview%2F4580" target="_blank" rel="noopener"><i class="bi bi-share"></i> Share article</a>
+
+			<div class="hel-fa-impact">
+				<span class="hel-fa-impact-label">our impact</span>
+				<h4>Your research is the real superpower</h4>
+				<p>Behind every article stands a team of authors, editors and reviewers upholding quality and sharing knowledge openly.</p>
+				<a class="hel-link" href="https://journal.arrus.id/index.php/jetech/about">Explore the journal <i class="bi bi-chevron-right"></i></a>
+			</div>
+
+						<div class="hel-fa-reco"><h4>Recommended articles</h4><div class="item citations-container" data-image-path="https://journal.arrus.id/plugins/generic/citations/images/" data-citations-url="https://journal.arrus.id/index.php/jetech/citations/get?citationsId=10.35877%2Fjetech4580&amp;citationsShowList=1&amp;citationsProvider=all"
+     data-citations-provider="all" data-citations-total="1" data-citations-list="1"
+     data-show-google="1" data-show-pmc="1">
+	<div id="citations-loader"></div>
+	<div class="citations-count">
+		<div class="citations-count-crossref">
+			<img class="img-fluid" src="https://journal.arrus.id/plugins/generic/citations/images/crossref.png" alt="Crossref"/>
+			<div class="badge_total"></div>
+		</div>
+		<div class="citations-count-scopus">
+			<img src="https://journal.arrus.id/plugins/generic/citations/images/scopus.png" alt="Scopus"/>
+			<br/>
+			<span class="badge_total"></span>
+		</div>
+		<div class="citations-count-google">
+			<a href="https://scholar.google.com/scholar?q=10.35877/jetech4580" target="_blank" rel="noreferrer">
+				<img src="https://journal.arrus.id/plugins/generic/citations/images/scholar.png" alt="Google Scholar"/>
+			</a>
+		</div>
+		<div class="citations-count-pmc">
+			<a href="http://europepmc.org/search?scope=fulltext&query=(REF:&quot;10.35877/jetech4580&quot;)" target="_blank" rel="noreferrer">
+				<img src="https://journal.arrus.id/plugins/generic/citations/images/pmc.png" alt="Europe PMC"/>
+				<br/>
+				<span class="badge_total"></span>
+			</a>
+		</div>
+	</div>
+	<div class="citations-list"></div>
+    </div>
+</div>
+						<div class="hel-sidebar-blocks tech-sidebar-blocks"><div class="pkp_block block_make_submission">
+	<h2 class="pkp_screen_reader">
+		Make a Submission
+	</h2>
+
+	<div class="content">
+		<a class="block_make_submission_link" href="https://journal.arrus.id/index.php/jetech/about/submissions">
+			Make a Submission
+		</a>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-information_journal">
+	<h2 class="title pkp_screen_reader">information_journal</h2>
+	<div class="content">
+		<ul>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" href="http://jurnal.ahmar.id/index.php/jetech/about/editorialTeam">EDITORIAL TEAM</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" href="http://jurnal.ahmar.id/index.php/jetech/reviewer">REVIEWERS</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="AUTHOR GUIDELINES" href="http://jurnal.ahmar.id/index.php/jetech/instructions">AUTHOR GUIDELINES</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" href="http://jurnal.ahmar.id/index.php/jetech/scope">FOCUS AND SCOPE</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="Author &amp; Affiliation Index" href="http://jurnal.ahmar.id/index.php/jetech/search/authors">AUTHOR &amp; AFFIL. INDEX</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="PEER REVIEW PROCESS" href="http://jurnal.ahmar.id/index.php/jetech/peerreview">PEER REVIEW PROCESS</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="OPEN ACCESS STATEMENT" href="http://jurnal.ahmar.id/index.php/jetech/openaccess">OPEN ACCESS STATEMENT</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="Retraction, Withdrawal, &amp; Correction (R-W-C) Policy" href="http://jurnal.ahmar.id/index.php/jetech/retraction">R-W-C POLICY</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="PUBLICATION ETHICS" href="http://jurnal.ahmar.id/index.php/jetech/ethics">PUBLICATION ETHICS</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="PLAGIARISM POLICY" href="http://jurnal.ahmar.id/index.php/jetech/plagiarism">PLAGIARISM POLICY</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="COPYRIGHT NOTICE" href="http://jurnal.ahmar.id/index.php/jetech/copyright">COPYRIGHT &amp; LICENSE</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="AUTHOR FEES" href="http://jurnal.ahmar.id/index.php/jetech/fee">JOURNAL BUSINESS MODEL</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="SCOPUS CITATION" href="http://jurnal.ahmar.id/index.php/jetech/scopuscitation">SCOPUS CITATION</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="WOS CITATION" href="http://jurnal.ahmar.id/index.php/jetech/woscitation">WOS CITATION</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="SPECIAL ISSUES" href="http://jurnal.ahmar.id/index.php/jetech/special_issues">SPECIAL ISSUES</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="CONTACT" href="http://jurnal.ahmar.id/index.php/jetech/about/contact">CONTACT</a></li>
+</ul>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-template">
+	<h2 class="title pkp_screen_reader">template</h2>
+	<div class="content">
+		<ul>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" href="#">Template Journal</a></li>
+</ul>
+<p align="center"><a title="Template" href="https://drive.google.com/file/d/1IGF_pPLlyH9mqKgrDX7rCIE7Hin3n53f/view?usp=sharing" target="_blank" rel="noopener"><img style="width: 120px;" src="http://jurnal.ahmar.id/logo/doc.png" alt=""></a></p>
+	</div>
+</div>
+</div>		</aside>
+	</div>
+</article>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script async src="https://badge.dimensions.ai/badge.js" charset="utf-8"></script>
+	
+
+</div><!-- .page -->
+
+		</div><!-- pkp_structure_main -->
+
+												<div class="pkp_structure_sidebar left" role="complementary" aria-label="Sidebar"><div class="hel-sidebar-blocks"><div class="pkp_block block_make_submission">
+	<h2 class="pkp_screen_reader">
+		Make a Submission
+	</h2>
+
+	<div class="content">
+		<a class="block_make_submission_link" href="https://journal.arrus.id/index.php/jetech/about/submissions">
+			Make a Submission
+		</a>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-information_journal">
+	<h2 class="title pkp_screen_reader">information_journal</h2>
+	<div class="content">
+		<ul>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" href="http://jurnal.ahmar.id/index.php/jetech/about/editorialTeam">EDITORIAL TEAM</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" href="http://jurnal.ahmar.id/index.php/jetech/reviewer">REVIEWERS</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="AUTHOR GUIDELINES" href="http://jurnal.ahmar.id/index.php/jetech/instructions">AUTHOR GUIDELINES</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" href="http://jurnal.ahmar.id/index.php/jetech/scope">FOCUS AND SCOPE</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="Author &amp; Affiliation Index" href="http://jurnal.ahmar.id/index.php/jetech/search/authors">AUTHOR &amp; AFFIL. INDEX</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="PEER REVIEW PROCESS" href="http://jurnal.ahmar.id/index.php/jetech/peerreview">PEER REVIEW PROCESS</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="OPEN ACCESS STATEMENT" href="http://jurnal.ahmar.id/index.php/jetech/openaccess">OPEN ACCESS STATEMENT</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="Retraction, Withdrawal, &amp; Correction (R-W-C) Policy" href="http://jurnal.ahmar.id/index.php/jetech/retraction">R-W-C POLICY</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="PUBLICATION ETHICS" href="http://jurnal.ahmar.id/index.php/jetech/ethics">PUBLICATION ETHICS</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="PLAGIARISM POLICY" href="http://jurnal.ahmar.id/index.php/jetech/plagiarism">PLAGIARISM POLICY</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="COPYRIGHT NOTICE" href="http://jurnal.ahmar.id/index.php/jetech/copyright">COPYRIGHT &amp; LICENSE</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="AUTHOR FEES" href="http://jurnal.ahmar.id/index.php/jetech/fee">JOURNAL BUSINESS MODEL</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="SCOPUS CITATION" href="http://jurnal.ahmar.id/index.php/jetech/scopuscitation">SCOPUS CITATION</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="WOS CITATION" href="http://jurnal.ahmar.id/index.php/jetech/woscitation">WOS CITATION</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="SPECIAL ISSUES" href="http://jurnal.ahmar.id/index.php/jetech/special_issues">SPECIAL ISSUES</a></li>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" title="CONTACT" href="http://jurnal.ahmar.id/index.php/jetech/about/contact">CONTACT</a></li>
+</ul>
+	</div>
+</div>
+<div class="pkp_block block_custom" id="customblock-template">
+	<h2 class="title pkp_screen_reader">template</h2>
+	<div class="content">
+		<ul>
+<li class="show" style="#d25458 solid; height: 50px;"><a class="cmp_manuscript_button" style="display: block; padding: 10px; text-align: left; color: #ffffff; background-color: #7b0dee;" href="#">Template Journal</a></li>
+</ul>
+<p align="center"><a title="Template" href="https://drive.google.com/file/d/1IGF_pPLlyH9mqKgrDX7rCIE7Hin3n53f/view?usp=sharing" target="_blank" rel="noopener"><img style="width: 120px;" src="http://jurnal.ahmar.id/logo/doc.png" alt=""></a></p>
+	</div>
+</div>
+</div></div>
+						</div><!-- pkp_structure_content -->
+
+	
+	<footer class="hel-footer" role="contentinfo">
+		<a id="pkp_content_footer"></a>
+		<div class="hel-footer-main">
+			<div class="hel-container">
+				<div class="row g-4 g-lg-5">
+					<div class="col-lg-3 col-md-6">
+						<h4 class="hel-foot-h">Guidelines</h4>
+						<ul class="hel-foot-links">
+							<li><a href="https://journal.arrus.id/index.php/jetech/instructions">Author guidelines</a></li><li><a href="https://journal.arrus.id/index.php/jetech/about/submissions">Services for authors</a></li><li><a href="https://journal.arrus.id/index.php/jetech/ethics">Policies and publication ethics</a></li><li><a href="https://journal.arrus.id/index.php/jetech/about/editorialTeam">Editor guidelines</a></li>						</ul>
+					</div>
+					<div class="col-lg-3 col-md-6">
+						<h4 class="hel-foot-h">Explore</h4>
+						<ul class="hel-foot-links">
+							<li><a href="https://journal.arrus.id/index.php/jetech/issue/current">Articles</a></li><li><a href="https://journal.arrus.id/index.php/jetech/issue/archive">Volumes and issues</a></li><li><a href="https://journal.arrus.id/index.php/jetech/announcement">Announcements</a></li><li><a href="https://journal.arrus.id/index.php/jetech/search">Search</a></li>						</ul>
+					</div>
+					<div class="col-lg-3 col-md-6">
+						<h4 class="hel-foot-h">Outreach</h4>
+						<ul class="hel-foot-links">
+							<li><a href="https://journal.arrus.id/index.php/jetech/instructions">About the journal</a></li><li><a href="https://journal.arrus.id/index.php/jetech/about/editorialTeam">Editorial board</a></li><li><a href="https://journal.arrus.id/index.php/jetech/about/contact">Contact</a></li><li><a href="https://journal.arrus.id/index.php/jetech/user/register">Register</a></li>						</ul>
+					</div>
+					<div class="col-lg-3 col-md-6">
+						<h4 class="hel-foot-h">Connect</h4>
+						<ul class="hel-foot-links">
+							<li><a href="https://journal.arrus.id/index.php/jetech/about/submissions">Submit</a></li><li><a href="https://journal.arrus.id/index.php/jetech/about/privacy">Privacy statement</a></li>						</ul>
+											</div>
+				</div>
+				<div class="hel-foot-custom"><table>
+<tbody>
+<tr>
+<td valign="top">
+<p><strong>ARRUS Intelektual Indonesia<br></strong>Gedung Wirausaha Lantai 1 Unit 104, Jalan HR Rasuna Said Kav. C-5, Kel. Karet, Kec. Setia Budi, Kota Jakarta Selatan, DKI Jakarta, <strong>Indonesia</strong><br>email: <a href="/cdn-cgi/l/email-protection#90f1e2e2e5e3faf5e4f5f3f8d0f1f8fdf1e2bef9f4"><span class="__cf_email__" data-cfemail="6d0c1f1f181e070819080e052d0c05000c1f430409">[email&#160;protected]</span></a></p>
+</td>
+<td width="10%">&nbsp;</td>
+<td valign="top"><center>
+<p><a href="https://info.flagcounter.com/ey1P"><img src="https://s11.flagcounter.com/count2/ey1P/bg_FFFFFF/txt_000000/border_CCCCCC/columns_3/maxflags_20/viewers_0/labels_1/pageviews_1/flags_0/percent_0/" alt="Flag Counter" border="0"></a> <!-- Default Statcounter code for ASCI Journal
+http://jurnal.ahmar.id/index.php/asci/ --><noscript><div class="statcounter"><a title="Web Analytics
+Made Easy - StatCounter" href="https://statcounter.com/"
+target="_blank"><img class="statcounter"
+src="https://c.statcounter.com/12029969/0/051600ba/1/"
+alt="Web Analytics Made Easy -
+StatCounter"></a></div></noscript><!-- End of Statcounter Code --></p>
+</center><!-- Default Statcounter code for JINAV
+http://jurnal.ahmar.id/index.php/jinav/ --><noscript><div class="statcounter"><a title="Web Analytics"
+href="https://statcounter.com/" target="_blank"><img
+class="statcounter"
+src="https://c.statcounter.com/12382287/0/85a52293/0/"
+alt="Web Analytics"></a></div></noscript><!-- End of Statcounter Code --></td>
+<td width="10%">&nbsp;</td>
+<td align="center" valign="top"><br><a href="https://issn.lipi.go.id/terbit/detail/20210505260884208" target="_blank" rel="noopener"><img class="alignleft" src="https://api-issn.lipi.go.id/download/barcode/dok_sk/2021/05/BARCODE_2776791400.png" width="267" height="94"></a><br>ISSN 2776-7914 (Print)<br>ISSN 2807-3045 (Online)</td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<p><strong><a href="https://creativecommons.org/licenses/by-nc/4.0/"><img class="alignleft" src="https://licensebuttons.net/l/by-nc/4.0/88x31.png" width="74" height="26"></a></strong></p>
+<p>ARRUS Journal of Engineering and Technology is licensed under a <a href="https://creativecommons.org/licenses/by-nc/4.0">Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) </a></p></div>			</div>
+		</div>
+		<div class="hel-footer-sub">
+			<div class="hel-container hel-footer-sub-inner">
+				<p class="mb-0">&copy; 2026 <strong>ARRUS Journal of Engineering and Technology</strong>. All rights reserved.</p>
+				<ul class="hel-footer-legal">
+					<li><a href="https://journal.arrus.id/index.php/jetech/about/privacy">Privacy policy</a></li>
+					<li><a href="https://journal.arrus.id/index.php/jetech/about">Terms and conditions</a></li>
+					<li><a href="https://journal.arrus.id/index.php/jetech/about/contact">Accessibility statement</a></li>
+				</ul>
+			</div>
+		</div>
+	</footer>
+
+	<a href="#" class="hel-to-top" id="elsToTop" aria-label="Back to top"><i class="bi bi-arrow-up"></i></a>
+
+</div><!-- pkp_structure_page -->
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js?v=3.3.0.22" type="text/javascript"></script><script src="https://journal.arrus.id/lib/pkp/lib/vendor/components/jquery/jquery.min.js?v=3.3.0.22" type="text/javascript"></script><script src="https://journal.arrus.id/lib/pkp/lib/vendor/components/jqueryui/jquery-ui.min.js?v=3.3.0.22" type="text/javascript"></script><script src="https://journal.arrus.id/plugins/themes/default/js/lib/popper/popper.js?v=3.3.0.22" type="text/javascript"></script><script src="https://journal.arrus.id/plugins/themes/default/js/lib/bootstrap/util.js?v=3.3.0.22" type="text/javascript"></script><script src="https://journal.arrus.id/plugins/themes/default/js/lib/bootstrap/dropdown.js?v=3.3.0.22" type="text/javascript"></script><script src="https://journal.arrus.id/plugins/themes/default/js/main.js?v=3.3.0.22" type="text/javascript"></script><script src="https://journal.arrus.id/plugins/themes/heliyon/js/heliyon.js?rev=20260916hel24" type="text/javascript"></script><script src="https://journal.arrus.id/plugins/generic/citationStyleLanguage/js/articleCitation.js?v=3.3.0.22" type="text/javascript"></script><script src="https://journal.arrus.id/plugins/generic/citations/js/citations.js?v=3.3.0.22" type="text/javascript"></script>
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v4bc70e2c01a94c73b74392e4234840661791215815920" integrity="sha512-L0ha0OXavK/8okipN9F8BtP84dg9DUhPERbBXzwI6dgTA55d2+yweo3pn5CSFYs45/r8md2+xvUPtTdvTNRfjA==" data-cf-beacon='{"version":"2024.11.0","token":"cfccf8c4f91442ba923fde60d33a84a3","r":1,"spa":2}' crossorigin="anonymous"></script>
+</body>
+</html>

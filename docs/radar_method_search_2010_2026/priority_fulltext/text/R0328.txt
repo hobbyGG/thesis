@@ -1,0 +1,1039 @@
+Article
+
+Optimization of the Number of Accelerometer Placements for
+Dynamic Identification of a Historical Masonry Bridge
+Cristiano Giuseppe Coviello 1,2, * , Fabio Rizzo 1                    and Maria Francesca Sabbà 1
+
+                                         1   Department of Architecture, Construction and Design, Polytechnic University of Bari, 70126 Bari, Italy;
+                                             fabio.rizzo@poliba.it (F.R.); mariafrancesca.sabba@poliba.it (M.F.S.)
+                                         2   Programa de Doctorado en Ingeniería de la Construcción, Universitat Politècnica de València, Camino de
+                                             Vera s/n, 46022 Valencia, Spain
+                                         *   Correspondence: c.coviello@phd.poliba.it; Tel.: +39-3313238273
+
+
+                                         Abstract
+                                         Dynamic identification using accelerometers is a common technique for measuring the
+                                         modal frequencies of existing structures. Strategically placing these sensors on a bridge
+                                         allows for the derivation of its modal parameters through operational modal analysis
+                                         (OMA). This study aims to demonstrate how the number of accelerometers required for the
+                                         identification of a historical three-arch masonry bridge can be optimized. The experimental
+                                         campaign involved the Santa Teresa bridge (STb) in Bitonto, a XIX masonry bridge in
+                                         Southern Italy. Twenty-eight accelerometers were installed on the STb; frequency analysis
+                                         was first performed with all accelerometers, and then the number was decreased to 13, 8
+                                         and 4 accelerometers. The four optimizations performed involved both the number and
+                                         positioning of accelerometers along the central arch. The five primary vibration modes
+                                         obtained revealed that with a smaller number of accelerometers, it is possible to correctly
+                                         identify the natural frequencies of the bridge. A further optimization was per-formed with
+                                         only No. 6 accelerometers on the keystone of the bridge’s three arches. The results of the
+                                         modal shapes and natural frequencies showed that a limited number of accelerometers
+                                         is sufficient to dynamically identify a bridge. The configuration with 13 accelerometers
+                                         proved to be the best for this purpose. However, optimization with 6 accelerometers
+Academic Editors: Boulent Imam and
+Joan Ramon Casas Rius                    proved to be the best for recording normalized displacements compared to the reference
+                                         configuration. The advantages of this study are directly related to the reduction in time,
+Received: 7 August 2025
+Revised: 10 October 2025                 logistics and costs of in situ monitoring. This preliminary assessment approach enables the
+Accepted: 21 October 2025                establishment of baseline conditions for subsequent periodic monitoring campaigns.
+Published: 22 October 2025
+
+Citation: Coviello, C.G.; Rizzo, F.;     Keywords: accelerometer optimization; bridge monitoring; historical masonry bridge;
+Sabbà, M.F. Optimization of the          OMA method; bridge modal shape
+Number of Accelerometer Placements
+for Dynamic Identification of a
+Historical Masonry Bridge.
+Infrastructures 2025, 10, 281.
+                                         1. Introduction
+https://doi.org/10.3390/
+infrastructures10110281                        The Italian infrastructure heritage largely consists of masonry buildings and bridges
+                                         that require systematic structural assessment and monitoring strategies [1–3]. The preser-
+Copyright: © 2025 by the authors.
+Licensee MDPI, Basel, Switzerland.
+                                         vation of these historical structures presents unique challenges that demand innovative
+This article is an open access article   approaches balancing conservation requirements with modern safety standards. In this con-
+distributed under the terms and          text, the distinction between continuous monitoring and one-shot dynamic characterization
+conditions of the Creative Commons       becomes crucial for developing appropriate assessment strategies. Continuous monitoring
+Attribution (CC BY) license              enables real-time detection of structural changes and damage progression through repeated
+(https://creativecommons.org/
+                                         measurements over extended periods, achieving damage detection capability as low as
+licenses/by/4.0/).
+
+
+
+
+Infrastructures 2025, 10, 281                                                                         https://doi.org/10.3390/infrastructures10110281
+Infrastructures 2025, 10, 281                                                                                          2 of 21
+
+
+
+                                5% stiffness reduction through real-time assessment and environmental compensation [4].
+                                Conversely, one-shot dynamic characterization provides baseline structural properties
+                                through focused experimental campaigns that can inform numerical model calibration and
+                                establish reference conditions for future assessments, typically requiring 15–25% stiffness
+                                changes for reliable detection but reducing operational costs significantly [5].
+                                      Modern non-destructive dynamic identification techniques, such as operational modal
+                                analysis (OMA), enable a comprehensive understanding of civil structures’ modal behavior
+                                without compromising structural integrity [6–9]. Recent systematic reviews of optimization
+                                algorithms for structural health monitoring demonstrate that enhanced genetic algorithms
+                                and modified particle swarm optimization variants now achieve superior convergence
+                                characteristics, with biology-based algorithms showing particular effectiveness for bridge
+                                applications [10]. However, despite these theoretical advances, practical implementation
+                                studies focusing on heritage masonry bridges remain limited, particularly those addressing
+                                the specific challenges of optimizing sensor configurations for three-arch historical struc-
+                                tures. OMA, integrated with finite element method (FEM) analysis, can simulate structural
+                                behavior under real conditions and proves crucial for interpreting monitoring data and
+                                enabling potential damage detection [11]. This technique emerges as an excellent tool for
+                                characterizing historical masonry buildings, thereby enhancing the existing safety level of
+                                these structures [12,13]. The integration of OMA with other computational methodologies,
+                                such as FEM, significantly broadens the scope of structural investigation. However, model
+                                calibration remains essential, particularly for FEM applications where vibration-based
+                                model updating provides the foundation for accurate structural representation [14,15].
+                                      The field of sensor placement optimization has undergone a remarkable transforma-
+                                tion, with comprehensive classification studies identifying six primary evaluation criteria:
+                                maximum vibration signal, maximum modal identification, minimum parameter identifica-
+                                tion error, data reconstruction error minimization, probability-based damage detection, and
+                                minimum energy consumption [16,17]. Advanced optimization frameworks now employ
+                                hybrid approaches combining simulated annealing with ensemble Kalman filtering, where
+                                GA-EnKF outperforms SA-EnKF in accuracy while SA-EnKF offers lower computational
+                                cost [18]. Recent developments in sensitivity analysis frameworks address modeling uncer-
+                                tainties through hierarchical clustering and Monte Carlo simulations, achieving a 10–15%
+                                improvement in damage detection sensitivity compared to conventional approaches [19].
+                                While these methodologies provide robust theoretical foundations, there remains a signifi-
+                                cant gap in practical validation studies that demonstrate sensor optimization effectiveness
+                                specifically for masonry arch bridges under real operational conditions.
+                                      Accelerometer placement optimization is highly dependent on structural morphology
+                                and monitoring objectives. For composite steel–concrete bridges, positioning accelerom-
+                                eters along pylons rather than exclusively on the deck may prove beneficial [20], while
+                                masonry arch bridges require specialized strategies that account for their unique dynamic
+                                characteristics and heritage preservation constraints. Recent breakthrough results on her-
+                                itage structures using improved genetic algorithms demonstrate a 9.16–28.24% reduction
+                                in optimization time while improving damage detection capability by 12–64% compared
+                                to conventional methods [21]. However, these studies primarily focus on single-arch or
+                                suspension bridge configurations, highlighting the need for dedicated research on multi-
+                                arch masonry bridges where structural complexity and modal interaction patterns differ
+                                significantly. The OMA monitoring methodology demonstrates universal applicability
+                                across structural typologies and materials. The fundamental frequencies recorded for
+                                reinforced concrete and steel structures typically differ by approximately an order of mag-
+                                nitude [22], reflecting the inherent material properties where cementitious conglomerates
+                                are more vulnerable to cracking due to low tensile strength [23]. Steel truss bridges require
+Infrastructures 2025, 10, 281                                                                                           3 of 21
+
+
+
+                                specialized approaches focusing on fatigue-critical locations and connection monitoring,
+                                with stiffness separation methods achieving reduced computational complexity through
+                                substructure analysis [24].
+                                      The Modal Assurance Criterion (MAC) serves as a fundamental parameter for assess-
+                                ing experimental result reliability and validating proposed methodologies for measuring
+                                frequency errors in masonry bridges [25]. Recent advances employ hypotrochoid spiral
+                                optimization algorithms for triaxial accelerometers using three MAC-based objective func-
+                                tions, demonstrating superior performance in modal independence assessment and sensor
+                                redundancy elimination [26]. Understanding the dynamic behavior of historical struc-
+                                tures proves crucial for their preservation, with OMA offering powerful non-destructive
+                                monitoring capabilities that, when optimized with reduced accelerometer configurations,
+                                provide efficient and cost-effective structural health assessment solutions [27,28]. The vali-
+                                dation of sensor optimization strategies through experimental campaigns on actual heritage
+                                structures represents a critical research need, as most existing studies rely primarily on
+                                numerical simulations without comprehensive field validation. Comparative analysis of
+                                experimental results from masonry [29] and reinforced concrete structural elements [30–33]
+                                with OMA identification outcomes provides powerful tools for numerical validation and
+                                model refinement.
+                                      Recent developments in wireless sensor network architectures have further enhanced
+                                the practical viability of reduced sensor configurations. Comprehensive analyses of wire-
+                                less smart sensor networks demonstrate that multi-hop communication protocols achieve
+                                7 kB/s data collection rates, with ZigBee protocol implementation extending sensor life
+                                from days to 160–168 days [34]. Advanced IoT integration with narrowband connectivity
+                                enables structural health monitoring systems that achieve 99.91% data transmission accu-
+                                racy while supporting autonomous operation through energy harvesting capabilities [35].
+                                These technological advances directly support the feasibility of optimized sensor deploy-
+                                ments for heritage structures where traditional wired installations may prove impractical
+                                or invasive.
+                                      The implementation of reduced sensor arrays represents a paradigm shift toward
+                                cost-effective monitoring solutions, with particular relevance for heritage infrastructure
+                                where budget constraints often limit the extent of monitoring deployments. The adop-
+                                tion of fewer sensors, particularly low-cost MEMS accelerometers, results in significantly
+                                lower costs compared to traditional piezoelectric devices. The development of low-cost
+                                adaptable, reliable accelerometer (LARA) systems achieves 0.00005 m/s2 resolution using
+                                five aligned MEMS accelerometers with multiplexing to reduce noise density, operating
+                                effectively in the 0.1–165 Hz frequency range at significantly reduced cost compared to
+                                commercial alternatives [36]. Recent technological advances demonstrate that MEMS tech-
+                                nologies enable unit cost reductions of up to 400% compared to previous generations while
+                                maintaining adequate accuracy and sensitivity levels [30]. Wireless networks combined
+                                with inexpensive MEMS devices [35,37] further reduce wiring and maintenance costs [38],
+                                with comprehensive analysis revealing that wireless sensor networks achieve an 80% cost
+                                reduction compared to traditional wired systems while maintaining comparable perfor-
+                                mance [39]. Installation of fewer accelerometers significantly reduces operational time,
+                                especially when utilizing intelligent architectures based on distributed storage or simple
+                                Ethernet networks [34]. Practical implementations, such as the Serra Cazzola viaduct in
+                                Sicily, demonstrate efficient setup time reduction through locally synchronized MEMS
+                                sensors, with each span initially equipped with 6 triaxial accelerometers [40].
+                                      Practical implementations of high-density accelerometer arrays have demonstrated
+                                that strategic optimization can significantly reduce installation complexity while maintain-
+                                ing monitoring effectiveness. Recent deployments on major infrastructure projects show
+Infrastructures 2025, 10, 281                                                                                           4 of 21
+
+
+
+                                that systems with substantial sensor counts benefit from intelligent architecture optimiza-
+                                tion, with locally synchronized configurations proving particularly effective for span-based
+                                monitoring approaches [41]. The evolution toward distributed fiber optic sensing systems
+                                provides additional validation for optimized sensor placement strategies, with successful
+                                implementations on masonry arch rail bridges enabling quantified analysis of dynamic
+                                loading while maintaining non-invasive installation requirements [42].
+                                      Contemporary research reveals that optimized sparse sensing approaches achieve
+                                damage detection sensitivities within 10–15% of full-scale deployments while reducing costs
+                                by 40–60% [43]. Fisher Information-based optimization maximizes damage detectability
+                                while minimizing sensor count, showing a 35–40% improvement in damage detection
+                                probability for critical structural components [43]. Digital twin systems integrating wireless
+                                MEMS accelerometers with IoT infrastructure achieve 99.99% ROC-AUC for anomaly
+                                detection using LightGBM classifiers, with hybrid edge-cloud architectures reducing costs
+                                by 80% compared to traditional wired systems [36]. However, the translation of these
+                                optimization principles to heritage masonry bridges requires specialized consideration of
+                                structural morphology, modal characteristics, and practical constraints that differentiate
+                                such structures from modern bridge designs.
+                                      The practical application of sensor optimization extends beyond simple cost reduction
+                                to encompass comprehensive monitoring strategy development. Recent research on limited
+                                roving sensor methodologies demonstrates that strategic sensor positioning can effectively
+                                monitor bridges subjected to random traffic loading, providing validation for reduced
+                                sensor array effectiveness under realistic operational conditions [44]. Multi-objective
+                                optimization frameworks now specifically address masonry bridge model calibration,
+                                incorporating uncertainty quantification and parameter identification strategies that directly
+                                support the validation of sensor reduction approaches [25]. These developments confirm
+                                the scientific validity of systematic sensor reduction strategies when properly implemented
+                                and validated through comprehensive experimental programs.
+                                      Formal optimization methodologies now incorporate multi-objective frameworks
+                                balancing damage sensitivity, measurement uncertainty, and cost considerations through
+                                NSGA-III algorithms handling 3–15 objectives simultaneously [45]. Advanced sensitivity
+                                analysis employs Fisher Information Matrix optimization for quantifying measurement
+                                information content, eigenvector sensitivity approaches for modal parameter analysis,
+                                and local sensitivity matrices for forward uncertainty propagation [19]. Optimal sensor
+                                placement methodologies for parametric identification utilize comprehensive frameworks
+                                that ensure maximum damage detectability while minimizing parameter identification er-
+                                rors [46]. Despite these theoretical advances, practical implementation studies that validate
+                                optimization effectiveness through systematic experimental reduction from comprehensive
+                                sensor arrays to minimal configurations remain scarce in the literature, particularly for
+                                heritage masonry structures.
+                                      The convergence of artificial intelligence, digital twin technologies, and advanced
+                                sensor networks creates unprecedented capabilities for autonomous structural assessment.
+                                Machine learning-enhanced Fisher Information Matrix approaches integrate explainability
+                                through SHAP (SHapley Additive exPlanations) for optimal sensor placement, while deep
+                                reinforcement learning frameworks formulate optimization as Markov decision processes,
+                                demonstrating superior performance over traditional algorithms [47]. Digital twin ar-
+                                chitectures integrate real-time sensor data with 500 Hz sampling rates for instantaneous
+                                structural analysis and adaptive sensor configuration optimization based on evolving
+                                structural conditions [48]. However, the practical application of these advanced computa-
+                                tional frameworks to heritage structures requires experimental validation that considers
+Infrastructures 2025, 10, 281                                                                                             5 of 21
+
+
+
+                                the unique challenges of masonry arch bridges, including their distinctive modal patterns,
+                                environmental sensitivity, and preservation constraints.
+                                      Within this rapidly evolving technological landscape, the present study addresses a
+                                critical gap in the literature by providing comprehensive experimental validation of sensor
+                                optimization strategies specifically for historical masonry arch bridges. The objective is
+                                to demonstrate how the number of accelerometers required for dynamic identification
+                                of such structures can be systematically optimized through strategic sensor placement,
+                                validated through actual field measurements rather than numerical simulation alone. The
+                                case study focuses on the Santa Teresa bridge (STb) in Bitonto, a representative three-arch
+                                masonry structure that provides an ideal testbed for developing and validating practical
+                                optimization frameworks. This research contributes essential empirical evidence sup-
+                                porting the effectiveness of reduced sensor configurations for heritage bridge assessment,
+                                establishing practical optimization strategies that minimize instrumentation requirements
+                                while maintaining measurement reliability. The validation methodology employed in this
+                                study incorporates measurement-system design principles that combine information from
+                                dynamic excitations, following established frameworks for optimal sensor configuration
+                                validation [35]. Recent advances in modal kinetic energy-based sensor placement optimiza-
+                                tion provide theoretical foundations for understanding the effectiveness of reduced sensor
+                                arrays in capturing essential structural dynamics [49].
+                                      The systematic approach from comprehensive to minimal sensor configurations en-
+                                ables quantitative assessment of the trade-offs between sensor reduction and measurement
+                                accuracy, addressing a critical need identified in contemporary research. The systematic
+                                approach from a 28-accelerometer reference configuration through multiple reduced con-
+                                figurations provides a useful experimental validation of sensor optimization principles,
+                                thereby enabling evidence-based cost-effective monitoring solutions for heritage infrastruc-
+                                ture preservation.
+                                      The objective of this study is to identify the natural frequencies of a three-arch masonry
+                                bridge, optimizing the number of accelerometers. The case study is a historical bridge in
+                                Bitonto: the Santa Teresa bridge (STb). This study provides a framework for performing
+                                accurate monitoring using fewer sensors. This result was achieved by identifying the
+                                natural frequencies and mode shapes observed in the case study. The optimization was
+                                performed following a heuristic approach and comparing the natural frequency values
+                                and mode shapes of the bridge to identify the most relevant accelerometers. This research
+                                aims to demonstrate that it is possible to minimize the instrumentation required while
+                                still obtaining consistent results. This reduction in equipment allows for a streamlining of
+                                instrumentation and a consequent reduction in the costs of monitoring existing structures.
+
+                                2. Framework and Novelty
+                                     This study seeks to address the effectiveness and efficiency of structural monitoring
+                                of historic masonry bridges through dynamic identification. The main aim is to develop
+                                and validate a practical approach for sensor placement optimization, demonstrating that a
+                                reduced number of accelerometers can provide reliable modal parameters in comparison
+                                to high-density acquisition.
+                                     This paper is structured as follows: Section 3 introduces the experimental setup of
+                                the Santa Teresa bridge, including the detailed specifications of the instrumentation and
+                                sensor assembly configurations. Section 4 presents the experimental methodology and
+                                the results of the dynamic characterization tests, including the frequency identification
+                                through different sensor configurations and the comprehensive analysis of the modal
+                                displacement patterns. Section 5 discusses the optimization outcomes, comparing the effec-
+                                tiveness of reduced sensor arrays through quantitative metrics of performance, including
+Infrastructures 2025, 10, 281                                                                                             6 of 21
+
+
+
+                                frequency accuracy and modal assurance criterion analysis. Finally, Section 5 presents
+                                conclusions, emphasizing practical implications for the assessment of historic bridges and
+                                making recommendations for future research directions in sensor optimization for masonry
+                                arch bridges.
+                                      This paper is innovative for several reasons. Unlike most studies that rely exclusively
+                                on numerical simulations, this investigation uses an extensive experimental campaign
+                                with 28 accelerometers as a “ground truth” condition to validate the effectiveness of a re-
+                                duced sensor array. This data-driven approach provides concrete evidence that optimized
+                                configurations can maintain an accuracy equivalent to high-density ones, but with signifi-
+                                cantly lower installation complexity and cost. The study addresses a common challenge
+                                in structural monitoring: the need for analysis under realistic operational conditions. The
+                                application of an optimization approach to a masonry structure subjected to random traffic
+                                loading demonstrates the robustness of the proposed research. The research validates the
+                                effectiveness of reduced configurations in operational scenarios, overcoming the limitations
+                                of controlled-load experimental campaigns.
+                                      The study specifically addresses optimization strategies for preliminary dynamic
+                                characterization aimed at establishing accurate baseline properties for heritage masonry
+                                bridges. The optimized sensor configurations developed can subsequently be implemented
+                                for periodic reassessment campaigns (typically at 5-year intervals) to enable long-term
+                                structural health monitoring through comparison with established baseline measurements.
+
+                                3. Experimental Setup of the STb
+                                     The bridge considered in the present study is an Italian arch bridge in limestone, Santa
+                                Teresa bridge (STb) in Bitonto (BA) (see Figure 1). The bridge is made of three arches, with
+                                the central one bigger than the others. The overall design of STb is strictly symmetrical
+                                with respect to its vertical and barycentric axes, as detailed in [50], which reports the survey
+                                campaign carried out.
+
+
+
+
+                                Figure 1. General visualization of the monitored STb in Bitonto.
+
+                                      Initially, 28 uniaxial accelerometers were used to monitor the STb, positioned at
+                                various positions on both sides of the bridge. In particular, 22 of these were vertically
+                                oriented to capture vibration frequencies in the Z-direction, while the remaining 6 were
+                                set up to monitor frequencies in the transverse Y-direction. Figure 2 provides top (a) and
+                                side (b) views detailing the placement of both uniaxial and biaxial accelerometers. More
+                                information regarding the experimental setup can be found in previous studies [6,51].
+                                Looking in the direction of the X-axis, it is possible to state that the arches on the left side
+                                are numbered from 12 to 22, while the arches on the right side are numbered from 1 to 11
+                                in relation to the bridge deck.
+Infrastructures 2025, 10, 281                                                                                                    7 of 21
+
+
+
+
+                                                                 (a)
+
+
+
+
+                                                                (b)
+
+                                Figure 2. Schematic illustration of the plan (a) and facade (b) placement of accelerometers for the STb
+                                experimental campaign [51].
+
+                                      Within the scope of this scientific investigation, the reference configuration (baseline)
+                                for STb monitoring was defined by the deployment of 28 accelerometers. Alternative
+                                experimental configurations, characterized by a reduced number of accelerometers, specif-
+                                ically 13, 8, 6, and 4, represent optimized scenarios. The data acquired from these latter
+                                scenarios were systematically compared to those obtained from the reference configuration,
+                                with the objective of evaluating their comparative performance and efficiency in detecting
+                                natural frequency and modal displacement. In all considered scenarios, accelerometers
+                                were positioned at the top of the central arch. Only in the scenario with No. 6 accelerom-
+                                eters, the sensors were placed at the top of the keystones of all three arches. The sensor
+                                reduction strategy employs a systematic heuristic optimization approach that evaluates
+                                structural behavior and modal characteristics to guide sensor placement decisions. This
+                                approach incorporates an iterative assessment of modal participation factors, identification
+                                of structurally critical locations, and quantitative evaluation of measurement effectiveness
+                                to determine optimal sensor configurations for different accuracy requirements.
+Infrastructures 2025, 10, 281                                                                                             8 of 21
+
+
+
+                                Instrumentation and Sensor Assembly
+                                      The dynamic characterization employed 28 individual uniaxial accelerometers
+                                (Model 393B31, PCB Piezotronics) with the following specifications: sensitivity 10.0 V/g
+                                (±5%), frequency range 0.1–200 Hz (±5%), and broadband resolution 0.000001 g rms.
+                                These uniaxial sensors were assembled into different measurement configurations using
+                                custom aluminum mounting cubes that enable flexible monoaxial, biaxial, and triaxial
+                                arrangements depending on the specific measurement requirements at each location. The
+                                total of 28 accelerometers was distributed across 22 measurement points, with 22 sensors
+                                oriented vertically (Z-direction) and 6 sensors positioned horizontally (Y-direction) at strate-
+                                gic locations. This assembly approach explains the apparent discrepancy between the total
+                                number of accelerometers (28) and the number of visible measurement points in Figure 2,
+                                where multiple sensors may be co-located at single spatial coordinates but oriented in
+                                different directions.
+
+                                4. Experimental Results from Environmental Tests
+                                4.1. Methodology and Reference Configuration
+                                     To ensure comparability of the test results from the STb, identical methodological
+                                measurement techniques were employed for each measurement. Data acquisitions were
+                                performed under both ambient conditions and forced vibrations induced by a heavy vehicle
+                                passing on the bridge deck. Each acquisition lasted 13–15 min for the ambiental acquisitions
+                                while 25 s for the forced ones. The forced vibration tests employed a commercial heavy
+                                vehicle with a total mass of approximately 3.5 tonnes, traveling at 30 km/h along the bridge
+                                centerline. The vehicle passage provided controlled excitation conditions, with multiple
+                                crossings recorded to ensure measurement consistency across all sensor configurations.
+                                Of the total recordings obtained for the STb, only the results of three forced inputs will
+                                be considered in this study; however, comprehensive results are available in previous
+                                publications [6,51]. Given the substantial mass and inherent damping characteristics of the
+                                historical masonry bridge, forced vibration tests were selected over ambient measurements
+                                to ensure adequate excitation of the structural modes. The heavy vehicle loading provided
+                                sufficient energy input to clearly identify the natural frequencies across all sensor config-
+                                urations, while ambient excitation proved insufficient to generate measurable responses
+                                in the reduced sensor arrays. This methodological choice ensured consistent and repeat-
+                                able test conditions essential for comparing different sensor configurations. The selection
+                                of forced vibration testing over ambient measurements was based on multiple technical
+                                considerations. The massive masonry structure requires significant excitation energy to
+                                generate measurable responses above ambient noise levels, particularly for the reduced
+                                sensor configurations investigated. Heavy vehicle loading represents the most critical
+                                operational condition for bridge safety assessment and provides controlled, repeatable
+                                excitation conditions essential for comparative analysis across different sensor arrange-
+                                ments. Additionally, forced vibration tests enable acquisition times of 25 s compared to
+                                13–15 min required for ambient measurements, significantly reducing the cost and logistical
+                                complexity of dynamic characterization campaigns. Comprehensive ambient vibration
+                                analysis for this structure has been previously documented [6,51], confirming that forced
+                                excitation provides optimal modal identification for masonry arch bridges. It is important
+                                to underline that even if not all the acquisitions carried out in the experimental campaign
+                                were considered, the results presented in this study were sufficient for the dynamic identifi-
+                                cation of the structure. For this purpose, Artemis Modal software was utilized, enabling
+                                data analysis through the powerful operational modal analysis (OMA) technique, specifi-
+                                cally Stochastic Subspace Identification with eXtended Un-weighted Principal Component
+                                (SSI-UPCX). The optimization analysis utilized post-processing of simultaneously recorded
+Infrastructures 2025, 10, 281                                                                                                              9 of 21
+
+
+
+                                      data from all 28 accelerometers, with reduced configurations simulated by selecting appro-
+                                      priate subsets of measurement channels. This methodology ensures identical excitation
+                                      conditions across all analyzed configurations, eliminating variability due to different test
+                                      sessions and enabling direct comparison of sensor arrangement effectiveness. The reduced
+                                      configurations (13, 8, 6, and 4 accelerometers) were selected based on strategic positioning
+                                      criteria that prioritize locations with maximum modal participation and structural signifi-
+                                      cance. The summarized results for the STb are presented in Tables 1 and 2, respectively.
+                                      In columns 2, 3 and 4 of Tables 1 and 2, the first 5 recorded frequencies in Hz are shown.
+                                      The fifth column of each Table displays the main modal shapes of each mode. The first
+                                      three vibration modes are visualized in Figure 3. The latter illustrates the direction of the
+                                      measurement positions and the first three vibration modes of the STb, as recorded in Test 3.
+                                      The aim of this study is to reduce the total number of accelerometers used for monitoring
+                                      existing bridges. This aim will be pursued by demonstrating how it is possible to optimize
+                                      the number of accelerometers, allowing for the acquisition of the same data that could be
+                                      achieved with a large number of measurement instruments.
+
+                                      Table 1. Identified frequencies (Hz) for the STb, obtained from three tests utilizing 28 accelerome-
+                                      ters [6,51].
+
+                                                                                                Mean           Mode
+   Number of Identified Frequency                  Test 1      Test 2           Test 3                                       Interested Arch
+                                                                                                Values         Shape
+                         1                           9.5            9.1          9                9.2       Translational          All
+                         2                          12.1           13.3         12.6             12.7          Vertical            All
+                         3                            -            14.7         14.5             14.6          Vertical          Central
+                         4                          16.7           16.5         16.3             16.5          Vertical            All
+                         5                          19.7            18          20.9             19.5          Vertical          Central
+
+
+                                      Table 2. Identified frequencies (Hz) of the STb, obtained from forced tests utilizing 28, 13, 8, 6 and
+                                      4 accelerometers.
+
+                                 Acquisition         Acquisition                 Acquisition              Acquisition         Acquisition
+ Number of Iden-
+                                   with 28             with 13                      with 8                   with 6              with 4
+ tified Frequency
+                                Accelerometers      Accelerometers              Accelerometers           Accelerometers      Accelerometers
+            1                        9.2                     9.1                          9                   10.5                10.9
+            2                        12.7                   13.4                         12.8                 12.9                12.8
+            3                        14.6                   14.6                         14.3                 14.3                14.3
+            4                        16.5                   16.6                         16.6                 16.5                16.6
+            5                        19.5                   19.8                         19.6                 20.1                19.7
+
+
+
+
+                             (a)                                          (b)                                          (c)
+
+                                       Figure 3. Visualization of the first (a), the second (b) and the third (c) identified mode of the STb
+                                       during Test 3 for the reference configuration (28 accelerometers) [6,51].
+
+                                            The average value between the frequencies of the three tests was compared with each
+                                       one individually, and the test with the smallest frequency deviation was considered. This
+                                       deviation was chosen to compare the frequency values of the other tests with those of
+Infrastructures 2025, 10, 281                                                                                        10 of 21
+
+
+
+                                the subsequent scenarios optimized with a reduced number of accelerometers. In this
+                                case, study, the mean values of the 3 tests were considered for the comparison with the
+                                other optimizations.
+                                     All identified modes exhibit predominantly vertical displacement patterns, consistent
+                                with the expected dynamic behavior of masonry arch bridges under vertical excitation. This
+                                vertical character of the modal response validates the effectiveness of vertically oriented
+                                sensor arrangements in capturing the essential dynamic characteristics of the structure.
+
+                                4.2. Identification of the Vibration Modes in the Optimized Scenarios
+                                     The sensor optimization employed a systematic, heuristic iterative procedure ap-
+                                propriate for the manageable parameter space of this three-arch bridge configuration.
+                                The approach systematically evaluated each sensor configuration by ranking positions
+                                according to modal kinetic energy distribution, structural criticality, and measurement
+                                sensitivity criteria. Performance assessment at each iteration included frequency identifi-
+                                cation accuracy and modal correlation evaluation, with sensor reduction continuing until
+                                predetermined thresholds were approached. This iterative approach enabled identification
+                                of minimum sensor requirements while maintaining quantitative validation against the
+                                reference configuration.
+                                     MAC analysis was not implemented for cross-configuration comparison due to inher-
+                                ent mathematical limitations when comparing modal shapes with different measurement
+                                point distributions. The normalization properties of the MAC index and the spatial in-
+                                consistency between configurations would compromise the reliability of comparative
+                                assessments. This represents a methodological limitation that future research could address
+                                through the development of correlation metrics specifically designed for variable sensor
+                                array comparisons.
+                                     It was found, for the STb, that placing accelerometers exclusively along the keystones
+                                of the bridge deck was sufficient for an accurate modal analysis. Neglecting measurements
+                                from positions near the piers of the bridge did not result in a significant variation in the
+                                vibration modes of the structure. Accelerometers could only be positioned along the two
+                                sides of the deck, in proximity to the two arches of the central vault. Table 2 contains all
+                                identified frequency values in each accelerometer configuration from 28 to 13, 8, 6 and 4.
+                                The modal shape for each identified frequency in all optimized configurations consistently
+                                coincides with that of the reference configuration. As expected, an exception is observed
+                                solely in the configuration employing 6 accelerometers, where the modal shape is vertical
+                                for all identified frequencies. Figure 4a–c correspond to the frequency values collected in
+                                the previous tables. They display the dynamic identification of each optimization of the
+                                STb performed with Artemis.
+                                     The frequency variations observed across different sensor configurations require eval-
+                                uation from an engineering perspective. Specifically, the percentage errors relative to the
+                                reference 28-accelerometer setup are as follows: 13-accelerometer configuration shows
+                                a maximum error of 5.5% (Mode 2), 8-accelerometer configuration exhibits a maximum
+                                error of 2.2% (Mode 1), 6-accelerometer configuration presents a maximum error of 14.1%
+                                (Mode 1), and 4-accelerometer configuration displays a maximum error of 18.5% (Mode 1).
+                                For historical masonry structures, frequency variations within 10–15% are generally accept-
+                                able for structural characterization and model updating purposes. The trade-off analysis
+                                demonstrates that configurations with 8 or more accelerometers maintain engineering
+                                accuracy suitable for most monitoring applications.
+                                     Figure 5 shows an even further optimization of accelerometer placement, reducing the
+                                number to 6. These accelerometers are positioned near the six keystones of the arches that
+                                delineate the three vaults, but only in the Z-direction. Conversely, as with previous opti-
+Infrastructures 2025, 10, 281                                                                                                   11 of 21
+
+
+
+                                mizations, it is evident that the frequency values closely align with those from optimization
+                                that used No. 28, 13, 8, and 4 accelerometers, respectively, placed only along the central
+                                arch. Figure 5 shows the three main vibration modes related to the recordings obtained
+                                with the optimization using 6 accelerometers placed at the keystone.
+
+
+
+
+                                                                 (a)
+
+
+
+
+                                                                 (b)
+
+
+
+
+                                                                 (c)
+
+                                Figure 4. Visualization of the first three identified modes of the optimizations with 13 (a), 8 (b) and
+                                4 (c) accelerometers placed near the main central arch of STb.
+
+
+
+
+                          (a)                                      (b)                                          (c)
+
+                                Figure 5. Visualization of Mode 1 (a), Mode 2 (b) and Mode 3 (c) of the fourth optimization with
+                                6 accelerometers.
+
+                                     From Figure 5, it is possible to observe that the deformed configurations of the first
+                                3 modes coincide. In each graphical representation of the vibration mode, no interpolations
+                                of the vibration shape were performed; rather, deformations were identified exclusively at
+                                the nodes where the measuring instruments were placed. This is why the only nodes that
+                                show displacement are those where the accelerometers were positioned. This happens in
+                                all optimized configurations, and in the optimization with 6 accelerometers, the distance
+                                between the nodes where the measuring instrument was placed is more evident.
+Infrastructures 2025, 10, 281                                                                                                 12 of 21
+
+
+
+                                4.3. Identification of the Frequencies in the Optimized Scenarios
+                                      To gain a more comprehensive understanding of the variability in each vibration
+                                mode across all monitored nodes, the normalized displacement values were compared
+                                for every optimization scenario. It should be noted that the normalization of displace-
+                                ments with respect to Y and Z translations was conducted exclusively for Mode 1. This
+                                outcome is attributable to the fact that it was the unique mode displaying a translational
+                                modal shape in the Y-axis. In contrast, higher vibration modes (2, 3, 4, and 5) exhibited
+                                a predominance of vertical displacements along the Z-axis, consequently resulting in the
+                                plotting of displacements exclusively in the vertical direction. In the optimization with
+                                13 accelerometers, in nodes 4, 5, 7, 8, 16, and 18, nodal displacements were measured only
+                                in the Z-axis direction and not in the Y-direction; so, the displacement in the Y-axis direction
+                                was not considered. Similarly, for each optimization and for each vibration mode in the
+                                Y-direction, only values at nodes 2, 6, 10, 15, 17, and 19 were considered, as measurement
+                                accelerometers were present exclusively at these positions. Table 3 contains the results of
+                                the normalized displacement for Mode 1 in each node and for the configurations with 28,
+                                13, 8 and 4 accelerometers. Figure 6 shows the graphical behavior of the normalized Y-axis
+                                displacements in absolute value of Mode 1.
+
+                                Table 3. Mode 1 normalized displacements in the Y-axis in the optimized scenarios with 13, 8 and
+                                4 accelerometers.
+
+                                      Node                Y-28acc             Y-13acc               Y-8acc             Y-4acc
+                                         2                −0.692                -                     -                 -
+                                         6                −3.206              −4.274                −0.679            −0.832
+                                        10                −2.261                -                     -                 -
+                                        15                −2.843              −4.156                  -                 -
+                                        17                −3.013              −4.161                −0.418            −0.563
+                                        19                −2.452              −3.246                  -                 -
+
+
+
+
+                                Figure 6. Mode 1—Visualization of the Y-axis in absolute value for the optimized scenarios with 13, 8
+                                and 4 accelerometers.
+
+                                     Table 4 and Figure 7 contain the normalized displacement values in the Z-direction
+                                for Mode 1. As can be observed, compared to the displacements in the Y-direction, the
+                                quantity of recorded data is significantly larger. The scenarios with 13, 8, 6, and 4 accelerom-
+                                eters show peaks at nodes 6, 10, 15, and 21. In the central arch area (near node 6), the
+Infrastructures 2025, 10, 281                                                                                             13 of 21
+
+
+
+                                displacement values recorded with optimized scenarios better approximate those of the
+                                reference configuration.
+
+                                Table 4. Mode 1—Normalized displacements in the Z-axis for each optimized scenario.
+
+                                    Node           Z-28acc         Z-13acc          Z-8acc          Z-6acc            Z-4acc
+                                       1            1.448             -                -              -                 -
+                                       2            −0.452            -                -            −0.134              -
+                                       3            −0.514            -                -              -                 -
+                                       4            −0.414          −0.296             -              -                 -
+                                       5            −0.902          −1.638           0.113            -                 -
+                                       6            −1.175          −2.154           0.553          0.460             0.410
+                                       7            −0.577          −1.065           0.114            -                 -
+                                       8            −0.403          −0.689             -              -                 -
+                                       9            −0.113            -                -              -                 -
+                                      10            0.440             -                -            −3.319              -
+                                      11            0.134             -                -              -                 -
+                                      12            −0.272            -                -              -                 -
+                                      13            0.160             -                -            0.191               -
+                                      14            0.573             -                -              -                 -
+                                      15            −0.876          −7.630             -              -                 -
+                                      16            0.699           0.727            0.565            -                 -
+                                      17            1.000           1.000            1.000          1.000             1.000
+                                      18            0.887           0.885            0.463            -                 -
+                                      19            0.741           0.713              -              -                 -
+                                      20            0.970             -                -              -                 -
+                                      21            0.830             -                -            −2.460              -
+                                      22            0.312             -                -              -                 -
+
+
+
+
+                                Figure 7. Mode 1—Visualization of the Z-axis normalized displacements in absolute value for each
+                                optimized scenario.
+
+                                     Table 5 and Figure 8 present the normalized displacement values in the Z-direction for
+                                Mode 2. In this case, by using only 6 accelerometers and without considering the outliers
+                                in nodes 10 and 21, it is possible to rebuild the components of vibration Mode 2 with
+                                good approximation. At node 10, the normalized displacement value obtained by placing
+                                6 accelerometers at the keystone segments of the three arches exactly matches that recorded
+                                in the reference configuration with 28 accelerometers.
+Infrastructures 2025, 10, 281                                                                                               14 of 21
+
+
+
+                                Table 5. Mode 2—Normalized displacements in the Z-axis for each optimized scenario.
+
+                                    Node           Z-28acc         Z-13acc          Z-8acc          Z-6acc            Z-4acc
+                                       1            0.434             -                -              -                 -
+                                       2            −0.006            -                -            0.008               -
+                                       3            0.103             -                -              -                 -
+                                       4            0.127           −0.139             -              -                 -
+                                       5            0.394           0.294            0.424            -                 -
+                                       6            1.000           1.000            1.000          1.000             1.000
+                                       7            0.352           0.515            0.384            -                 -
+                                       8            −0.212          0.011              -              -                 -
+                                       9            −1.094            -                -              -                 -
+                                      10            −1.993            -                -            −2.995              -
+                                      11            −0.544            -                -              -                 -
+                                      12            0.312             -                -              -                 -
+                                      13            0.343             -                -            0.390               -
+                                      14            0.167             -                -              -                 -
+                                      15            0.368           0.551              -              -                 -
+                                      16            0.561           0.832            0.337            -                 -
+                                      17            0.900           1.260            0.622          1.047             0.533
+                                      18            0.385           0.470            0.288            -                 -
+                                      19            −0.272          −0.298             -              -                 -
+                                      20            −1.168            -                -              -                 -
+                                      21            −1.583            -                -            −1.799              -
+                                      22            −0.447            -                -              -                 -
+
+
+
+
+                                Figure 8. Mode 2—Visualization of the Z-axis normalized displacements in absolute value for each
+                                optimized scenario.
+
+                                     The normalized displacement values for all configurations for Modes 3, 4, and 5 are
+                                included in Tables 6–8, respectively. Their corresponding absolute values are graphically
+                                represented in Figures 9–11, respectively.
+
+                                Table 6. Mode 3—Normalized displacements in the Z-axis for each optimized scenario.
+
+                                    Node           Z-28acc         Z-13acc          Z-8acc          Z-6acc            Z-4acc
+                                       1            0.071             -                -              -                 -
+                                       2            −0.120            -                -            −0.158              -
+                                       3            0.017             -                -              -                 -
+                                       4            −0.209          −0.236             -              -                 -
+Infrastructures 2025, 10, 281                                                                                               15 of 21
+
+
+
+                                Table 6. Cont.
+
+                                     Node          Z-28acc         Z-13acc         Z-8acc          Z-6acc             Z-4acc
+                                        5           0.237          0.251            0.248            -                  -
+                                        6           0.827          0.832            0.813          0.746              0.822
+                                        7           0.405          0.427            0.405            -                  -
+                                        8           −0.016         0.026              -              -                  -
+                                        9           −0.702           -                -              -                  -
+                                       10           −1.734           -                -            −1.598               -
+                                       11           −0.946           -                -              -                  -
+                                       12           −0.270           -                -              -                  -
+                                       13           −0.197           -                -            −0.165               -
+                                       14           0.018            -                -              -                  -
+                                       15           0.300          0.215              -              -                  -
+                                       16           0.593          0.600            0.593            -                  -
+                                       17           1.000          1.000            1.000          1.000              1.000
+                                       18           0.455          0.466            0.477            -                  -
+                                       19           −0.084         −0.046             -              -                  -
+                                       20           −0.787           -                -              -                  -
+                                       21           −1.526           -                -            −1.511               -
+                                       22           −0.786           -                -              -                  -
+
+
+                                Table 7. Mode 4—Normalized displacements in the Z-axis for each optimized scenario.
+
+                                     Node          Z-28acc         Z-13acc         Z-8acc          Z-6acc             Z-4acc
+                                        1           0.091            -                -              -                  -
+                                        2           −0.034           -                -            −0.020               -
+                                        3           0.157            -                -              -                  -
+                                        4           −0.110         −0.100             -              -                  -
+                                        5           0.451          0.462            0.448            -                  -
+                                        6           1.000          1.000            1.000          1.000              1.000
+                                        7           0.491          0.489            0.511            -                  -
+                                        8           0.121          0.138              -              -                  -
+                                        9           −0.293           -                -              -                  -
+                                       10           −0.528           -                -            −0.301               -
+                                       11           −0.154           -                -              -                  -
+                                       12           −0.108           -                -              -                  -
+                                       13           −0.109           -                -            −0.105               -
+                                       14           0.056            -                -              -                  -
+                                       15           0.240          0.263              -              -                  -
+                                       16           0.605          0.590            0.596            -                  -
+                                       17           0.844          0.803            0.842          0.788              0.803
+                                       18           0.408          0.394            0.415            -                  -
+                                       19           0.041          0.068              -              -                  -
+                                       20           −0.247           -                -              -                  -
+                                       21           −0.386           -                -            −0.162               -
+                                       22           −0.142           -                -              -                  -
+
+
+                                Table 8. Mode 5—Normalized displacements in the Z-axis for each optimized scenario.
+
+                                     Node          Z-28acc         Z-13acc         Z-8acc          Z-6acc             Z-4acc
+                                       1            0.093            -                -              -                  -
+                                       2            −0.217           -                -            −0.229               -
+                                       3            0.176            -                -              -                  -
+                                       4            −0.055         −0.088             -              -                  -
+                                       5            0.618          0.418            0.382            -                  -
+Infrastructures 2025, 10, 281                                                                                             16 of 21
+
+
+
+                                Table 8. Cont.
+
+                                     Node           Z-28acc         Z-13acc          Z-8acc          Z-6acc          Z-4acc
+                                        6           1.000           1.000            1.000          1.000             1.000
+                                        7           0.999           0.616            0.612            -                 -
+                                        8           1.362           0.493              -              -                 -
+                                        9           2.016             -                -              -                 -
+                                       10           3.539             -                -            3.358               -
+                                       11           1.952             -                -              -                 -
+                                       12           0.129             -                -              -                 -
+                                       13           −0.146            -                -            −0.188              -
+                                       14           −0.059            -                -              -                 -
+                                       15           0.093           −0.068             -              -                 -
+                                       16           0.349           0.393            0.408            -                 -
+                                       17           0.058           0.445            0.476          0.128             0.470
+                                       18           0.288           0.318            0.328            -                 -
+                                       19           0.774           0.336              -              -                 -
+                                       20           1.638             -                -              -                 -
+                                       21           2.677             -                -            2.501               -
+                                       22           1.484             -                -              -                 -
+
+
+
+
+                                Figure 9. Mode 3—Visualization of the Z-axis normalized displacements in absolute value for each
+                                optimized scenario.
+
+
+
+
+                                Figure 10. Mode 4—Visualization of the Z-axis normalized displacements in absolute value for each
+                                optimized scenario.
+Infrastructures 2025, 10, 281                                                                                              17 of 21
+
+
+
+
+                                Figure 11. Mode 5—Visualization of the Z-axis normalized displacements in absolute value for each
+                                optimized scenario.
+
+                                     In Mode 3, the optimization with 6 accelerometers proves to be the best; the main
+                                error between the displacements is within 10%. This is because, for all nodes where an
+                                accelerometer is present, the displacement values align with those recorded in the reference
+                                configuration. The fact that the 13-accelerometer configuration does not reconstruct the
+                                main components of Mode 3 is due to the accelerometers not being placed at the keystones
+                                of the two lateral vaults.
+                                     Unlike the previous cases, Figure 10 shows that for Mode 4 the best optimized scenario
+                                appears to be the one with 13 accelerometers. In fact, except for nodes where no accelerometer
+                                was placed, in the central sections of the bridge, the 13-accelerometer scenario perfectly follows
+                                the dashed line. Nevertheless, even the configuration with 6 accelerometers placed at the
+                                keystones also closely follows the displacements measured in the reference configuration.
+                                     Mode 5 is correctly recorded in the scenario with 6 accelerometers. In this case, unlike
+                                the previous vibration modes, the other optimizations are not reasonable. None, except for
+                                the one with 6 accelerometers placed at the keystone, correctly reconstructs the normalized
+                                displacements recorded with 28 accelerometers. In particular, by eliminating the outlier of
+                                0.128 at node 17, the configuration with 6 accelerometers shows an average measurement
+                                error of approximately 9%.
+
+                                5. Conclusions
+                                     Through a case study of a historical masonry bridge, this study investigates how
+                                reducing the number of measurement accelerometers yields analogous results. A dynamic
+                                identification performed with 28 accelerometers on the STb shows no substantial differ-
+                                ences compared to 3 subsequent optimizations in which 13, 8 and 4 accelerometers were,
+                                respectively, placed along only the central arch, if only the natural frequencies are consid-
+                                ered. Furthermore, even changing the position of the accelerometers from the central arch
+                                to the keystone sections showed that the frequencies remained very close to each other.
+                                Using only 4 or 6 accelerometers on the central arch and on the keystone, respectively, the
+                                values of the first frequency result to be different by more or less 10%. Therefore, through a
+                                heuristic approach, it can be shown that deformations could be recorded correctly even
+                                with the smallest number of accelerometers.
+                                     Comparing the four optimized scenarios, those that came closest to matching the
+                                28 accelerometers were the one with 13 and the one with 6 accelerometers for different as-
+                                pects. Optimization with 13 accelerometers offers the best optimization to the identification
+Infrastructures 2025, 10, 281                                                                                               18 of 21
+
+
+
+                                of the STb frequencies but also the shape of the mode, with a lower number the accuracy of
+                                the shape is lost. Observing the normalized displacements for each vibration mode and
+                                every optimization, the 6-accelerometer configuration stands out as the best. In fact, to
+                                accurately record the displacements of almost all vibration modes, it would be sufficient to
+                                strategically place 6 accelerometers at the keystones of each arch in the bridge to correctly
+                                capture the structure’s deformed configuration. The displacements of Modes 3 and 5 were
+                                found to be the most correctly identified through the 6-accelerometer configuration. For
+                                these, in fact, the percentage measurement error was around 10%. Unlike the displacements
+                                in the Z-direction, those in the Y-direction (transverse to the bridge) were not estimated
+                                with the same precision through the different optimized configurations.
+                                      This instrumental optimization offers several advantages. Primarily, it leads to a
+                                significant reduction in the costs associated with monitoring existing structures. It also
+                                decreases measurement time, as the installation of much fewer accelerometers is less de-
+                                manding. A larger quantity of data implies a level of precision that, from an engineering
+                                perspective and considering the time constraints in professional practice, is unnecessary.
+                                Naturally, a complete understanding of the structure under investigation is required to
+                                precisely determine the accelerometer placement. In the context of this study, the most
+                                intelligent strategic choice for accelerometer placement along the bridge deck was clearly
+                                the most deformable central zone, specifically near the central arch. In addition, recording
+                                with discrete monitoring takes on another major benefit related to the durability of the
+                                measuring instrument. By interrupting the measurement at each recording, it is possible
+                                to avoid damage to the accelerometer itself, which, by remaining connected and active
+                                for less time, would be preserved from possible instrumental deterioration. The sensor
+                                optimization strategies developed in this study provide a foundation for cost-effective pre-
+                                liminary assessment that can be repeated at regular intervals to track structural condition
+                                changes over time, thereby enabling practical monitoring programs for heritage infrastruc-
+                                ture. The sensor optimization principles demonstrated in this study show potential for
+                                application to similar masonry arch bridges, particularly those with comparable structural
+                                morphology and material characteristics. The strategic placement approach focusing on
+                                arch keystones reflects fundamental structural behavior patterns common to masonry arch
+                                bridges. However, the specific sensor configurations and reduction ratios identified should
+                                be validated for different span lengths, arch geometries, and masonry materials before
+                                general application. The approach provides a systematic framework that can be adapted
+                                to different heritage bridge assessments while maintaining the core principles of strategic
+                                placement and quantitative performance evaluation.
+                                      In the future, this approach should be extended to bridges with different numbers
+                                of arches, span configurations, and masonry materials to establish broader applicability
+                                guidelines. Additionally, comparative studies across different heritage bridge types would
+                                help identify universal principles versus structure-specific optimization requirements, ulti-
+                                mately leading to standardized approaches for heritage bridge assessment. Future research
+                                directions should explore the extension of these optimization strategies to ambient vibration
+                                monitoring scenarios. While the current study demonstrates the effectiveness of sensor
+                                reduction under controlled excitation conditions, the development of similar optimization
+                                frameworks for ambient monitoring would further enhance the practical applicability of
+                                these findings for long-term structural health monitoring programs. The principles estab-
+                                lished in this work provide a foundation for such developments, particularly regarding the
+                                strategic placement of sensors at structurally critical locations such as arch keystones.
+
+                                Author Contributions: Conceptualization, C.G.C. and M.F.S.; methodology, M.F.S. and F.R.; software,
+                                C.G.C. and F.R.; validation, C.G.C. and M.F.S.; formal analysis, C.G.C. and M.F.S.; investigation,
+                                M.F.S. and F.R.; resources, M.F.S. and F.R.; data curation, C.G.C. and M.F.S.; writing—original
+Infrastructures 2025, 10, 281                                                                                                     19 of 21
+
+
+
+                                  draft preparation, C.G.C.; writing—review and editing, C.G.C. and M.F.S.; visualization, C.G.C.;
+                                  supervision, C.G.C., M.F.S. and F.R.; project administration, M.F.S.; funding acquisition, F.R. All
+                                  authors have read and agreed to the published version of the manuscript.
+
+                                  Funding: This research was funded by Project CSLLPP/ReLUIS REP. n.3561 and the S-MoSES
+                                  (Smart Monitoring for Safety of Existing Structures and Infrastructures) Project (Research Project
+                                  of National Interest, PRIN2020) by the MUR (Italian Ministry of University and Research). This
+                                  essential funding was pivotal for executing the extensive experimental campaigns, acquiring the
+                                  advanced instrumentation, and performing the subsequent data analysis presented herein. Without
+                                  this support, the research could not have been completed.
+
+                                  Data Availability Statement: The original contributions presented in this study are included in the
+                                  article. Further inquiries can be directed to the corresponding author.
+
+                                  Acknowledgments: The financial support provided through the S-MoSES (Smart Monitoring for
+                                  Safety of Existing Structures and Infrastructures) Project (Research Project of National Interest, PRIN
+                                  2020) by the MUR (Italian Ministry of University and Research) is gratefully acknowledged.
+
+                                  Conflicts of Interest: The authors declare no conflicts of interest.
+
+References
+1.    Borlenghi, P.; Gentile, C.; D’Angelo, M.; Ballio, F. Long-Term Monitoring of a Masonry Arch Bridge to Evaluate Scour Effects.
+      Constr. Build. Mater. 2024, 411, 134580. [CrossRef]
+2.    La Scala, A. Ancient Solutions for Modern Challenges: Structural Analysis of Roman Ventilated Facade Systems. Buildings 2025,
+      15, 3229. [CrossRef]
+3.    Rizzo, F.; Barbato, M.; Sepe, V. Shape Dependence of Wind Pressure Peak Factor Statistics in Hyperbolic Paraboloid Roofs. J.
+      Build. Eng. 2021, 44, 103203. [CrossRef]
+4.    Rizzo, P.; Enshaeian, A. Challenges in Bridge Health Monitoring: A Review. Sensors 2021, 21, 4336. [CrossRef]
+5.    Riasat Azim, M.; Gül, M. Damage Detection of Steel-Truss Railway Bridges Using Operational Vibration Data. J. Struct. Eng. 2020,
+      146, 04020008. [CrossRef]
+6.    Foti, D.; Giannoccaro, N.I.; Rizzo, F.; Sabbà, M.F.; La Scala, A.; Mansour, S. Dynamic Characterization of a Squat Historical Bridge
+      by Considering Vehicle-Bridge Interaction. In Proceedings of the International Operational Modal Analysis Conference, Naples,
+      Italy, 22–24 May 2024; Springer: Cham, Switzerland, 2024; pp. 493–504.
+7.    Bel-Hadj, Y.; Weil, M.; Weijtjens, W.; Devriendt, C. Experimental Validation of Automated OMA and Mode Tracking for Structural
+      Health Monitoring of Transmission Towers. Struct. Health Monit. 2025, 24, 1272–1291. [CrossRef]
+8.    Foti, D.; Giannoccaro, N.I.; Diaferio, M.; Ivorra, S. Structural Identification and Numerical Models for Slender Historical
+      Structures. In Handbook of Research on Seismic Assessment and Rehabilitation of Historic Structures; IGI Global: Hershey, PA, USA,
+      2015; pp. 674–703, ISBN 9781466682870.
+9.    Diaferio, M.; Foti, D.; Gentile, C.; Ivan Giannoccaro, N.; Saisi, A.E. Dynamic Testing of a Historical Slender Building Using
+      Accelerometers and Radar. In Proceedings of the 6th International Operational Modal Analysis Conference, Gijon, Spain, 12–14
+      May 2015; EDICIONES UNIV OVIEDO, SERV PUBLICACIONES UNIV OVIEDO, CAMPUS HUMANIDADES: Oviedo, España,
+      2015; pp. 1–10.
+10.   Hassani, S.; Dackermann, U. A Systematic Review of Optimization Algorithms for Structural Health Monitoring and Optimal
+      Sensor Placement. Sensors 2023, 23, 3293. [CrossRef]
+11.   Ferrara, M.; Bertagnoli, G.; Giordano, L. Model Updating of Different Bridge Types Using Ambient Vibration and OMA
+      Identification. Procedia Struct. Integr. 2024, 62, 773–780. [CrossRef]
+12.   Diaferio, M.; Foti, D.; La Scala, A.; Sabbà, M.F. Selection Criteria of Experimental Setup for Historical Structures. In Proceedings
+      of the 2021 AEIT International Annual Conference (AEIT), Milan, Italy, 4–8 October 2021; pp. 1–6.
+13.   Bru, D.; Ivorra, S.; Baeza, F.J.; Reynau, R.; Foti, D. OMA Dynamic Identification of a Masonry Chimney with Severe Cracking
+      Condition, IOMAC’15. In Proceedings of the 6th International Operational Modal Analysis Conference, Gijón, Spain, 12–14 May
+      2015; pp. 1–8.
+14.   Borlenghi, P.; Saisi, A.; Gentile, C. Determining Structural Models of a Masonry Tower from Architectural Research and
+      Operational Modal Analysis. J. Build. Eng. 2025, 111, 113347. [CrossRef]
+15.   Rizzo, F.; Caracoglia, L.; Piccardo, G. Examining Wind-Induced Floor Accelerations in an Unconventionally Shaped, High-Rise
+      Building for the Design of “Smart” Screen Walls. J. Build. Eng. 2021, 43, 103115. [CrossRef]
+Infrastructures 2025, 10, 281                                                                                                  20 of 21
+
+
+
+16.   Sun, Z.; Mahmoodian, M.; Sidiq, A.; Jayasinghe, S.; Shahrivar, F.; Setunge, S. Optimal Sensor Placement for Structural Health
+      Monitoring: A Comprehensive Review. J. Sens. Actuator Netw. 2025, 14, 22. [CrossRef]
+17.   Chang, M.; Pakzad, S.N. Optimal Sensor Placement for Modal Identification of Bridge Systems Considering Number of Sensing
+      Nodes. J. Bridge Eng. 2014, 19, 04014019. [CrossRef]
+18.   Nasr, D.; Dahr, R.E.; Assaad, J.; Khatib, J. Comparative Analysis between Genetic Algorithm and Simulated Annealing-Based
+      Frameworks for Optimal Sensor Placement and Structural Health Monitoring Purposes. Buildings 2022, 12, 1383. [CrossRef]
+19.   Yang, C. An Adaptive Sensor Placement Algorithm for Structural Health Monitoring Based on Multi-Objective Iterative Opti-
+      mization Using Weight Factor Updating. Mech. Syst. Signal Process 2021, 151, 107363. [CrossRef]
+20.   Diaferio, M.; Foti, D.; La Scala, A.; Sabbà, M.F. Design of the Set-up for Ambient Vibration and Dynamic Forced Tests on a
+      Cable-Stayed Bridge. In Proceedings of the 2021 AEIT International Annual Conference (AEIT), Milan, Italy, 4–8 October; pp. 1–5.
+21.   Guo, H.Y.; Zhang, L.; Zhang, L.L.; Zhou, J.X. Optimal Placement of Sensors for Structural Health Monitoring Using Improved
+      Geneticalgorithms. Smart Mater. Struct. 2004, 13, 528. [CrossRef]
+22.   Foti, D.; Giannoccaro, N.I.; Sabbà, M.F.; La Scala, A. Dynamic Identification of a Strategic Building of the Sixties with a Mixed
+      Structure. Procedia Struct. Integr. 2023, 44, 782–789. [CrossRef]
+23.   Coviello, C.G.; La Scala, A.; Sabbà, M.F.; Carnimeo, L. On the Cementitious Mixtures Reinforced with Waste Polyethylene
+      Terephthalate. Materials 2024, 17, 5351. [CrossRef]
+24.   Xiao, F.; Mao, Y.; Sun, H.; Chen, G.S.; Tian, G. Stiffness Separation Method for Reducing Calculation Time of Truss Structure
+      Damage Identification. Struct. Control Health Monit. 2024, 2024, 5171542. [CrossRef]
+25.   Barros, B.; Conde, B.; Cabaleiro, M.; Solla, M.; Riveiro, B. Multi-Objective Optimization-Based Model Calibration of Masonry
+      Bridges. Case Stud. Constr. Mater. 2023, 19, e02306. [CrossRef]
+26.   Mahjoubi, S.; Barhemat, R.; Bao, Y. Optimal Placement of Triaxial Accelerometers Using Hypotrochoid Spiral Optimization
+      Algorithm for Automated Monitoring of High-Rise Buildings. Autom. Constr. 2020, 118, 103273. [CrossRef]
+27.   Faridi, M.A.; Kuncham, E.; Roy, K.; Singhal, V. Using Limited Roving Sensors to Monitor Bridge Subjected to Random Traffic
+      Load. J. Civ. Struct. Health Monit. 2024, 14, 693–710. [CrossRef]
+28.   Wang, Y.; Chen, Y.; Yao, Y.; Ou, J. Advancements in Optimal Sensor Placement for Enhanced Structural Health Monitoring:
+      Current Insights and Future Prospects. Buildings 2023, 13, 3129. [CrossRef]
+29.   Foti, D.; Diaferio, M.; Vacca, V.; Sabbà, M.F.; La Scala, A. Parameterization and Mechanical Behavior of Multi-Block Columns. In
+      Architecture and Design for Industry 4.0: Theory and Practice; Springer: Cham, Switzerland, 2023; pp. 963–978.
+30.   La Scala, A.; Rizzo, F.; Carnimeo, L.; Chorro, S.I.; Foti, D. A Proposal of a Neural Predictor of Residual Compressive Strength
+      in an SCC Exposed to High Temperatures for Resilient Housing. In Proceedings of the 2024 IEEE International Humanitarian
+      Technologies Conference (IHTC), Bari, Italy, 27–30 November 2024; pp. 1–6.
+31.   Śliwa-Wieczorek, K.; La Scala, A.; Derkowski, W.; Binder, E. Longitudinal Shear in Timber–Concrete Composites with Flexible
+      Adhesive Connections—Experimental and Numerical Investigations. Materials 2024, 17, 6055. [CrossRef] [PubMed]
+32.   La Scala, A.; Śliwa-Wieczorek, K.; Rizzo, F.; Sabbà, M.F.; Zajac,
+                                                                       ˛ B. Flexible Polyurethane Adhesives: Predictive Numerical Model
+      Calibration through Experimental Testing at Elevated Temperature. Appl. Sci. 2024, 14, 1943. [CrossRef]
+33.   La Scala, A.; Carnimeo, L. Effective Comparison of Thermo-Mechanical Characteristics of Self-Compacting Concretes Through
+      Machine Learning-Based Predictions. Fire 2025, 8, 289. [CrossRef]
+34.   Sofi, A.; Regita, J.J.; Rane, B.; Lau, H.H. Structural Health Monitoring Using Wireless Smart Sensor Network–An Overview. Mech.
+      Syst. Signal Process 2022, 163, 108113. [CrossRef]
+35.   Di Nuzzo, F.; Brunelli, D.; Polonelli, T.; Benini, L. Structural Health Monitoring System with Narrowband IoT and MEMS Sensors.
+      IEEE Sens. J. 2021, 21, 16371–16380. [CrossRef]
+36.   Armijo, A.; Zamora-Sánchez, D. Integration of Railway Bridge Structural Health Monitoring into the Internet of Things with a
+      Digital Twin: A Case Study. Sensors 2024, 24, 2115. [CrossRef]
+37.   Komarizadehasl, S.; Mobaraki, B.; Ma, H.; Lozano-Galant, J.-A.; Turmo, J. Development of a Low-Cost System for the Accurate
+      Measurement of Structural Vibrations. Sensors 2021, 21, 6191. [CrossRef]
+38.   Komarizadehasl, S.; Huguenet, P.; Lozano, F.; Lozano-Galant, J.A.; Turmo, J. Operational and Analytical Modal Analysis of a
+      Bridge Using Low-Cost Wireless Arduino-Based Accelerometers. Sensors 2022, 22, 9808. [CrossRef]
+39.   Dai, Z.; Wang, S.; Yan, Z. BSHM-WSN: A Wireless Sensor Network for Bridge Structure Health Monitoring. In Proceedings of
+      the 2012 Proceedings of International Conference on Modelling, Identification and Control, Wuhan, China, 24–26 June 2012;
+      pp. 708–712.
+40.   Sforza, G.; Gentile, C.; Mannella, P. Monitoring System with a High Number of Accelerometers: Optimization of Installation and
+      OMA. In Proceedings of the International Operational Modal Analysis Conference; Springer: Cham, Switzerland, 2024; pp. 334–341.
+41.   Yi, T.; Li, H.; Song, G.; Zhang, X. Optimal Sensor Placement for Health Monitoring of High-rise Structure Using Adaptive Monkey
+      Algorithm. Struct. Control Health Monit. 2015, 22, 667–681. [CrossRef]
+Infrastructures 2025, 10, 281                                                                                                    21 of 21
+
+
+
+42.   Kishida, K.; Aung, T.L.; Lin, R. Monitoring a Railway Bridge with Distributed Fiber Optic Sensing Using Specially Installed
+      Fibers. Sensors 2024, 25, 98. [CrossRef]
+43.   Papadimitriou, C.; Beck, J.L.; Au, S.-K. Entropy-Based Optimal Sensor Location for Structural Model Updating. J. Vib. Control.
+      2000, 6, 781–800. [CrossRef]
+44.   Singh, S.; Shanker, R. Wireless Sensor Networks for Bridge Structural Health Monitoring: A Novel Approach. Asian J. Civ. Eng.
+      2023, 24, 1425–1439. [CrossRef]
+45.   Waqas, M.; Jan, L.; Zafar, M.H.; Hassan, S.R.; Asif, R. A Sensor Placement Approach Using Multi-Objective Hypergraph Particle
+      Swarm Optimization to Improve Effectiveness of Structural Health Monitoring Systems. Sensors 2024, 24, 1423. [CrossRef]
+      [PubMed]
+46.   Kammer, D.C. Sensor Placement for On-Orbit Modal Identification and Correlation of Large Space Structures. J. Guid. Control.
+      Dyn. 1991, 14, 251–259. [CrossRef]
+47.   Civera, M.; Mugnaini, V.; Zanotti Fragonara, L. Machine Learning-based Automatic Operational Modal Analysis: A Structural
+      Health Monitoring Application to Masonry Arch Bridges. Struct. Control Health Monit. 2022, 29, e3028. [CrossRef]
+48.   Zinno, R.; Haghshenas, S.S.; Guido, G.; VItale, A. Artificial Intelligence and Structural Health Monitoring of Bridges: A Review of
+      the State-of-the-Art. IEEE Access 2022, 10, 88058–88078. [CrossRef]
+49.   An, H.; Youn, B.D.; Kim, H.S. A Methodology for Sensor Number and Placement Optimization for Vibration-Based Damage
+      Detection of Composite Structures under Model Uncertainty. Compos. Struct. 2022, 279, 114863. [CrossRef]
+50.   Foti, D.; Sabbà, M.F.; Pavone, R.; Cucumazzo, F. A Dynamically Validated Model Verified by Drone Photos of the Masonry Bridge
+      of the XIX Century. Procedia Struct. Integr. 2023, 44, 1506–1513. [CrossRef]
+51.   Mansour, S.; Rizzo, F.; Giannoccaro, N.I.; La Scala, A.; Sabbà, M.F.; Foti, D. Essential Dynamic Characterization of a Historical
+      Bridge: Integrated Experimental and Numerical Investigations. J. Civ. Struct. Health Monit. 2024, 14, 85–102. [CrossRef]
+
+
+Disclaimer/Publisher’s Note: The statements, opinions and data contained in all publications are solely those of the individual
+author(s) and contributor(s) and not of MDPI and/or the editor(s). MDPI and/or the editor(s) disclaim responsibility for any injury to
+people or property resulting from any ideas, methods, instructions or products referred to in the content.
+

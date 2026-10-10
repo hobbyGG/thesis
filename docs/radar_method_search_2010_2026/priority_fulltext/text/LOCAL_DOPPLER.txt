@@ -1,0 +1,1110 @@
+                                                 Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+                                                            Contents lists available at ScienceDirect
+
+
+                                        Mechanical Systems and Signal Processing
+                                                   journal homepage: www.elsevier.com/locate/ymssp
+
+
+
+
+A novel Doppler-based phase unwrapping algorithm for mmWave
+MIMO radars and its application to displacement estimation in
+structural health monitoring
+Giorgio Guerzoni a , Elahe Faghand a,b , Loris Vincenzi a                                           ,∗, Elisa Bassoli a ,
+
+Giorgio Matteo Vitetta a
+a
+    Department of Engineering ’Enzo Ferrari’, University of Modena e Reggio Emilia, Modena, Italy
+b
+    Department of Electrical Engineering, Shahid Beheshti University, Tehran, Iran
+
+
+
+ARTICLE                  INFO                             ABSTRACT
+
+Communicated by Z. Mao                                    In this manuscript, the problem of estimating dynamic structural displacements through
+                                                          mmWave multiple-input multiple-output frequency modulated continuous wave radars is inves-
+Keywords:
+                                                          tigated. These devices allow to potentially achieve high accuracy in the measurement of radial
+MIMO radar
+Displacement measurement
+                                                          displacements. However, in the presence of moving targets, their resolution is affected by the
+Phase wrapping                                            phase wrapping phenomenon; this occurs when, in the time interval separating consecutive
+Doppler                                                   measurements, the target to be tracked moves by more than a quarter of the radar wavelength.
+Structural health monitoring                              To mitigate this problem, a novel iterative method for performing phase unwrapping on the
+                                                          basis of estimated Doppler information is developed. Our experimental results evidence that
+                                                          the proposed method can be exploited to faithfully reconstruct the phase trajectory associated
+                                                          with specific points of quickly moving objects and, consequently, to carefully estimate their
+                                                          radial displacement also in those scenarios where traditional techniques are bound to fail, at
+                                                          the price of a small computational complexity.
+
+
+
+
+1. Introduction
+
+    Nowadays, a fundamental role in civil engineering is played by structural health monitoring (SHM) systems, since these allow
+to detect potential areas of structural weakness in the built environment at an early stage. Such systems usually exploit multiple
+sensors to acquire displacement information about the monitored structures in dynamic conditions; this is due to the fact that such
+information are directly correlated with structural integrity and provide valuable insights into various technical issues (e.g., system
+identification, model updating and earthquake engineering).
+    Different methods can be adopted for the measurements of dynamic structural displacements. On the one hand, direct methods
+process measurements acquired through sensors that can directly provide displacement information. Sensors of this type include
+linear voltage displacement transducers (LVDTs), laser doppler vibrometers (LDVs) [1,2], vision cameras [3], global navigation satellite
+system (GNSS) receivers [4] and ground-based radars. On the other hand, indirect methods exploit sensors (like accelerometers [5]
+and strain gauges), whose measurements can be converted to displacement information [6]. However, in the last case, the extraction
+of accurate displacement information from the available measurements may represent a challenging task and entail significant errors.
+Moreover, the use of contact sensors, such as accelerometers, strain gauges, or LVDTs, is not always possible. In fact, first of all,
+
+
+     ∗ Corresponding author.
+       E-mail address: loris.vincenzi@unimore.it (L. Vincenzi).
+
+https://doi.org/10.1016/j.ymssp.2025.112777
+Received 10 May 2024; Received in revised form 22 March 2025; Accepted 18 April 2025
+Available online 6 June 2025
+0888-3270/© 2025 The Authors.           Published by Elsevier Ltd.                        This is an open access article under the CC BY license
+(http://creativecommons.org/licenses/by/4.0/).
+G. Guerzoni et al.                                                                                  Mechanical Systems and Signal Processing 235 (2025) 112777
+
+sensors directly providing displacement information (e.g., LVDTs) require a fixed measurement base, often unavailable in field
+conditions. In addition, contact sensors may potentially interfere with the functionality of the monitored structure, may require
+complex wiring and installation processes, and entail significant costs, especially when monitoring multiple points.
+    Non-contact systems may also suffer from various limitations. For instance, vision cameras and LDV can be affected by
+environmental conditions, whereas GNSS systems are limited by their centimetre-level accuracy [4]. Structural monitoring based
+on satellite radar data is gaining increasing attention thanks to its capability to oversee structures and infrastructures on a broad
+territorial scale [7]. Nonetheless, its applicability is limited to the quasi-static monitoring of structures and infrastructures, as the
+periodicity of data acquisition is quite long. Most of the above mentioned limitations can be overcome through the use of ground-
+based radar sensing [8]. In fact, radar sensing is contactless, is unaffected by environmental conditions and is capable of directly
+measuring displacements in both quasi-static and dynamic conditions. Most of the manuscripts available in the technical literature
+about the use of radar technology in SHM of the built environment mainly concern the exploitation of real aperture radar (RAR)
+and synthetic aperture radar (SAR) systems for displacement-based dynamic monitoring. On the one hand, RAR systems have been
+shown to be effective in the monitoring of tall and flexible structures (e.g., see [9,10]), but achieve limited accuracy when these
+exhibit high fundamental frequencies [11]. On the other hand, SAR systems are usually unsuitable for structural dynamic monitoring
+because of their limited scanning speed [4,12].
+    Recently, in the field of radar-based SHM, various research efforts have focused on the use of: a) microwave interferometric
+radars; b) colocated1 radar devices equipped with multiple transmit (TX) and receive (RX) antennas (i.e., of multiple-input multiple-
+output, MIMO, type), and operating at millimeter-wave (mmWave) [13–15]. This interest can be motivated as follows. High
+speed microwave interferometry has been shown to be a viable option for both static and dynamic testing of structures and
+infrastructures [16,17]. The interferometric radars considered in the technical literature operate in the microwave spectrum and
+are equipped with a limited number of antennas. Although a working frequency in the GHz range allows to achieve millimeter-level
+accuracy in the estimation of radial displacements, the use of a limited number of antennas limits the angular resolution of such
+radar systems [18]. Colocated MIMO radars operating at mmWave, instead, are able to detect sub-millimeter displacements and, if
+equipped with large antenna arrays, can monitor multiple points of the monitored structure. In recent years, colocated MIMO radars
+of Frequency-Modulated Continuous Wave (FMCW) type, endowed with a large number of antennas, and operating at 24, 60 or 77 GHz
+have become available at a fraction of the cost of previous technologies. Thanks to their features, they have become the elected
+choice for researchers, and their use cases have far outreached the automotive field [19,20], reaching SHM too [21]. Being their
+wavelength in the order of a few millimeters, they allow to achieve a substantially better resolution in radial displacement (down to
+a few hundredth of a millimeter). On the other hand, this makes the so called phase wrapping problem severe and difficult to avoid.
+Phase wrapping is a phenomenon that occurs when the object to be tracked moves by more than a quarter wavelength during the time
+interval separating two consecutive measurements. In this case, the total round trip length experienced by the electromagnetic wave
+radiated by the radar device exceeds half a wavelength; this results in a phase rotation greater than 𝜋 radians in the corresponding
+electromagnetic echo detected at the RX side. When this happens, the object displacement cannot be unambiguously estimated on
+the basis of the phase rotation alone.
+    Various methods have been proposed in the technical literature to solve the phase wrapping problem, although not all are
+suitable for structural monitoring applications [22–27]. More specifically, a linear interferometric method, based on linear phase
+demodulation technique initially designed for continuous wave (CW) and then adapted to FMCW radars, has been developed for
+measuring large displacements in [23,28]; however, the maximum inter-fame displacement is limited to one fourth the wavelength
+of the radiated signal. An adaptive phase unwrapping algorithm aided by acceleration has been illustrated in [29] to keep track
+of displacement when the line of sight with the radar is interrupted by an obstructing object for a brief period of time; the main
+drawback of this solution is represented by the needs of supplementary hardware. An alternative to the above mentioned solutions is
+offered by the techniques developed in [22,25] for the estimation of small displacements and based on the so called Viterbi algorithm
+for the mitigation of the effects of noise in phase unwrapping. Unluckily, they are not suitable to SHM applications where both small
+and large displacements occurring at high velocity need to be tracked.
+    A conceptually different approach to phase unwrapping is pursued in [24,26,27], where machine learning techniques are
+exploited to tackle it. However, the solutions illustrated in those manuscripts have been devised for entire SAR images and cannot
+be adapted to mmWave MIMO radars, which can be used to independently track the displacement of individual points; note that
+this represents a crucial aspect in SHM applications, where detecting local damages, potentially leading to local displacements and
+deformations different from those appearing in the other parts of the considered structure, is one of the main goals.
+    In this manuscript, a novel iterative method for performing phase unwrapping in a colocated MIMO FMCW radar is illustrated.
+The proposed method has the following relevant features:
+    (1) It exploits Doppler information to predict the phase of the received signal at future time instants, and then exploit a phase
+measurement to correct this prediction, even when the phase rotates by tens of radians between two subsequent radar frames.
+    (2) It allows to track the phase variations characterizing specific points of a radar image, without exploiting the possible
+correlations between spatially close points.
+    (3) It is computationally simple and does not the require the use of additional sensors (e.g., an accelerometer).
+    The accuracy of our method has been assessed on the basis of the measurements acquired in a controlled laboratory environment
+and in the monitoring of a real footbridge. Our numerical results evidence that our method is able to track the target phase (and,
+
+
+  1 The term colocated means that the transmit and receive arrays of the radar are close to each other, usually on the same board, and that the radar size is
+
+small with respect to its range resolution.
+
+
+                                                                             2
+G. Guerzoni et al.                                                                                   Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+                                        Fig. 1. FMCW radar block diagram of a colocated MIMO FMCW radar system.
+
+
+
+
+Fig. 2. Time evolution of the instantaneous frequency of the oscillation generated by the VCO block appearing in Fig. 1. In this case each frame contains two
+chirps (i.e., 𝑁𝑐 = 2). Usually, for commercial devices, 𝑇𝐹 is tens of times greater than 𝑇𝐶 .
+
+
+
+
+thus, the displacement) and, in particular, to resolve the phase ambiguity even when the phase jump between two consecutive radar
+frames is as wide as 10𝜋 radians.
+   The remaining part of this manuscript is organized as follows. The architecture of a MIMO FMCW radar and various related
+signal models are illustrated in Section 2. The phase wrapping problem and a simple solution to it are described in Section 3. Our
+phase unwrapping algorithm is developed in Section 4, whereas its performance is analyzed in Section 5. Finally, some conclusions
+are offered in Section 6.
+
+2. System and signal models
+
+    In this section the architecture of a colocated FMCW MIMO radar equipped with 𝑁𝑇 TX antennas and 𝑁𝑅 RX antennas is
+analyzed2 ; in our description we refer to the block diagram illustrated in Fig. 1, that describes the signal processing tasks executed
+at both TX and RX sides.
+    At the TX side, a voltage controlled oscillator (VCO) is employed to generate a frequency modulated wave, whose instantaneous
+frequency evolves according to the periodic pattern shown in Fig. 2. As it can be easily inferred from that figure, the transmission
+is organized in frames, each encompassing 𝑁𝑐 consecutive chirp signals, characterized by an instantaneous frequency increasing
+linearly over time. Note also that: a) each chirp lasts 𝑇𝑅 s; b) the interval separating the start of two consecutive chirps within the
+same frame lasts 𝑇𝐶 s; c) the interval separating the start of two consecutive frames lasts 𝑇𝐹 s.
+    Let us analyze the signal 𝑠(VCO) (𝑡) generated during each chirp interval. In particular, we consider, for simplicity, the chirp signal
+generated during the interval [0, 𝑇𝑅 ) (see Fig. 2); this signal can be expressed as
+                          (   (         ) )
+       𝑠(VCO) (𝑡) = 𝑉0 exp 𝑗2𝜋 𝑓0 + 𝜇𝑡 𝑡 ,                                                                                              (1)
+
+where 𝑉0 is the signal amplitude, 𝜇 is the chirp slope and 𝑓0 is the start frequency. Note that the lowest and the highest frequencies
+generated during each chirp are 𝑓0 and
+
+        𝑓𝑇 = 𝑓0 + 𝜇𝑇𝑅 ,                                                                                                                                    (2)
+
+respectively, so that the central frequency is
+             𝑓𝑇 + 𝑓0
+        𝑓𝑐 =         .                                                                                                                                     (3)
+                2
+Given 𝑓𝑐 , the radar wavelength 𝜆 can be computed as 𝑐∕𝑓𝑐 , where 𝑐 is the speed of light.
+
+
+  2 The presence of non-idealities is ignored here, for simplicity; however, in practice, these need to be carefully compensated for in order to mitigate their
+
+impact on estimation accuracy (e.g., see [30] and references therein).
+
+
+                                                                              3
+G. Guerzoni et al.                                                                                      Mechanical Systems and Signal Processing 235 (2025) 112777
+
+    The VCO output signal 𝑠(VCO) (𝑡) is applied to a power divider feeding both a power amplifier (PA) and the local oscillator port
+of a mixer. The PA raises the power level of the VCO signal before sending it to one of the antenna elements of the available TX
+array. The radiated signal 𝑠(TX) (𝑡) can be expressed as
+
+        𝑠(TX) (𝑡) = 𝐴R{𝑠(VCO) (𝑡)},                                                                                                                            (4)
+where R{𝑥} denotes the real part of 𝑥 and 𝐴 is real positive parameter accounting for power amplification.
+    Let us assume now that the VCO signal is radiated by a single TX antenna (namely, the 𝑛𝑇 th TX antenna, with 𝑛𝑇 ∈ {1, 2, … , 𝑁𝑇 })
+and, then, it is reflected by a single point target. The electromagnetic echo generated by that target is received by each antenna of
+the RX array; for this reason, 𝑁𝑅 signals become available at the output of that array when a single TX antenna is activated. To
+simplify our mathematical description of the received signals, it is useful to refer to the virtual array associated with the given TX
+and RX physical arrays. This array is obtained replacing each couple of TX and RX physical antennas with a single virtual element
+located in the median position of the considered antenna pair.3 Therefore, in principle, the considered radar system is equipped
+with a virtual array consisting of 𝑁𝑇 𝑁𝑅 virtual antennas. Actually, some of the virtual antennas may overlap; in this case, only
+one of the overlapping elements is arbitrarly selected, so that the overall size 𝑁𝑉 𝐴 of the virtual array is smaller than 𝑁𝑇 𝑁𝑅 . The
+construction of the virtual array associated with given TX and RX arrays is exemplified by Fig. 3-a), that refers to a case in which
+𝑁𝑇 = 2 and 𝑁𝑅 = 4. Note that the resulting virtual array, that consists of 𝑁𝑉 𝐴 = 8 virtual elements (since there is no overlapping
+in the generation of the virtual antennas), is characterized by a linear geometry, and that the spacing between its adjacent elements
+is uniform and equal to 𝜆∕4 (in other words, the virtual array is a uniform linear array, ULA, with 𝜆∕4 inter-antenna spacing). In
+the following, it is assumed that, for simplicity, the virtual array of the considered radar system is an horizontal ULA, consisting of
+𝑁𝑉 𝐴 distinct elements and characterized by a 𝜆∕4 inter-antenna spacing, as shown in Fig. 3-b). Then, If noise and attenuation are
+ignored, the signal received by the 𝑣th virtual element of that array can be expressed as
+                          (      )
+        𝑠(RX)
+         𝑣    (𝑡) = 𝑠(VCO) 𝑡 − 𝜏𝑣 ,                                                                                                 (5)
+with 𝑣 = 1, 2, … , 𝑁𝑉 𝐴 ; here
+                𝑅𝑣
+        𝜏𝑣 = 2                                                                                                                       (6)
+                 𝑐
+is the round trip delay and 𝑅𝑣 is the (unknown) distance between the given pointwise target and the considered virtual element
+(i.e., the target range observed by the considered virtual antenna). The signal 𝑠(RX)
+                                                                                 𝑣    (𝑡) (5) is applied to a low noise amplifier (LNA),
+raising its power level. The LNA feeds the radio frequency (RF) port of the mixer, whose output is sent to a low pass filter (LPF). The
+LPF output can be expressed as (e.g., [31, Eq. (5)])
+                     ( (              ))
+         𝑠(B)               (B)   (B)
+          𝑣 (𝑡) ≃ exp 𝑗 2𝜋𝑓𝑣 𝑡 + 𝜙𝑣      ,                                                                                           (7)
+where
+        𝑓𝑣(B) ≜ 𝜇𝜏𝑣                                                                                                                                            (8)
+is the beat frequency and
+
+        𝜙(B)
+         𝑣 ≜ 2𝜋𝑓0 𝜏𝑣                                                                                                                                           (9)
+
+is the phase characterizing 𝑠(B)                        (B)
+                             𝑣 (𝑡) (7). Note that both 𝑓𝑣   (8) and 𝜙(B)
+                                                                      𝑣 (9) are proportional to 𝜏𝑣 and, consequently, to the target
+range 𝑅𝑣 (see (6)). However, 𝑓𝑣 can take on an arbitrary value, whereas 𝜙(B)
+                                 (B)
+                                                                               𝑣 belongs to the interval 𝜙 ≜ [−𝜋, 𝜋). This explains
+why 𝜙(B)
+       𝑣 can be exploited at the RX side to measure range variations only if their absolute value does not exceed 𝜆∕2.
+    Finally, the LPF output 𝑠(B)
+                             𝑣 (𝑡) (7) undergoes digitization; the last task is accomplished by an analog-to-digital converter (ADC)
+operating at the sampling frequency 𝑓𝑠 = 1∕𝑇𝑠 , where 𝑇𝑠 denotes the sampling period. In each chirp interval, 𝑁 samples are acquired
+from each virtual element, with 𝑁 ≤ 𝑇𝑅 ∕𝑇𝑠 . The time domain samples acquired in the same chirp interval from the 𝑁𝑉 𝐴 antennas are
+collected in the 𝑁 ×𝑁𝑉 𝐴 complex matrix denoted 𝐒T ; more specifically, the ordered samples originating from the 𝑣th virtual antenna
+(see Fig. 3-b)) form the 𝑣th column of 𝐒T . Once the matrix 𝐒T has been generated, the detection of targets, and the estimation of
+their range and azimuth is accomplished as follows. First of all, zero padding (ZP) is applied to all the columns of 𝐒T by appending
+(𝑁0(R) − 𝑁) zeros to each of them.4 Then, an order 𝑁0(R) fast Fourier transform FFT is performed on each column of the resulting
+zero-padded matrix; this produces the 𝑁0(R) × 𝑁 matrix 𝐒R , that can be easily exploited to detect targets and estimate their range.
+                                                                     ̄ an amplitude peak appears on all the columns of 𝐒R and value 𝑙̄
+In fact, if a target is in the field of view of the radar at a range 𝑅,
+of the column index identifying this peak is the same for all the columns. This is due to the fact that distinct rows of 𝐒R correspond
+                                                          ̄ row is associated with the range5
+to different values of target range; in particular, the 𝑙th
+                          𝑐
+        𝑅̄ = (𝑙̄ − 1)             .                                                                                                (10)
+                      2𝑇𝑠 𝑁0(R) 𝜇
+
+
+  3 The usefulness of this approach is due to the fact that each virtual element can be considered as the antenna of a monostatic radar (i.e., as an antenna
+
+employed for both transmission and reception).
+  4 Consequently, the size of each column becomes 𝑁 (R)
+                                                      0
+  5 Keep in mind that the use of an order 𝑁 (R) FFT entails range discretization. In fact, the range domain is partitioned into 𝑁 (R) spatial bins, each associated
+                                              0                                                                                  0
+with a specific value of the index of the FFT output.
+
+
+                                                                                4
+G. Guerzoni et al.                                                                                   Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+         Fig. 3. (a) Physical geometry and b) virtual array of a colocated FMCW MIMO radar equipped with two TX antennas and four RX antennas.
+
+
+
+
+In the presence of multiple targets, the superposition principle can be applied; for this reason, if the target ranges are different,
+multiple peaks appear along each column of 𝐒R . This is exemplified by Figs. 4-a) and -b) that represent, through color maps, the
+amplitude of the elements of the matrices 𝐒T and 𝐒R in the presence of a couple of point targets, one characterized by the range
+𝑅1 = 4 m and the azimuth 𝜃1 = −30◦ , the other one by the range 𝑅2 = 10 m and the azimuth 𝜃2 = 8.5◦ ; in this simulation,
+𝑁 = 𝑁0(R) = 128, 𝑁𝑉 𝐴 = 𝑁0(A) = 80, 𝑓𝑠 = 12.8 MHz, 𝜇 = 30 MHz/𝜇𝑠. As it can easily be inferred from Fig. 4-b), the presence of two
+targets results in two local peaks along each of the columns of 𝐒R . It is important to mention that the range resolution 𝛥𝑅 of an
+FMCW radar system, i.e. its ability to distinguish two closely spaced targets, can be expressed as
+                 𝑐
+        𝛥𝑅 =       ,                                                                                                                                     (11)
+                2𝐵
+where 𝐵 ≜ 𝑓𝑇 − 𝑓0 is the bandwidth of the RF signal generated by the VCO. If the difference between the ranges of two point targets
+is less than 𝛥𝑅, the peaks originating from such targets will overlap in the same range bin, so that the radar system will not be able
+to distinguish them in the range domain; this form of mutual interference represents a source of error in range and displacement
+estimation, and can be mitigated by increasing the radar bandwidth (i.e., by increasing the slope 𝜇 or the ramp duration 𝑇𝑅 , and
+adjusting 𝑁 and/or 𝑓𝑠 accordingly). Moreover, the maximum distance 𝑅̄ 𝑚𝑎𝑥 at which a target can be detected is given by
+                 𝑐 𝑓𝑠
+        𝑅̄ 𝑚𝑎𝑥 =      .                                                                                                                                  (12)
+                 𝜇 2
+    The availability of an horizontal ULA in the considered radar system allows us not only to detect a target and estimate its range,
+but also to estimate its azimuth (i.e., the angle of arrival, AoA, of its electromagnetic echo). This result is achieved by:
+    (a) Applying ZP to all the rows of 𝐒R ; this produces a 𝑁0(R) ×𝑁0(A) matrix, where 𝑁0(A) ≜ 𝑁𝑀𝐴 and 𝑀𝐴 is the adopted oversampling
+factor.
+    (b) Applying a 𝑁0(A) order FFT to all the rows of the resulting zero-padded matrix.6 . This produces the 𝑁0(R) × 𝑁0(A) complex
+matrix 𝐒A = [𝑎𝑙,𝑚 ].
+    (c) Finding the amplitude peak in the set of elements of 𝐒A . In fact, it can be shown that, in the presence of a single point target
+characterized by the range 𝑅̄ < 𝑅̄ 𝑚𝑎𝑥 (Eq. (10)) and the azimuth 𝜃̄ ∈ (−90◦ , 90◦ ), an amplitude peak is found at the element 𝑎𝑙,̄ 𝑚̄ of
+𝐒A identified by the row index 𝑙̄ and the column index 𝑚;   ̄ here, 𝑙̄ is the same index appearing in Eq. (10), whereas
+
+               𝑁0(𝐴)
+        𝑚̄ ≈               ̄ + 1.
+                       sin(𝜃)                                                                                                                            (13)
+                2
+Similarly, in the presence of multiple and adequately spaced targets, multiple peaks will appear in the matrix 𝐒A . This is exemplified
+by Fig. 4-c), that refers to the case of two targets. Moreover, if two targets have similar angular coordinates, the only way to
+discriminate them is to use a radar with a larger number of virtual elements 𝑁𝑉 𝐴 . Note that the above mentioned complex quantity
+𝑎𝑙,̄ 𝑚̄ plays an important role in the following, since its amplitude is proportional to the energy returned by the specific spatial region
+in which a target is detected and its phase can be taken as an estimate of the phase 𝜙(B)    𝑣 (9).
+
+
+
+   6 Just like the range FFT, the angular FFT involves the discretization of AoA, but in a nonuniform grid due to the presence of the nonlinear function sin(⋅)
+
+in (13)
+
+
+                                                                              5
+G. Guerzoni et al.                                                                                   Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+Fig. 4. Representation of the absolute values of the elements of: (a) the matrix 𝐒T , collecting the real part of the samples captured by the ADC ; (b) the
+corresponding matrix 𝐒R ; (c) the corresponding matrix 𝐒A . The presence of two distinct targets is assumed.
+
+
+
+
+           Fig. 5. Representation of the phase wrapping problem. A positive phase variation is misinterpreted as a negative one, since it exceeds 𝜋.
+
+
+
+
+3. The phase wrapping problem and the traditional solution to it
+
+    Let us analyze now the phase wrapping problem and illustrate the most known solution to it, dubbed traditional phase unwrapping
+(TPU) in the following and widely used in the technical literature [32]. In our description of that problem and its solution we assume
+that: a) a single chirp is radiated during the transmission of each frame; b) a single point target is present in the radar field of view;
+                                                                       ̄ row and 𝑚th
+c) the target is detected thanks to an amplitude peak located in the 𝑙th            ̄ column of the matrix 𝐒A . If in the time interval
+separating two consecutive frames the target range changes by 𝛥𝑥 ≪ 𝛥𝑅 (i.e., the value of 𝑙̄ does not change; see (10)), the variation
+experienced by the phase of the element 𝑎𝑙,̄ 𝑚̄ ∈ 𝐒A within two frames is
+                4𝜋
+        𝛥𝜙 =       𝛥𝑥,                                                                                                                                   (14)
+                 𝜆
+as it can be easily inferred from (6) and (9), whereas the index 𝑙̄ associated with the estimate 𝑅̄ (10) of the target range does not
+change at all. For instance, if the central frequency 𝑓𝑐 (see (3)) is equal to 77 GHz (so that 𝜆 ≈ 4 mm), a range variation of 1 mm will
+result in a phase variation 𝛥𝜙 approximately equal to 𝜋 radians. This suggests that, on the one hand, small radial displacements of a
+given target can be tracked by analyzing the sequence {𝜙𝑘 ; 𝑘 = 1, 2, …}, that collects the phases observed on the same element of 𝐒A
+over multiple consecutive frames (here, 𝜙𝑘 denotes the phase observed in the 𝑘th frame). On the other hand, this idea suffers from
+an important limitation, since the signal phase is always assumed to belong to the interval 𝜙 ; this means that any phase variation
+falling out of this interval leads to a wrong estimate of the displacement. This problem is exemplified by Fig. 5, where the positive
+variation (𝜙𝑘+1 − 𝜙𝑘 ) is interpreted as a negative one because it exceeds the upper limit of 𝜙 . The existence of the phase wrapping
+problem implies that the maximum displacement 𝛥𝑥 that can be unambiguously detected is limited to 𝜆∕4 (see (14)). In the situation
+illustrated in Fig. 5, a radial movement away from the radar longer than 𝜆∕4 (blue path) is misinterpreted as a movement toward
+the radar (green path) shorter than 𝜆∕4.
+    If we assume that the absolute value of the phase variation referring to each couple of consecutive elements of the sequence
+{𝜙𝑘 ; 𝑘 = 1, 2, …} never exceeds 𝜋, unambiguous estimates of the radial displacements with respect to an initial position (associated
+withe the first phase 𝜙1 ) can be evaluated through the above mentioned TPU algorithm. This algorithm is fed by the phase sequence
+{𝜙𝑘 ; 𝑘 = 1, 2, …} and generates the new sequence {𝜓𝑘 ; 𝑘 = 1, 2, …}, collecting the unwrapped signal phases. It is initialized setting
+
+                                                                              6
+G. Guerzoni et al.                                                                                   Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+                     Fig. 6. Representation of a specific phase sequence {𝜙𝑘 } feeding TPU algorithm and of the corresponding output {𝜓𝑘 }.
+
+
+
+
+𝜓1 = 𝜙1 and computes 𝜓𝑘 on the basis of 𝜓𝑘−1 and 𝜙𝑘 only for any 𝑘 > 1; more specifically, 𝜓𝑘 is evaluated by adding to 𝜙𝑘 the
+quantity 2𝜋𝛽𝑘 , where 𝛽𝑘 is the only relative integer ensuring that |𝜓𝑘 − 𝜓𝑘−1 | is smaller than 𝜋 (see Fig. 6). This procedure can be
+formalized as in Algorithm 1, where ⌊⋅⌋ denotes the floor function. The output generated by it when fed by a specific phase sequence
+is shown in Fig. 6. The computational complexity of the TPU algorithm is extremely small, since it requires only 9 floating point
+operations (FLOPS) for each frame..7 Unluckily, the TPU algorithm fails in the presence of phase variations exceeding 𝜋. In principle,
+the amplitude of such variations can be reduced by making the time interval between two subsequent phase measurements shorter
+(i.e., 𝑇𝐹 smaller). In fact, this increases the value of the maximum target speed
+                 𝜆
+         𝑣𝑐 =       ,                                                                                                                                    (15)
+                4𝑇𝐹
+that allows an unambiguous phase unwrapping. In fact, the TPU algorithm works if the target speed belongs to the interval.8 [−𝑣𝑐 , 𝑣𝑐 )
+or, equivalently, if the rate of phase variations does not exceed
+              𝜋
+        𝜔𝑐 =    .                                                                                                               (16)
+             𝑇𝐹
+Unluckily, 𝑇𝐹 cannot be arbitrarily reduced because of hardware limitations. This motivates the development of new phase
+unwrapping algorithms that are able to work properly at target speeds greater than 𝑣𝑐 (15).
+
+
+Algorithm 1 Example of traditional phase unwrap implementation
+    Input: {𝜙𝑘 }
+    Initialize:
+ 1: 𝜓1 = 𝜙1
+    Begin:
+ 2: for 𝑘 = 2 to 𝑘 = 𝑁𝐹 do
+                (       )
+ 3:    𝛽𝑘 = ⌊⌊ 𝜓𝑘−1 − 𝜙𝑘 ∕𝜋⌋∕2 + 0.5⌋
+ 4:    𝜓𝑘 = 𝜙𝑘 + 2𝜋𝛽𝑘
+ 5: end for
+    Output: {𝜓𝑘 }
+
+
+4. Doppler-based phase unwrapping algorithm
+
+     In this section, a novel algorithm for performing phase unwrapping, called Doppler-assisted phase unwrapping (DAPU), is
+illustrated. It exploits the Doppler information acquired from multiple chirps of the same frame to make accurate phase unwrapping
+possible in those cases in which, because of the low frame rate and/or high target speed, TPU fails. In the following, its description
+is provided for the case in which 𝑁𝑐 = 2 (i.e., two chirps are transmitted in each frame; see Fig. 2), for simplicity. The DAPU
+algorithm is fed by the sequence of couples of wrapped phases {(𝜙1,𝑘 , 𝜙2,𝑘 ); 𝑘 = 1, 2, …}. The first phase of each couple (namely,
+𝜙1,𝑘 ) is evaluated in the same way as the phase processed by TPU algorithm. Therefore, it represents the phase of a specific element
+of the matrix 𝐒A evaluated for the first chirp of the 𝑘th frame (this matrix is denoted 𝐒(1)               A
+                                                                                                             [𝑘]); the row and column index of this
+element, denoted 𝑙̄𝑘(1) and 𝑚̄ (1)
+                               𝑘
+                                   , respectively, are evaluated  by searching   for an amplitude          peak  in the set of elements of the matrix
+𝐒(1)
+  A
+     [𝑘]. On the other  hand, the    phase  𝜙2,𝑘 represents the phase   of the element  (𝑙̄(1) , 𝑚̄ (1) ) of the matrix 𝐒A evaluated for the second
+                                                                                           𝑘        𝑘
+chirp of the 𝑘th frame (this matrix is denoted 𝐒(2)    A
+                                                         [𝑘]). For this reason, for any 𝑘, the phases of the couple (𝜙1,𝑘 , 𝜙2,𝑘 ) refer to two
+consecutive chirps of the same (i.e., the 𝑘th) frame, but are associated with measurements referring to the same spatial coordinates
+(i.e., to the same range and azimuth). Based on the sequence {(𝜙1,𝑘 , 𝜙2,𝑘 ); 𝑘 = 1, 2, …}, the DAPU algorithm computes:
+
+
+  7   A detailed analysis of the TPU computational cost is illustrated in Appendix A
+  8   This interval is called Doppler unambiguity region
+
+
+                                                                               7
+G. Guerzoni et al.                                                                           Mechanical Systems and Signal Processing 235 (2025) 112777
+
+    (1) The phase sequence {(𝛼1,𝑘 , 𝛼2,𝑘 ); 𝑘 = 1, 2, …} (with 𝛼1,1 = 𝜙1,1 ) resulting from TPU of {(𝜙1,𝑘 , 𝜙2,𝑘 ); 𝑘 = 1, 2, …};
+    (2) The phase sequence {𝜓𝑘 ; 𝑘 = 1, 2, …} (with 𝜓1 = 𝜙1,1 ), resulting from TPU of {𝜙1,𝑘 ; 𝑘 = 1, 2, …};
+    (3) The sequence {𝜔̄ 𝑘 ; 𝑘 = 1, 2, …}, where
+               𝛼2,𝑘 − 𝛼1,𝑘
+        𝜔̄ 𝑘 ≜                                                                                                                                   (17)
+                   𝑇𝐶
+represents an estimate of rate of change of phase evaluated over the two consecutive chirps of the 𝑘th frame. Note that this estimate
+refers to the time instant
+                       𝑇
+         𝑡(𝑘𝜔)
+            ̄
+               ≜ 𝑘𝑇𝐹 + 𝐶                                                                                                                   (18)
+                        2
+that corresponds to the center of the time interval which the phases {𝜙1,𝑘 , 𝜙2,𝑘 } refer to; moreover, this instant can be approximated
+as 𝑘𝑇𝐹 , since 𝑇𝐹 ≫ 𝑇𝐶 .
+    The DAPU algorithm operates in a recursive fashion. The processing it executes for the 𝑘th frame interval aims at generating an
+estimate, denoted 𝜙̂ (𝑢)𝑘
+                          , of the unwrapped phase referring to that interval. The evaluation of 𝜙̂ (𝑢)  𝑘
+                                                                                                            is based on
+    (a) the estimates {𝜔̄ 𝑘 , 𝜔̄ 𝑘+1 , 𝜔̄ 𝑘+2 } of the rate of change of phase in the considered frame interval and in the following two frame
+intervals;
+    (b) the previous estimate 𝜙̂ (𝑢)   𝑘−1
+                                            of the unwrapped phase
+    (c) the estimates {𝜔̂ 𝑘−1 , 𝜔̂ 𝑘−2 , 𝜔̂ 𝑘−3 } of the rate of the past change of phase, evaluated on the basis of the unwrapped phase; in
+fact, 𝜔̂ 𝑘−𝑙 , being defined as
+                     𝜙̂ (𝑢)
+                        𝑘−𝑙
+                            − 𝜙̂ (𝑢)
+                                 (𝑘−𝑙)−1
+        𝜔̂ 𝑘−𝑙 ≜                           ,                                                                                                     (19)
+                            𝑇𝐹
+can be considered as an estimate average rate of phase variation over the time interval ((𝑘 − 1 − 𝑙)𝑇𝐹 , (𝑘 − 𝑙)𝑇𝐹 ), centered at the
+instant
+                   (𝑘 − 1 − 𝑙) + (𝑘 − 𝑙)
+        𝑡(𝑘𝜔)
+           ̂
+              ≜ 𝑇𝐹                              ,                                                                                     (20)
+                              2
+with 𝑙 ∈ {1, 2, 3}.
+    The DAPU algorithm tries to compute a more accurate estimate of the average rate of change of phase in the time interval
+((𝑘 − 1)𝑇𝐹 , 𝑘𝑇𝐹 ) by fitting its trend over a larger observation interval with a polynomial and, in particular, with a quadratic function.
+In practice, we take into consideration the vector of measurements
+                 [                                               ]T
+        Ω(𝑘) ≜ 𝜔̂ 𝑘−3 , 𝜔̂ 𝑘−2 , 𝜔̂ 𝑘−1 , 𝜔̄ 𝑘 , 𝜔̄ 𝑘+1 , 𝜔̄ 𝑘+2                                                                      (21)
+
+and the vector of the associated abscissas
+
+        𝐱 ≜ [−3.5, −2.5, −1.5, 0, 1, 2]T                                                                                                         (22)
+
+that represent the corresponding normalized instants at which such measurements refer to; note that, in the evaluation of each
+abscissa, normalization is accomplished with respect to the frame interval 𝑇𝐹 and that the instant 𝑘𝑇𝐹 is taken a reference. Therefore,
+if we adopt the model 𝑦 = 𝑎𝑥2 + 𝑏𝑥 + 𝑐 to fit the available measurements, the least-square estimate of the coefficients 𝑎̂(𝑘) , 𝑏̂ (𝑘) and
+𝑐̂(𝑘) can be expressed as (e.g., see [33])
+
+        [𝑎̂(𝑘) , 𝑏̂ (𝑘) , 𝑐̂(𝑘) ]T = (𝐗T 𝐗)−1 𝐗T Ω(𝑘) ,                                                                                          (23)
+
+where
+           [                             ]
+        𝐗 ≜ 𝐱(2) , 𝐱, [1, 1, 1, 1, 1, 1]T ,                                                                                                      (24)
+
+and 𝐱(2) represents the vector obtained from 𝐱 by replacing each element with its square. Then, the average rate of change of phase
+in the time interval ((𝑘 − 1)𝑇𝐹 , 𝑘𝑇𝐹 ) is evaluated as
+                                            |
+       𝜔̂ (𝑎) = 𝑎̂(𝑘) 𝑥2 + 𝑏̂ (𝑘) 𝑥 + 𝑐̂(𝑘) |       .                                                                                (25)
+          𝑘                                 |𝑥=−0.5
+Note that the choice of evaluating the quadratic function for 𝑥 = −0.5 (i.e., at the instant (𝑘 − 0.5)𝑇𝐹 ) is motivated by the fact that
+the rate of phase change is assumed to vary in a linear fashion during any interval lasting 𝑇𝐹 .
+   Given 𝜔̂ (𝑎)
+              𝑘
+                  (25), an estimate 𝛾̂ (𝑘) of the overall number of complete phase rotations around the origin 𝛾 (𝑘) between the (𝑘 − 1)th
+frame and the 𝑘th frame is evaluated as
+                ⌊ (𝑎)                          ⌉
+         (𝑘)
+                  𝜔̂ 𝑘 𝑇𝐹 − (𝜓𝑘 − 𝜓𝑘−1 )
+       𝛾̂ =                                       ,                                                                                  (26)
+                               2𝜋
+
+where ⌊⋅⌉ represents the nearest integer rounding function. Given 𝛾̂ (𝑘) (26), the new unwrapped phase 𝜙̂ (𝑢)
+                                                                                                          𝑘
+                                                                                                              is computed as
+
+        𝜙̂ (𝑢)
+           𝑘
+               = 𝜙̂ (𝑢)
+                    𝑘−1
+                        + 𝜓𝑘 − 𝜓𝑘−1 + 2𝜋 𝛾̂ (𝑘) ,                                                                                                (27)
+
+since the difference (𝜓𝑘 − 𝜓𝑘−1 ) accounts for the phase variation from the (𝑘 − 1)th frame to the 𝑘th one in the absence of complete
+phase rotations. This concludes our description of the DAPU algorithm.
+
+                                                                        8
+G. Guerzoni et al.                                                                               Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+                                       Fig. 7. Representation of the basic steps involved in the DAPU algorithm.
+
+
+
+
+   It is important to point out that:
+   (1) The DAPU algorithm can be initialized by setting: a) 𝜙̂ (𝑢)
+                                                               −3
+                                                                   = 𝜙̂ (𝑢)
+                                                                        −2
+                                                                            = 𝜙̂ (𝑢)
+                                                                                 −1
+                                                                                     = 𝜙̂ (𝑢)
+                                                                                          0
+                                                                                              = 0 when 𝜔̂ (𝑎)
+                                                                                                          1
+                                                                                                              , … , 𝜔̂ (𝑎)
+                                                                                                                       3
+                                                                                                                           are evaluated; b) 𝜓0 = 𝜓1
+                   (𝑢)
+when 𝛾̂ (1) and 𝜙̂ 1 are computed.
+   (2) If 𝑇𝐹 is reasonably small, the trajectory described by the six measurements collected in Ω(𝑘) (21) is expected to be well
+represented by a parabolic trajectory.
+   (3) The first three elements of Ω(𝑘) (21) have the purpose of giving stability and memory to the estimation, whereas its last three
+elements have the role of changing the trend of the curve.
+   (4) For any 𝑘, the phases 𝜙1,𝑘 and 𝜙2,𝑘 can be quickly acquired within the 𝑘th frame, whereas a much longer time is required to
+acquire these information from the next frame, as evidenced by Fig. 2. 5) The target maximum speed at which the DAPU algorithm
+can operate is (see Eq. (17))
+                      𝜆
+        𝑣(DAPU)
+         𝑐      =        ,                                                                                                                           (28)
+                     4𝑇𝐶
+and is much higher than the maximum unambiguous speed of the TPU algorithm (see (15)).
+    The DAPU algorithm is summarized in Algorithm 2. A simple block diagram representing its flow is shown in Fig. 7. The DAPU
+computational cost is assessed in Appendix A.
+    The recursive nature and initialization of the DAPU algorithm play a crucial role in ensuring its proper functioning. The
+initialization process for both the TPU and DAPU algorithms begins with selecting an appropriate range-angle bin from the 2D
+FFT output. This selection should be guided by the engineers understanding of the environment. A simple approach, in the case
+of a single target in front of the radar, is to choose the bin with the highest amplitude and analyze its phase evolution over time.
+However, in Algorithm 2, all parameters are set to zero by default. This assumption implies that the target remains stationary during
+the first six acquired frames. If the target is moving, a phase unwrapping error initially occurs. However, after these six frames,
+the algorithm converges and begins correctly tracking the target. Finally, it is worth noting that the algorithm can accommodate
+different radar configurations or a different number of virtual arrays. Increasing the number of virtual antennas improves the SNR
+by reducing the size of each range-angle bin. However, the DAPU unwrapping algorithm is completely agnostic to the number of
+antennas used by the radar.
+
+
+5. Experimental results
+
+
+    In this section the improvement provided by the DAPU algorithm with respect to the TPU algorithm is assessed in the estimation
+of small displacements. In the following, we first describe the radar device employed in our measurement campaigns. Then, we
+analyze various numerical results obtained on the basis of the measurements acquired in two different scenarios, namely in a
+structure testing laboratory and on a steel footbridge. The experiment accomplished in the laboratory enabled the validation of
+the DAPU algorithm under controlled conditions, while the experiments conducted on the steel footbridge allowed us to assess its
+applicability to real-world scenarios.
+
+                                                                          9
+G. Guerzoni et al.                                                                                Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+Algorithm 2 Doppler-assisted phase unwrap algorithm.
+    Input: {(𝜙1,𝑘 , 𝜙2,𝑘 )}.
+    Initialize:
+      (𝑢)        (𝑢)
+ 1: 𝜙̂ , ..., 𝜙̂     = 0.
+      −3         0
+                                       T
+ 2: 𝐱 = [−3.5, −2.5, −1.5, 0, 1, 2] .
+            [                        ]
+ 3: 𝐗 ≜ 𝐱(2) , 𝐱, [1, 1, 1, 1, 1, 1]T .
+ 4: {𝜓𝑘 } as TPU of {𝜙1,𝑘 }.
+ 5: 𝜓0 = 𝜓1 .
+    Begin:
+ 6: for 𝑘 = 1, 2, ... do
+ 7:      (𝛼1,𝑘 , 𝛼2,𝑘 ) as TPU of (𝜙1,𝑘 , 𝜙2,𝑘 ).
+                  𝛼 −𝛼
+ 8:       𝜔̄ 𝑘 ≜ 2,𝑘𝑇 1,𝑘 (see (17)).
+                         𝐶
+                        (𝑢)     (𝑢)
+                     𝜙̂ 𝑘−𝑙 −𝜙̂ (𝑘−𝑙)−1
+ 9:       𝜔̂ 𝑘−𝑙 ≜           𝑇𝐹
+                                           , 𝑙 = 1, 2, 3 (see (19)).
+                     [                                                   ]T
+10:       𝛀(𝑘) ≜        𝜔̂ 𝑘−3 , 𝜔̂ 𝑘−2 , 𝜔̂ 𝑘−1 , 𝜔̄ 𝑘 , 𝜔̄ 𝑘+1 , 𝜔̄ 𝑘+2 (see (21)).
+11:       [𝑎̂(𝑘) , 𝑏̂ (𝑘) , 𝑐̂(𝑘) ]T = (𝐗T 𝐗)−1 𝐗T 𝛀(𝑘) (see (23)).
+                                                       |
+12:       𝜔̂ (𝑎) = 𝑎̂(𝑘) 𝑥2 + 𝑏̂ (𝑘) 𝑥 + 𝑐̂(𝑘) |                (see (25)).
+              𝑘
+                             ] (𝑎)                     |𝑥=−0.5
+                               𝜔
+                               ̂    𝑇 𝐹 −(𝜓 𝑘 −𝜓 𝑘−1 )
+13:       𝛾̂ (𝑘) = ⌊[⌉ 𝑘                 2𝜋
+                                                         (see (26)).
+
+14:       𝜙̂ (𝑢)
+             𝑘
+                 = 𝜙̂ (𝑢)
+                      𝑘−1
+                          + 𝜓𝑘 − 𝜓𝑘−1 + 2𝜋 𝛾̂ (𝑘) (see (27)).
+15: end for
+      Output: {𝜙̂ (𝑢)
+                  𝑘
+                      , 𝑘 = 1, 2, ...}.
+
+
+
+
+Fig. 8. (a) Employed MIMO radar device and (b) representation of the physical TX and RX arrays (the employed virtual ULA is also shown); 𝑛𝑅 represents the
+RX antenna index.
+
+
+
+
+5.1. MIMO radar device
+
+
+    All the measurements have been acquired through a FMCW TIDEP-01012 Cascade mmWave radar evaluation module, which is
+designed and manufactured by Texas Instruments Inc. and is readily available as an off-the-shelf device [34]. This device is endowed
+with a planar array made of 12 TX and 16 RX antennas, so that the total number of available VAs is 192; however, only 9 TX antennas
+are used in our work, since a uniform linear portion of the whole virtual array is exploited; in practice, after virtual array reordering,
+only 86 virtual elements are used with an interantenna spacing is equal to 𝜆∕4. The relevant parameters adopted in our experiments
+are: a) chirp slope 𝜇 = 87 MHz/μs; b) central frequency 𝑓𝑐 = 78 GHz (corresponding to the wavelength 𝜆 = 3.75 mm); c) sampling
+frequency 𝑓𝑠 = 10 MHz; d) number of samples per chirp 𝑁 = 512; e) chirp duration 𝑇𝐶 = 64 μs; f) frame duration 𝑇𝐹 = 30 𝑚s.
+Moreover, range and angle FFTs of order 𝑁0(R) = 1024 and 𝑁0(A) = 128, respectively, have been used. A picture of the employed
+radar device and a representation of the physical TX and RX arrays, together with the employed virtual ULA, are provided in Figs.
+8-(a) and -(b), respectively.
+
+                                                                                        10
+G. Guerzoni et al.                                                                                 Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+Fig. 9. Laboratory experiments: (a) picture of the steel frame employed in our measurement campaign; (b) polar representation of a portion of the matrix 𝐒A
+acquired in front of the considered frame (the position of the two points selected for phase estimation is identified by red circles).
+
+
+
+
+Fig. 10. Temporal evolution of the displacements characterizing: (a) point A; (b) point B. The measurements provided by the reference sensor are compared
+with the estimates generated by the TPU and DAPU algorithms.
+
+
+
+
+5.2. Laboratory experiments
+
+    These experiments have been performed under controlled conditions, and have involved the four-story steel frame shown in Fig.
+9-(a); this frame has been put on a shaking table exciting it. Different types of excitation were applied to the frame base; these
+included sinusoidal forces and simulated earthquake ground motions. Our radar system was used to estimate the displacements of
+multiple points of the frame in all the experiments; such points were characterized by different heights. The accuracy of radar-based
+estimates has been assessed by comparing them with the estimates provided by a reference sensor, namely a LVDT sensor. The last
+sensor is able to assess displacements with the range [0, 100 mm]; moreover, its sensitivity and excitation voltage are equal to 80
+mV/V and 10 V, respectively.
+    Our first results refer to the displacements due to a simulated earthquake ground motion, lasting 38 s and featuring fast
+displacements with a maximum amplitude of 60 mm; this condition presented the most significant challenges for the phase
+unwrapping process because of the presence of wide and fast movements. With the given radar settings, the spectral peak associated
+with the main reflection may move from one range bin to another one (i.e., in principle, the value of 𝑙̄ is not constant). In this case,
+we can rely on the leakage of the reflected power over multiple adjacent bins at the expense of a degraded SNR, or employ a
+tracking algorithm to adjust 𝑙̄ dynamically and compensate for the additional phase modulation that such approach can introduce.
+However, all this is outside the scope of this manuscript. A polar representation of the amplitude of the elements of the matrix 𝐒A
+evaluated in one of our experiments is shown in Fig. 9-(b), where the position of the couple of points (one located at the bottom
+
+                                                                            11
+G. Guerzoni et al.                                                                                   Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+Fig. 11. Representation of: (a) the time evolution of Doppler rate; (b) the corresponding sequence of estimates {̂𝛾 (𝑘) } generated by the DAPU algorithm (see
+(26)). All these results refer to point B (see Fig. 9-(b)).
+
+
+
+
+of the frame and the other at its top) whose displacements are analyzed in the following are highlighted. These specific points
+(namely, point B located on the shaking table deck and point A located at the top of the frame) have been selected because they
+enabled a simple comparison with the available reference displacements; in fact, the displacement of point B was equal to that of
+shaking table deck, whereas that of point A was measured by a LVDT sensor. The reference displacements and the corresponding
+radar-based estimates obtained through the TPU and DAPU algorithms are shown in Fig. 10. The Doppler rate of point B, measured
+at the instants 𝑘𝑇𝐹 , is shown in Fig. 11(a); in that figure, seven colored stripes have been drawn to identify the Doppler rate intervals
+{[(2𝛾 − 1), (2𝛾 + 1)]𝜔𝑐 ; 𝛾 = −3, … , 3}. The corresponding values of the parameter 𝛾̂ generated by the DAPU algorithm (see (26)) are
+shown in Fig. 11(b). A detailed representation of the instantaneous displacement of point B, its Doppler rate and the corresponding
+values of 𝛾̂ generated by the DAPU algorithm is offered in Fig. 12.
+    From these results it is easily inferred that:
+    (1) The TPU algorithm operates in a reliable fashion only when the frame oscillations are small and slow: as soon as the
+displacement occurring between two frames exceeds 𝜆∕4 ≈ 0.94 mm (i.e., the rate of phase variation observed for the considered
+point is greater than 𝜔𝑐 ≈ 104 rad/s), it fails (see Fig. 12-(a)).
+    (2) The DAPU algorithm, instead, is able to track rapid displacements and to generate accurate estimates of them (see Fig. 12-(a)).
+This is made possible by its ability to filter noisy Doppler information and to properly assess the overall number of phase rotations
+due to Doppler (see Figs. 12-(b) and 12-(c)).
+    (3) The non-zero estimates of 𝛾 do not precisely align with the time instants at which the phase rotation rate exceeds 𝜔𝑐 (16)
+(see Figs. 12-(b) and 12-(c)). Note that, if 𝛾̂ had been evaluated on the basis of unfiltered Doppler measurements, the output of
+DAPU shown Fig. 12-(a) would not have followed the reference signal; instead, it would have been affected by jumps similar to
+those observed at the output of the TPU algorithm.
+
+5.3. Real footbridge experiments
+
+    The accuracy achieved by the TPU and DAPU algorithms has been also assessed by measuring the displacements experienced by
+a slender and lightweight truss-girder steel footbridge spanning the Panaro River in Modena, Italy (see Fig. 13(a)). The considered
+footbridge is highly deformable and sensitive to dynamic vibrations, typically caused by the movement of pedestrians, cyclists, and
+environmental factors (e.g., wind). It is characterized by a box-shaped cross-section measuring 3.00 𝑥 3.20 meters and is made up
+of truss girders constructed from hollow tubular sections. In total, the footbridge stretches over 160 meters and is divided into three
+segments: two 45-meter side spans and a central span of 70 m.
+    The employed radar device has been positioned beneath the footbridge (see Fig. 13(b)). Its alignment with the right side of the
+deck has allowed us to detect the vertical vibrations of points spread along the footbridge span that are also aligned to that side.
+The polar representation of the matrix 𝐒A obtained in these conditions is illustrated in Fig. 13-(c), where the positions of the two
+points analyzed in the following (and denoted A and B) are also identified. These points are vertically in line with the radar device
+on the right side of the deck, but differ in their height. In fact, point A is located on a transverse element of the underside of the
+deck, whereas point B is associated with an higher element (which is likely to be part of the parapet). An accelerometer-based
+monitoring system has been also installed on the footbridge for comparison purposes. The main components of the measurement
+system are a controller, a storage unit and bus-connected biaxial sensing units of Micro-Electro-Mechanical System (MEMS) type. The
+bus connection guarantees a high degree of reliability and prevention against electromagnetic interferences. Thanks to an accurate
+design of the employed device and local digital filtering techniques, these sensing units exhibit a noise level of about 0.3–0.5 mg
+(depending on the sampling frequency), where g indicates the gravity acceleration [35]. In our measurement campaign, the MEMS
+biaxial accelerometers were placed in seven cross-sections of the footbridge, namely at the midspan and at six additional positions,
+
+                                                                             12
+G. Guerzoni et al.                                                                                   Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+Fig. 12. Representation of: (a) the temporal evolution of the displacement of the controlled shaking table deck and of the corresponding estimates evaluated by
+the TPU and DAPU algorithms; (b) the Doppler rate estimated through our radar system; (c) the sequence of estimates {̂𝛾 (𝑘) } generated by the DAPU algorithm
+(see (26)). All these results refer to point B (see Fig. 9-(b)). Note that the radar displacement estimated by the TPU and DAPU algorithms have been aligned
+with the table deck displacement for comparison purposes in subfigure (a).
+
+
+
+
+symmetrically arranged around the midspan at intervals of 7.5 meters each. The accelerometers were installed on both sides of the
+footbridge deck using plates and magnets. The sampling frequency of the sensing system was set to 80 Hz.
+    Both acquisition systems measured structural vibrations due to environmental conditions and those induced by a pedestrian
+walking on the footobridge. The forced vibrations were generated by a pedestrian jumping at a frequency of 138 beats per minute
+(BPM). This specific frequency, controlled through a metronome, has been selected to excite the main vertical vibrational mode
+of the footbridge. The structural displacements estimated on the basis of our radar measurements, using the TPU and DAPU
+algorithms, have been compared with those estimated on the basis of the measured accelerations. The procedure outlined in [36]
+has been exploited to reconstruct displacements from measured accelerations; this requires minimizing the squared errors between
+the measured accelerations and the second-order time derivative of the reconstructed displacements. The choice of this algorithm
+was motivated by the fact that it produces accurate results when the overall temporal history of the observed displacement has zero
+mean.
+    The estimates of the structural displacements obtained from the measured accelerations are compared with those extracted from
+radar measurements in Fig. 14; in the same figure, the sequence of estimates {̂𝛾 (𝑘) } generated by the DAPU algorithm for point A
+and the temporal evolution of the Doppler rate referring to the same point are also shown. Similar results are shown for point B in
+Fig. 15. Detailed views are shown in Figs. 16 and 17 for points A and B, respectively. These results evidence that:
+    (1) The DAPU algorithm is able to accurately track both small and large displacements, even under conditions of strong noise
+as those characterizing point B (see Figs. 15 and 16).
+    (2) In both cases there is a good agreement between the displacement derived from the measured acceleration and that
+estimated by the DAPU algorithm on the basis of the radar measurements. In particular, the maximum difference between these two
+displacements is approximately equal to 0.57 mm (the average of the absolute value of this difference is approximately equal to
+0.17 mm). This confirms the effectiveness of the DAPU algorithm in successfully filtering out noisy Doppler samples and selecting
+the correct value of 𝛾̂ .
+    (3) The use of the TPU algorithm leads to considerable inaccuracies in the estimated displacements (see Figs. 14-(a) and 15-(a)).
+
+                                                                              13
+G. Guerzoni et al.                                                                                  Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+Fig. 13. Representation of the: (a) global view of the footbridge involved in our experiments; (b) the position of the employed radar device; (c) polar
+representation of the amplitude of the elements of the matrix 𝐒A computed in one of our experiments. The position of the two points selected for displacement
+estimation is identified by red circles.
+
+
+
+
+   Finally, it is important to point out that, in this application, accurate estimates of displacements have been obtained through
+double integration of measured accelerations thanks to the fact that the considered footbridge oscillates around a position of zero
+displacement. In the presence of permanent or quasi-static displacements, this method could lead to considerable errors. On the
+contrary, radar-based estimates do not suffer from this problem and are unbiased in all conditions.
+
+6. Conclusions
+
+   In this manuscript, a novel iterative method for mitigating the phase wrapping phenomenon in radar-based estimation of target
+displacement has been proposed. The accuracy of this method has been assessed by applying it to the estimation of dynamic structural
+displacements through a mmWave MIMO FMCW radar. Our results, based on a set of measurements acquired through a commercial
+radar device in two different scenarios, evidence that our method is able to carefully estimate the radial displacement of quickly
+moving structures, also in those situations where traditional solution fails, at the price of a small computational complexity.
+
+CRediT authorship contribution statement
+
+   Giorgio Guerzoni: Writing – review & editing, Writing – original draft, Validation, Software, Methodology, Data curation,
+Conceptualization. Elahe Faghand: Writing – review & editing, Writing – original draft, Validation, Software, Methodology,
+Data curation, Conceptualization. Loris Vincenzi: Writing – review & editing, Writing – original draft, Validation, Supervision,
+Data curation, Conceptualization. Elisa Bassoli: Writing – review & editing, Writing – original draft, Validation, Data curation.
+Giorgio Matteo Vitetta: Writing – review & editing, Writing – original draft, Validation, Supervision, Methodology, Data curation,
+Conceptualization.
+
+Declaration of competing interest
+
+    The authors declare that they have no known competing financial interests or personal relationships that could have appeared
+to influence the work reported in this paper.
+
+Acknowledgments
+
+    This work was sponsored by the Department of Engineering ’’Enzo Ferrari’’ of the University of Modena and Reggio Emilia via
+the research project ‘‘Radar MIMO per il monitoraggio della salute strutturale’’ in the scope of the research grant FARD2022. The
+financial support of the UNIMORE is gratefully acknowledged.
+
+                                                                             14
+G. Guerzoni et al.                                                                                     Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+Fig. 14. Representation of the temporal evolution of: (a) the displacements estimated by the TPU algorithm, the DAPU algorithm and the accelerometer-based
+measurement system; (b) the estimated Doppler rate; (c) the corresponding sequence of estimates {̂𝛾 (𝑘) } generated by the DAPU algorithm. All these results refer
+to point A.
+
+
+
+
+Appendix A. Evaluation of TPU and DAPU computational complexity
+
+    In this Appendix, we assess the overall computational complexity of the TPU and DAPU methods in term of the number of
+FLOPS. In our evaluation, each summation, division, multiplication, and subtraction is counted as one flop. Based on the procedure
+illustrated in Algorithm 1, the computation of 𝛽𝑘 and 𝜓𝑘 requires 6 and 3 FLOPS, respectively. Therefore, for each new frame, the
+execution of the TPU algorithm requires 9 FLOPS. It is also worth mentioning that, in our simulations, performed on a AMD Ryzen
+5 1400 at 3.2 GHz, the total time to unwrap 10000 samples is approximatively 0.03 s.
+    As far as the DAPU algorithm is concerned, its computational complexity is assessed as follows:
+
+    • Eq. (17) requires the evaluation of (𝛼1,𝑘 , 𝛼2,𝑘 ) using the TPU algorithm, with a cost of 18 FLOPS (9 FLOPS for each parameter)
+      plus 2 FLOPS to evaluate 𝜔̄ 𝑘 .
+    • Eq. (19) requires 6 FLOPS in total.
+    • In Eq. (23) various matrix operations (namely, matrix multiplication and inversion) are performed; these involve the 6 × 3
+      matrix 𝐗 and the 6 dimensional row vector Ω. These operations result in a total of 590 FLOPS.
+    • Finally, the computation of 𝜔̂ (𝑎)
+                                      𝑘
+                                         , 𝛾̂ 𝑘 and 𝜙̂ (𝑢)
+                                                       𝑘
+                                                           according to Eqs. (25), (26) and (27) requires 4, 5 and 4 FLOPS, respectively.
+
+Based on these results, it is easy to show that the overall number of FLOPS for the DAPU method is 620 (for each frame). This cost
+is still well within the capabilities of any modern personal computer. In our simulations, performed on a AMD Ryzen 5 1400 at
+3.2 GHz, the total time to unwrap 10000 samples is approximatively 0.9 s; this results in a throughput exceeding 10000 samples per
+second.
+
+Appendix B. Impact of noise on the TPU and DAPU algorithms
+
+   In this Appendix we briefly discuss how the presence of noise in radar measurements affects the accuracy of the TPU and DAPU
+algorithms in terms of probability of error.
+
+                                                                               15
+G. Guerzoni et al.                                                                                     Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+Fig. 15. Representation of the temporal evolution of: (a) the displacements estimated by the TPU algorithm, the DAPU algorithm and the accelerometer-based
+measurement system; (b) the estimated Doppler rate; (c) the corresponding sequence of estimates {̂𝛾 (𝑘) } generated by the DAPU algorithm. All these results refer
+to point B.
+
+
+
+
+B.1. TPU algorithm
+
+   The TPU algorithm is able to properly unwrap the phases if and only if the phase difference 𝛥𝜙𝑘 between two consecutive samples
+𝜙𝑘 and 𝜙𝑘+1 is smaller than 𝜋; if a phase noise term 𝜂𝑘 , drawn from a generic random distribution, is added to either 𝜙𝑘 or 𝜙𝑘+1 ,
+then TPU will not fail if the condition
+
+        𝛥𝜙𝑘 + 𝜂𝑘 < 𝜋                                                                                                                                        (29)
+
+holds. Since the phase difference between two consecutive frames is proportional to the speed of the target (see Eq. (14)), phase
+trajectories associated with fast moving objects are more sensitive to noise. If we define 𝑣𝑘 as the target speed at the instant 𝑘𝑇𝐹 ,
+we can write the probability of failure of the TPU algorithm as a function of the target speed 𝑣𝑘 , radar frame rate 𝑇𝐹 and wavelength
+𝜆:
+                    (                  )
+                      4𝜋
+       P(𝑒TPU ) = P      𝑣 𝑇 + 𝜂𝑘 < 𝜋                                                                                             (30)
+                       𝜆 𝑘 𝐹
+This expression is general, being independent of the specific distribution of 𝜂𝑘 .
+
+
+B.2. DAPU algorithm
+
+      Unlike TPU, a general expression for the probability of failure P(𝑒DAPU ) of the DAPU algorithm cannot be given. However, some
+useful insights are provided by an analysis of the internal structure of the algorithm itself. A key feature of the DAPU algorithm is
+represented by the fact that it computes the estimate 𝜔̂ (𝑎)      𝑘
+                                                                    of the target speed (see Eq. (25)) and multiplies it by the frame duration
+𝑇𝐹 in order to assess the overall displacement experienced by the target between the 𝑘th and the 𝑘 − 1th frames; the estimation of
+𝜔̂ (𝑎)
+   𝑘
+       is based on 𝜔̄ 𝑘 , 𝛼1,𝑘 , 𝛼2,𝑘 , 𝑇𝐶 and, in turn, on 𝜙1,𝑘 and 𝜙2,𝑘 .
+
+                                                                               16
+G. Guerzoni et al.                                                                                     Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+Fig. 16. Detailed representation of the temporal evolution of: (a) the displacements estimated by the TPU algorithm, the DAPU algorithm and the accelerometer-
+based measurement system; (b) the estimated Doppler rate; (c) the corresponding sequence of estimates {̂𝛾 (𝑘) } generated by the DAPU algorithm. All these results
+refer to point B.
+
+
+
+
+    Let 𝜂1,𝑘 and 𝜂2,𝑘 denote the random noise samples superimposed to 𝜙1,𝑘 and 𝜙2,𝑘 , respectively. The impact of 𝜂1,𝑘 and 𝜂2,𝑘 on the
+estimation of 𝜔̂ (𝑎)
+                 𝑘
+                     becomes stronger if 𝑇𝐶 is reduced. Moreover, an error in the estimation of 𝜂1,𝑘 will affect the estimation of the
+total inter-frame displacement more severely for larger values of 𝑇𝐹 , but only if 𝜂1,𝑘 and 𝜂2,𝑘 are uncorrelated. If 𝜂1,𝑘 and 𝜂2,𝑘 are
+correlated, the estimation of 𝜔̂ (𝑎)
+                                 𝑘
+                                     will be affected to a smaller extent. Based on the considerations illustrated above, it should be
+expected that
+                      𝑇𝐹 −1
+        P(𝑒DAPU ) ∝     ,𝜌                                                                                                                                  (31)
+                      𝑇𝐶 1,2
+where 𝜌1,2 denotes the covariance between 𝜂1,𝑘 and 𝜂2,𝑘 . Since 𝜙1,𝑘 and 𝜙2,𝑘 are separated by 𝑇𝐶 seconds and 𝑇𝐶 ≪ 𝑇𝐹 , 𝜌1,2 is likely
+to be greater than zero in the considered scenarios.
+
+B.3. Numerical results
+
+    Some computer simulations have been run to assess the TPU and DAPU probability of failure. The following assumptions have
+been made: 1) 𝜂𝑘 , 𝜂1,𝑘 and 𝜂2,𝑘 are Gaussian random variables having zero mean and variances 𝜎 2 , 𝜎12 and 𝜎22 , respectively; 2) 𝜂1,𝑘
+and 𝜂2,𝑘 are correlated (their correlation coefficient is denoted 𝜌1,2 ). In the case of the TPU algorithm, a noiseless phase trajectory
+{𝜙𝑘 , 𝑘 = 1, … , 10000} has been generated and then the noise sequence {𝜂𝑘 } has been added to it; the resulting sequence has been
+applied to the considered algorithm, whose probability of error has been evaluated as the ratio between the number of unwrapping
+errors and the length of the input sequence. A similar procedure has been followed for the DAPU algorithm, whose simulation
+has required, however, the generation of the sequences {𝜙1,𝑘 } and {𝜙2,𝑘 }, and of the associated noise sequences{𝜂1,𝑘 } and {𝜂2,𝑘 },
+respectively. Our numerical results, referring to a (single) target moving at a constant speed, are illustrated in Figs. 18–20. In
+particular, the results shown in the first figure show the impact of noise variance on the failure probability of the TPU algorithm
+for three different target speeds; 𝑇𝐹 = 30 ms and 𝑇𝐶 = 64 μs, (resulting in 𝑇𝐹 ∕𝑇𝐶 = 468.75) are assumed. Note that, as the target
+speed approaches the critical speed 𝑣𝑐 , the TPU performance undergoes a significant degradation. The results shown in Fig. 19,
+
+                                                                               17
+G. Guerzoni et al.                                                                                    Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+Fig. 17. Detailed representation of the temporal evolution of: (a) the displacements estimated by the TPU algorithm, the DAPU algorithm and the accelerometer-
+based measurement system; (b) the estimated Doppler rate; (c) corresponding sequence of estimates {̂𝛾 (𝑘) } generated by the DAPU algorithm. All these results
+refer to point A.
+
+
+
+
+                               Fig. 18. TPU probability of failure vs noise variance for three different values of target speed.
+
+
+
+
+instead, refer to the DAPU algorithm and aim at unveiling the impact of noise correlation on its probability of failure; in this case,
+three different values of the noise variances 𝜎12 and 𝜎22 are considered and 𝑣 = 30 mm/s (corresponding to a Doppler rate of change
+𝜔 ≈ 400 rad/s) is assumed for the target speed (the values of 𝑇𝐹 and 𝑇𝐶 are the same as the previous case). From these results it
+is easily inferred that, as noise correlation increases, the impact of noise on the DAPU algorithm becomes less significant; note that
+this is in agreement with Eq. (31). In Fig. 20, the dependence of the failure probability of the DAPU algorithm on the 𝑇𝐹 ∕𝑇𝐶 ratio
+
+                                                                              18
+G. Guerzoni et al.                                                                                      Mechanical Systems and Signal Processing 235 (2025) 112777
+
+
+
+
+                     Fig. 19. DAPU probability of failure vs noise correlation for three different values of the noise variances 𝜎12 and 𝜎22 .
+
+
+
+
+                       Fig. 20. DAPU probability of failure vs 𝑇𝐹 ∕𝑇𝐶 ratio for three different values of the noise variances 𝜎12 and 𝜎22 .
+
+
+
+
+is shown; in this case, 𝑇𝐹 = 30 ms, 𝜌1,2 = 0.9 and 𝑣 = 30 mm/s are assumed and, similarly as in Fig. 19, three different values of the
+noise variances 𝜎12 and 𝜎22 are considered. These results lead to the conclusion that, as the ratio 𝑇𝐹 ∕𝑇𝐶 increases, the probability of
+failure worsens, as suggested by Eq. (31).
+    Finally, it is worth noting that increasing the number of virtual antennas impacts the computational complexity primarily by
+increasing the complexity of the FFT angle, as a larger number of virtual antennas leads to a higher-dimensional FFT computation.
+However, the increased 𝑁𝑉 𝐴 does not directly affect the computational complexity of the TPU or DAPU algorithms, as they process
+the phase sequence extracted from the 2D FFT independently of the number of antennas.
+
+
+
+Data availability
+
+    Data will be made available on request.
+
+
+References
+
+ [1] K. Kim, H. Sohn, Dynamic displacement estimation by fusing LDV and LiDAR measurements via smoothing based Kalman filtering, Mech. Syst. Signal
+     Process. 82 (2017) 339–355.
+ [2] P.L. Reu, D.P. Rohe, L.D. Jacobs, Comparison of DIC and LDV for practical vibration and modal measurements, Mech. Syst. Signal Process. 86 (2017)
+     2–16.
+ [3] D. Lydon, M. Lydon, S. Taylor, J.M. Del Rincon, D. Hester, J. Brownjohn, Development and field testing of a vision-based displacement system using a
+     low cost wireless action camera, Mech. Syst. Signal Process. 121 (2019) 343–358.
+ [4] B. Hosseiny, J. Amini, H. Aghababaei, Structural displacement monitoring using ground-based synthetic aperture radar, Int. J. Appl. Earth Observ.
+     Geoinformat. 116 (2023) 103144.
+ [5] A. Ozdagli, B. Liu, F. Moreu, Low-cost, efficient wireless intelligent sensors (LEWIS) measuring real-time reference-free dynamic displacements, Mech. Syst.
+     Signal Process. 107 (2018) 343–356.
+ [6] J.-W. Park, S.-H. Sim, H.-J. Jung, Displacement estimation using multimetric data fusion, IEEE/ASME Trans. Mechatronics 18 (6) (2013) 1675–1682.
+
+
+                                                                                19
+G. Guerzoni et al.                                                                                      Mechanical Systems and Signal Processing 235 (2025) 112777
+
+ [7] E. Bassoli, L. Vincenzi, F. Grassi, F. Mancini, A multi-temporal DInSAR-based method for the assessment of the 3D rigid motion of buildings and
+     corresponding uncertainties, J. Build. Eng. 73 (2023) 106738.
+ [8] D. Camassa, N. Vaiana, A. Castellano, Modal testing of masonry constructions by ground-based radar interferometry for structural health monitoring: A
+     mini review, Front. Built Environ. 8 (2023).
+ [9] C. Castagnetti, E. Bassoli, L. Vincenzi, F. Mancini, Dynamic assessment of masonry towers based on terrestrial radar interferometer and accelerometers,
+     Sensors 19 (6) (2019).
+[10] G. Luzi, M. Crosetto, E. Fernández, Radar interferometry for monitoring the vibration characteristics of buildings and civil structures: Recent case studies
+     in Spain, Sensors 17 (4) (2017).
+[11] R.E. Alva, L.G. Pujades, R. González-Drigo, G. Luzi, O. Caselles, L.A. Pinzón, Dynamic monitoring of a mid-rise building by real-aperture radar interferometer:
+     Advantages and limitations, Remote. Sens. 12 (6) (2020).
+[12] J. Wang, Y. Hua, C. Fan, X. Huang, Precise scatter estimation of complex bridges with portable MMW SAR, in: 2022 7th International Conference on
+     Signal and Image Processing, ICSIP, 2022, pp. 147–151.
+[13] A. Baumann-Ouyang, J.A. Butt, D. Salido-Monzú, A. Wieser, MIMO-SAR interferometric measurements for structural monitoring: Accuracy and limitations,
+     Remote. Sens. 13 (21) (2021).
+[14] L. Ding, M. Ali, S. Patole, A. Dabak, Vibration parameter estimation using FMCW radar, in: 2016 IEEE International Conference on Acoustics, Speech and
+     Signal Processing, ICASSP, 2016, pp. 2224–2228.
+[15] W. Tian, Y. Li, C. Hu, Y. Li, J. Wang, T. Zeng, Vibration measurement method for artificial structure based on MIMO imaging radar, IEEE Trans. Aerosp.
+     Electron. Syst. 56 (1) (2020) 748–760.
+[16] M. Pieraccini, F. Parrini, M. Fratini, C. Atzeni, P. Spinelli, M. Micheloni, Static and dynamic testing of bridges through microwave interferometry, NDT &
+     E Int. 40 (3) (2007) 208–214.
+[17] M. Pieraccini, L. Miccinesi, An interferometric MIMO radar for bridge monitoring, IEEE Geosci. Remote. Sens. Lett. 16 (9) (2019) 1383–1387.
+[18] L. Miccinesi, M. Pieraccini, Bridge monitoring by a monostatic/bistatic interferometric radar able to retrieve the dynamic 3D displacement vector, IEEE
+     Access 8 (2020) 210339–210346.
+[19] Y. Xiong, Z. Peng, W. Jiang, Q. He, W. Zhang, G. Meng, An effective accuracy evaluation method for LFMCW radar displacement monitoring with phasor
+     statistical analysis, IEEE Sensors J. 19 (24) (2019) 12224–12234.
+[20] Y. Xiong, Z. Liu, S. Li, G. Meng, Z. Peng, Scanning microwave vibrometer: Full-field vibration measurement via microwave sensing with phase-encoded
+     beam scanning, IEEE Trans. Instrum. Meas. 72 (2023) 1–11.
+[21] Z. Ma, J. Choi, L. Yang, H. Sohn, Structural displacement estimation using accelerometer and fmcw millimeter wave radar, Mech. Syst. Signal Process.
+     vol. 182 (2023) 109582.
+[22] Q. Huang, S. Wei, L. Zhang, Radar interferometric phase ambiguity resolution using viterbi algorithm for high-precision space target positioning, IEEE
+     Signal Process. Lett. 30 (2023) 1242–1246.
+[23] J. Liu, Y. Li, C. Gu, Solving phase ambiguity in interferometric displacement measurement with millimeter-wave FMCW radar sensors, IEEE Sensors J. 22
+     (9) (2022) 8482–8489.
+[24] B. Liu, L. Wu, X. Song, H. Hao, L. Zou, Y. Lu, Punet: A robust framework for phase unwrapping in interferometric SAR, Front. Environ. Sci. 11 (2023).
+[25] M. Scherhäufl, F. Hammer, M. Pichler-Scheder, C. Kastl, A. Stelzer, Radar distance measurement with viterbi algorithm to resolve phase ambiguity, IEEE
+     Trans. Microw. Theory Tech. 68 (9) (2020) 3784–3793.
+[26] S. Vijay Kumar, X. Sun, Z. Wang, R. Goldsbury, I. Cheng, A U-net approach for InSAR phase unwrapping and denoising, Remote. Sens. 15 (21) (2023).
+[27] L. Zhang, G. Huang, Y. Li, S. Yang, L. Lu, W. Huo, A robust InSAR phase unwrapping method via improving the pix2pix network, Remote. Sens. 15 (19)
+     (2023).
+[28] W. Xu, Y. Li, C. Gu, J.-F. Mao, Large displacement motion interferometry with modified differentiate and cross-multiply technique, IEEE Trans. Microw.
+     Theory Tech. 69 (11) (2021) 4879–4890.
+[29] Z. Ma, J. Choi, H. Sohn, Continuous bridge displacement estimation using millimeter-wave radar, strain gauge and accelerometer, Mech. Syst. Signal
+     Process. vol. 197 (2023) 110408.
+[30] G. Guerzoni, E. Faghand, G.M. Vitetta, L. Vincenzi, E. Mehrshahi, Novel movement-based methods for the calibration of colocated multiple-input
+     multiple-output radars, IEEE Access 11 (2023) 116090–116108.
+[31] S.M. Patole, M. Torlak, D. Wang, M. Ali, Automotive radars: A review of signal processing techniques, IEEE Signal Process. Mag. 34 (2) (2017) 22–35.
+[32] G. Zhang, Y. Wu, W. Zhao, J. Zhang, Radar-based multipoint displacement measurements of a 1200-m-long suspension bridge, ISPRS J. Photogramm.
+     Remote Sens. 167 (2020) 71–84.
+[33] M. Planitz, Inconsistent systems of linear equations, Math. Gaz. 63 (425) (1979) 181–185.
+[34] Texas Instruments, Design guide: TIDEP-01012; Imaging Radar Using Cascaded mmWave Sensor Reference Design, 2019, Available at https://www.ti.com/
+     lit/ug/tiduen5a/tiduen5a.pdf.
+[35] R. Guidorzi, R. Diversi, L. Vincenzi, C. Mazzotti, V. Simioli, Structural monitoring of a tower by means of MEMS-based sensing and enhanced autoregressive
+     models, Eur. J. Control 20 (1) (2014) 4–13.
+[36] H.S. Lee, Y.H. Hong, H.W. Park, Design of an FIR filter for the displacement reconstruction using measured acceleration in low-frequency dominant
+     structures, Internat. J. Numer. Methods Engrg. 82 (4) (2010) 403–434.
+
+
+
+
+                                                                                20
+

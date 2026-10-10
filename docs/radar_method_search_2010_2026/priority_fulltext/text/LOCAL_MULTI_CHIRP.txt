@@ -1,0 +1,654 @@
+                                                                           Measurement 262 (2026) 120029
+
+
+                                                                     Contents lists available at ScienceDirect
+
+
+                                                                               Measurement
+                                                       journal homepage: www.elsevier.com/locate/measurement
+
+
+
+
+Accurate structural displacement measurement via enhanced
+millimeter-wave radar interferometry using multi-chirp-based adaptive
+phase unwrapping
+Zhanxiong Ma a,* , Lu Hai a , Tongtong Zhang a , Boran Wang a , Xin Jing a ,
+Qiangqiang Zhang a,* , Hoon Sohn b
+a
+    College of Civil Engineering and Mechanics, Lanzhou University, Lanzhou, Gansu 730000, China
+b
+    Department of Civil and Environmental Engineering, KAIST, Daejeon 34141, South Korea
+
+
+
+
+A R T I C L E I N F O                                       A B S T R A C T
+
+Keywords:                                                   Microwave radar has been widely utilized in structural displacement monitoring due to its long-range capabil­
+Structural displacement measurement                         ities and strong environmental adaptability. Among them, millimeter-wave radar has emerged as a key tech­
+Millimeter-wave radar interferometry                        nology for non-contact displacement sensing. Its short wavelength offers enhanced measurement resolution.
+Adaptive phase unwrapping
+                                                            However, the short wavelength also leads to phase wrapping issues during large structural movements, which
+                                                            can lead to inaccurate displacement measurement. To overcome this challenge, this study proposes an improved
+                                                            millimeter-wave radar interferometry technique for structural displacement measurement. A novel multi-chirp-
+                                                            based algorithm is developed to adaptively recover phase wrapped signals beyond phase limits. The algorithm
+                                                            first estimates the phase change rate using multi-chirps at each time step. It then predicts the phase for the next
+                                                            time step, providing a reference phase range for phase unwrapping. Unlike conventional algorithms that rely on
+                                                            empirical thresholds or additional sensors, the proposed algorithm operates autonomously. This feature makes it
+                                                            well-suited for structural displacement monitoring in field conditions. Laboratory tests show the algorithm’s
+                                                            accuracy in estimating large displacements (up to 5 cm), reducing root mean square errors by 98.80 % across
+                                                            various excitations. A field test on a footbridge further confirms its reliability, with a displacement estimation
+                                                            error of approximately 0.04 mm. These results demonstrate the potential of the proposed technique for high-
+                                                            precision structural displacement monitoring in real-world applications.
+
+
+
+
+1. Introduction                                                                                    based techniques [4]. Contact-based sensors, including accelerometers,
+                                                                                                   strain gauges, and Global Navigation Satellite System (GNSS) sensors,
+    Structural displacement monitoring is a critical measure to ensure                             have been widely adopted for structural monitoring applications.
+the long-term safety of bridges, buildings, and other civil infrastructures.                       Among them, accelerometers [5,6] and GNSS [7,8] are the predominant
+Structures in service are subjected to loads, environmental changes, and                           techniques due to their technological maturity. However, displacement
+material aging, which may cause displacement. If these exceed safety                               estimation through acceleration integration is prone to a significant low-
+thresholds, they can lead to cracks, settlements, or even structural                               frequency drift. While GNSS has demonstrated advantages in long-span
+instability and collapse [1–3]. Displacement monitoring helps identify                             bridge and high-rise building monitoring, its measurement accuracy is
+abnormal trends, provide early warnings, optimize maintenance stra­                                insufficient for detecting micro-vibrations in small to medium-span
+tegies, and prevent disasters. Therefore, displacement monitoring plays                            bridges.
+an important role in structural health assessment, lifespan prediction,                                Recent advancements have attracted interest in non-contact
+and safety management.                                                                             displacement monitoring, particularly vision-based techniques and
+    Numerous studies have been conducted on structural displacement                                radar interferometry techniques. Vision-based techniques offer advan­
+sensing, leading to the development of two major categories of                                     tages such as full-field displacement monitoring and multi-directional
+displacement monitoring techniques: contact-based and non-contact-                                 synchronous measurements [9–11]. Among them, the sampling moiré
+
+
+    * Corresponding authors.
+      E-mail addresses: mazx@lzu.edu.cn (Z. Ma), zhangqq@lzu.edu.cn (Q. Zhang).
+
+https://doi.org/10.1016/j.measurement.2025.120029
+Received 3 September 2025; Received in revised form 9 October 2025; Accepted 8 December 2025
+Available online 9 December 2025
+0263-2241/© 2025 Elsevier Ltd. All rights are reserved, including those for text and data mining, AI training, and similar technologies.
+Z. Ma et al.                                                                                                                   Measurement 262 (2026) 120029
+
+
+method [12] is a notable technique that enables multi-point measure­            quadrature I/Q signals [32]. However, the displacement change be­
+ments using only a few regular markers and a single fixed camera [13] or        tween two consecutive time steps remains within the half-wavelength
+drone camera [14]. This method is low-cost and can achieve displace­            limit [33].
+ment measurement with a high accuracy of up to 0.01 pixel. In addition              Attempts have also been made to address the phase wrapping issue
+to vision-based methods, microwave radar systems provide an alterna­            using additional sensor measurements. Zhang et al. combined two
+tive approach with complementary strengths, such as long-range mea­             FMCW radar signals operating at different frequencies to create a virtual
+surement capability and strong environmental adaptability. For                  signal with an effectively increased wavelength. While the dual-
+example, Guan developed a 2.4 GHz continuous wave (CW) radar with               frequency technique improves phase ambiguity resolution, it may
+an active transponder and applied the device for pedestrian bridge              introduce complexities related to system design and signal processing. In
+displacement measurement [15,16]. Zhang et al developed a 24 GHz                addition, implementing dual-frequency operations requires careful
+radar system and applied it for large-scale bridge displacement moni­           calibration to ensure signal coherence and may increase the computa­
+toring [17]. The commercialized radar interferometric sensors have also         tional load [33]. Authors previously fused millimeter-wave radar and
+been adopted for monitoring long-span bridges and steel-truss railway           acceleration measurements for accurate displacement measurement,
+bridges by Zhang et al [18] and Huang et al [19], respectively.                 and adaptive phase unwrapping was achieved with the help of accel­
+    Most previous studies employed centimeter-wave radars with radio            eration measurements [34,35]. Later on, targeting intermittent radar
+frequencies below 30 GHz. These radars have relatively long wave­               occlusion issues, a multi-target-based algorithm was developed for ab­
+lengths (e.g., 24 GHz corresponds to about 1.25 cm) and limited                 solute phase unwrapping, and then its robustness to phase noises was
+bandwidths (typically tens of MHz). The long wavelength reduces                 further improved by integrating it with the acceleration-aided algorithm
+measurement resolution for structural vibrations and requires larger            [36]. However, relying on the acceleration measurement introduced
+antennas, hindering device miniaturization and portability. The narrow          additional cost and difficulty. In addition, one of the biggest advantages
+bandwidth also limits range resolution and the ability to distinguish           of radar interferometry techniques is their ability to monitor multiple
+multiple targets. Furthermore, transmitter and receiver units are often         target displacements. The authors’ previous phase unwrapping algo­
+composed of discrete components, resulting in bulky systems with high           rithms require the installation of an accelerometer at each of these
+power consumption and cost. Together, these limitations restrict the            displacement measurement locations, which may be cumbersome for
+wide application of centimeter-wave radars in structural vibration              multi-point displacement monitoring.
+monitoring.                                                                         This study proposes an improved millimeter-wave radar interfer­
+    In contrast, millimeter-wave radars have much shorter wavelengths           ometry technique for accurate structural displacement measurement. A
+(e.g., 77 GHz corresponds to about 3.9 mm) and wider bandwidths                 multi-chirp-based algorithm is developed to adaptively recover wrapped
+(typically 1–4 GHz or more). Wider bandwidth improves range reso­               phases beyond phase limits. The phase change rate is first estimated
+lution, enhances multi-target discrimination, and significantly increases       using multi-chirps at the current time step and then used to predict the
+micro-displacement measurement accuracy. Millimeter-wave radar                  phase at the following time step. The predicted phase can roughly
+development also enables compact antenna designs and highly inte­               indicate the range of the actual phase, which helps avoid phase ambi­
+grated hardware. Most modern millimeter-wave radars use a system-on-            guity issues. Unlike previous algorithms, the proposed algorithm does
+chip design, integrating frequency synthesis, transceiver chains, and           not rely on ad-hoc thresholds or additional sensor measurements. This
+analog-to-digital conversion in a single module. This greatly reduces           ensures a more cost-effective and scalable solution.
+device size, power consumption, and cost. Their compact size, low                   The key contributions of this study are as follows: (1) development of
+power, low cost, and stable operation under extreme weather make                a novel multi-chirp-based algorithm for adaptive phase unwrapping; (2)
+millimeter-wave radars ideal for high-precision, non-contact displace­          improvement of the robustness by considering the phase wrapping issue
+ment monitoring. For example, Guo et al. proposed a vibration signal-to-        in phase change rate estimation; (3) elimination of the need for any ad-
+noise ratio (SNR) metric and a multi-signal consolidation design [20].          hoc threshold or additional sensor measurements. Compared with
+This design achieved micrometer-level vibration sensing and signifi­            existing phase-unwrapping algorithm, the proposed algorithm provides
+cantly reduced amplitude errors. Xiong et al. developed the scanning            several distinctive advantages: (1) Unlike the MDACM family of algo­
+microwave vibrometer [21]. It uses phase-encoded beam scanning and              rithms [30–32] that rely on the half-wavelength limitation, the proposed
+coherent signal synthesis for full-field vibration measurement. Izumi           algorithm remain robust under large inter-frame displacements; (2)
+et al. proposed a data-driven dynamic motion error compensation                 unlike the dual-frequency radar algorithm [33] that increase synthetic
+method [22]. It mitigates measurement interference from radar platform          wavelength at the cost of complex hardware, the proposed algorithm
+motion and achieves micrometer-level displacement estimation in field           remains single-frequency and thus hardware-friendly while maintaining
+tests on simply supported bridges. Millimeter-wave radar also shows             high accuracy; (3) Unlike the acceleration-aided algorithm [34–36] that
+potential for modal identification [23], bridge dynamic load testing            require extra sensors at each monitoring location, the proposed algo­
+[24], vibration response analysis [25], and cable tension estimation            rithm relies solely on radar signals, avoiding deployment complexity
+[26,27].                                                                        while supporting multi-target displacement measurement. Table 1
+    Despite its advantages, millimeter-wave radar suffers from phase-           summarizes the main differences between existing and proposed
+wrapping issues (or known phase ambiguity issues) due to its short              algorithms.
+wavelength. The phase directly extracted from radar measurements is                 The rest of this paper is structured as follows: Section 2 outlines the
+inherently limited to the range [-π, π]. When the actual phase exceeds          overall FMCW radar ranging principle. Section 3 details the proposed
+this range, phase wrapping occurs, leading to errors in displacement            structural displacement measurement method based on FMCW radar,
+measurement. Traditional phase-unwrapping algorithms [28,29] as­                incorporating a multi-chirp-based phase unwrapping algorithm. Section
+sume that phase changes between consecutive time steps remain below             4 provides experimental validation through both laboratory and field
+π, and then adjust wrapped phases by adding or subtracting multiples of         tests. Finally, Section 5 summarizes the study and explores potential
+± 2π. However, this assumption does not always hold, resulting in               directions for future research.
+inaccurate displacement measurement. To address phase ambiguity,
+researchers have proposed various solutions. Xu et al. introduced a             2. Overview of FMCW radar ranging principle
+modified differentiate and cross-multiply (MDACM) algorithm for
+continuous-wave (CW) radars, which improves phase unwrapping                       FMCW radar estimates distance by transmitting a frequency-
+robustness [30,31]. Liu et al. extended this algorithm for frequency-           modulated signal and receiving its reflection from a target. The time
+modulated continuous-wave (FMCW) radar by synthesizing                          delay (Δt) between the transmitted and reflected signals is used to
+
+                                                                            2
+Z. Ma et al.                                                                                                                                          Measurement 262 (2026) 120029
+
+
+Table 1
+Comparison between existing and proposed phase unwrapping algorithms.
+  Algorithms                             Key Working Principle                                Advantages            Limitations                       Scalability
+
+  Single           Traditional           Adjusts wrapped phases by ± 2π, ensuring             Easy to implement     The actual phase change needs     Easy to extend for multi-
+    − radar        Algorithm             consecutive phase changes below π                                          to be less than π                 target monitoring
+    only           [28,29]
+                   MDACM                 Uses differentiation and cross-multiplication to     Improved              Half-wavelength limit [33]        ​
+                   Algorithm             detect and correct phase jumps                       robustness to phase
+                   [30–32]                                                                    noises
+                   Proposed              Predicts the current phase by estimating the phase   Robust under large    Large data volume; Complex        ​
+                   Algorithm             change rate from previous multiple chirps for        inter-frame motion    signal processing
+                                         accurate unwrapping.
+  Dual-Frequency Radar Algorithm         Combines two FMCW radar signals at different         Improved phase        Complex hardware and signal       ​
+   [33]                                  frequencies to create a virtual longer wavelength    ambiguity             processing; Calibrations of two
+                                                                                              resolution            sensors
+  Acceleration-aided Algorithm           Uses acceleration to assist adaptive phase           Robust under large    ​                                 Requires extra sensors at each
+    [34,35]                              unwrapping                                           inter-frame motion                                      location for multi-target
+                                                                                                                                                      monitoring
+
+
+
+compute the distance (D) between the radar and the target with the                                can be achieved by transmitting a single chirp at each time step and
+known speed of light (c). The transmitted signal commonly used is a                               calculating the distance variation from. Since phase exhibits greater
+chirp signal, defined as:                                                                         sensitivity than frequency in estimating time delays, it is usually
+                     2
+                                                                                                  employed in displacement measurement. However, the phase directly
+T(t) = ej(2πfs t+πKt ) , 0 < t < Tc                                                    (1)        obtained from radar measurements is limited to a range of [-π, π]. When
+                                                                                                  the actual phase exceeds these boundaries, phase wrapping occurs. Ac­
+where fs and K represent the starting frequency and frequency change                              cording to the phase-distance relationship outlined in Eq. (4), the esti­
+rate, respectively. Tc denotes the duration of the chirp signal, respec­                          mated displacement is confined within a range of [-1/4 λ, 1/4 λ], where
+tively. An example of chirp signals is shown in Fig. 1, and its instanta­                         λ represents the radar wavelength. Consequently, when the displace­
+neous frequency changes linearly over time. Then, the reflected signal                            ment of a structure surpasses this range, phase wrapping can occur, as
+from the target becomes,                                                                          shown in Fig. 2a. Furthermore, the initial phase (φ0 ) may not necessarily
+                                                2                                                 be close to zero in some instances. If the initial phase is near the phase
+R(t) = δT(t − Δt) = δej(2πfs (t− Δt)+πK(t− Δt) )                                       (2)
+                                                                                                  limits of − π or π, even small displacements may lead to phase wrapping
+Here, δ accounts for the signal attenuation during the transmission.                              issues (Fig. 2b), complicating accurate displacement measurement.
+   An intermediate frequency (IF) signal is then computed by mixing
+transmitted and reflected signals:                                                                3. FMCW radar-based continuous structural displacement
+                                                                                                  measurement with multi-chirp-based adaptive phase
+IF(t) = T(t) × R* (t) ≈ δej(φ+ωt) ; ω = 2πKΔt; φ = 2π fs Δt                            (3)        unwrapping
+   It should be noted that both the frequency (ω) and phase (φ) items
+                                                                                                  3.1. FMCW radar-based continuous structural displacement measurement
+are linearly related to Δt. Then, distance can be estimated from either ω
+or φ,
+                                                                                                       Fig. 3 presents an overview of the proposed FMCW radar-based
+   c      c      c                                                                                structural displacement measurement technique, which incorporates a
+D = Δt =     ω=       φ                                                                (4)
+   2     4πK    4π fs                                                                             multi-chirp-based adaptive phase unwrapping algorithm. The radar is
+    For multiple targets, the IF signal extends to:                                               positioned at the designated displacement measurement location, where
+                                                                                                  it transmits signals and receives reflections from the ground. Typically,
+          Q
+          ∑          l   l                                                                        multiple targets are detected from the surroundings of the structure (e.
+IF(t) ≈         δl ej(φ +ω t) ; ωl = 2πKΔtl ; φl = 2πfs Δt l                           (5)
+          l=1
+                                                                                                  g., the ground), and displacement measurements are acquired along the
+                                                                                                  line of sight (LOS) for each target. Consequently, a specific target must
+    and for each target, its distance to the radar can be estimated simi­                         be selected for tracking, and a conversion factor must be determined to
+larly from either the frequency or the phase. Here, superscript l denotes                         transform the LOS displacement into the actual displacement.
+the lth target, and Q denotes the number of targets.                                                   To perform the initial calibration, the radar first transmits a single
+    For structural displacement monitoring, continuous measurements
+
+
+
+
+                                           Fig. 1. Example of chirp signals: (a) amplitude versus time and (b) frequency versus time.
+
+                                                                                              3
+Z. Ma et al.                                                                                                                        Measurement 262 (2026) 120029
+
+
+
+
+                                Fig. 2. Phase unwrapping caused by (a) large motion and (b) initial phases close to phase limits.
+
+
+
+
+Fig. 3. Continuous structural displacement measurement using FMCW radar: (a) sensor setup and initial calibration, and (b) flowchart of displacement measurement.
+
+
+chirp signal and receives its reflection. The IF signal is subsequently             with a fixed time interval of 1/Fs to measure structural displacement at a
+computed and transformed into a distance spectrum using the Fast                    sampling rate of Fs . In contrast, the proposed technique transmits mul­
+Fourier Transform (FFT). Peaks in the distance spectrum correspond to               tiple chirps at each time step, rather than a single chirp, to address phase
+various targets, with spectral amplitudes representing reflection in­               wrapping issues. The first chirp within each set is designated as the main
+tensities. The target exhibiting the strongest reflection is generally              chirp, while the remaining chirps are referred to as sub-chirps.
+selected for displacement measurement. To account for the angular                       At each time step (e.g., the kth time step), phases of both the main
+discrepancy between the LOS direction and the actual vibration direc­               chirp and the sub-chirps corresponding to the selected target are first
+tion, a conversion factor (β) is established based on the geometric                 extracted by applying the FFT transform to the IF signals. Then, the
+relationship between the radar and the selected target:                             phase of the main chirp is unwrapped by the proposed multi-chirp-based
+                                                                                    phase unwrapping algorithm (detailed in Section 3.2) with assistance
+     D
+β=                                                                        (6)       from the phase values of the sub-chirps. The LOS and actual displace­
+     H
+                                                                                    ments are then computed based on the phase variation:
+   where D and H represent radar-to-target distances in the LOS and
+                                                                                                          c (          )
+vertical directions, respectively. While D can be estimated directly from           uLOS,k = Dk − D0 =        φ − φ0,m                                       (7)
+                                                                                                         4πfs k,m
+radar measurements, H needs to be measured in advance using a laser
+rangefinder. It should be noted that the generalized definition of the
+                                                                                    uk = βuLOS,k                                                             (8)
+conversion factor β depends on both the angle between the actual
+movement direction and the LOS direction, and the angle between the                 where D0 and φ0,m denote the initial distance and phase of the main
+actual movement direction and the target surface. Equation (6) is a                 chirp, respectively. φk,m denote the phase of the main chirp at the kth
+simplified version for practical application in the field, as it ignores the
+                                                                                    time step. According to Equation (8), any calibration error in β directly
+angle between the actual movement direction and the target surface.                 propagates to the measured displacement uk , with the relative error of uk
+   Following calibration, displacement measurement proceeds contin­
+                                                                                    equal to that of β. For example, a 1 % error in β would result in a ± 0.1
+uously. Conventional techniques typically transmit a single chirp signal
+
+                                                                                4
+Z. Ma et al.                                                                                                                            Measurement 262 (2026) 120029
+
+
+mm error for a 10 mm displacement and ± 0.5 mm for a 50 mm                                   If the raw phase corresponding to the main chirp at the next time step
+displacement.                                                                            is denoted as φk+1,m , the unwrapped phase is determined as:
+
+                                                                                         φ*k+1,m = φk+1,m + 2Nr π                                               (13)
+3.2. Mult-chirp-based phase unwrapping principle
+                                                                                            Here,Nr is an integer, and its value should be chosen by minimizing
+    To address phase wrapping issues, a multi-chirp-based phase                          the difference between φ*k+1,m and φ̂ k+1,m ,
+unwrapping algorithm was proposed in this study (Fig. 4). The funda­                                  (φ
+                                                                                                       ̂             φk+1,m )
+                                                                                                           k+1,m −
+mental principle of this algorithm is to estimate the phase change rate                  Nr = round                                                             (14)
+                                                                                                                2π
+using multiple chirps obtained from the previous time step and subse­
+quently predict the phase at the current time step. The predicted phase                      Here, the following things need to be noted. First, the duration of the
+can roughly indicate the range of the actual phase, which helps in                       time period of [kΔt, (k + 1)Δt] is much larger than the duration of the
+finding the unwrapped phase.                                                             time period of [kΔt, kΔt + Nc Tc ]. Then, phase may not vary linearly be­
+    At each time step, a total of (Nc + 1) chirps including one main chirp               tween kΔt and (k + 1)Δt. Therefore, this linear assumption will cause
+and Nc sub-chirps, are transmitted by the radar’s transmitter consecu­                   errors in the phase prediction. Nevertheless, the predicted phase is only
+tively. The temporal spacing between two chirps equals the sum of the                    used to narrow the possible range of phase values. As long as the pre­
+chirp duration and the idle time required by the radar. These signals are                diction error remains below π, correct unwrapping is ensured. In Section
+reflected and subsequently received by the radar’s receiver. Following                   4.2, excitation frequencies up to 5 Hz were considered, and phase
+signal processing, the phases corresponding to the selected target for all               unwrapping was achieved correctly. Considering that vibrations in civil
+(Nc + 1) chirps are obtained and expressed as:                                           infrastructures are typically dominated by low-frequency signals, this
+                                                                                         assumption is generally reasonable for such applications. However, in
+φk,m & φk,i , i = 1, ⋯Nc                                                       (9)       high-speed or high-frequency cases, the linear assumption may break
+                                                                                         down. This can cause prediction errors greater than π, leading to
+Owing to phase wrapping effects, the extracted phases may be discon­                     unwrapping failure.
+tinuous. Assuming that the unwrapped phase corresponding to the main                         Second, linear fitting requires at least two points, but three or more
+chirp is recovered as φ*k,m , then the unwrapped phases corresponding to                 are generally recommended to reduce phase noise and improve fitting
+sub-chirps can be determined as:                                                         accuracy. However, increasing the number of sub-chirps also increases
+                                                                                         the number of samples per interval, which is limited by the radar
+φ*k,i = φk,i + φ*k,m − φk,m , i = 1, ⋯Nc                                      (10)
+                                                                                         hardware. Therefore, in scenarios with high phase SNR, such as short-
+                                                                                         range monitoring, only a few sub-chirps (e.g., 3–5) are sufficient. In
+Considering the short time duration, the phase can be assumed to vary
+                                                                                         lower SNR scenarios, such as long-range monitoring, a larger number of
+linearly with a rate of vk during the time period of [kΔt, kΔt + Nc Tc ], and
+                                                                                         sub-chirps can be employed within the limits of hardware constraints.
+then the following relationship holds,
+                                                                                             Last, it is assumed that the structure exhibits minimal or negligible
+              ⎡        ⎤
+⎡       ⎤                                                                                vibration during the initial time step, ensuring that phase wrapping does
+   Tc            φ*k,1           ⎡
+                                    φk,i
+                                         ⎤
+              ⎢        ⎥
+⎣ ⋮ ⎦vk = ⎢ ⋮ ⎥ − φ* = ⎣ ⋮ ⎦ − φk,m                                                      not occur at the start. According to Eq. (4), the initial displacement
+                           k,m                                           (11)                                                ( )     (
+  Nc Tc
+              ⎣        ⎦                                                                 should therefore be within [− c/ 4fs , c/ 4fs , ]. This condition can be
+                φ*                 φk,Nc
+                   k,Nc
+                                                                                         easily satisfied by selecting an initial time point when the structure is
+                                                                                         free from external loads. For bridges, this corresponds to periods with no
+The phase change rate vk is then estimated from Eq. (11) using a least-                  vehicles or pedestrians on the span.
+squares algorithm. Finally, the phase at next time step can be pre­
+dicted as,
+
+̂ k+1,m = φ*k,m + vk Δt
+φ                                                                             (12)
+
+
+
+
+                                           Fig. 4. Basic principle of the proposed multi-chirp-based phase unwrapping algorithm.
+
+                                                                                     5
+Z. Ma et al.                                                                                                                           Measurement 262 (2026) 120029
+
+
+3.3. Robustness enhancement considering phase wrapping in phase                           The experimental results are presented in Fig. 8. Since the vibration
+change rate estimation                                                                direction is perpendicular to the wall, a strong reflection was observed
+                                                                                      from the wall (Fig. 8a). The LOS direction is identical to the vibration
+    Given the relatively short duration, phase changes between (Nc + 1)               direction, resulting in a β value of 1. Fig. 8b displays the raw phase
+chirps are generally small. However, if the phase of the first chirp is close         extracted from the target, where phase wrapping is clearly observed,
+to the phase limits (i.e., ±π), phase wrapping may still occur (Fig. 5),              with all phases constrained between − π and π. Displacement was esti­
+leading to incorrect estimation of the phase change rate. To mitigate this            mated from the phase information using both the proposed and existing
+issue, phase unwrapping is required. Again, due to the short time in­                 phase-unwrapping algorithms [29]. The existing algorithm is widely
+terval between chirps, phase changes remain relatively small, making                  used in recent FMCW-based studies [20,38,39], including the one
+wrapping easy to detect. By comparing the phase difference between the                employing the same radar sensor (e.g., TI IWR1642) [20]. However, it
+first chirp and subsequent chirps, 2π can be added or subtracted as                   failed to recover the phase correctly at certain time steps, leading to
+needed to ensure that phase differences remain below π (Equation 15).                 accumulated unwrapping errors and a noticeable bias (Fig. 8c). Conse­
+           ⎧            ⃒             ⃒
+                        ⃒ *           ⃒                                               quently, a large root mean square error (RMSE) of 22.10 mm was
+           ⎪
+           ⎪    φ*k,i   ⃒φk,i − φ*k,m ⃒ ≤ π
+           ⎪
+           ⎨                                                                          observed. In contrast, the proposed algorithm accurately recovered the
+    φ*k,i = φ* + 2π φ* − φ* < π , i = 1, ⋯Nc (15)                                     phase at all time steps, achieving strong agreement with the actual
+           ⎪  k,i          k,i    k,m
+           ⎪
+           ⎪
+           ⎩ φ* − 2π φ* − φ* > π                                                      displacement and yielding a significantly lower RMSE of 0.39 mm
+              k,i          k,i    k,m
+                                                                                      (Fig. 8d).
+                                                                                          To further analyze the displacement measurement performance,
+4. Experimental validation
+                                                                                      RMSE values were evaluated for different time periods under varying
+                                                                                      excitation conditions, as summarized in Table 2. The existing algorithm
+4.1. Device description
+                                                                                      assumes that the phase change between consecutive time steps remains
+                                                                                      below π [29], but this assumption fails under certain conditions. The
+    A Texas Instruments (TI) IWR1642 millimeter-wave radar was
+                                                                                      RBV excitation contains both low- and high-frequency components,
+employed to validate the performance of the proposed technique. Fig. 6
+                                                                                      leading to sudden displacement changes at specific time steps. As a
+shows the radar specification and chirp configuration. The radar oper­
+                                                                                      result, the existing algorithm fails to unwrap the phase correctly at these
+ates at a starting frequency of 77 GHz with a maximum bandwidth of 4
+                                                                                      time steps. This leads to error accumulation in subsequent steps,
+GHz. The frequency slope of chirp signals was set to 64.985 MHz/μs,
+                                                                                      resulting in large RMSE values (22.10 mm and 9.04 mm, respectively).
+enabling high-resolution ranging with a 4.89 cm distance resolution and
+                                                                                      For low-frequency excitations (i.e., 0.1 Hz and 0.3 Hz), displacement
+a maximum detection range of 12 m. Each chirp consists of 256 ADC
+                                                                                      changes gradually, ensuring that the phase change remains within the
+samples over a 60 μs duration, with an Analog-to-Digital Converter
+                                                                                      assumed limit for all time steps. Thus, phase unwrapping is successfully
+(ADC) sampling frequency of 6000 kS/s. At each time step, four chirps, i.
+                                                                                      performed by the existing algorithm, yielding small RMSE values of
+e., one main chirp and three sub-chirps, are transmitted. For validation,
+                                                                                      0.25 mm and 0.36 mm, respectively. However, at 1 Hz excitation,
+a PolyTec RSV-150 Laser Doppler Vibrometer (LDV) was used as the
+                                                                                      displacement varies rapidly, causing the existing algorithm to fail at
+reference displacement measurement device, providing a 0.3 nm reso­
+                                                                                      most time steps. This results in measurement saturation and the highest
+lution [37]. Both measurements from the radar and LDV were recorded
+                                                                                      RMSE exceeding 40 mm. In all five cases, the proposed algorithm suc­
+at a 100 Hz sampling rate, ensuring synchronized data acquisition. This
+                                                                                      cessfully measured displacement with RMSE values below 0.6 mm,
+experimental setup provided a comprehensive assessment of the
+                                                                                      resulting in an average error reduction of 97.8 % compared to the
+millimeter-wave radar’s capability to accurately measure dynamic
+                                                                                      existing algorithm.
+structural displacements.
+                                                                                          The phase change rate estimation results are shown in Fig. 9.
+                                                                                      Without performing phase unwrapping using Eq. (15), the phase change
+4.2. Four-story building model test considering large motion                          rate was estimated with a total of 6258 outliers (Fig. 9a). However, these
+                                                                                      outliers disappeared with phase unwrapping (Fig. 9b). This justifies the
+    The proposed technique was first validated on a four-story building               necessity of performing phase unwrapping in phase change rate esti­
+model (Fig. 7). The millimeter-wave radar was placed on top of the                    mation. Note that these outliers are distributed under all five different
+model, while an APS 400 ELECTRO-SEIS shaker induced horizontal                        excitations, meaning that phase unwrapping is required for both high
+motion for the model. A concrete wall, located approximately 1.318 m                  and low-frequency excitations.
+away, was chosen as the fixed target for the radar. A 325 s signal,                       Table 3 compares the computational efficiency of the existing and
+comprised of recorded bridge vibration (RBV) signals and sine signals                 the proposed algorithms. Both algorithms estimate structural displace­
+with different frequencies, was input into the shaker to generate rela­               ment at a frequency of 100 Hz over a duration of 325 s, corresponding to
+tively large motion.
+
+
+
+
+               Fig. 5. Example of phase distribution of multiple chirps when phase: (a) far away from the phase limit and (b) close to the phase limit.
+
+                                                                                  6
+Z. Ma et al.                                                                                                                     Measurement 262 (2026) 120029
+
+
+
+
+                                                      Fig. 6. Radar specification and chirp configuration.
+
+
+
+
+                                                    Fig. 7. Overview of the four-story building model test.
+
+
+32,500 time steps. The existing algorithm requires only 1 chirp per time           (OSMO action) was used to provide reference displacement
+step, processing a total of 1 × 32,500 chirps. Its phase extraction takes          measurements.
+310.03 ms and phase unwrapping 2.62 ms, for a total of 312.65 ms. In                  Fig. 11a shows the distance spectra corresponding to the first frame.
+contrast, the proposed algorithm requires 4 chirps per time step, pro­             Two peaks were clearly observed at 1.14 m and 1.57 m, which corre­
+cessing a total of 4 × 32,500 chirps. Phase extraction takes 843.51 ms             spond to the conner reflectors 1 and 2, respectively. Fig. 11b shows raw
+and phase unwrapping 207.15 ms, for a total of 1,050.66 ms. The                    phases extracted from these two peaks, and they were limited in the
+increased total computation time of the proposed algorithm is mainly               range of [-π, π]. Therefore, these raw phases can not be directly used for
+due to the simultaneous processing of four times the data and the more             displacement estimation. Estimation results of the proposed technique
+complex phase unwrapping procedure. However, the average compu­                    are shown in Fig. 12. Displacements were correctly estimated by the
+tation time per time step of the proposed algorithm is only 0.03 ms,               proposed technique with RMSE less than 0.1 mm.
+which is far below the 10 ms time step, ensuring real-time displacement
+estimation.
+                                                                                   4.4. Footbridge test
+
+4.3. Linear translation stage test for multi-target monitoring                         The proposed technique was ultimately validated on a three-span
+                                                                                   steel box-girder footbridge located in Daejeon, Korea. The bridge com­
+    The proposed technique was then validated using two linear trans­              prises spans of 45 m, 45 m, and 30 m, and the experiments were
+lation stages, considering multi-target monitoring as shown in Fig. 10.            conducted on one of the 45 m spans (Fig. 13). Temperature and wind
+Two conner reflectors were fixed to linear translation stages, which               speed were not measured during the tests. However, based on local
+provide reciprocating motion. The millimeter-wave radar was placed in              weather data, conditions during testing were approximately 24–25 ◦ C
+front of the stages to monitor the displacement of two reflectors simul­           with wind speeds ranging from 7.41 to 9.26 km/h. A millimeter-wave
+taneously. The distances from the radar to the two corner reflectors were          radar was positioned at the mid-span, while an LDV was placed
+approximately 1.1 m and 1.6 m., respectively. The relative positions of            beneath the bridge to capture the actual displacement. To induce vi­
+the radar and the reflectors are illustrated in Fig. 10. A vision camera           brations, several individuals either walked slowly across the bridge or
+
+                                                                               7
+Z. Ma et al.                                                                                                                             Measurement 262 (2026) 120029
+
+
+
+
+Fig. 8. Lab-scale test results: (a) distance spectrum, (b) raw phase of main chirps, and (c)-(d) displacements measured by the existing algorithm [29], and (d)
+displacements measured by the proposed p algorithm.
+
+
+                                                                                         multiple strong reflections were observed from the ground and the LDV
+Table 2
+                                                                                         devices (Fig. 8a), and the target with the strongest reflection was used
+RMSEs (mm) of displacements estimated using existing and proposed
+                                                                                         for displacement measurement (Fig. 14a). Fig. 14b displays the raw
+algorithms.
+                                                                                         phase extracted from the target, where phase wrapping is clearly
+  #     Excitations   Duration          Existing       Proposed         Reduction        observed, with all phases constrained between − π and π. Displacement
+                                        (mm)           (mm)
+                                                                                         was estimated from the phase information using the proposed algo­
+  1     RBV1               [0, 64 s]    22.10          0.29             98.69 %          rithms, achieving strong agreement with the actual displacement and
+  2     RBV2           [66 s, 130 s]     9.04          0.22             97.57 %
+  3     0.1 Hz sine   [131 s, 195 s]     0.25          0.25             0
+  4     0.3 Hz sine   [196 s, 260 s]     0.36          0.36             0                Table 3
+  5     1 Hz sine     [261 s, 325 s]    42.43          0.51             98.80 %
+                                                                                         Comparison between existing and proposed algorithms in terms of computa­
+                                                                                         tional costs.
+  Average                               14.84          0.33             97.80 %
+                                                                                          Algorithms   Number of          Phase          Phase             Total
+                                                                                                       chirps processed   extraction     unwrapping        (ms)
+                                                                                                                          (ms)           (ms)
+jumped at the mid-span location.
+   Three tests were conducted with a duration of 60 s, and the experi­                    Existing     1 × 32,500         310.03           2.62             312.65
+                                                                                          Proposed     4 × 32,500         843.51         207.15            1050.66
+mental results are presented in Fig. 14. Due to the setup of the LDV,
+
+
+
+
+                                 Fig. 9. Multi-chip-based phase change rate estimation results: (a) before and (b) after phase unwrapping.
+
+                                                                                     8
+Z. Ma et al.                                                                                                                             Measurement 262 (2026) 120029
+
+
+
+
+                                              Fig. 10. Overview of the multi-target test using linear translation stages.
+
+
+
+
+                            Fig. 11. Radar measurements: (a) distance spectrum of the first frame and (b) raw phases of two reflectors.
+
+
+
+
+       Fig. 12. Estimation results: (a)-(b) phase change rates of reflectors 1 and 2, respectively, and (c)-(d) displacement of reflectors 1 and 2, respectively.
+
+
+
+                                                                                   9
+Z. Ma et al.                                                                                                                        Measurement 262 (2026) 120029
+
+
+
+
+                                                            Fig. 13. Overview of the footbridge test.
+
+
+
+
+         Fig. 14. Footbridge test results: (a) distance spectrum, (b) raw phase of main chirps, and (c) displacements measured by the proposed technique.
+
+
+yielding a significantly lower RMSE of 0.05 mm (Fig. 14c). Note that,                large displacements of up to 5 cm. Under both low- and high-frequency
+due to the relatively small amplitude of bridge displacements, the phase             excitations, the proposed technique successfully recovered the phase,
+change between consecutive time steps is below π for all time steps in               achieving up to a 98.80 % reduction in displacement measurement error
+three tests, and then the existing algorithm achieves identical results to           compared to the existing algorithm. Performance for multi-target
+the proposed algorithm.                                                              displacement monitoring was further confirmed using a linear trans­
+                                                                                     lation stage test, with errors below 0.1 mm. Finally, a field test on a
+5. Conclusions                                                                       footbridge demonstrated the algorithm’s reliability, with displacement
+                                                                                     measurement errors of approximately 0.04 mm.
+    This study presents an improved millimeter-wave radar interferom­                    Future research will focus on enhancing the robustness, scalability,
+etry technique for measuring structural displacement. A multi-chirp-                 and real-time applicability of the proposed technique. First, systematic
+based algorithm was proposed to adaptively recover phases wrapped                    investigations under diverse environmental conditions (e.g., rain, fog,
+over phase limits, while phase unwrapping is applied for phase change                and electromagnetic interference) will be conducted to ensure reliable
+rate estimation to further improve robustness. The key advantage of the              long-term monitoring. Second, the proposed multi-chirp algorithm will
+proposed algorithm is its capability to operate without the need for ad-             be deployed on the previously developed compact sensing system. This
+hoc thresholding or additional sensor measurements. The effectiveness                system integrates a millimeter-wave radar, an accelerometer, and a
+of the proposed technique was first validated through laboratory ex­                 Raspberry Pi 4, and can achieve real-time displacement estimation at
+periments on a four-story frame structure, where it accurately estimated             100 Hz [40]. Since the new algorithm requires only the radar,
+
+
+                                                                                10
+Z. Ma et al.                                                                                                                                                Measurement 262 (2026) 120029
+
+
+computational complexity, power consumption, and costs are expected                               [13] S. Ri, Q. Wang, H. Tsuda, H. Shirasaki, K. Kuribayashi, Displacement measurement
+                                                                                                       of concrete bridges by the sampling Moiré method based on phase analysis of
+to be reduced while maintaining real-time capability. Third, future
+                                                                                                       repeated pattern, Strain 56 (2020) e12351, https://doi.org/10.1111/str.12351.
+studies will address challenges in multi-target monitoring, such as                               [14] S. Ri, J. Ye, N. Toyama, N. Ogura, Drone-based displacement measurement of
+overlapping echoes and varying SNRs, to ensure stable tracking in                                      infrastructures utilizing phase information, Nat. Commun. 15 (2024) 395, https://
+complex bridge environments.                                                                           doi.org/10.1038/s41467-023-44649-2.
+                                                                                                  [15] S. Guan, J.A. Bridge, C. Li, N.J. DeMello, Smart radar sensor network for bridge
+                                                                                                       displacement monitoring, J. Bridg. Eng. 23 (2018) 04018102.
+CRediT authorship contribution statement                                                          [16] S. Guan, J.A. Rice, C. Li, Y. Li, G. Wang, Structural displacement measurements
+                                                                                                       using DC coupled radar with active transponder, Struct. Control Hlth. 24 (2017)
+                                                                                                       e1909.
+    Zhanxiong Ma: Writing – review & editing, Writing – original draft,                           [17] G. Zhang, Y. Wu, W. Zhao, J. Zhang, Radar-based multipoint displacement
+Visualization, Validation, Supervision, Resources, Project administra­                                 measurements of a 1200-m-long suspension bridge, ISPRS J. Photogramm. Remote
+tion, Methodology, Investigation, Funding acquisition, Formal analysis,                                Sens. 167 (2020) 71–84, https://doi.org/10.1016/j.isprsjprs.2020.06.017.
+                                                                                                  [18] B. Zhang, X. Ding, C. Werner, K. Tan, B. Zhang, M. Jiang, J. Zhao, Y. Xu, Dynamic
+Data curation, Conceptualization. Lu Hai: Formal analysis, Data cura­                                  displacement monitoring of long-span bridges with a microwave radar
+tion. Tongtong Zhang: Validation, Data curation. Boran Wang: Vali­                                     interferometer, ISPRS J. Photogramm. Remote Sens. 138 (2018) 252–264.
+dation, Investigation. Xin Jing: Writing – original draft, Validation.                            [19] Q. Huang, Y. Wang, G. Luzi, M. Crosetto, O. Monserrat, J. Jiang, H. Zhao, Y. Ding,
+                                                                                                       Ground-based radar interferometry for monitoring the dynamic performance of a
+Qiangqiang Zhang: Resources, Project administration, Funding acqui­                                    multitrack steel truss high-speed railway bridge, Remote Sens. (Basel) 12 (2020)
+sition. Hoon Sohn: Resources, Writing – review & editing.                                              2594, https://doi.org/10.3390/rs12162594.
+                                                                                                  [20] J. Guo, Y. He, C. Jiang, M. Jin, S. Li, J. Zhang, R. Xi, Y. Liu, Measuring micrometer-
+                                                                                                       level vibrations with mmwave radar, IEEE Trans. Mob. Comput. (2021) 1, https://
+Declaration of competing interest
+                                                                                                       doi.org/10.1109/TMC.2021.3118349.
+                                                                                                  [21] Y. Xiong, Z. Liu, S. Li, G. Meng, Z. Peng, Scanning microwave vibrometer: full-field
+    The authors declare that they have no known competing financial                                    vibration measurement via microwave sensing with phase-encoded beam scanning,
+interests or personal relationships that could have appeared to influence                              IEEE Trans. Instrum. Meas. 72 (2023) 1–11, https://doi.org/10.1109/
+                                                                                                       TIM.2023.3244835.
+the work reported in this paper.                                                                  [22] Y. Izumi, M. Komuro, T. Kawarai, K. Yoshimori, Dynamic displacement estimation
+                                                                                                       of bridge using MIMO radar interferometry from an oscillating platform, IEEE
+Acknowledgment                                                                                         Trans. Geosci. Remote Sens. (2025).
+                                                                                                  [23] Y. Matsue, J. Kuroda, Y. Kashima, S. Kawaji, S. Yamada, T. Nagayama, J. Iyama,
+                                                                                                       Modal analysis of structures using a millimeter-wave sensor, IEEE Sens. Lett.
+   This research was supported by the Gansu Key Research and                                           (2025).
+Development Program under Grant No. 25YFWA001 and the Talent                                      [24] L. Qiao, X.-J. Xia, H. Guo, H. Song, Y.-Q. Feng, T.A. Ka, Analysis of bridge dynamic
+                                                                                                       load test based on millimeter wave radar, Sci. Rep. 15 (2025) 13127.
+Scientific Fund of Lanzhou University under Grant No. 561120211.                                  [25] R. Jia, J. Long, F. Dong, Y. Liu, S. Zhu, G. Cai, Vibration response analysis of simply
+                                                                                                       supported girder bridges using millimeter-wave radar measurements, Sci. Rep. 15
+Data availability                                                                                      (2025) 6679.
+                                                                                                  [26] W. Zhao, G. Zhou, Z. Zhu, Y. Tian, Noncontact tension force measurement of an
+                                                                                                       arch bridge with a developed lightweight millimeter-wave radar system, Meas. Sci.
+    Data will be made available on request.                                                            Technol. 36 (2025) 045103.
+                                                                                                  [27] G. Che, R. Jia, K. Liu, S. Zhu, J. Hu, Cable force measurement of cable-stayed
+                                                                                                       bridge based on microwave radar test technology, Adv. Civ. Eng. 2024 (2024)
+References
+                                                                                                       2515052.
+                                                                                                  [28] G. Wang, J.-M. Munoz-Ferreras, C. Gu, C. Li, R. Gomez-Garcia, Application of
+ [1] AASHTO, AASHTO LRFD Bridge Design Specifications, in: the American                                linear-frequency-modulated continuous-wave (LFMCW) radars for tracking of vital
+     Association of State Highway and Transportation Officials, Washington, D.C.,                      signs, IEEE Trans. Microw. Theory Tech. 62 (2014) 1387–1399, https://doi.org/
+     2017.                                                                                             10.1109/TMTT.2014.2320464.
+ [2] MLTM, Korea highway bridge design code (in Korean), in: Ministry of Land,                    [29] D.V.Q. Rodrigues, D. Zuo, C. Li, Wind-induced displacement analysis for a traffic
+     Infrastructure and Transport, Seoul, 2010.                                                        light structure based on a low-cost doppler radar array, IEEE Trans. Instrum. Meas.
+ [3] MOHURD, GB 50017–2017 Code for Design of Steel Structures (in Chinese), in:                       70 (2021) 1–9, https://doi.org/10.1109/TIM.2021.3098380.
+     China Machine Press, Beijing, 2020.                                                          [30] W. Xu, C. Gu, J.-F. Mao, Noncontact high-linear motion sensing based on a
+ [4] Z. Ma, J. Choi, H. Sohn, Structural displacement sensing techniques for civil                     modified differentiate and cross-multiply algorithm, in: 2020 IEEE/MTT-S
+     infrastructure: a review, J Infrastruct. Intell. Resil. 2 (2023) 100041, https://doi.             International Microwave Symposium (IMS), 2020: pp. 619–622. Doi: 10.1109/I
+     org/10.1016/j.iintel.2023.100041.                                                                 MS30576.2020.9223896.
+ [5] A. Bunce, D. Hester, S. Taylor, J. Brownjohn, F. Huseynov, Y. Xu, A robust                   [31] W. Xu, Y. Li, C. Gu, J.-F. Mao, Large displacement motion interferometry with
+     approach to calculating bridge displacements from unfiltered accelerations for                    modified differentiate and cross-multiply technique, IEEE Trans. Microw. Theory
+     highway and railway bridges, Mech. Syst. Sig. Process. 200 (2023) 110554,                         Tech. 69 (2021) 4879–4890, https://doi.org/10.1109/TMTT.2021.3103576.
+     https://doi.org/10.1016/j.ymssp.2023.110554.                                                 [32] J. Liu, Y. Li, C. Gu, Solving phase ambiguity in interferometric displacement
+ [6] D. Arias-Lara, J. De-la-Colina, Assessment of methodologies to estimate                           measurement with millimeter-wave FMCW radar sensors, IEEE Sens. J. 22 (2022)
+     displacements from measured acceleration records, Measurement 114 (2018)                          8482–8489, https://doi.org/10.1109/JSEN.2022.3158657.
+     261–273, https://doi.org/10.1016/j.measurement.2017.09.019.                                  [33] P. Zhang, Z. Xu, A dual-frequency phase ambiguity resolution method for FMCW
+ [7] N. Shen, L. Chen, R. Chen, Displacement detection based on Bayesian inference                     radar high-accuracy ranging, IEEE Trans. Instrum. Meas. 73 (2024) 1–10, https://
+     from GNSS kinematic positioning for deformation monitoring, Mech. Syst. Sig.                      doi.org/10.1109/TIM.2024.3371009.
+     Process. 167 (2022) 108570, https://doi.org/10.1016/j.ymssp.2021.108570.                     [34] Z. Ma, J. Choi, L. Yang, H. Sohn, Structural displacement estimation using
+ [8] J.R. Vazquez-Ontiveros, G.E. Vazquez-Becerra, J.A. Quintana, F.J. Carrion, G.                     accelerometer and FMCW millimeter wave radar, Mech. Syst. Sig. Process. 182
+     M. Guzman-Acevedo, J.R. Gaxiola-Camacho, Implementation of PPP-GNSS                               (2023) 109582, https://doi.org/10.1016/j.ymssp.2022.109582.
+     measurement technology in the probabilistic SHM of bridge structures,                        [35] Z. Ma, J. Choi, H. Sohn, Continuous Bridge displacement estimation using
+     Measurement 173 (2021) 108677, https://doi.org/10.1016/j.                                         millimeter-wave radar, strain gauge and accelerometer, Mech. Syst. Sig. Process.
+     measurement.2020.108677.                                                                          (2023) 110408, https://doi.org/10.1016/j.ymssp.2023.110408.
+ [9] E. Cai, Y. Zhang, X. Ji, X. Lu, L. Xie, Y. Zhuang, T. Zhao, G. Lin, Estimating small         [36] Z. Ma, J. Choi, J. Lee, H. Sohn, Accelerometer-aided millimeter-wave radar
+     structural motions from multi-view video measurement, Eng. Struct. 275 (2023)                     interferometry for uninterrupted bridge displacement estimation considering
+     115259, https://doi.org/10.1016/j.engstruct.2022.115259.                                          intermittent radar target occlusion, Mech. Syst. Sig. Process. 223 (2025) 111888,
+[10] L. Felipe-Sesé, Á.J. Molina-Viedma, E. López-Alba, F.A. Díaz, FP+DIC for low-cost              https://doi.org/10.1016/j.ymssp.2024.111888.
+     3D full-field experimental modal analysis in industrial components, Mech. Syst.              [37] Polytech GmbH, RSV-150 Scanning Vibrometer Datasheet, (2019). https://www.
+     Sig. Process. 128 (2019) 329–339, https://doi.org/10.1016/j.ymssp.2019.04.004.                    atecorp.com/products/polytec/rsv-150 (accessed March 24, 2022).
+[11] Z. Ma, J. Choi, H. Sohn, Multi-point structural displacement estimation and modal            [38] A.A. Pramudita, D.-B. Lin, A.A. Dhiyani, H.H. Ryanu, T. Adiprabowo, E.A. Yudha,
+     identification by combining a single-point camera and multi-point accelerometers,                 FMCW radar for noncontact bridge structure displacement estimation, IEEE Trans.
+     Measurement 244 (2025) 116578, https://doi.org/10.1016/j.                                         Instrum. Meas. 72 (2023) 1–14, https://doi.org/10.1109/TIM.2023.3292960.
+     measurement.2024.116578.                                                                     [39] G. Ciattaglia, G. Iadarola, G. Battista, L. Senigagliesi, E. Gambi, P. Castellini,
+[12] S. Ri, M. Fujigaki, Y. Morimoto, Sampling Moiré Method for Accurate Small                        S. Spinsante, Displacement evaluation by mmWave FMCW radars: method and
+     Deformation distribution Measurement, Exp. Mech. 50 (2010) 501–508, https://                      performance metrics, IEEE Trans. Instrum. Meas. 73 (2024) 1–13.
+     doi.org/10.1007/s11340-009-9239-4.                                                           [40] Z. Ma, K. Han, J. Choi, J. Lee, O. Kwon, H. Sohn, J. Liu, D. Hwang, J. Aggarwal,
+                                                                                                       H. Noh, E. Cai, Y. Zhang, Development and field deployment validation of a low-
+                                                                                                       cost and high-precision displacement sensing system by fusing millimeter-wave
+
+
+                                                                                             11
+Z. Ma et al.                                                                           Measurement 262 (2026) 120029
+
+      radar and accelerometer, Eng. Struct. 321 (2024) 118926, https://doi.org/
+      10.1016/j.engstruct.2024.118926.
+
+
+
+
+                                                                                  12
+

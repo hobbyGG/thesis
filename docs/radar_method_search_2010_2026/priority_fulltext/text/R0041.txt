@@ -1,0 +1,1591 @@
+           sensors
+Article
+Remote Monitoring of Human Vital Signs Based
+on 77-GHz mm-Wave FMCW Radar
+Yong Wang * , Wen Wang, Mu Zhou, Aihu Ren and Zengshan Tian
+ School of Communication and Information Engineering, Chongqing University of Posts and
+ Telecommunications, Chongqing 400065, China; wwangwen96@163.com (W.W.); zhoumu@cqupt.edu.cn (M.Z.);
+ rah15320299632@163.com (A.R.); tianzs@cqupt.edu.cn (Z.T.)
+ * Correspondence: yongwang@cqupt.edu.cn
+                                                                                                 
+ Received: 18 January 2020; Accepted: 18 May 2020; Published: 25 May 2020                        
+
+
+ Abstract: In recent years, non-contact radar detection technology has been able to achieve long-term
+ and long-range detection for the breathing and heartbeat signals. Compared with contact-based
+ detection methods, it brings a more comfortable and a faster experience to the human body, and it
+ has gradually received attention in the field of radar sensing. Therefore, this paper extends the
+ application of millimeter-wave radar to the field of health care. The millimeter-wave radar first
+ transmits the frequency-modulated continuous wave (FMCW) and collects the echo signals of the
+ human body. Then, the phase information of the intermediate frequency (IF) signals including
+ the breathing and heartbeat signals are extracted, and the Direct Current (DC) offset of the phase
+ information is corrected using the circle center dynamic tracking algorithm. The extended differential
+ and cross-multiply (DACM) is further applied for phase unwrapping. We propose two algorithms,
+ namely the compressive sensing based on orthogonal matching pursuit (CS-OMP) algorithm and
+ rigrsure adaptive soft threshold noise reduction based on discrete wavelet transform (RA-DWT)
+ algorithm, to separate and reconstruct the breathing and heartbeat signals. Then, a frequency-domain
+ fast Fourier transform and a time-domain autocorrelation estimation algorithm are proposed to
+ calculate the respiratory and heartbeat rates. The proposed algorithms are compared with the
+ contact-based detection ones. The results demonstrate that the proposed algorithms effectively
+ suppress the noise and harmonic interference, and the accuracies of the proposed algorithms for both
+ respiratory rate and heartbeat rate reach about 93%.
+
+ Keywords: non-contact; frequency-modulated continuous waveform; orthogonal matching pursuit;
+ discrete wavelet transform
+
+
+
+1. Introduction
+     Vital sign signals are important indicators in modern health care and medical applications [1].
+Monitoring the vital parameters, such as heartbeat and breathing signals, provides doctors with
+reliable diagnosis and treatment basis. The traditional vital sign detection method mainly uses a
+contacted wearable sensor [2] or a sticky electrode [3] to directly monitor the heartbeat and breathing
+signals. However, both the wearable sensor-based and sticky electrode-based methods restrict the
+users’ behavior due to the wired lines, and thus they cannot truly reflect the change of the users’ vital
+characteristics parameters with unconscious movement. Moreover, the contact-based sensor is usually
+complicated to operate, and it often makes the users uncomfortable. In comparison, non-contact
+radar detection technology can monitor the heartbeat and breathing signals over long distances
+without electrodes or sensors, making it easier and more comfortable for users. More importantly,
+the non-contact radar sensor has broad applications in the field of rescue, counter-terrorism response,
+and emergency search [4]. As a result, non-contact radar detection technology has gradually become a
+
+
+Sensors 2020, 20, 2999; doi:10.3390/s20102999                               www.mdpi.com/journal/sensors
+Sensors 2020, 20, 2999                                                                             2 of 23
+
+
+
+research hotspot in the emerging application fields, such as vital sign monitoring [5], oceanographic
+surface current velocity measurements [6], naval search and rescue operations [7,8], position occupying
+perception [9,10], and gesture perception in human-computer interaction [11,12]. This paper focuses
+on the vital sign monitoring, and other application fields of non-contact radar sensing are out the scope
+of this paper.
+      At present, there are three main types of radar systems for vital sign monitoring, namely pulse
+radar [13] /(ultra-wide band radar) [14], continuous wave (CW) Doppler radar [15,16], and frequency
+modulated continuous wave (FMCW) radar [17]. In Reference [13], the authors reduce the noise
+through a time-varying filter to extract the heartbeat and respiration rates using a 3.3 GHz pulsed
+radar; however, the detection accuracy has not yet been discussed. Meanwhile, the pulse radar
+used in [13] is very unfavorable in the system integration and low-power operation due to its broad
+band characteristics. In contrast, CW and FMCW radars have higher levels of system integration
+and lower-power operation, and easier proximity detection. Thus, Dong et al. [16] apply a 24 GHz
+CW Doppler radar to obtain electrocardiograms, by detecting the combined atrial and ventricular
+contractions and relaxations conducted to the skin on the back. Since the CW Doppler radar lacks
+modulation spectrum information, it is not good at distinguishing clutter and multiple targets.
+As a result, the CW Doppler radar-based vital sign monitoring methods rely only on the Doppler
+information to detect the relative motion [18]. Moreover, since the Doppler radar gets only the doppler
+information and it cannot get the range information, the extracted doppler information may contain
+the micro-motion interference that from the human body itself and nearby environment, leading to a
+low vital sign detection accuracy. Compared to CW and pulse radars, the FMCW radar has a higher
+range and speed resolution, as well as its ability to distinguish multiple targets and extract target
+fretting information, making it a mainstream choice in the field of life detection. Therefore, this paper
+adopts FMCW radar for human non-contact vital sign detection.
+      The FMCW radar has been implemented for vital sign monitoring by Sharpe et al. in 1990 [19].
+In 2013, Zhang et al. [20] use a 24.15 GHz FMCW radar with a scanning bandwidth of 72 MHz to
+extract the human heartbeat rate signal, and propose a projection matrix method for periodic clutter
+suppression. Although it considers the clutter interference of surrounding static objects, it does
+not eliminate the interference of human micro-motion on the heartbeat rate estimation. Since the
+micro-motion may cover the respiratory movement, the incorrect extracted heartbeat information
+may be incorrect. Lee et al. [21] use a 24 GHz FMCW radar for heartbeat rate estimation, and they
+eliminate the environmental clutter noise and reduce the mutual interference among multiple people.
+Nevertheless, the influence of micro-motion of human target on the characteristics estimation of
+living body is not considered. In [22], the authors apply a 9.6 GHz FMCW radar for heartbeat and
+respiration rate detection. To reduce the influence of human respiratory fretwork harmonics on the
+heartbeat rate estimation, Anitori et al. [22] propose two methods for heartbeat rate and respiratory
+rate calculation using the signal amplitude and phase information. However, the specific solutions
+for harmonic and noise reduction are inefficient. Gu et al. [23] use the arctangent demodulation and
+phase compensation for a 2.4 GHz radar to solve the problem of harmonic interference caused by
+body movement. Due to the use of orthogonal receivers, the I/Q signals introduces the DC offset,
+thus a more complex I/Q signal calibration is required. The high-frequency millimeter-wave radar
+provides a high signal-to-noise ratio, and has a high sensitivity when measuring the vital sign signals
+even with small displacements of tens of microns [24]. Alizadeh et al. [25], the authors apply a
+77 GHz millimeter-wave radar to detect the components of vital signal by extracting the phase of
+the intermediate frequency (IF) signal. Such a 77 GHz millimeter-wave radar not only avoids the
+higher harmonics caused by the amplitude signal estimation, but also solves the problem of dc signal
+offset caused by the orthogonal receivers. Nevertheless, the method proposed in [25] may cause the
+phenomenon of respiratory harmonic frequencies that conceal the heartbeat frequency, leading to a
+decrease in the accuracy of heartbeat rate estimation. Alizadeh et al. [25] use two bandpass filters to
+separate the heartbeat and breathing signals and find the largest spectral values (in the two bands)
+Sensors 2020, 20, 2999                                                                             3 of 23
+
+
+
+as the estimated respiratory frequency and heartbeat frequency. However, because of the existed
+respiratory harmonic or noise, the obtained heartbeat and breathing frequencies might be incorrect,
+especially for the heartbeat one.
+     To address the aforementioned issues, this paper proposes to use a high-frequency
+millimeter-wave FMCW radar with a starting frequency of 77 GHz and a chirp frequency of 4 GHz to
+detect the human breathing and heartbeat signals. The main contributions are concluded as follows:
+(1)   By briefly introducing the principle of FMCW radar, we induce the closed-form expression of
+      the measurement accuracy of human heartbeat and respiration detection. In addition, the range
+      determination of human body in the radar field of view and the vibration FFT of breathing and
+      heartbeat are expounded.
+(2)   The circular center dynamic tracking algorithm is applied to correct the DC offset. Then,
+      the extended differential and cross-multiply (DACM) is applied for phase unwrapping to obtain
+      correct phase change information of breathing and heartbeat signals, and the phase signal is
+      further differentially enhanced.
+(3)   We propose two methods, compressive sensing based on orthogonal matching pursuit (CS-OMP)
+      and rigrsure adaptive soft threshold noise reduction based on discrete wavelet transform
+      (RA-DWT), to separate and reconstruct the heartbeat and respiratory signals, and obtain
+      interference-suppressed heartbeat and respiratory signals. Then, the two methods, namely
+      frequency FFT algorithm and time domain autocorrelation algorithm, are presented to calculate
+      the heartbeat and respiratory rates.
+(4)   To verify the effectiveness of the proposed algorithms, the obtained heartbeat rate and respiration
+      rate are respectively compared with the two contact-based sensors (smart bracelet Mi 3 and
+      airflow sensors). The results show that the proposed CS-OMP and RA-DWT algorithms effectively
+      suppress the harmonics and interference, and greatly improve the detection accuracy of heartbeat
+      rate and respiratory rate.
+     The remainder of this paper is structured as follows: In Section 2, the mechanism of FMCW radar
+and the actual detection accuracy of the radar are discussed. In Section 3, detailed introduction to the
+extraction algorithm implementation steps are detailed. In Section 4, the results using the measured
+data are presented and discussed. Finally, conclusions are given in Section 5.
+
+2. Theory of FMCW Radar
+     The FMCW radar system includes the radio frequency (RF) such as transmit (TX) and receive
+(RX), analog clocking, and digital circuit such as analog-to-digital converters (ADCs), microcontrollers
+(MCUs), and digital signal processors (DSPs). Figure 1 shows a simplified block diagram of a typical
+FMCW radar system. The FMCW radar sends a linear FMCW signal generated by the synthesizer.
+The radar signal will be reflected when it encounters an object. Then, the orthogonal receiver is
+responsible for capturing the echo signal and orthogonally mixing it with the transmitted signal.
+A low-pass filter is used to filter out the high frequency part and obtain the IF signal. Finally, the IF
+signal is sampled by an ADC.
+                                  TX chirp signal
+
+
+
+
+                                            Synth
+                             TX
+                                    90°
+
+                             RX                     Low-pass filter   IF signal   ADC
+                                                                                        DSP
+                                                    Low-pass filter   IF signal   ADC
+
+                                  RX chirp signal
+
+
+                               Figure 1. FMCW radar system block diagram.
+Sensors 2020, 20, 2999                                                                                        4 of 23
+
+
+
+     The transmitted signals are usually sawtooth or triangle waves, and the sawtooth wave is used in
+this paper. It is noted that the method proposed in this paper is also suitable for the triangle wave,
+but more effort are required. The specific form is shown in Figure 2.
+
+                                    Frequency
+                                                                   td   TX chirp RX chirp
+
+
+
+
+                                              B
+
+                                               fc    Tc                               time
+        Figure 2. Time dependence of transmitted and received signals (frequency as a function of time).
+
+      The transmitted signal of the FMCW radar can be expressed as [26]
+
+                                                                           B 2
+                                        x T (t) = A TX cos(2π f c t + π       t + θ (t)),                        (1)
+                                                                           Tc
+
+where fc is the starting frequency of the chirp signal, B is the bandwidth, ATX is the amplitude of the
+transmitted signal, θ (t) is the phase noise, Tc is the width of chirp signal pulse, and B / Tc is the slope
+of the chirp signal, which represents the changing rate of the frequency.
+     Assuming that R(t) is the motion displacement of the chest, and d0 is the distance from the radar
+sensor to the human body. The distance from the chest to the radar is x(t) = R(t) + d0 , and the time
+delay is td = 2x(t)/c, where c is the light speed. Then, the received signal is
+
+                                                                        B
+                          x R (t) = A RX {cos(2π f c (t − td )) + π        ( t − t d )2 + θ ( t − t d ) } .      (2)
+                                                                        Tc
+
+    The echo signal and the transmission signal are mixed by two orthogonal I/Q channels, and then
+passed through a low-pass filter to obtain an IF signal S IF (t)
+
+                                                            B                      B
+                         S IF (t)   =   A T A R exp( j(2π [    t ]t + 2π f c td + π td 2 + ∆θ (t)))
+                                                            Tc d                   Tc
+                                                            B
+                                    ≈   A T A R exp( j(2π [ td ]t + 2π f c td + ∆θ (t)))
+                                                            Tc
+                                                           2Bd0       4π ( R(t) + d0 )
+                                    ≈   A T A R exp( j(2π          t+                   ))
+                                                            cT                  λ
+                                                           | {zc }    |        {z     }
+                                                              fb               ψ(t)
+
+                                    =   A T A R exp( j(2π f b t + ψ(t)),                                         (3)
+
+where td = 2( R(t) + d0 )/c. Since the third term, π TBc td 2 , is very small (about 106 order) in the
+practical scenario, it is ignored in the second approximation. The residual noise phase term
+ ∆θ (t) = θ (t) − θ (t − td ) can also be neglected in the third approximation because of the range
+correlation effects [27]. In general, t = 1 µs , the chest displacement R(t) is in mm, and R(t)t
+can be ignored. It can be seen that at a fixed distance d0 , ψ(t) varies with R(t) relative to λ.
+      Since the velocity rate of the chest motion is much lower than 103 m/s, the chest displacement
+is no more than 1 mm per chirp (duration time of a single chirp is 50 µs). Thus, R(t) will be very
+small and it approximates a constant in the microsecond time of a single chirp. Therefore, in order to
+obtain the change in chest displacement, multiple chirps should be transmitted in sequence to obtain
+the chest displacement information, which is equivalent to sampling R(t). Assuming that L chirp
+signals are sent, and the sampling interval for R(t) is the frame period Tm . When Tm ≥ Tc , the chest
+Sensors 2020, 20, 2999                                                                              5 of 23
+
+
+
+displacement information related to the change of R(t) will be obtained at the distance of the human
+target. The delay will become
+                                           2 [d0 + R(lTc + t)]
+                                      td =                     .                                  (4)
+                                                    c
+    The form of displacement movement caused by thoracic dilatation is the form of cosine signal,
+which satisfies R(lTc + t) ≈ R(lTc ). Substituting Equation (4) into Equation (3), and, after sampling,
+we can obtain
+                            S IF (lTc + nTs ) = A T A R exp( j(2π f b nTs + ψl ),                   (5)
+                                        2Bd0              4π ( R(lTc ) + d0 )
+                                 fb =             ψl =                        ,                        (6)
+                                         cTc                      λ
+where Ts is the fast-time sampling period. The acquired beat frequency signal is a two-dimensional
+function of fast sampling n and slow sampling lTc . Therefore, we should find the information of f b
+and ψl from the sampled beat signal to estimate the distance and the vibration frequency caused by the
+thorax. These two pieces of information can be obtained using a FFT. It can be found that, when the
+FFT is performed, only the phase term ψl is left if f = f b . The FFT is performed on a single chirp on
+the fast sampling time axis to obtain the spectrum of the beat signal. The peak values of the spectrum
+correspond to the targets at different distances, which is called range FFT [28]. A FFT is performed on
+the slow time axis to obtain the vibration frequency, which is called vibration FFT [29].
+     The maximum detection range of FMCW radar is
+
+                                                          Fs c
+                                               dmax =          ,                                       (7)
+                                                          2S
+
+where Fs is the sampling rate. Substituting S= TBc into Equation (7), we have
+
+                                        Fs Tc c            c
+                              dmax =            = Msamples = Msamples dres ,                           (8)
+                                         2B               2B
+where Msamples = Fs Tc is the number of sampling points in the period of Tc . The theoretical range
+resolution of FMCW radar is defined by dres = c/2B according to the Nyquist sampling theorem.
+It can be seen that the effective ranging dmax is proportional to the distance resolution dres . Combining
+Equations (7) and (8), the range resolution can also describe as
+
+                                                         1    Fs Tc c
+                                        dreal_res =                   .                                (9)
+                                                      Msamples 2B
+
+     It should be noted that the range resolution may not reach the theoretical value due to the
+equipment in the actual experiment. Similarly, the vibration frequency caused by the chest cavity is
+related to the sampling frame rate R(t) of 1/Tm . The Nyquist sampling principle limits the maximum
+vibration frequency, and the minimum vibration frequency is determined by the number of FFT chirps
+N, thereby giving the actual maximum and minimum frequencies
+
+                                                1                    1
+                                     f max =              f min =       .                            (10)
+                                               2Tm                  NTm
+
+3. Proposed Algorithm
+
+3.1. Overview
+     Figure 3 shows the systematic process of human heartbeat and respiratory signal detection.
+It consists of four steps: target detection, phase extraction, signal separation and reconstruction,
+estimation of respiration and heartbeat rates. After performing analog-to-digital conversion on the
+IF signal, we first need to identify the distance range corresponding to the detected human body in
+Sensors 2020, 20, 2999                                                                                              6 of 23
+
+
+
+the radar field of view. The distance information is obtained by range FFT, and then the range time
+map (RTM) is constructed according to the range distribution. After the human target is determined,
+the DC offset is corrected, and the arctangent demodulation phase is unwrapped by using the extended
+DACM algorithm. The heartbeat signal is enhanced by using the differential phase to further extract
+the accurate phase change information in Step 2. In Step 3, CS-OMP and RA-DWT algorithms
+are presented to separate and reconstruct the heartbeat and respiratory signals. Finally, we use
+a frequency-domain FFT algorithm and a time-domain autocorrelation algorithm to calculate the
+heartbeat rate and respiration rate.
+
+
+                                                                                           Range-
+                             IF signal            A/D               Range FFT
+                                                                                          Time Map
+
+                                                       Setp1.Target Detection
+
+                               Phase           DACM Phase                                 DC offset
+                                                                      Arctan(.)
+                             difference        Unwrapping                                 correction
+
+                                                       Setp2.Phase Extration
+
+
+                                          Bandpass               CS-OMP
+                                           filtering          reconstruction
+                                                                                         Respiration and
+                                                                                          heartbeat rate
+                                                               Rigrsure de-
+                                            DWT
+                                                                  noised          Setp4.Estimation of respiration
+                                                                                       and heartbeat rates
+                                               Setp3.Signal Separation
+                                                 and Reconstruction
+
+                         Figure 3. Human heartbeat and breathing signal detection flowchart.
+
+3.2. Target Detection
+     Before phase extraction, we must first perform target detection to determine the location of the
+human being. We assume that the tested person is sitting in front of the radar and stay stably (Since
+the human body movement usually covers the heartbeat and breathing signals, it is difficult to detect
+vital sign of human body in the presence of body movements. The authors in [30] apply to solve
+such a problem with a Doppler radar. Although the work in [30] cannot be directly applied to the
+FMCW radar, it provides some research direction for the vital sign detection under body movements
+with FMCW radar, and we leave it for future work). These tasks will be done by the range FFT and
+RTM construction. A single-frame beat signal obtained after the A/D is a two-dimensional matrix,
+which composes of fast sampling and slow sampling. The vertical axis corresponds to the slow time
+sampling points constructed by the chirp frequency N, and the horizontal axis is the number of fast
+time sampling points Msamples . In order to suppress side lobe leakage, a Hamming window is added,
+and the range FFT vector is obtained by FFT at the fast time sampling points, so as to obtain the
+distance distribution from the radar field of view. In [25], the vertical axis uses a single chirp in Tm
+time, and N = 1. However, we experimentally found that using multiple chirps achieves a higher
+signal-to-noise ratio and a smaller clutter power than a single chirp. We collect data every 2 cm at the
+distance of 70–90 cm in front of the radar to calculate the signal peak and signal-to-noise ratio as shown
+in Figure 4. The results show that the clutter power in the multi-chirp mode is significantly reduced,
+and the signal-to-noise ratio is about 15 dB higher than that of the single-chirp mode. Therefore, we use
+the average range spectrum of the multi-chirp mode by calculating the mean value among columns in
+the two-dimensional matrix.
+Sensors 2020, 20, 2999                                                                                                                                                                                            7 of 23
+
+
+                           1.2                                                                                            80
+                                                                                         Single-chirp                                                                                         Single-chirp
+                                                                                         Multi-chirp                                                                                          Multi-chirp
+                                                                                                                          70
+                            1
+
+                                                                                                                          60
+       FFT Output (dBFs)
+
+
+
+
+                           0.8
+                                                                                                                          50
+
+
+
+
+                                                                                                                SNR(dB)
+                           0.6                                                                                            40
+
+
+                                                                                                                          30
+                           0.4
+
+                                                                                                                          20
+                           0.2
+                                                                                                                          10
+
+                            0                                                                                              0
+                                 0               1   2   3       4         5         6     7              8                 70     72    74      76      78            80   82    84     86       88         90
+                                                             Range (m)                                                                                        Range(cm)
+                                                              (a)                                                                                                 (b)
+
+      Figure 4. Single chirp and multiple chirps comparison: (a) range spectrum; and (b) signal-to-noise ratio.
+
+     An RTM is constructed based on the range spectrum obtained by multi-frame coherent
+accumulation. The horizontal and vertical axes of the RTM represent the range and time domains,
+respectively, and the process is shown in Figure 5. The average range spectrum vector obtained
+by the range FFT is obtained by multi-frame accumulation and put into a two-dimensional matrix
+by rows. The horizontal axis is the distance domain obtained by FFT for fast sampling, and the
+vertical axis is the time domain obtained by accumulating the corresponding length of multiple frames,
+frame rate, Tm . The distance interval of human vital signs extraction is found on the range time
+matrix. This search process can be achieved by calculating the maximum average power of different
+distance intervals. Usually, the displacement movement brings strong reflection signals and large
+average power, and power changes distinguish the human chest motion displacement interval and the
+stationary target interval.
+
+
+
+                                                                                                   C
+                                                                                                                                                               Slow tmie
+                                                                                                    Slow time
+
+
+
+
+                                                 N                                  Range FFT
+
+                                             3
+                                         2
+                                     1
+                                                                         MSamples                                                             MSamples                           Range
+                                                                                                                                 Fast time
+
+                                                                                    Figure 5. RTM construction.
+
+3.3. Phase Extraction
+      After completing the human body detection, the phase information is extracted at the distance
+interval where the target position is located. However, before extracting the phase information ψl in a
+certain distance interval, it is necessary to ensure that any nonlinear distortion and interference such as
+false targets are removed. The DC offset of the two I/Q channels is a typical interference, which affects
+the accuracy of the phase extraction of vital signs. Assume that the two I/Q demodulated signals are
+expressed as:
+                                   B I (t) = A I cos(2π f b nTm + ψl ) + DC I ,                        (11)
+
+                                                                     BQ (t) = AQ sin(2π f b nTm + ψl ) + DCQ ,                                                                                                     (12)
+                                                                                              BQ ( t )
+                                                                                                      
+                                                                             ϕ(t) = arctan               ,                                                                                                         (13)
+                                                                                              B I (t)
+where A I and AQ is the amplitude of the I and Q channels, respectively, DC I and DCQ are the DC
+offsets. There are two main reasons for the DC offset. One reason is that the external DC signal
+component is superimposed on the original signal. The other one comes from the local oscillator
+Sensors 2020, 20, 2999                                                                                                       8 of 23
+
+
+
+leakage and the nonlinearity of the mixer or I/Q demodulator. It is noted that the DC term contains the
+DC component of the original signal and the DC information of the chest displacement motion. Thus,
+the DC component caused by the circuit or external static objects makes the arctangent demodulation
+ϕ(t) 6= ψl . Experimental results in [31] show that the DC offset is mainly affected by circuit component
+defects, and the DC component of the interference needs to be corrected to obtain ϕ, so that ϕ(t) = ψl .
+The traditional method is to use the ADC data in the empty environment to collect the DC offset caused
+by the surrounding stationary targets, thermal noise, and circuits. However, this method should
+strictly keep the same environment during measurement and collection, which is difficult to achieve
+in practice. In this paper, we use a circular center dynamic DC offset tracking method. This method
+uses an efficient gradient descent algorithm to achieve dynamic DC offset tracking, and then performs
+DC offset correction [32]. Specifically, the DC offset correction is performed on the two I/Q channels,
+and the trigonometric function is eliminated
+
+                                                        2                                   !2
+                                   | B I (t) − DC I |               BQ (t) − DCQ
+                               
+                                                             +                                    = 1.                        (14)
+                                            AI                           AQ
+
+      Considering that A I = AQ = A R , we have
+
+                                                                                       2
+                                   | B I (t) − DC I |2 + BQ (t) − DCQ                      = AR 2 .                           (15)
+
+    It can be seen that the I/Q data received will become a circle centered on the DC offset DC I
+and DCQ . Therefore, if the center and radius are found, the DC offset of the signal can be corrected.
+The gradient descent algorithm is used to minimize the following optimization functions
+                                                n     q                                                             
+               F ( DC I , DCQ , A R ) = min ∑                                   2                        2
+                                                             ( B I [k] − DC I ) + BQ [k] − DCQ                − AR       ,    (16)
+                                              k =1
+
+where k is the number of sampling points. When the above formula achieves the minimum value,
+we will get the optimal result, and the DC offset and circle radius will be obtained.
+     It is noticed that, since the breathing and chest displacement movements is about 12 mm, which
+is several times of the FMCW radar wavelength (4 mm at 77 GHz). The value of the extracted phase
+will exceed the phase range (−π/2, π/2) if we use the arctangent demodulation technology, which
+will cause phase ambiguity caused by phase discontinuity and phase jump. To solve this problem,
+the extended DACM algorithm is used [31]. Let
+                                               (
+                                                     I (t) = B I (t) − DC I
+                                                                                                                              (17)
+                                                     Q(t) = BQ (t) − DCQ ,
+
+      The DACM algorithm turns the arctangent function into a derivative operation, then
+
+                                                              I (t) Q(t)0 − I (t)0 Q(t)
+                                                         
+                           d            d           Q(t)
+                              [ ϕ(t)] =      arctan         =                           ,                                     (18)
+                           dt           dt          I (t)           I ( t )2 + Q ( t )2
+
+where I (t)0 and Q(t)0 are the differential forms of I (t) and Q(t), respectively. According to [31],
+Equation (18) is further expressed in a discrete form, and the summation is
+                                    n
+                                          I [k ]{ Q[k ] − Q[k − 1]} − { I [k] − I [k − 1]} Q[k]
+                         ϕ[k] = ∑                                                                        .                    (19)
+                                   k =2                          I [ k ]2 + Q [ k ]2
+
+     Although the extended DACM algorithm solves the phase ambiguity problem, the heartbeat
+frequency is very small and it can be easily drowned in the breathing harmonic frequencies and
+noise. Therefore, we perform phase difference on the phase-unwrapping signal to enhance the
+Sensors 2020, 20, 2999                                                                                                                  9 of 23
+
+
+
+heartbeat signal. Differential phase is the difference between adjacent consecutive phase values, i.e.,
+ϕ[k ] − ϕ[k − 1]. Such a differential phase expression enhances the heartbeat signal while suppressing
+the phase drift phenomenon.
+
+3.4. Signal Separation and Reconstruction
+     The differential phase signal includes the phases of the breathing and heartbeat waveforms.
+After the phase difference, the heartbeat rate and the breathing rate can estimate directly, but the errors
+of the estimated value are large. Although the heartbeat and respiratory signals are periodic, when the
+harmonic frequency and noise frequency exist, the main respiratory signal is not an ideal periodic sine
+wave, and the heartbeat and respiratory frequency are easily drowned in the harmonic or noise. For the
+heartbeat frequency, the differential phase makes the heartbeat frequency more obvious; however,
+the harmonic peaks larger than the peak value of the heartbeat frequency are prone to occur when
+the breathing signal is not periodic. This will make the estimated rates of heartbeat and breathing of
+an intermediate frequency domain FFT method and time domain autocorrelation in Reference [22]
+wrong. It is worth noting that such problems cannot be avoided when estimating the heartbeat rate
+and respiration rate [25]. Therefore, we provide two methods for the separation and reconstruction of
+heartbeat and respiratory signals.
+
+3.4.1. CS-OMP Algorithm
+      Since heartbeat frequency is 0.8–2 Hz, and the breathing frequency is 0.1–0.5 Hz, the heartbeat
+and breathing signals can be separated using bandpass filters. In this paper, we first design two
+bandpass filters (serially-cascaded Bi-Quad IIR filter) to separate the heartbeat and respiratory signals
+according to these two frequency bands. The sampling frequency is 20 Hz, and the pass-band gain
+and stop-band gain are, respectively, 1 dB and 40 dB. The differential phase signal is passed through
+the two designed band-pass filters, and the heartbeat and breathing signals are separated as shown
+in Figure 6. As shown in the spectrum in Figure 6b,d, there are always harmonic and noise frequencies
+in the spectrums of the separated two bands that affect the estimation of heartbeat rate and respiratory
+rate. Therefore, we propose a CS-OMP algorithm to reconstruct the heartbeat and breathing signals,
+and suppress harmonic interference and noise.
+
+(a)                              1
+                                                                                   (b)               0.15
+  Displacement(mm)
+
+
+
+
+                          0.5
+                                                                                                      0.1
+                                                                                         Amplitude
+
+
+
+
+                                 0
+
+                                                                                                     0.05
+                     -0.5
+
+
+                                 -1                                                                    0
+                                      0    10       20             30   40    50                            0   2    4        6     8      10
+                                                         time(s)                                                    Frequency(Hz)
+
+(c)                                                                                (d)
+                                 4                                                                   0.25
+              Displacement(mm)
+
+
+
+
+                                                                                                      0.2
+                                 2
+                                                                                         Amplitude
+
+
+
+
+                                                                                                     0.15
+                                 0
+                                                                                                      0.1
+                                 -2
+                                                                                                     0.05
+
+                                 -4                                                                    0
+                                      0    10       20             30   40    50                            0   2    4        6     8      10
+                                                         time(s)                                                    Frequency(Hz)
+
+                                 Figure 6. Waveform and spectrum of separated signal: (a) heartbeat waveform; (b) heartbeat spectrum;
+                                 (c) respiratory waveform; and (d) respiratory spectrum.
+Sensors 2020, 20, 2999                                                                               10 of 23
+
+
+
+     According to the compressed sensing theory, if the signal is sparse in a transformation domain,
+an observation matrix unrelated to the transformation basis can be used to project the transformed
+high-dimensional signal into a low-dimensional space. Therefore, by collecting a small number of
+signal projection values, the accurate or approximate reconstruction of the signal can be achieved [33].
+Since the sparsity of heartbeat and breathing signals has been proven in [34], the compression and
+reconstruction of the heartbeat and breathing signals in this paper can be implemented by the
+compressed sensing theory. Then, the sparsity of the heartbeat or breathing signals is given by [35]
+
+                                               x = Γ ( α + w ),                                         (20)
+
+where Γ = {Γ1 , Γ2 , Γ3 , · · · , Γ P } is the orthogonal transform basis in the frequency domain, α is the
+weight coefficient of P × 1, and w is the noise. If the signal x has only K (K << P) non-zero coefficients
+on a transformation basis Γ, then, Γ is called the sparse basis of x, and K is the number of sparse
+signals. The smaller the K, the greater the signal sparseness. The original signal is projected onto
+the measurement matrix Φ = [φ1 , φ2 , φ3 , · · · , φP ] of M × P by retaining the K important characteristic
+components in the non-adaptive linear projection y. Then, the non-adaptive linear projection value of
+the signal x is
+                                         y = Φx = ΦΓ(α + w) = ACS α + Z,                               (21)
+
+where ACS = ΦΓ is the perception matrix, Z = ΦΓw is the projection value of noise. Especially when
+there is no noise, y = ACS α. When the measurement matrix M << P, reconstructing x from y is an
+ill-posed problem. However, since the signal x is sparse, L1 -norm can be applied to transform the
+problem as a convex optimization problem [33]. Therefore, the ill-posed problem is transformed into
+the following optimization one
+
+                                   arg min kαk1       s.t.k Acs α − yk2 ≤ ε,                            (22)
+
+where kαk1 is the L1 -norm of α , and ε is the noise boundary in the data. By solving Equation (22),
+we can obtain the sparse coefficient vector α̂, and then the reconstructed signal is x̂ = Γα̂, where α̂ is
+the optimal solution. We use the OMP algorithm [36] to reconstruct signal x from x̂ = Γα̂. To obtain
+a noiseless heartbeat or breathing signal (K = 1 in this paper), important feature components in y
+are retained and reconstructed using OMP. It is noted that reconstruction failure occurs during the
+reconstruction process due to the fact that the reconstructed signal may not be noiseless. Therefore,
+in order to ensure that the reconstructed signal is the heartbeat or breathing signal after denoising,
+a restriction condition is set. The reconstructed signal is output only when the peak value of the
+reconstructed signal spectrum equals the peak value of the original one. Then, the CS-OMP algorithm
+can be described as Algorithm 1.
+
+Algorithm 1 CS-OMP algorithm for breathing signal.
+Input: perception matrix ACS = ΦΓ, Observation vector y, Signal spectrum peak frequency f max ,
+   and the noise boundary ε.
+Output: 1-sparse reconstructed signal for x, x̂.
+1: Initialization residual r0 = y, K = 1, index matrix Λ0 = Φ0 = ∅.
+2: Find the index λK corresponding to the residual rK , and the maximum value of the column inner
+
+    product of the measurement matrix such that λK = arg max         r K −1 , φ j   ;
+                                                        j=1,··· ,N
+ 3: Update index matrix ΛK = [ ΛK −1 , λK ] and ΦK = [ ΦK −1 , φλK −1 ];
+ 4: Calculate the least squares solution, α̂K = arg min y − ACSK α 2 ;
+                                                    αK
+ 5: Update rK = y − ACS α̂K ;
+ 6: If krK k2 > ε, return to Step 1. Otherwise, reconstruct the signal x by using x̂ = Γ α̂K ;
+ 7: If the reconstructed signal spectrum is f = f max , stop, output x̂. Otherwise, return to Step 2.
+Sensors 2020, 20, 2999                                                                             11 of 23
+
+
+
+     The proposed CS-OMP algorithm will get better results for the respiration signal reconstruction,
+and the accuracy of its corresponding respiration rate will be improved. This is due to the fact that
+the respiratory frequency always has the maximum peak in its spectrum. For the heartbeat spectrum,
+its maximum peak may not necessarily correspond to the heartbeat frequency. As mentioned before,
+breathing harmonics, noise, and body movements may have larger peaks than the real heartbeats.
+Fortunately, the heartbeat frequency is always the maximum or sub-peak of its spectrum and the
+heartbeat rate estimation method will be given later.
+
+3.4.2. RA-DWT Algorithm
+      Heartbeat and respiration signals belong to non-stationary signals, which are very important for
+the frequency domain characteristics of non-stationary signals at any time. The wavelet transform has
+multi-resolution characteristics, and the selection of appropriate scale factor and telescopic coefficient
+can be used to represent the local characteristics of signals in time domain and frequency domain by
+the mother wavelet. The discrete wavelet transform is used to perform wavelet decomposition on the
+differential signal. The discrete wavelet transform is described as [37]
+                                                     ∞
+                                        yl [n] =     ∑ ϕ[k] · g[2n − k],                              (23)
+                                                   k =−∞
+
+                                                      ∞
+                                        yh [n] =     ∑ ϕ[k] · h[2n − k],                              (24)
+                                                   k =−∞
+
+where ϕ[k ] is the discrete differential phase signal, k is the number of sampling points, and n is
+the number of sampling data. g[2n − k ] and h[2n − k ] are respectively the low-pass and high-pass
+filter decomposition coefficients. The yl [n] and yh [n] are the approximate and detail coefficients after
+decomposition, respectively. After the finite order decomposition of ϕ[k ], it can be reconstructed by
+DWT decomposition
+                                    b                           b
+                           S[k] = ∑ yl [n] · G [2n − k] + ∑ yh [n] H [2n − k],                        (25)
+                                   i=a                        m= a
+
+where a is the scale factor, b is the displacement factor, G [2n − k] and H [2n − k ] are low-pass
+and high-pass reconstruction coefficients for scaling and wavelet functions, respectively [38].
+The approximate and detailed coefficients after each order of decomposition can reconstruct the
+corresponding two sets of the signals, and obtain the desired frequency interval signal according to
+the breathing and heartbeat frequency ranges
+                                                      ∞
+                                        SBR [k ] =    ∑ S[k] · g[2n − k],                             (26)
+                                                     k =−∞
+
+                                                      ∞
+                                        S HR [k] =    ∑ S[k] · h[2n − k].                             (27)
+                                                     k =−∞
+
+     In this paper, “db5” wavelet is selected to perform wavelet decomposition on the input discrete
+differential signal ϕ[k] according to the two expected frequency intervals of heartbeat and respiration
+signals. After obtaining the heartbeat and breathing signals in the desired frequency range, the signals
+are quantified by a threshold value. The rigrsure adaptive soft threshold Stein’s unbiased risk
+estimation rule is selected for noise reduction [39], and then the heartbeat and breathing signals
+are reconstructed. After the FFT of the noise-reconstructed signal is obtained, the peak value of the
+spectrum can be used as the estimation of the respiration or heartbeat frequency. However, there may
+be multiple decomposed and reconstructed signals falling in the desired frequency range. Therefore,
+a confidence metric, W, is defined for each reconstructed signal, representing the ratio of the signal
+Sensors 2020, 20, 2999                                                                               12 of 23
+
+
+
+power at the maximum peak (and some surrounding frequencies) to the remaining frequency intervals
+in the spectrum:
+                                         f maxR+h̄/2
+                                                     | P( f )| d f
+                                                  f max −h̄/2
+                                 W=                                                         ,           (28)
+                                       R∞                     f maxR+h̄/2
+                                            | P( f )| d f −                 | P( f )| d f
+                                        0                     f max −h̄/2
+
+where | P( f )| is the signal power at frequency f , and h̄ = Fslow /Msamples is the frequency resolution,
+calculated as the ratio of the slow time sampling rate Fs_slow to the number of FFT sampling points.
+The greater the confidence measure W is, the more accurate the peak frequency of the corresponding
+reconstructed signal is as a heartbeat or breathing frequency estimate. It is noted that, when the
+confidence level is less than a certain threshold value, it indicates that the peak frequency of the
+corresponding spectrum is unreliable.
+
+3.5. Estimation of Respiration and Heartbeat Rates
+      The respiration and heartbeat rates can be calculated using the FFT method after the CS-OMP
+and RA-DWT reconstruction. However, as mentioned before, the method of heartbeat rate estimation
+after reconstruction using the CS-OMP algorithm needs to be redefined. We find out all the peaks in
+the spectrum of reconstructed signal and keep them in 0.8–2 Hz, and remove the respiratory harmonic
+peak. Then, the frequency corresponding to the peak of the reconstructed signal is counted and the
+frequency weight coefficient is defined as ξ i = m/q, where m is the number of occurrences of the
+corresponding frequency of reconstruction, and q is the number of reconstructions. Then, the heartbeat
+rate is
+                                                          N
+                                                   f¯h = ∑ f i ξ i .                                    (29)
+                                                         i =1
+
+     For comparison, both the CS-OMP and RA-DWT reconstruction can be combined with the
+autocorrelation method to estimate the heartbeat and respiration rates. For breathing and heartbeat
+with a limited period signal, the corresponding autocorrelation function will gradually become zero,
+and a peak corresponding to the multiple of the basic period will appear in the time:
+
+                                                      k=∞
+                                    R xx (m) = ρ       ∑ x ( k + m ) x ∗ ( k ),                         (30)
+                                                     k =−∞
+
+where ρ is the normalization factor, m is the lag time, and ∗ is the conjugate multiplication.
+The autocorrelation functions of the separated and reconstructed heartbeat and respiration signals
+are calculated. Then, the corresponding time of the autocorrelation peak in the heartbeat and
+breathing time interval is estimated, and the inverse number is the corresponding breathing and
+heartbeat frequency.
+     The calculation of real-time heartbeat and breathing rate is given by
+
+                                            tconvert_hz_bpm · RnumPeaks · Fs
+                                    γ=                                       ,                          (31)
+                                                   LcircularBu f f erSize
+
+where tconvert_hz_bpm is the measurement duration, LcircularBufferSize is the radar buffer size, RnumPeaks
+is the number of signal crest when the data length of the buffer area is LcircularBufferSize . Specifically,
+tconvert_hz_bpm = 60 s, the heartbeat and respiration rates are calculated as the number of heartbeats
+and breaths per minute.
+Sensors 2020, 20, 2999                                                                                                                            13 of 23
+
+
+
+4. Experimental Results and Discussion
+
+4.1. Experimental Parameters
+      This paper uses Texas Instruments (TI)’ millimeter-wave radar AWR1642 (State of Texas, US),
+which is an integrated single-chip FMCW radar sensor operating in the 77 to 81 GHz frequency
+band [40]. The experimental application scenario is as shown in Figure 7a. The person to be tested
+sits in front of the radar and remains stationary, wearing an airflow sensor and a smart bracelet Mi
+3. The airflow sensor is used to get the breathing rate and the smart bracelet Mi 3 is adopted to
+capture the heartbeat rate. It is noted that, although the person sits in front of the radar and remains
+stable, there still exists noise and micro-motion interference from the human body itself and the nearby
+environment. AWR1642 integrates TI’s high-performance C674x DSP subsystem for radar signal
+processing, which can be programmed on the radar board. However, to observe the experimental
+results and data analysis, we hope to obtain the original data for algorithm verification. Therefore,
+human heartbeat and respiratory data are collected by DCA1000 [41] combined with AWR1642 in
+streaming data mode.
+      AWR1642 adopts two transmitting and four receiving one-dimensional linear array antenna
+layout, and uses time division multiplexing (TDM) mode to alternately transmit antenna TX1 and TX2
+frequency modulation pulses to obtain eight virtual antenna arrays, as shown in Figure 7b. In our
+experiment, a single TX/RX antenna pair can implement single-person heartbeat and respiration
+detection. However, in order to get a longer detection distance, we increase the signals gain by using
+two TXs. We alternately send a single FM pulse with duration time, Tc = 50 µs, and the pulse interval
+idle time is 7 µs, and the sawtooth frequency modulation slope is S = 70 MHz/µs, as a result, the frame
+rate is Tm = 50 ms. Considering that the observation time contains at least two cycles of breathing
+or heartbeat signals, to better analyze the heartbeat rate and breathing rate per minute, we set the
+observation time T = 50 s. Thus, the frame length C (C = T/Tm ) is 1000. The specific frequency chirp
+form is shown in Figure 7, and the specific radar parameter settings are listed in Table 1.
+
+                                                                           2λ                  λ/2
+
+
+
+                          Airflow sensor
+                                                                     Tx1        Tx2        Rx1 Rx2 Rx3 Rx4 Rx5 Rx6 Rx7 Rx8
+
+
+                                                  DCA1000
+                                                                                                       Tx1                    Tx2
+                                                                                                      (b)
+                            AWR1642
+                                                                                                                    t1:idle time(7us)
+                                                                    Frequency                                       t2:Ramp end time(57us)
+                                                                                                                    t3:frame period(50ms)
+                                                                      (GHz)
+                                                                           81         Chirp1         Chirp2                Chirp1        Chirp2
+                                               Ethernet port
+                         Smart band (Mi3)
+
+
+
+
+                                                                           77 t1      t2                       t3                        time
+                                     (a)                                                              (c)
+
+      Figure 7. Experimental platform: (a) experimental scene; (b) radar antenna layout; and (c) radar chirp
+      parameters setting.
+
+                                                                Table 1. Radar parameter setting.
+
+                Parameter                    Tc                Tm          S          Fs_adc           Fs_slow      Msamples           C
+                   Value                    50 µs           50 ms    70 MHz/µs        4 Msps           20 Hz           200           1000
+
+
+     Combining Equations (7) and (9) with (10), the actual distance measurement accuracy and
+frequency vibration measurement range of the AWR1642 radar are calculated in a complex 1× mode,
+Sensors 2020, 20, 2999                                                                                                                               14 of 23
+
+
+
+as shown in Table 2. The breathing frequency is in the range of 0.1–0.5 Hz, and the heartbeat frequency
+is in the range of 0.8–2 Hz. The measurement accuracy range in Table 2 shows that the radar parameter
+settings are sufficient to achieve non-contact human heartbeat and breathing detection.
+
+                                     Table 2. Distance and vibration frequency detection range.
+
+                                        Parameter       Range (m)          Vibration Frequency (Hz)
+                                              Max              6.7                                             10
+                                              Min            0.0335                                           0.020
+
+
+     Since we use the DCA1000 to capture the raw radar data, the data will become a non-interleaved
+data format [41] after ADC. The ADC data need de-ping-pong to build a complex signal, and then
+serial-parallel conversion is performed to correspond the TX/RX antenna pair.
+
+4.2. Experimental Results
+
+4.2.1. Target Detection
+     The RTM image constructed according to the flow of Figure 5 is shown in Figure 8a. Figure 8b
+shows the single frame (single chirp) range information, and there are reflections from different targets
+in the range of 0.6–0.9 m. During the experiment, the human body is always sitting in front of the
+radar (see Figure 7a), which means that the target body moves up and down only because of heartbeat
+and breathing movement. As mentioned before, the moving target always brings stronger signal
+power, which is reflected in the brighter part of the image. By comparing the average power of unit
+range interval, the maximum power interval caused by heartbeat and respiration is selected, which
+is shown as 0.7–0.84 m in Figure 8a. The vibration FFT can be used to verify the selected distance
+interval, and the second FFT is performed on the phase-unwrapping row to obtain the vibration FFT,
+as shown in Figure 8b. The range corresponding to the vertical axis is about 21 times/min, and this
+is caused by the predominant breathing vibration, which falls in the 0.1–0.5 Hz (6–30 beats/min)
+interval, and it is proved that the distance interval we choose is correct. Moreover, we observe that
+0.02–0.1 m in Figure 8a has a target, which is caused by the spectral leakage because of the antenna
+coupling phenomenon. It can be removed after DC correction, which is reflected in the vibration FFT
+of Figure 8c. Except for the body motion vibration caused by heartbeat and breathing, the vibration
+frequency no longer exists in the other sections.
+
+              50                                                       1                             1
+
+              45             Spectrum                                  0.9                          0.9
+
+              40             leakage                                   0.8                          0.8
+
+              35                                                       0.7                          0.7
+                                                                              Nomalized amplitude
+
+
+
+
+                                         0.7          0.84
+              30                                                       0.6                          0.6
+    time(s)
+
+
+
+
+              25                                                       0.5                          0.5
+
+              20                                                       0.4                          0.4
+                                                                                                                      Spectrum
+              15                                                       0.3                          0.3
+                                                                                                                      leakage
+              10                                                       0.2                          0.2
+
+               5                                                       0.1                          0.1
+
+                                                                       0                             0
+                   0   0.2     0.4      0.6     0.8      1       1.2                                      0      0.2     0.4      0.6      0.8   1   1.2
+                                     Range(m)                                                                                  Range (m)
+                                      (a)                                                                                          (b)
+                                                                Figure 8. Cont.
+Sensors 2020, 20, 2999                                                                                                                                                                                    15 of 23
+
+
+                                                               70                                                                                                          1
+
+                                                                                                                                                                           0.9
+                                                               60
+                                                                                                                                                                           0.8
+
+
+
+
+                                Vibration frequency(per min)
+                                                               50                                                                                                          0.7
+
+                                                                                                                                                                           0.6
+                                                               40
+                                                                                                                                                                           0.5
+                                                               30
+                                                                                                                                                                           0.4
+
+
+                                                               20                                                                                                          0.3
+
+                                                                                                                                                                           0.2
+                                                               10
+                                                                                                                                                                           0.1
+
+                                                                                                                                                                           0
+                                                                    0                     0.2       0.4      0.6          0.8           1                         1.2
+                                                                                                          Range(m)
+                                                                                                            (c)
+                      Figure 8. Target Detection: (a) RTM; (b) range FFT; and (c) vibration-range.
+
+4.2.2. Phase Extraction of Heartbeat and Breathing
+      The result after DC offset correction can also be seen in the time domain and the corresponding
+frequency domain. The real part of the complex data of the collected radar is taken as the horizontal
+axis, and the imaginary part is taken as the vertical axis. The circular center tracking algorithm is
+applied for DC offset correction, and the results are shown in Figure 9a. The green points are the raw
+data, and the blue ones are the data after DC offset correction. It can be clearly seen that the center and
+the blue points of the green circle (shifted origin and before DC cor. in Figure 9a are moved to the blue
+circle with center Origin. Figure 9b shows the comparison before and after the time-domain waveform
+correction. It can be seen from Figure 9c that the DC offset dynamic tracking of the circle center can
+effectively suppress the DC offset caused by non-thoracic displacement motion.
+      Figure 10a shows the phase after arctangent demodulation, and phase jumps and discontinuities
+appear in the figure. The extended DACM algorithm is used to obtain Figure 10b. After phase
+unwrapping, the time domain waveform is closer to a sine wave. It is learnt from Figure 10b that the
+heartbeat frequency becomes weak and it is easily submerged in the fundamental harmonic and noise.
+It can be seen that, in the spectrum of Figure 10c after the phase difference, the heartbeat frequency
+becomes more obvious. It is noted that the large waveform in Figure 10b is caused by the respiratory
+vibration, whereas the vibration caused by the chest displacement movement is always superimposed
+on the top of the waveform. In the frequency spectrum, there are tiny frequencies close to 0, and they
+are caused by small tremors such as muscles or bones.
+
+         104
+    1                                                                                     10                                                                      40
+                               After dc cor.                                                                                    Before dc cor.                                                       Before dc cor.
+                               Origin                                                                                           After dc cor.                                                        After dc cor.
+                               Brfore dc cor.                                               0
+ 0.5                                                                                                                                                              30
+                               Shifted origin
+                                                                         Phase(radains)
+
+
+
+
+                                                                                                                                                  Amplitude(dB)
+
+
+
+
+                                                                                          -10
+    0                                                                                                                                                             20
+Q
+
+
+
+
+                                                                                          -20
+
+ -0.5                                                                                                                                                             10
+                                                                                          -30
+
+
+  -1                                                                                      -40                                                                      0
+    -1         -0.5      0     0.5                                      1                       0    10      20          30        40            50                    0   0.5   1        1.5    2       2.5          3
+                         I                                               104                                  time(s)                                                                Frequency(Hz)
+                      (a)                                                                                          (b)                                                                   (c)
+
+         Figure 9. DC offset correction: (a) center-dynamic DC offset tracking correction; (b) time-domain; and
+         (c) frequency domain.
+Sensors 2020, 20, 2999                                                                                                                                                                                                             16 of 23
+
+
+                  5                                                               20                                                                                                 5
+ Phase(radains)
+
+
+
+
+                                                                 Phase(radains)
+
+
+
+
+                                                                                                                                                                   Phase(radains)
+                                                                                   0
+                  0                                                                                                                                                                  0
+                                                                                  -20
+
+
+                  -5                                                              -40                                                                                               -5
+                       0       10      20         30   40   50                          0    10                     20                30          40         50                          0     10         20             30   40        50
+                                        time(s)                                                                             time(s)                                                                            time(s)
+                       1                                                          10                                                                                                0.3
+                                                                                                               10
+                                                                                                                                                                                              fb
+
+
+
+
+                                                                                                   Amplitude
+                               fb fh                                                                           5                    fb              fh
+  Amplitude
+
+
+
+
+                                                                    Amplitude
+
+
+
+
+                                                                                                                                                                  Amplitude
+                                                                                                                                                                                    0.2
+                  0.5                                                              5        fb
+                                                                                                               0
+                                                                                                                    0         0.5      1    1.5         2   2.5
+                                                                                                                                                                                                    fh
+                                                                                                                                    Frequency(Hz)
+                                                                                                                                                                                    0.1
+                                                                                                  fh
+                       0                                                           0                                                                                                 0
+                           0    2       4          6   8    10                         0     2                          4             6             8        10                           0    2           4             6    8         10
+                                    Frequency(Hz)                                                              Frequency(Hz)                                                                             Frequency(Hz)
+                                            (a)                                                                              (b)                                                                               (c)
+                           Figure 10. Phase extraction: (a) phase waveform and its corresponding spectrum after arctangent
+                           demodulation; (b) phase waveform and its spectrum after phase unwrapping; and (c) phase waveform
+                           after phase difference and its spectrum.
+
+4.2.3. Separation and Reconstruction of Heartbeat and Breathing Signals
+     The CS-OMP algorithm is proposed to construct the phase signal in Figure 11. The red line is the
+original heartbeat and breathing signal after bandpass filtering, and the blue one is the reconstructed
+signal. It is obviously learnt from the right two figures of Figure 11 that the reconstructed signal is an
+ideal periodic sinusoidal signal composed of a single frequency, and there is no other interference for
+the frequency estimation of the heartbeat and breathing.
+     The heartbeat and respiration signals in the differential phase signal can be obtained from
+coarse to fine according to the confidence formula. The peak frequency and confidence value of the
+reconstructed signal using “db5” under different order decompositions are given in Table 3. It can
+be learnt that, at the 4th order, the peak frequency of the reconstructed heartbeat signal is 1.46 Hz,
+and the corresponding confidence value is 0.4155. This confidence value is the largest in the frequency
+range of 0.8–2 Hz; as a result, 1.46 Hz will be used as the estimated heartbeat frequency. Similarly,
+0.34 Hz at the 6th order decomposition is the breathing rate frequency. Then, we can get the heartbeat
+signal after the 4th order wavelet decomposition, and the breathing signal is obtained after 6th wavelet
+decomposition. Therefore, to show the multiple decomposition process of the phase differential
+signal, we give the reconstructed breathing and heartbeat signals in Figure 12. In Figure 12, the blue
+line is the reconstructed breathing signal with approximate coefficients, and the green one is the
+reconstructed heartbeat signal with detailed coefficients. Ideally, the heartbeat and breathing signals
+are ideal periodical, and the reconstructed breathing and heartbeat signals after 6th and 4th order
+wavelet decomposition are not strictly periodical because of the noise and interference. To preserve
+the ideal periodicity of the heartbeat and breathing signals and the correctness of the reconstructed
+signals, the adaptive soft threshold with rigrsure is further used for noise reduction. The red lines in
+Figure 12 show the heartbeat and breathing signals of the noise reduction results. It can be seen that
+the denoised results are much better than the original ones.
+Sensors 2020, 20, 2999                                                                                                                                                                                  17 of 23
+
+
+                                       1                                                                                                 0.2
+        Displacement(mm)                                                               Reconstructed signal                                                                               Reconstructed signal
+                                                                                       Filtering signal                                                                                   Fitering signal
+                                0.5                                                                                                  0.15
+
+
+
+
+                                                                                                                         Amplitude
+ (a)                                   0                                                                                                 0.1
+
+
+                           -0.5                                                                                                      0.05
+
+
+                                       -1                                                                                                 0
+                                            0            10        20             30          40              50                               0             2              4         6           8              10
+                                                                        time(s)                                                                                          Frequency(Hz)
+
+                                       4                                                                                                 0.3
+                                                                                       Reconstructed signal                                                                               Reconstructed signal
+                    Displacement(mm)
+
+
+
+
+                                                                                       Filtering signal                                                                                   Filtering signal
+                                       2
+                                                                                                                                         0.2
+
+
+
+
+                                                                                                                             Amplitude
+(b)                                    0
+
+                                                                                                                                         0.1
+                                       -2
+
+
+                                       -4                                                                                                 0
+                                            0            10        20             30          40              50                               0             2              4         6           8              10
+                                                                        time(s)                                                                                          Frequency(Hz)
+
+           Figure 11. CS-OMP reconstructed signal: (a) heartbeat signal and its spectrum; (b) respiration signal
+           and its spectrum.
+
+         2
+s        0
+        -2
+                                                     5             10             15               20                25       30      35                                        40         45             50
+                                                                                                                       Wavelet decomposition
+
+ a1                                                                                                                      d1
+
+
+
+ a6                                                                                                                         d4
+
+                                                                                                                      Depreciation noise reduction
+                                                                                        original                                                                                                original
+    2                                                                                                                        2                                                                  de-noised
+                                                                                        de-noised
+    0                                                                                                                        0
+  -2
+                                                                                                                          -2
+
+                                       5        10   15       20   25     30      35    40     45       50                                         5    10       15    20       25   30   35    40    45       50
+                                                               time(s)                                                                                                   time(s)
+                                                     Figure 12. Wavelet decomposition and noise reduction reconstruction results.
+
+                                            Table 3. Confidence value of the reconstructed signal under different order decompositions.
+
+                                                                   Decomposition Level                   f n_ max        f d_ max                       W1             W2
+                                                                                  2                           0.46          -                          0.1217            -
+                                                                                  3                           0.46        1.78                         0.2092         0.0614
+                                                                                  4                           0.46        1.46                         0.4032         0.4155
+                                                                                  5                           0.28         1.3                         0.3915         0.3868
+                                                                                  6                           0.14        0.34                         0.3817         0.9229
+                                                                                  7                             -         0.14                            -           0.5384
+
+
+     Figure 13 shows the frequency spectrum of the breathing (in Figure 13a) and heartbeat signals
+(in Figure 13b) reconstructed after the 6th and 4th order wavelet decomposition and noise reduction.
+The blue line represents the spectrum of the heartbeat and breathing signals after bandpass filtering.
+Sensors 2020, 20, 2999                                                                                                                                                                                                                               18 of 23
+
+
+
+It can be seen that the interference frequency is significantly reduced after wavelet decomposition and
+noise reduction.
+                        1                                                                                                                                              1
+                                  X: 0.34                                                                                                                                                    X: 1.46
+                                                                                             Reconstructed signal                                                                                                                     Reconstructed signal
+                                  Y: 1                                                                                                                                                       Y: 1
+                                                                                             Original signal                                                                                                                          Original signal
+                                                                                                                                                                                X: 1.3
+                                                                                                                                                                                Y: 0.7724
+                       0.8                                                                                                                                            0.8
+                                                                                                                                                                                                X: 1.78
+Normalized Amplitude
+
+
+
+
+                                                                                                                                               Normalized Amolitude
+                                                                                                                                                                                                Y: 0.6681
+
+
+                       0.6                                                                                                                                            0.6
+
+
+
+                       0.4                                                                                                                                            0.4
+                                   X: 0.46
+                                   Y: 0.3812
+
+                       0.2       X: 0.14                                                                                                                              0.2
+                                 Y: 0.2254
+
+
+
+                        0                                                                                                                                              0
+                             0                            2        4               6                   8            10                                                      0                  2                 4           6              8                10
+                                                                   Frequency(Hz)                                                                                                                                Frequency(Hz)
+                                                                       (a)                                                                                                                                             (b)
+                                       Figure 13. Wavelet decomposition spectrum: (a) respiratory signal; and (b) heartbeat signal.
+
+     In order to observe the respiration waveform and heartbeat waveform after reconstruction,
+the observation time window is set to 50 s. In addition to the frequency domain estimation method,
+the autocorrelation function is used to estimate the respiratory and heartbeat rates in the time domain.
+The experimental results are shown in Figure 14.
+
+                                                                                                                                                     1
+                                                                                                                         Filtering
+                                                                                                                         CS-OMP
+                                                                                                                         RA-DWT                      0
+
+
+                                                                                                                                               -1
+                                                                                                                                                                0                       10              20              30       40             50
+
+                                                                                                                                                      1
+                                         Ampltitude
+
+
+
+
+                                   (a)                                                                                                                0
+
+
+                                                                                                                                                -1
+                                                                                                                                                                 0                      10              20              30       40             50
+
+                                                                                                                                                     1
+
+
+                                                                                                                                                     0
+
+
+                                                                                                                                               -1
+                                                      0       10             20                   30          40                     50                         0                       10              20              30       40             50
+                                                                                   time(s)                                                                                                                    time(s)
+                                                                                                                                           1
+                                                                                                                     Filtering
+                                                                                                                     CS-OMP
+                                                                                                                     RA-DWT                0
+
+
+                                                                                                                                          -1
+                                                                                                                                                  0                                    10              20               30       40             50
+                                                                                                                                           1
+                                             Ampltitude
+
+
+
+
+                                   (b)                                                                                                     0
+
+
+                                                                                                                                          -1
+                                                                                                                                                  0                                    10              20               30       40             50
+                                                                                                                                          1
+
+
+                                                                                                                                          0
+
+
+                                                                                                                                          -1
+                                                          0    10             20                  30          40                     50        0                                      10               20               30       40             50
+                                                                                       time (s)                                                                                                              time(s)
+
+                             Figure 14. Separate reconstructed waveform: (a) heartbeat waveform and its autocorrelation; and
+                             (b) breathing waveform and its autocorrelation.
+Sensors 2020, 20, 2999                                                                                                  19 of 23
+
+
+
+4.3. Performance Comparison
+      To further verify the accuracy and effectiveness of the proposed algorithms, we compare our
+work with the filtering method that proposed in [25]. The filtering method uses two bandpass filters to
+separate the breathing and heartbeat signals, and find the largest spectral values in the two bands as
+the corresponding estimated breathing and heartbeat rate. In this paper, the radar is used to collect data
+for five minutes on five adult males and five adult females, respectively. For the collected offline data,
+the data length of one minute is taken for respiratory rate and heartbeat rate estimation. The respiratory
+rate and heartbeat rate estimation in frequency domain FFT and time domain autocorrelation are used
+to obtain Tables 4 and 5. In the tables, the mean standard deviation (MSD) and the Pearson correlation
+coefficient (PCC) are used for performance comparison. The MSD is defined as:
+                                                      s
+                                                               n
+                                                          1                 2
+                                                          n   ∑ (ei − ē)
+                                                              i =1
+                                              σe =                              ,                                          (32)
+                                                                     d¯
+where ei is the difference between the corresponding reference heartbeat rate (or respiration rate) and
+the estimated value; ē is the average difference; and d¯ is the data average rate. Reference heartbeat rate
+and respiratory rate are provided by contact sensing device. PCC is defined as [25]
+
+                                                ∑iN=1 (dri − d¯ri )(dsi − d¯si )
+                                 PCC = q                                                   ,                               (33)
+                                              ∑iN=1 (dri − d¯ri ) ∑iN=1 (dsi − d¯2si )
+
+where dri and dsi are the i-th estimated rate (respiratory or heartbeat rate) and contact sensor reference
+rata, respectively. The value of PCC ranges from [0–1], where 0 indicates that the two are not related,
+and 1 indicates that the two are completely linearly related. In Tables 4 and 5, when the band-pass
+filtering method is used in conjunction with the frequency FFT and time-domain autocorrelation
+methods, the MSD is higher and the PCC is reduced due to the passband noise and harmonic
+interference. The use of CS-OMP and RA-DWT method while ensuring lower MSD, PCC has also been
+correlated higher guaranteed. It is observed that the MSD and PCC of the two methods of CS-OMP are
+always the same because CS-OMP is reconstructed as a single frequency periodic sine wave, and both
+its frequency domain and time domain autocorrelation are corresponding to a single frequency or
+period. We also learn from Tables 4 and 5 that the accuracy of heartbeat rate is improved by about 7%,
+and the accuracy of breathing rate is improved by about 4%.
+
+                         Table 4. Heartbeat rate comparison between different methods.
+
+                                                                          AWR1642 Radar Sensor
+                            Mi 3
+                                                  Filtering [25]                       CS-OMP                RA-DWT
+   Subjects      (Reference Heartbeat Rate)
+                                                            Auto-                         Auto-                 Auto-
+                                               FFT                              FFT                   FFT
+                                                          Correlation                   Correlation           Correlation
+    Male 1                  88                  92                  85           92         92         87         85
+    Male 2                  77                  85                  75           73         73         79         77
+    Male 3                  74                  80                  79           74         74         75         74
+    Male 4                  60                  75                  65           58         58         60         58
+    Male 5                  67                  80                  77           65         65         65         62
+   Female 1                 81                  97                  83           83         83         82         80
+   Female 2                 71                  82                  76           78         78         75         73
+   Female 3                 85                  93                  88           87         87         89         82
+   Female 4                 73                  86                  82           72         72         70         70
+   Female 5                 82                  95                  90           80         80         85         83
+   MSD (%)                   -                 4.63                5.43         4.38       4.38       3.16       2.92
+   PCC (%)                   -                  88                  86           95         95         97         97
+Sensors 2020, 20, 2999                                                                                                                                             20 of 23
+
+
+
+                                                       Table 5. Breathing rate comparison between different methods.
+
+                                                                                                          AWR1642 Radar Sensor
+                       Airflow Sensor
+                                                                                     Filtering [25]                  CS-OMP                             RA-DWT
+   Subjects      (Reference Breathing Rate)
+                                                                                           Auto-                        Auto-                              Auto-
+                                                                               FFT                            FFT                             FFT
+                                                                                         Correlation                  Correlation                        Correlation
+    Male 1                                                 17                   21             18              17            17                17            17
+    Male 2                                                 19                   24             21              20            20                19            19
+    Male 3                                                 23                   26             25              22            22                25            23
+    Male 4                                                 16                   19             17              15            15                17            15
+    Male 5                                                 22                   21             19              20            20                22            21
+   Female 1                                                23                   28             25              25            25                23            22
+   Female 2                                                18                   19             16              18            18                19            17
+   Female 3                                                28                   32             28              28            28                28            25
+   Female 4                                                24                   28             27              26            26                25            25
+   Female 5                                                25                   27             23              23            23                25            24
+   MSD (%)                                                  -                  7.70           9.43            6.78          6.78              3.21          5.09
+   PCC (%)                                                  -                   90             88              94            94                98            96
+
+
+   Figure 15a,b respectively show the real-time heartbeat rate and breathing rate obtained by the
+RA-DWT method using the contact sensing devices (smart bracelet Mi 3 and Airflow sensor) and
+AWR1642 radar sensor of male 5 within 10 min.
+                                                      80
+                                                                                                                                   Radar RA-DWT
+                                                                                                                                   Mi 3
+                                                            MSD=1.36%
+                                                            PCC=0.94
+                                                      75
+                            Heartbeat rate(per min)
+
+
+
+
+                                                      70
+
+
+
+                     (a)
+                                                      65
+
+
+
+
+                                                      60
+
+
+
+
+                                                             50    100   150   200      250    300      350    400    450    500       550        600
+                                                                                              time(s)
+                                                      28
+                                                                                                                            Radar RA-DWT
+                                                            MSD=6.46%                                                       Airflow Sensor
+                                                      26
+                                                            PCC=0.93
+
+                                                      24
+
+
+                                                      22
+                           Breathing rate(per min)
+
+
+
+
+                                                      20
+
+
+                                                      18
+                     (b)
+                                                      16
+
+
+                                                      14
+
+
+                                                      12
+
+
+                                                      10
+
+
+                                                       8
+
+                                                            50    100    150   200      250    300      350    400    450    500        550       600
+                                                                                              time(s)
+
+
+                     Figure 15. Real-time comparison: (a) heartbeat rate; and (b) breathing rate.
+Sensors 2020, 20, 2999                                                                                             21 of 23
+
+
+
+4.4. Discussion
+     After applying the circular center dynamic tracking algorithm to correct the DC offset,
+the extended DACM allows us to obtain effective heartbeat and breathing-related phase information.
+Two methods, CS-OMP and RA-DWT, are proposed to process the extracted differential phase signal.
+The heartbeat and breathing waveform reconstructed by the CS-OMP algorithm shows an ideal
+periodic sine wave, and its corresponding autocorrelation function is also a periodic sine signal with no
+other interference frequencies. The heartbeat and breathing signals reconstructed by RA-DWT reduce
+the irregular waveform phenomenon, and effectively reduce the noise and harmonic interference
+while retaining the time-frequency characteristics of the original signal. Compared with the general
+band-pass filtering method, the accuracies of heartbeat rate and respiration rate are improved.
+     The heartbeat signal reconstructed by CS-OMP may be noise that is close to the true heartbeat
+frequency, and there is still a certain estimation bias in using the statistical value of the weighting
+coefficient to approximate the true value. It is worth noting that the RA-DWT in Tables 4 and 5 has
+a higher PCC and a lower MSD than the CS-OMP method, but this does not mean that the latter is
+worse than the former. In Figures 15a,b, the PCC for the real-time heartbeat rate and the real-time
+respiration rate are compared with the results in Tables 4 and 5 of the offline collected data processing,
+and the RA-DWT method is reduced instead. Therefore, for offline data processing results, the PCC
+obtained by RA-DWT is a little higher than CS-OMP, but, for real-time processing, due to hardware
+equipment and other influencing factors, the accuracy of RA-DWT detection may be reduced. In our
+experiments, the effect of the two methods is actually equivalent, and more experiments are needed
+to verify which one is better. However, compared with the traditional method of band-pass filtering
+in [25], the MSD of CS-OMP and RA-DWT are always lower, and both heartbeat rate and breathing
+rate of the PCC value can be guaranteed at about 93%.
+
+5. Conclusions
+     In this paper, a 77 GHz FMCW radar was applied to obtain the breathing and heartbeat signals
+via extracting the radar IF phase information. This paper systematically introduced the radar data
+signal processing flow and parameter configuration. Two methods for separating and reconstructing
+the heartbeat and breathing signals were proposed, and the results were compared with those of
+the contact sensor devices (smart bracelets and airflow sensors). Experimental results showed that
+both the proposed methods effectively suppressed the influence of noise and harmonic interference.
+The detection accuracies of both heartbeat rate and respiration rate were higher than 93%, which
+proved the feasibility and effectiveness of FMCW radar in remote vital signs monitoring. The methods
+proposed in this paper achieve high accuracy in static human life detection, and a more practical
+scenario with human body movement is interesting, and we leave it for future work.
+
+Author Contributions: Y.W. is responsible for the theoretical work, and the writing of the manuscript. W.W. and
+M.Z. developed most of the methodology and validated the results. A.R. assisted with writing the manuscript.
+Z.T. supervised the research. All authors have read and agreed to the published version of the manuscript.
+Funding: This work was supported in part by the National Natural Science Foundation of China under Grants
+61771083, 61901076, and 61704015, in part by the Fundamental and Frontier Research Project of Chongqing
+under Grant cstc2017jcyjAX0380, Young Project of Science and Technology Research program of Chongqing
+Education Commission of China (No. KJQN201900603) and in part by the University Outstanding Achievement
+Transformation Project of Chongqing under Grant KJZH17117.
+Conflicts of Interest: The authors declare no conflict of interest.
+
+References
+1.    Shafiq, G.; Veluvolu, K.C. Surface chest motion decomposition for cardiovascular monitoring. Sci. Rep. 2014, 4, 5093.
+      [CrossRef]
+2.    Kwak, Y.H.; Kim, W.; Park, K.B.; Kim, K.; Seo, S. Flexible heartbeat sensor for wearable device.
+      Biosens. Bioelectron. 2017, 94, 250–255. [CrossRef] [PubMed]
+Sensors 2020, 20, 2999                                                                                     22 of 23
+
+
+
+3.    Yamashita, S. Biological Signal Detection Electrode and Biological Signal Detection Apparatus. U.S. Patent
+      8,620,401, 31 December 2013.
+4.    Chen, K.M.; Huang, Y.; Zhang, J.; Norman, A. Microwave life-detection systems for searching human
+      subjects under earthquake rubble or behind barrier. IEEE Trans. Biomed. Eng. 2000, 47, 105–114. [CrossRef]
+      [PubMed]
+5.    Li, C.; Lin, J.; Xiao, Y. Robust overnight monitoring of human vital signs by a non-contact respiration and
+      heartbeat detector. In Proceedings of the 2006 International Conference of the IEEE Engineering in Medicine
+      and Biology Society, New York, NY, USA, 30 August–3 September 2006; pp. 2235–2238.
+6.    Liu, Y.; W.R.H.; Merz, C. Assessment of CODAR Seasonde and WERA HF Radars in Mapping Surface
+      Currents on the West Florida Shelf. J. Atmos. Ocean. Technol. 2014, 31, 1363–1382. [CrossRef]
+7.    Zhao, C.; Zezong, C.; He, C.; Xie, F.; Chen, X.; Mou, C. Validation of Sensing Ocean Surface Currents Using
+      Multi-Frequency HF Radar Based on a Circular Receiving Array. Remote. Sens. 2018, 10, 184. [CrossRef]
+8.    Wyatt, L.R. Use of HF radar for marine renewable applications. In Proceedings of the 2012 Oceans—Yeosu,
+      Yeosu, Korea, 21–24 May 2012; pp. 1–5.
+9.    Yavari, E.; Jou, H.; Lubecke, V.; Boric-Lubecke, O. Doppler radar sensor for occupancy monitoring.
+      In Proceedings of the 2013 IEEE Topical Conference on Power Amplifiers for Wireless and Radio Applications,
+      Santa Clara, CA, USA, 20 January 2013; pp. 145–147.
+10.   Yavari, E.; Song, C.; Lubecke, V.; Boric-Lubecke, O. Is there anybody in there?: Intelligent radar occupancy
+      sensors. IEEE Microw. Mag. 2014, 15, 57–64. [CrossRef]
+11.   Wang, F.K.; Tang, M.C.; Chiu, Y.C.; Horng, T.S. Gesture sensing using retransmitted wireless communication
+      signals based on Doppler radar technology. IEEE Trans. Microw. Theory Tech. 2015, 63, 4592–4602. [CrossRef]
+12.   Liu, C.; Gu, C.; Li, C. Non-contact hand interaction with smart phones using the wireless power transfer
+      features. In Proceedings of the 2015 IEEE Radio and Wireless Symposium (RWS), San Diego, CA, USA,
+      25–28 January 2015; pp. 20–22.
+13.   Hosseini, S.A.T.; Amindavar, H. UWB radar signal processing in measurement of heartbeat features.
+      In Proceedings of the 2017 IEEE International Conference on Acoustics, Speech and Signal Processing
+      (ICASSP), New Orleans, LA, USA, 5–9 March 2017; pp. 1004–1007.
+14.   Li, J.; Zeng, Z.; Sun, J.; Liu, F. Through-Wall Detection of Human Being’s Movement by UWB Radar.
+      IEEE Geosci. Remote. Sens. Lett. 2012, 9, 1079–1083. [CrossRef]
+15.   Li, C.; Lubecke, V.M.; Boric-Lubecke, O.; Lin, J. A review on recent advances in Doppler radar sensors for
+      noncontact healthcare monitoring. IEEE Trans. Microw. Theory Tech. 2013, 61, 2046–2060. [CrossRef]
+16.   Dong, S.; Zhang, Y.; Ma, C.; Zhu, C.; Gu, Z.; Lv, Q.; Zhang, B.; Li, C.; Ran, L. Doppler Cardiogram: A Remote
+      Detection of Human Heart Activities. IEEE Trans. Microw. Theory Tech. 2019, 68, 1132–1141. [CrossRef]
+17.   Anghel, A.; Vasile, G.; Cacoveanu, R.; Ioana, C.; Ciochina, S. Short-range wideband FMCW radar for
+      millimetric displacement measurements. IEEE Trans. Geosci. Remote Sens. 2014, 52, 5633–5642. [CrossRef]
+18.   Li, Y.; O’Young, S. Method of doubling range resolution without increasing bandwidth in FMCW radar.
+      Electron. Lett. 2015, 51, 933–935. [CrossRef]
+19.   Sharpe, S.M.; Seals, J.; MacDonald, A.H.; Crowgey, S.R. Non-Contact Vital Signs Monitor. U.S. Patent
+      4,958,638, 25 September 1990.
+20.   Zhang, D.; Kurata, M.; Inaba, T. FMCW radar for small displacement detection of vital signal using projection
+      matrix method. Int. J. Antennas Propag. 2013, 2013, 571986. [CrossRef]
+21.   Lee, H.; Kim, B.H.; Park, J.K.; Yook, J.G. A Novel Vital-Sign Sensing Algorithm for Multiple Subjects Based
+      on 24-GHz FMCW Doppler Radar. Remote Sens. 2019, 11, 1237. [CrossRef]
+22.   Anitori, L.; de Jong, A.; Nennie, F. FMCW radar for life-sign detection. In Proceedings of the 2009 IEEE
+      Radar Conference, Pasadena, CA, USA, 4–8 May 2009; pp. 1–6.
+23.   Gu, C.; Wang, G.; Inoue, T.; Li, C. Doppler radar vital sign detection with random body movement
+      cancellation based on adaptive phase compensation. In Proceedings of the 2013 IEEE MTT-S International
+      Microwave Symposium Digest (MTT), Seattle, WA, USA, 2–7 June 2013; pp. 1–3.
+24.   Ahmad, A.; Roh, J.C.; Wang, D.; Dubey, A. Vital signs monitoring of multiple people using a
+      FMCW millimeter-wave sensor. In Proceedings of the 2018 IEEE Radar Conference (RadarConf18),
+      Oklahoma City, OK, USA, 23–27 April 2018; pp. 1450–1455.
+25.   Alizadeh, M.; Shaker, G.; De Almeida, J.C.M.; Morita, P.P.; Safavi-Naeini, S. Remote monitoring of human
+      vital signs using mm-wave FMCW radar. IEEE Access 2019, 7, 54958–54968. [CrossRef]
+Sensors 2020, 20, 2999                                                                                         23 of 23
+
+
+
+26.   Brooker, G.M. Understanding millimetre wave FMCW radars. In Proceedings of the 1st International
+      Conference on Sensing Technology, Palmerston North, New Zealand, 21–23 November 2005; pp. 152–157.
+27.   Budge, M.C.; Burt, M.P. Range correlation effects in radars. In Proceedings of the Record of the 1993 IEEE
+      National Radar Conference, Lynnfield, MA, USA, 20–22 April 1993; pp. 212–216.
+28.   Barrick, D.E. FM/CW Radar Signals and Digital Processing. Available online: http://www.codar.com/
+      images/about/1973Barrick_FMCW.pdf (accessed on 20 May 2020).
+29.   Ding, L.; Ali, M.; Patole, S.; Dabak, A. Vibration parameter estimation using FMCW radar. In Proceedings
+      of the 2016 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP),
+      Shanghai, China, 20–25 March 2016; pp. 2224–2228.
+30.   Lv, Q.; Chen, L.; An, K.; Wang, J.; Li, H.; Ye, D.; Huangfu, J.; Li, C.; Ran, L. Doppler Vital Signs Detection in
+      the Presence of Large-Scale Random Body Movements. IEEE Trans. Microw. Theory Tech. 2018, 66, 4261–4270.
+      [CrossRef]
+31.   Park, B.K.; Boric-Lubecke, O.; Lubecke, V.M. Arctangent demodulation with DC offset compensation in
+      quadrature Doppler radar receiver systems. IEEE Trans. Microw. Theory Tech. 2007, 55, 1073–1079. [CrossRef]
+32.   Lv, Q.; Ye, D.; Qiao, S.; Salamin, Y.; Huangfu, J.; Li, C.; Ran, L. High dynamic-range motion imaging based
+      on linearized Doppler radar sensor. IEEE Trans. Microw. Theory Tech. 2014, 62, 1837–1846. [CrossRef]
+33.   Candès, E.J.; Romberg, J.; Tao, T. Robust uncertainty principles: Exact signal reconstruction from highly
+      incomplete frequency information. IEEE Trans. Inf. Theory. 2006, 52, 489–509. [CrossRef]
+34.   Chen, W.; Wassell, I. Energy efficient signal acquisition via compressive sensing in wireless sensor networks.
+      In Proceedings of the 2011 6th International Symposium on Wireless and Pervasive Computing (ISWPC),
+      Hong Kong, China, 23–25 February 2011; Volume 2325, p. 16.
+35.   Tsaig, Y.; Donoho, D.L. Extensions of compressed sensing. Signal Process. 2006, 86, 549–571. [CrossRef]
+36.   Sun, H.; Ni, L. Compressed sensing data reconstruction using adaptive generalized orthogonal matching
+      pursuit algorithm. In Proceedings of the 2013 3rd International Conference on Computer Science and
+      Network Technology, Dalian, China, 12–13 October 2013; pp. 1102–1106.
+37.   Soman, K. Insight into Wavelets: From Theory to Practice; PHI Learning Pvt. Ltd.: Delhi, India, 2010.
+38.   Choi, C.H.; Park, J.H.; Lee, H.N.; Yang, J.R. Heartbeat detection using a Doppler radar sensor based on the
+      scaling function of wavelet transform. Microw. Opt. Technol. Lett. 2019, 61, 1792–1796. [CrossRef]
+39.   Valencia, D.; Orejuela, D.; Salazar, J.; Valencia, J. Comparison analysis between rigrsure, sqtwolog,
+      heursure and minimaxi techniques using hard and soft thresholding methods. In Proceedings of the 2016
+      XXI Symposium on Signal Processing, Images and Artificial Vision (STSIVA), Bucaramanga, Colombia,
+      31 August–2 September 2016; pp. 1–5.
+40.   AWR1642 Single-Chip 76-GHz to 81-GHz Automotive Radar Sensor Evaluation Module. Available online:
+      http://www.ti.com/tool/AWR1642BOOST (accessed on 15 January 2020).
+41.   DCA1000EVM Real-time Data-capture Adapter For Radar Sensing Evaluation Module. Available online:
+      http://www.ti.com/tool/DCA1000EVM (accessed on 15 January 2020).
+
+                          c 2020 by the authors. Licensee MDPI, Basel, Switzerland. This article is an open access
+                         article distributed under the terms and conditions of the Creative Commons Attribution
+                         (CC BY) license (http://creativecommons.org/licenses/by/4.0/).
+

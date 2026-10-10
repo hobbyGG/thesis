@@ -1,0 +1,33 @@
+{
+  "input": 1779,
+  "fulltext_upgrades": 13,
+  "counts": {
+    "module": 672,
+    "context": 523,
+    "pending": 81,
+    "exclude": 503
+  },
+  "modules": {
+    "M01": 71,
+    "M02": 99,
+    "M03": 18,
+    "M04": 4,
+    "M05": 103,
+    "M06": 35,
+    "M07": 9,
+    "M08": 139,
+    "M09": 22,
+    "M10": 47,
+    "M11": 66,
+    "M12": 10,
+    "M13": 19,
+    "M14": 66,
+    "M15": 57,
+    "M16": 168,
+    "M17": 145,
+    "M18": 43,
+    "M19": 64,
+    "M20": 151
+  },
+  "status": "stage-1 abstract review plus first fulltext/supplement upgrades; not final exhaustive full-text screening"
+}

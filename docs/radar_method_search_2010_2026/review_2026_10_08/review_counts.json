@@ -1,0 +1,33 @@
+{
+  "input": 1779,
+  "reviewed_decisions": 1686,
+  "counts": {
+    "pending": 93,
+    "module": 659,
+    "context": 524,
+    "exclude": 503
+  },
+  "modules": {
+    "M01": 67,
+    "M02": 99,
+    "M03": 18,
+    "M04": 4,
+    "M05": 99,
+    "M06": 26,
+    "M07": 7,
+    "M08": 139,
+    "M09": 21,
+    "M10": 47,
+    "M11": 65,
+    "M12": 10,
+    "M13": 19,
+    "M14": 58,
+    "M15": 53,
+    "M16": 168,
+    "M17": 145,
+    "M18": 42,
+    "M19": 56,
+    "M20": 144
+  },
+  "status": "phase-1 priority review, not final full-text screening"
+}

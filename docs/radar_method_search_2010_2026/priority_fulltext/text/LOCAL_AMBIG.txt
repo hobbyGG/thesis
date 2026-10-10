@@ -1,0 +1,539 @@
+8482                                                                       IEEE SENSORS JOURNAL, VOL. 22, NO. 9, MAY 1, 2022
+
+
+
+
+        Solving Phase Ambiguity in Interferometric
+            Displacement Measurement With
+                 Millimeter-Wave FMCW
+                      Radar Sensors
+       Jingtao Liu , Graduate Student Member, IEEE, Yuchen Li , Graduate Student Member, IEEE,
+                               and Changzhan Gu , Senior Member, IEEE
+
+
+
+  Abstract —The frequency-modulated continuous-wave
+(FMCW) radar sensor is subject to phase ambiguity in mea-
+suring large displacement of over half a wavelength, which is
+particularly severe in the millimeter-wave FMCW radar sensor
+due to its short wavelength. The state-of-the-art linear phase
+demodulation techniques were mostly developed for single
+tone quadrature continuous-wave (CW) radars such as the
+Modified differentiate and cross-multiply (MDACM) algorithm.
+This paper presents a novel linear interferometric dis-
+placement measurement technique which can synthesize the
+quadrature I/Q signals across slow time from a single-channel
+FMCW radar. In this way, the linear phase demodulation tech-
+nique developed for the CW radar can now be leveraged for the
+FMCW radar. The theoretical analysis and working principles
+are discussed. Exhaustive experiments are performed to
+validate the proposed technique. It is demonstrated that the
+displacement motions as large as 10 times of the wavelength
+can be precisely extracted from a single channel FMCW radar
+with micrometer accuracy and without any phase ambiguity.
+  Index Terms — Displacement, FMCW radar sensor, interferometry, motion sensing, phase demodulation, quadrature
+I/Q, short-range.
+
+
+
+                      I. I NTRODUCTION                                        rate displacement measurement based on interferometric
+                                                                              sensing [8]–[10]. However, it cannot track multi-targets due to
+W       ITH radar sensors becoming more portable, more
+        affordable and more intelligent, radar technology is
+entering our daily lives, providing applications such as non-
+                                                                              the zero bandwidth. Recently, the FMCW radar is also utilized
+                                                                              to realize accurate displacement measurement by tracking the
+contact vital sign monitoring, touchless human-computer                       phase history at the target range bins [11], [12]. Therefore,
+interaction (HCI), and structural health monitoring [1]–[7].                  in addition to the ranging capability, the FMCW radar can
+The single-tone CW radar has long been utilized for accu-                     also track the target’s displacement motions, which makes it
+                                                                              possible for many more potential applications, such as vital
+                                                                              sign monitoring of multiple persons, RF microphone, and
+   Manuscript received February 26, 2022; accepted March 7, 2022. Date
+of publication March 10, 2022; date of current version April 29, 2022.        so on [13]–[20].
+This work was supported in part by the National Key Research and                 However, the displacement measurement based on phase
+Development Program of China under Grant 2021YFA0715303, in part              tracking suffers from the phase ambiguity issue when the
+by the Shanghai Municipal Science and Technology Major Project under
+Grant 2021SHZDZX0102, and in part by the National Natural Science             phase exceeds 2π [15]–[20]. The vital signs are successfully
+Foundation of China under Grant 61831016 and Grant 62171277. The              captured using a 5.8 GHz FMCW radar in [11], where
+associate editor coordinating the review of this article and approving        the phase history based displacement measurement is firstly
+it for publication was Dr. Cheng-Ta Chiang. (Corresponding author:
+Changzhan Gu.)                                                                proposed. It should be noted that the respiration motion
+   The authors are with the MoE Key Laboratory of High-Speed                  usually exhibits <2 cm displacement and the heartbeat is at
+Electronic Systems and the MoE Key Laboratory of Artificial Intelli-          millimeter or even sub-millimeter scale, which are smaller
+gence, Shanghai Jiao Tong University, Shanghai 200240, China (e-mail:
+changzhan@sjtu.edu.cn).                                                       than half of the wavelength at 5.8 GHz. Therefore, the phase
+   Digital Object Identifier 10.1109/JSEN.2022.3158657                        ambiguity issue does not occur in vital signs detection in [11].
+
+                  1558-1748 © 2022 IEEE. Personal use is permitted, but republication/redistribution requires IEEE permission.
+                                See https://www.ieee.org/publications/rights/index.html for more information.
+
+        Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on March 25,2026 at 13:13:15 UTC from IEEE Xplore. Restrictions apply.
+LIU et al.: SOLVING PHASE AMBIGUITY IN INTERFEROMETRIC DISPLACEMENT MEASUREMENT                                                                       8483
+
+
+
+
+Fig. 1. The typical architecture for a single-channel FMCW radars with
+two separate antennas for high isolation.
+
+Nevertheless, it happens in measuring displacement motions
+exceeding half a wavelength [15]–[20], which is particularly
+severe in millimeter-wave displacement measurement due to
+its short wavelength. Phase unwrapping is needed in case
+the phase ambiguity occurs. The frequency evaluation method
+                                                                              Fig. 2. The range profile matrix from which the phase evolution is
+is combined to resolve the phase ambiguity issue in some                      extracted with both the conventional FMCW radar displacement mea-
+works [21]–[23]. However, these works require demanding                       surement method and the proposed technique. t0 is the PRT and mo is
+conditions such as large bandwidth. The phase unwrapping                      the range bin where the target located.
+function may be useful for phase ambiguity issue in com-
+mercial software such as MATLAB, which works by adding
+or subtracting certain amount of phases at the discontinuity                  the radar and the target with d being the mean distance and
+point. However, the unwrapping process is low efficient [24]                  x(τ ) being the displacement, and τ = n · t0 is the so-called
+and is error-prone in the presence of noise [25]. The MDACM                   ‘slow time’ with n being the sequence number of the chirps.
+algorithm [24] developed for CW radars is a more efficient                    Applying Fourier transform on the ‘fast time’ of (2) leads to:
+and robust method to solve the phase ambiguity issue but not                                     σ A2
+applicable for the conventional FMCW radar processing.                        sb _I ( f, τ ) =        [ex p ( j · φ (τ )) si nc (t0 ( f − f b ))
+                                                                                                   2
+   In this paper, a novel technique was proposed for linear                                          + ex p ( j · −φ (τ )) si nc (t0 ( f + f b ))],    (3)
+interferometric sensing of displacement motions using the
+FMCW radar sensor. It works by synthesizing the quadrature                    where φ (τ ) = 4π R (τ ) /λc with λc = c/ f c and fb =
+I /Q signals across slow-time from a single-channel FMCW                      4πk R (τ ) /c. In the FMCW radar displacement measure-
+radar. The phase history can therefore be directly tracked by                 ment [11], the negative half of the spectrum could be
+applying the advanced linear phase demodulation techniques,                   neglected. Therefore, (3) can be rewritten to be:
+e.g. MDACM, to the synthesized slow-time I /Q signals,
+                                                                                              σ A2
+which are equivalent to those in a quadrature CW radar. Thus,                     sb _I ( f, τ ) = ex p ( j · φ (τ )) si nc (t0 ( f − f b )) , (4)
+linear phase demodulation with high efficiency is possible                                      2
+in FMCW radars by leveraging the techniques that were                         where f > 0. The displacement can be extracted through the
+developed for the single-tone CW radars.                                      phase of (4):
+                                                                                                                    φ (τ ) λc
+                         II. T HEORY                                                                     x (τ ) =             .                       (5)
+                                                                                                                       4π
+A. Principles of the Single-Channel FMCW Radars
+  Fig. 1 shows the typical architectures for single-channel                   B. Phase Ambiguity in FMCW Radar
+FMCW radars with two separate antennas. The radiofre-                         Displacement Measurement
+quency (RF) signals could be down-converted to a single real
+                                                                                 In the existing FMCW radar displacement measurement
+channel output, as shown in Fig. 1. The transmitted signal
+                                                                              methods [11], [12], [15]–[20], beat signals associated with
+could be modeled as:
+                                                                            distinct ramp intervals are stacked into rows to form a signal
+         st x (t) = A · cos 2π fc t + πkt 2 + φ0 ,       (1)                  matrix. Performing fast Fourier transform (FFT) on each
+                                                                              row of the matrix creates a range profile matrix R P [n, m]
+where A is the amplitude, f c is the center frequency, k = B/t0               (n = 1, 2, 3 . . . N; m = 1, 2, 3, . . . , M; with N being the
+with B being the sweep bandwidth and t0 being the pulse                       number of transmitted chirp ramps and M being the number
+repetition (PRT) time, t ∈ (−t0 /2, t0 /2) is the so-called ‘fast             of samples per ramp), which is demonstrated in Fig. 2. The
+time’ [11] and φ0 is the initial phase. The signal transmitted to             conventional FMCW radar displacement measurement meth-
+the target is backscattered to the Rx channel and then down-                  ods work by combining the phase evolution at the range bin
+converted to be:                                                              m o where the target is located, as shown in Fig.2:
+                                                           
+                      2      4πk R (τ )       4π f c R (τ )
+   sb _I (t, τ ) = σ A cos              ·t +                  , (2)                  φ [n, m o ] = {φ [1, m o ] , φ [2, m o ] . . . φ [N, m o ]} ,    (6)
+                                  c                 c
+where σ is related to the propagation loss and circuit gain, c is               An additional calibration procedure is then performed
+the speed of light, R (τ ) = d + x(τ ) is the distance between                to compensate the constant phase drift that widely
+
+        Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on March 25,2026 at 13:13:15 UTC from IEEE Xplore. Restrictions apply.
+8484                                                                                                 IEEE SENSORS JOURNAL, VOL. 22, NO. 9, MAY 1, 2022
+
+
+
+
+                                                                              cos 2 + si n 2 = 1, the following could be obtained by cross-
+                                                                              multiplication and further mathematical manipulations:
+                                                                                                   λ
+                                                                                           x  (t) =   I (t) Q  (t) − I  (t) Q(t) .    (10)
+                                                                                                  4π
+                                                                                The expected displacement motion x (t) can therefore be
+                                                                              obtained by performing integration on (10), the digitized form
+                                                                              of which is illustrated as follows:
+Fig. 3. Phase ambiguity in FMCW radars: the target displacement of                                     n
+more than half a wavelength will exhibit phase ambiguity due to the                              λ
+codomain limitation of the arctangent function.                                      x [n] =               I [k − 1] Q [k] − I [k] Q [k − 1],      (11)
+                                                                                                4π
+                                                                                                     k=2
+                                                                              where x [n] is the digitized form of x (t). Since no inverse
+exists [18], [22]:                                                            trigonometric function (e.g. arctangent) is used in the process,
+                                                                              the phase ambiguity issue is resolved.
+                     φ [n] = φ [n, m o ] − nφ0 ,                      (7)
+where φ0 is only related to the PRT and the chosen range                      D. High-Linear Phase Demodulation in Single-Channel
+bin and can be pre-measured and pre-stored. However, due to                   FMCW Radars
+the codomain of the arctangent function, the phase evolution
+                                                                                 Assuming that f 0 is the frequency corresponding to the
+φ [n] is limited to [−π, π], which is also known as the phase
+                                                                              target range bin m0 , substituting f 0 into (4) leads to:
+ambiguity issue. For small displacement, the phase variation
+of 4π R λc caused by the displacement R won’t exceed                                            σ A2
+                                                                               sb _I ( f 0 , τ ) =   ex p ( j · φ (τ )) si nc (t0 ( f0 − f b )) . (12)
+2π [11]. However, for large displacement motions of over half                                     2
+a wavelength, there will be phase discontinuities. As shown                   In a real radar system, the unsynchronized sampling will
+in Fig. 3, a sinusoidal motion with a displacement of λ will                  lead to an additional phase drift φ0 τ in φ (τ ). Therefore,
+be distorted because the phase information recovered by the                   φ (τ ) = φ0 τ + 4π R (τ ) /λc . With τ = n · t0 , sb _I ( f0 , τ ) can
+arctangent approach is trapped within [−π, π]. Therefore, the                 be rewritten as sb _I1 (n) = I1 (n · t0 ) + j · Q 1 (n · t0 ). Thus,
+linear
+  detection
+             region is limited to only half a wavelength                    the digital I /Q signals can be synthesized as follows:
+ −λ 4, λ 4 . To solve the phase ambiguity issue, the phase                                                                             
+information might be unwrapped with the unwrap function                                                                       4π R(n)
+                                                                                            I1 (n) = A0 cos 2π f m n +                            (13)
+in MATLAB, which works by adding or subtracting certain                                                                          λc
+                                                                                                                                      
+amount of phases at the discontinuity point caused by the                                                                    4π R(n)
+                                                                                          Q 1 (n) = A0 sin 2π f m n +                     ,       (14)
+phase ambiguity. However, in millimeter-wave displacement                                                                        λc
+measurement with an embedded system, the short wavelength
+makes the phase ambiguity a much more challenging issue due                   where A0 = σ A2 si nc (t0 ( f 0 − f b )) /2 is the amplitude of
+to the limited computing resources and the large numbers of                   equivalent digital I /Q signals with constant phase, f m =
+cycles of unwrapping corrections. Therefore, an efficient tech-               φ0 /2π, λc = c/ f c is the equivalent wavelength, and R (n) =
+nique for linear demodulation of accurate phase information                   d + x(n) with d being the mean range of the moving targets
+is a necessity.                                                               and x(n) being the displacement to be extracted. A pre-
+                                                                              conditioning is applied to compensate the 2π f m n item in
+                                                                              (13)/(14) to make them have the same form as those in the
+C. High-Linear Phase Demodulation in CW Radars                                single-tone CW radar:
+   A variety of linear phase demodulation techniques have
+                                                                                                                                   4πd 4π x (n)
+been investigated for single-tone CW radars in the past few                    sb _I (n) = (I1 + j Q 1 ) · e− j ·nφ0 = ex p( j (       +        ).
+decades [24], [25]. Recently, the more advanced MDACM                                                                               λc   λc
+algorithm was presented, which is supposed to be more                                                                                           (15)
+efficient with a simple process [24]. The baseband I/Q signals                where φ0 is pre-measured and pre-stored. The equivalent
+of a single-tone CW radar can be represented as follows:                      digital I /Q signals of sb _I (n) can be written as:
+                                                                                                                            
+                  I (t) = cos(θd + 4π x(t) λ)              (8)                                                 4πd    4π x(n)
+                                                                                           I (n) = A0 cos          +              (16)
+                 Q (t) = sin θd + 4π x(t) λ ,              (9)                                                  λ        λc
+                                                                                                              c              
+                                                                                                              4πd     4π x(n)
+where θd is the constant phase shift caused by the trav-                                   Q (n) = A0 sin          +            ,  (17)
+eling distance of the electromagnetic signals, and x(t) is                                                      λc      λc
+the target motion information to be detected. The traditional                 It is seen that (16)/(17) has the same form as those in
+method works by applying arctangent function to the I /Q sig-                 the single-tone CW radar. Therefore, the MDACM algorithm
+nals which causes phase ambiguity. The MDACM approach,                        that is proposed for resolving the phase ambiguity issue can
+on the other hand, avoids the arctangent function and thus                    then be applied to extract the phase evolution in FMCW
+resolves the phase ambiguity issue. It applies differentiation                radar. The detailed process is shown in Fig. 2. It can be
+to (8)/(9) at first, and then, based on the trigonometric function            seen that the equivalent digital I /Q signals are synthesized
+
+        Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on March 25,2026 at 13:13:15 UTC from IEEE Xplore. Restrictions apply.
+LIU et al.: SOLVING PHASE AMBIGUITY IN INTERFEROMETRIC DISPLACEMENT MEASUREMENT                                                                    8485
+
+
+
+
+Fig. 4. Each pulsed chirp is converted to 1 sampling point of the
+synthesized I/Q signals. The equivalent sampling rate is PRT−1 .
+
+
+
+                                                                              Fig. 6. Simulation results for the equivalent I/Q signals from a 79 GHz
+                                                                              FMCW radar measuring a 0.2 mm displacement motion at a distance
+                                                                              of 600.1 mm: (a) the I/Q trajectory located at η = −23.4◦ , and
+                                                                              (b) the synthesized time-domain I/Q signals. (c) Comparison of the
+                                                                              reconstructed displacement motions using the conventional FMCW radar
+                                                                              displacement measurement methods and the proposed technique.
+
+
+
+
+Fig. 5. Stacked range profiles for a point target located 60 cm from the
+radar.
+
+
+
+by combining the pre-conditioned real/imaginary components
+of the complex values at the target range bins m o and the
+MDACM algorithm is then applied for efficient linear phase
+demodulation without phase ambiguity. Each sampling point
+of the synthesized signals corresponds to 1 pulsed chirp as
+shown in Fig. 4. Thus, the sampling rate of the synthesized                   Fig. 7. Simulation results for the equivalent I/Q signals from a 79 GHz
+signals is PRT−1 .                                                            FMCW radar measuring a 0.2 mm displacement motion at a distance
+                                                                              of 600.5 mm: (a) the I/Q trajectory located at η = −97.3◦ , and
+                                                                              (b) the synthesized time-domain I/Q signals. (c) Comparison of the
+                                                                              reconstructed displacement motions using the conventional FMCW radar
+                       III. S IMULATIONS                                      displacement measurement methods and the proposed technique.
+A. Linear Phase Extraction
+   In the simulation, it is assumed that a point target is located
+about 60 cm away from a 79 GHz FMCW radar having a
+bandwidth of 4 GHz. The chirp interval is 6 ms and 2000 chirp
+ramps were used so the length of the slow-time I /Q signals
+is 12 seconds. Fig. 5 shows the stacked range profiles for the
+target. The target is performing sinusoidal vibrations with a
+frequency of 0.5 Hz and amplitudes of 0.2 mm and 1.95 mm,
+which are captured by a single-channel FMCW radar as shown
+in Fig. 1. It should be noted that the distance, the bandwidth,
+the working frequency, the chirp interval can be changed.
+   Fig. 6-Fig. 8 exhibit the simulation results. Fig.6-8(a) are
+the I /Q constellation plots based on the synthesized slow-                   Fig. 8.    Simulation results for the equivalent I/Q signals from a
+time I /Q signals with the proposed technique. It is seen                     79 GHz FMCW radar measuring a 1.95 mm (half a wavelength at 79 GHz)
+in Fig. 6 that, when the target is 600.1 mm away from                         displacement motion: (a) the I/Q trajectory occupies the entire circle,
+                                                                              and (b) the synthesized time-domain I/Q signals. (c) Comparison of the
+the radar, the I /Q trajectory is shorter than half of a unit                 reconstructed displacement motions using the conventional FMCW radar
+circle and resides in the 1st and 4th quadrants. Since it sits                displacement measurement methods and the proposed technique.
+within the codomain limitation of the conventional arctangent
+demodulation, it won’t cause any phase ambiguity as shown                                                                              
+in Fig. 6(c). However, when the target is moved by 0.4 mm                     shift by 73.9o on the unit circle according to ϑo = 4πdo λ.
+to 600.5 mm away from the radar, the I /Q trajectory now                      Therefore, in millimeter-wave interferometry, the small vari-
+resides on the 3rd and 4th quadrants. Phase ambiguity starts to               ations in distance or displacement pose large influences on
+appear in the conventional arctangent demodulation as shown                   the demodulation results. When the displacement increases to
+in Fig. 7 (c). The 0.4 mm distance seems short but it does                    half a wavelength at 1.95 mm, the I /Q trajectory starts to
+matter because the short wavelength of 79 GHz makes it                        occupy the entire circle, as shown in Fig. 8. In this case,
+
+        Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on March 25,2026 at 13:13:15 UTC from IEEE Xplore. Restrictions apply.
+8486                                                                                                IEEE SENSORS JOURNAL, VOL. 22, NO. 9, MAY 1, 2022
+
+
+
+
+                                                                                Fig. 11. The 79 GHz 2 × 2 FMCW radar system with only TX1-RX1
+                                                                                subsystem used in the experiments: (a) the simplified block diagram of
+                                                                                the radar system and (b) the real radar module consisting of a commercial
+                                                                                radar front-end chip ADT1002.
+Fig. 9. An FMCW radar is measuring 3 targets of different motions
+at different locations. Target #1 is moving linearly across range bins.
+Target #2 and #3 are performing small reciprocating movements.
+
+
+
+
+                                                                                 Fig. 12. The experimental setup for detecting mechanical vibrations.
+
+
+
+                                                                                extracted at 0.2 m. However, there is slight disturbance around
+                                                                                2.5 seconds on the slow time axis. This is because, as target #1
+                                                                                moves outwards to cross the range bin at 0.2 m, where
+Fig. 10. The simulation results for tracking the motions of multiple targets.   target #2 is located, the clutter reflection from target #1 is
+                                                                                added to target #2. Therefore, it disrupts the phase information
+                                                                                induced by the sinusoidal movement. It is also seen that the
+the phase ambiguity is unavoidable with the conventional                        disturbance disappears as target #1 moves away from 0.2 m.
+arctangent demodulation due to the fact that the I /Q trajec-                   Based on the proposed technique, the complex motion of
+tory exceeds the codomain limitation of [−π, π]. As shown                       target #3 can be precisely recovered as shown in Fig. 10.
+in Fig. 8 (b)/(c), abrupt phase changes and dramatic phase
+discontinuities can be seen. However, the MDACM technique                                    IV. E XPERIMENTAL E VALUATIONS
+is still able to linearly reconstruct the accurate displacement
+                                                                                A. Radar System and Experimental Setup
+motion without any phase ambiguity.
+                                                                                   Fig. 11 shows the 79 GHz 2 × 2 FMCW radar system which
+                                                                                mainly incorporates a radar front-end transceiver ADT1002.
+B. Simulating a Real Complex Scenario
+                                                                                The radar is configured through the PLL (ADF4159) and
+   In the real environment, the use case could be complex. For
+                                                                                supports a maximum bandwidth of 5GHz (76∼81 GHz).
+example, multiple targets may exist in close proximity to each                  In the experiments, only the TX1-RX1 subsystem is used
+other and targets may perform different movements. Moreover,
+                                                                                and only the I channel of the subsystem is sampled by the
+there are static and dynamic clutter reflections from the                       data acquisition board (DAQ) for the post signal processing.
+surrounding environments. Therefore, a complex simulation,                      Fig. 12 shows the experimental setup for detecting mechan-
+that mimics the real scenario is carried out. In the simulation,
+                                                                                ical vibrations. The radar is facing the metallic plate with
+an FMCW radar is used to simultaneously measure 3 targets                       do ≈ 30cm away. The metallic plate is fixed on an actuator
+performing different motions at different locations, as shown                   (Zaber T-NA08A50), which can be programmed to perform
+in Fig. 9. Target #1 is initially 0.1 m away from the radar but
+                                                                                the desired movements. The radar was set to work at 79GHz
+moves linearly at a speed of 0.4 cm/s outwards across range                     with 4GHz bandwidth. The PRT was 6 ms and the sampling
+bins. Both target #2 and #3 are performing small reciprocating                  rate of the DAQ was 10 kHz.
+movements around certain range bins. The nominal distance
+from target #2 to radar is 0.2 m and it vibrates sinusoidally
+at 1 Hz with a displacement of 1 mm. Target #3 resides further                  B. Mechanical Vibrations Detection
+at 0.8 m and performs a complex movement combining two                             In the experiments, the actuator was programmed to perform
+sinusoidal motions of 1.5 mm@0.5 Hz and 1 mm@0.3 Hz.                            sinusoidal movements x (t) = A x · sin 2π f x t, where A x is the
+   The simulation results are illustrated in Fig. 10. It is seen                amplitude, f x is the frequency. The distance from the radar to
+that the sinusoidal motion of target #2 can be accurately                       the actuator is about 30 cm. Fig. 13 shows the experimental
+
+         Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on March 25,2026 at 13:13:15 UTC from IEEE Xplore. Restrictions apply.
+LIU et al.: SOLVING PHASE AMBIGUITY IN INTERFEROMETRIC DISPLACEMENT MEASUREMENT                                                                    8487
+
+
+
+
+Fig. 13. The experimental results of the stacked 1000 range profiles.
+The moving target is located at around 30 cm away. The TX-RX coupling
+is suppressed by the temporal filtering technique proposed in [27].
+
+
+                                                                              Fig. 15.    The experimental results (0.9 mm displacement): (a) the
+                                                                              I/Q trajectory has a length of 170.6◦ degrees, and (b) the synthesized
+                                                                              time-domain I/Q signals. (c) Comparison of the ground truth with the
+                                                                              recovered displacement motions using the conventional FMCW radar
+                                                                              displacement measurement methods and the proposed technique.
+
+
+
+
+Fig. 14.    The experimental results (90 μm displacement): (a) the
+I/Q trajectory has a length of 17.1◦ degrees, and (b) the synthesized
+time-domain I/Q signals. (c) Comparison of the ground truth with the
+recovered displacement motions using the conventional FMCW radar
+displacement measurement methods and the proposed technique.
+
+
+results for the stacked 1000 range profiles. The target can be
+found by locating the target range bin in the range profile                   Fig. 16. The experimental results (4 cm displacement): (a) the I/Q
+                                                                              trajectory has a length of over 360◦ degrees, and (b) the synthesized
+and the equivalent I /Q signal is synthesized at the target                   time-domain I/Q signals show amplitude variation due to the large
+range bin.                                                                    displacement. (c) Comparison of the ground truth with the recovered
+   In the first experiment, the displacement motion is set to                 displacement motions using the conventional FMCW radar displacement
+                                                                              measurement methods and the proposed technique.
+be 45μm@0.2Hz. The equivalent I /Q signals obtained with
+the proposed technique are plot as a trajectory in the I /Q
+constellation as shown in Fig. 14(a)/(b). The displacement                    movement increases. It is seen in Fig. 16 that a displacement
+extracted with the conventional FMCW radar displacement                       motion of 4.0 cm occupies the entire unit circle. In fact,
+measurement method and the proposed technique are illus-                      as shown in (16)/(17), a small displacement of only half a
+trated in Fig. 14(c). It is seen that both methods exhibit similar            wavelength will generate a 360◦ I /Q trajectory. For 79 GHz,
+measurement results that match well with the ground truth with                it means a small displacement of only 1.9 mm. As the I /Q
+a root mean square error (RMSE) of 4.9 μm. This is because                    trajectory of the 4.0 cm displacement revolves on the unit cir-
+the small displacement of A x = 45μm leads to a short I /Q                    cle for several times, the conventional methods results in large
+trajectory of 17.1◦, which sits within the codomain limitation                phase discontinuities as shown in Fig. 16(c). In contrast, the
+of the conventional arctangent demodulation [24].                             proposed technique can fully recover the large displacement
+   As the amplitude of the displacement increases, the length                 with an RMSE of 16.1 μm. It is seen that the radius of the
+of the I /Q trajectory extends. Fig. 15 illustrates the exper-                I /Q trajectory varies as it revolves on the unit circle. This
+imental results for a sinusoidal motion with A x = 0.45mm                     is because the amplitude A0 (= σ A2 si nc (t0 ( f 0 − f b )) /2)
+and f x = 0.2Hz. It is seen that the I /Q trajectory is                       varies with the beat frequency f b which is related to the
+extended to 170.6◦ and sits across the first, second the third                distance.
+quadrants. Because of the codomain limitation of [−π, π],
+the conventional method shows phase discontinuity because
+the I /Q trajectory crosses the second and third quadrants. The               C. Comparison With the IF-Based Unwrapping Methods
+proposed technique, however, can still linearly recover the                     The beat frequency, also called intermediate-frequency (IF),
+phase information that represents the displacement motion                     might be used to solve the phase ambiguity issue [21]–[23].
+without any phase ambiguities. The RMSE is still good                         However, this IF based phase unwrapping method requires
+at 5.2 μm.                                                                    demanding conditions to realize high accurate IF estimation
+   Figure 16 illustrates the experimental results for the large               of ±λc /4 [23]. In [21], an enormously large bandwidth of
+displacement motions of 4.0 cm. The length of the I /Q                        20 GHz is used to guarantee the high accurate IF estimation.
+trajectory increases as the displacement of the sinusoidal                    In [22], although a much smaller bandwidth of 1 GHz is
+
+        Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on March 25,2026 at 13:13:15 UTC from IEEE Xplore. Restrictions apply.
+8488                                                                                                IEEE SENSORS JOURNAL, VOL. 22, NO. 9, MAY 1, 2022
+
+
+
+
+Fig. 17. The extracted displacement (4 cm displacement) with the IF
+evaluation method.
+
+
+
+used, a strict single-target condition is used to guarantee the
+high accurate IF estimation. In [23], although neither large                    Fig. 18.      The experimental results with the proposed method
+bandwidth nor single-target condition is needed, it requires                    (1cm displacement): (a) the synthesized I/Q trajectory, and (b) the
+                                                                                synthesized time-domain I/Q signals. (c) Comparison of the ground truth
+the target to be stationary. The method in [23] requires                        with the recovered displacement motions using the proposed technique.
+a large number of the same chirp signals (For example,
+15000 in [23]) to estimate the IF, which means the target
+should be stationary within those chirps. Moreover, the method
+in [23] also increases the computation complexity. In this
+work, a limited bandwidth of 4 GHz is used to detect the
+target displacement in the cluttered office environment. The
+IF-based phase unwrapping method is not applicable due to
+the low IF estimation accuracy. Taking the previous 4-cm
+mechanical vibration experiment as an example, the extracted
+displacement with frequency evaluation is shown in Fig. 17.
+The inset shows that the error range of the IF evaluation
+method is around ±5 mm, which is much larger than the
+accuracy requirement of ±λc /4 = ±0.95 mm. Therefore, the
+IF-based unwrapping method is not applicable in this situation.                 Fig. 19. The experimental results with the CW-based method (1cm dis-
+                                                                                placement): (a) the I/Q trajectory, and (b) the synthesized time-domain
+                                                                                I/Q signals. (c) Comparison of the ground truth with the recovered
+D. Comparison With the CW-Based Displacement                                    displacement motions using the proposed technique.
+Motion Measurement
+   The accuracy of the proposed technique should be much
+better than the CW-based displacement measurement motion                        the reconstructed displacement, which means the proposed
+measurement. In the CW-based method [24], the signal is                         method is immune to the AC coupling.
+usually distorted by hardware deficiencies, i.e. the AC cou-                       Experiments are further carried out to compare the accuracy
+pling [28] and I /Q mismatch [29]. However, the proposed                        between the two methods. The experimental setup is the same
+method is immune to these hardware deficiencies. The pro-                       as Fig. 12. The actuator sits around 30 cm away from the radar
+posed technique only uses a single channel which avoids the                     and is moving sinusoidally with an amplitude of 5 mm and a
+I /Q mismatch issue. As to the AC coupling [29], considering                    frequency of 0.2 Hz. In the first experiment, the radar is set
+the high pass filter generated by the blocking capacitor being                  the same as the experiment before. The displacement motion
+H ( f )e j ϕ( f ) , the spectrum of the in-phase channel becomes:               is extracted with the proposed technique and the experimental
+                                                                                results are shown in Fig.18. The I /Q trajectory and the
+sb _Ih ( f, τ )
+                                                                                synthesized I /Q signals are shown in Fig. 18(a) and (b) and
+    = sb _I ( f, τ ) · H ( f ) e j ϕ( f )                                       it is seen in Fig. 18(c) that the extracted displacement motion
+                                                                       
+                           σ A2                                                 with the proposed method matches well with the ground truth
+    = H ( f ) e j ϕ( f )        ex p ( j ·φ (τ )) si nc (t0 ( f − f b )) .
+                             2                                                  with an RMSE 12.1 μm. In the second experiment, the radar
+                                                                         (18)   is set to work in CW mode at 79 GHz. The sampling rate of
+                                                                                the DAQ is set to be 200 Hz. The displacement is extracted
+And the synthesized I /Q signal becomes:                                        with the CW-based method [24]. The calibrated I /Q trajectory
+                                                                              and the calibrated I /Q signals are shown in Fig. 19(a) and (b),
+                              4πd   4π x (n)
+  Ih (n) = H ( f 0 ) A0 cos       +          + ϕ ( f 0 ) , (19)                 respectively. Disturbances can be seen on the calibrated I /Q
+                               λ       λc
+                             c                                                trajectory and the calibrated I /Q signal, which are caused by
+                             4πd    4π x (n)
+ Q h (n) = H ( f 0 ) A0 sin       +          + ϕ ( f 0 ) . (20)                 the calibration imperfection. Fig. 19(c) illustrates the recov-
+                               λc     λc                                        ered displacement motions using the CW-based method. It is
+Comparing (16)/(17) and (19)/(20), it can be concluded that                     seen that the recovered displacement matches with the ground
+the AC coupling will only influence the amplitude and initial                   truth with an RMSE of 321.4 μm, which is much worse than
+phase of the synthesized I /Q signal and thus will not influence                that with the proposed technique.
+
+         Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on March 25,2026 at 13:13:15 UTC from IEEE Xplore. Restrictions apply.
+LIU et al.: SOLVING PHASE AMBIGUITY IN INTERFEROMETRIC DISPLACEMENT MEASUREMENT                                                                          8489
+
+
+
+
+                      V. C ONCLUSION                                            [14] M. Mercuri, I. R. Lorato, Y.-H. Liu, F. Wieringa, C. V. Hoof, and
+                                                                                     T. Torfs, “Vital-sign monitoring and spatial tracking of multiple people
+   This paper proposes a novel technique to completely resolve                       using a contactless radar-based sensor,” Nature Electron., vol. 2, no. 6,
+the phase ambiguity issue in FMCW radar displacement mea-                            pp. 252–262, Jun. 2019.
+surement. By combining the real/imaginary components of the                     [15] L. Piotrowsky and N. Pohl, “Spatially resolved fast-time vibrometry
+                                                                                     using ultrawideband FMCW radar systems,” IEEE Trans. Microw. The-
+complex value at the target range bins across slow time, the                         ory Techn., vol. 69, no. 1, pp. 1082–1095, Jan. 2021.
+I /Q signals which have the same form as those in the single-                   [16] J.-M. Munoz-Ferreras, J. Wang, Z. Peng, C. Li, and R. Gomez-Garcia,
+tone CW radar can be synthesized. Thereby, the more efficient                        “FMCW-radar-based vital-sign monitoring of multiple patients,” in
+                                                                                     Proc. IEEE MTT-S Int. Microw. Biomed. Conf. (IMBioC), May 2019,
+high linear phase demodulation technique developed for the                           pp. 1–3.
+CW radar can now be leveraged to resolve the phase ambiguity                    [17] G. Su, N. Petrov, and A. Yarovoy, “Dynamic estimation of vital signs
+issue in FMCW radars. Thorough experiments are performed                             with mm-wave FMCW radar,” in Proc. 17th Eur. Radar Conf. (EuRAD),
+                                                                                     Jan. 2021, pp. 206–209.
+to validate the performance of the proposed technique.                          [18] E. Guerrero, J. Brugues, J. Verdu, and P. D. Paco, “Microwave micro-
+                                                                                     phone using a general purpose 24-GHz FMCW radar,” IEEE Sensors
+                                                                                     Lett., vol. 4, no. 6, pp. 1–4, Jun. 2020.
+                               R EFERENCES                                      [19] E. Cardillo and A. Caddemi, “Radar range-breathing separation for the
+ [1] Y. Wang and Y. Zheng, “An FMCW radar transceiver chip for object                automatic detection of humans in cluttered environments,” IEEE Sensors
+     positioning and human limb motion detection,” IEEE Sensors J., vol. 17,         J., vol. 21, no. 13, pp. 14043–14050, Jul. 2021.
+     no. 2, pp. 236–237, Jan. 2017.                                             [20] C. Will, P. Vaishnav, A. Chakraborty, and A. Santra, “Human target
+ [2] A. Singh, S. U. Rehman, S. Yongchareon, and P. H. J. Chong, “Multi-             detection, tracking, and classification using 24-GHz FMCW radar,” IEEE
+     resident non-contact vital sign monitoring using radar: A review,” IEEE         Sensors J., vol. 19, no. 17, pp. 7283–7299, Sep. 2019.
+     Sensors J., vol. 21, no. 4, pp. 4061–4084, Feb. 2021.                      [21] L. Piotrowsky, T. Jaeschke, S. Kueppers, J. Siska, and N. Pohl, “Enabling
+ [3] C. Gu, J. Wang, and J. Lien, “Motion sensing using radar: Gesture               high accuracy distance measurements with FMCW radar sensors,”
+     interaction and beyond,” IEEE Microw. Mag., vol. 20, no. 8, pp. 44–57,          IEEE Trans. Microw. Theory Techn., vol. 67, no. 12, pp. 5360–5371,
+     Aug. 2019.                                                                      Dec. 2019.
+ [4] M. Ash, M. Ritchie, and K. Chetty, “On the application of digital moving   [22] S. Scherr, S. Ayhan, B. Fischbach, A. Bhutani, M. Pauli, and T. Zwick,
+     target indication techniques to short-range FMCW radar data,” IEEE              “An efficient frequency and phase estimation algorithm with CRB per-
+     Sensors J., vol. 18, no. 10, pp. 4167–4175, May 2018.                           formance for FMCW radar applications,” IEEE Trans. Instrum. Meas.,
+ [5] J. Yao, S. Tjuatja, and H. Huang, “Real-time vibratory strain sensing           vol. 64, no. 7, pp. 1868–1875, Jul. 2015.
+     using passive wireless antenna sensor,” IEEE Sensors J., vol. 15, no. 8,   [23] M. Scherhaufl, F. Hammer, M. Pichler-Scheder, C. Kastl, and A. Stelzer,
+     pp. 4338–4345, Aug. 2015.                                                       “Radar distance measurement with Viterbi algorithm to resolve phase
+ [6] J. Lien et al., “Soli: Ubiquitous gesture sensing with millimeter wave          ambiguity,” IEEE Trans. Microw. Theory Techn., vol. 68, no. 9,
+     radar,” ACM Trans. Graph., vol. 35, no. 4, 2016, Art. no. 142.                  pp. 3784–3793, Sep. 2020.
+ [7] A. Shrestha, H. Li, J. Le Kernec, and F. Fioranelli, “Continuous human     [24] W. Xu, Y. Li, C. Gu, and J.-F. Mao, “Large displacement motion
+     activity classification from FMCW radar with Bi-LSTM networks,”                 interferometry with modified differentiate and cross-multiply technique,”
+     IEEE Sensors J., vol. 20, no. 22, pp. 13607–13619, Nov. 2020.                   IEEE Trans. Microw. Theory Techn., vol. 69, no. 11, pp. 4879–4890,
+ [8] C. Li et al., “A review on recent progress of portable short-range              Nov. 2021.
+     noncontact microwave radar systems,” IEEE Trans. Microw. Theory            [25] J. Wang, X. Wang, L. Chen, J. Huangfu, C. Li, and L. Ran, “Noncontact
+     Techn., vol. 65, no. 5, pp. 1692–1706, May 2017.                                distance and amplitude-independent vibration measurement based on an
+ [9] J. K. Yan et al., “Power allocation algorithm for target tracking in            extended DACM algorithm,” IEEE Trans. Instrum. Meas., vol. 63, no. 1,
+     unmodulated continuous wave radar network,” IEEE Sensors J., vol. 15,           pp. 145–153, Jan. 2014.
+     no. 2, pp. 1098–1108, Feb. 2015.                                           [26] G. Wang, J.-M. Munoz-Ferreras, C. Gu, C. Li, and R. Gomez-Garcia,
+[10] E. L. Chuma and Y. Iano, “A movement detection system using                     “Linear-frequency-modulated continuous-wave radar for vital-sign mon-
+     continuous-wave Doppler radar sensor and convolutional neural network           itoring,” in Proc. IEEE Topical Conf. Wireless Sensors Sensor Netw.
+     to detect cough and other gestures,” IEEE Sensors J., vol. 21, no. 3,           (WiSNet), Jan. 2014, pp. 37–39.
+     pp. 2921–2928, Feb. 2021.                                                  [27] J. Liu, J. Lu, Y. Li, C. Gu, and J. Mao, “Mitigation of leakage and
+[11] G. Wang, J.-M. Munoz-Ferreras, C. Gu, C. Li, and R. Gomez-Garcia,               stationary clutters in short-range FMCW radar with hybrid analog and
+     “Application of linear-frequency-modulated continuous-wave (LFMCW)              digital compensation technique,” IEEE Trans. Microw. Theory Techn.,
+     radars for tracking of vital signs,” IEEE Trans. Microw. Theory Techn.,         vol. 70, no. 1, pp. 62–73, Jan. 2022.
+     vol. 62, no. 6, pp. 1387–1399, Jun. 2014.                                  [28] C. Gu, Z. Peng, and C. Li, “High-precision motion detection using
+[12] Z. Peng et al., “A portable FMCW interferometry radar with program-             low-complexity Doppler radar with digital post-distortion technique,”
+     mable low-IF architecture for localization, ISAR imaging, and vital             IEEE Trans. Microw. Theory Techn., vol. 64, no. 3, pp. 961–971,
+     sign tracking,” IEEE Trans. Microw. Theory Techn., vol. 65, no. 4,              Mar. 2016.
+     pp. 1334–1344, Apr. 2017.                                                  [29] E. Yavari and O. Boric-Lubecke, “Channel imbalance effects and
+[13] S.-J. Ryu, J.-S. Suh, S.-H. Baek, S. Hong, and J. H. Kim, “Feature-based        compensation for Doppler radar physiological measurements,” IEEE
+     hand gesture recognition using an FMCW radar and its temporal feature           Trans. Microw. Theory Techn., vol. 63, no. 11, pp. 3834–3842,
+     analysis,” IEEE Sensors J., vol. 18, no. 18, pp. 7593–7602, Sep. 2018.          Nov. 2015.
+
+
+
+
+         Authorized licensed use limited to: TONGJI UNIVERSITY. Downloaded on March 25,2026 at 13:13:15 UTC from IEEE Xplore. Restrictions apply.
+

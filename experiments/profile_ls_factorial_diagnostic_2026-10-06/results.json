@@ -1,0 +1,1246 @@
+{
+  "dependency_sha256": "0b48a1f335f3802ac6e5cd69e3b0530e2f34328c1d8babfe4056891b1fddd940",
+  "factors": {
+    "offgrid_array": {
+      "beta_scale": 1.0,
+      "position_error": [
+        0.0,
+        0.015,
+        -0.01,
+        0.02,
+        -0.012,
+        0.008,
+        -0.018,
+        0.005
+      ]
+    },
+    "offgrid_beta": {
+      "beta_scale": 1.015,
+      "position_error": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "offgrid_only": {
+      "beta_scale": 1.0,
+      "position_error": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  },
+  "historical_400_402_recovery": false,
+  "protocol_sha256": "16256e744db5aaec88216f79b7972955cb59babd621fceed4767896d6a56ce32",
+  "rows": [
+    {
+      "factor": "offgrid_only",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9991239973720483,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9885225492511669,
+          "theta_hat_deg": 17.25
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0023638074048318593,
+          "phase_bias_rad": -0.0009272329223106328,
+          "phase_rmse_rad": 0.004559333235396316,
+          "rmse_mm": 0.0015648835259818486,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_only",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9991239973720483,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9885225492511669,
+          "theta_hat_deg": 17.25
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002363807404831852,
+          "phase_bias_rad": -0.0009272329223105514,
+          "phase_rmse_rad": 0.004559333235396287,
+          "rmse_mm": 0.0015648835259818412,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_only",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 0.9991239973720483,
+        "conversion_ratio": 0.9999999999999998,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9885749595281265,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0023610300849798947,
+          "phase_bias_rad": -0.0008779509996228009,
+          "phase_rmse_rad": 0.004550546290844924,
+          "rmse_mm": 0.0015176956897892965,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0002861809630924623,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_only",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 0.9991239973720483,
+        "conversion_ratio": 0.9999999999999998,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9885749595281265,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0023610300849799034,
+          "phase_bias_rad": -0.0008779509996227842,
+          "phase_rmse_rad": 0.004550546290844916,
+          "rmse_mm": 0.0015176956897892963,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0002861809630924623,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9991167495732036,
+        "conversion_ratio": 1.0143376924694987,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9885282316713173,
+          "theta_hat_deg": 17.25
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002850060354655767,
+          "phase_bias_rad": -0.0009289561729085493,
+          "phase_rmse_rad": 0.0045515856013334695,
+          "rmse_mm": 0.008392663370100847,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9991167495732036,
+        "conversion_ratio": 1.0143376924694987,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9885282316713173,
+          "theta_hat_deg": 17.25
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002850060354655748,
+          "phase_bias_rad": -0.0009289561729084739,
+          "phase_rmse_rad": 0.004551585601333423,
+          "rmse_mm": 0.008392663370100846,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 0.9991167495732036,
+        "conversion_ratio": 1.0149999999999997,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9885815017003016,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0028921123143396555,
+          "phase_bias_rad": -0.0008797110954406689,
+          "phase_rmse_rad": 0.004542656202611264,
+          "rmse_mm": 0.008763358894045229,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.00028618290387036284,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 0.9991167495732036,
+        "conversion_ratio": 1.0149999999999997,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9885815017003016,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0028921123143396755,
+          "phase_bias_rad": -0.0008797110954413532,
+          "phase_rmse_rad": 0.004542656202611439,
+          "rmse_mm": 0.00876335889404529,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.00028618290387036284,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9990636260491086,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9884919376338945,
+          "theta_hat_deg": 17.25
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002363793650186898,
+          "phase_bias_rad": -0.0009320242620085053,
+          "phase_rmse_rad": 0.0045598645194646435,
+          "rmse_mm": 0.0015649676499587181,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9990636260491086,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9884919376338945,
+          "theta_hat_deg": 17.25
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0023637936501868903,
+          "phase_bias_rad": -0.0009320242620092866,
+          "phase_rmse_rad": 0.004559864519464791,
+          "rmse_mm": 0.0015649676499587613,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -0.0200000000000351,
+        "bartlett_peak": 0.9990636260491086,
+        "conversion_ratio": 0.9998908829138581,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9885165866346398,
+          "theta_hat_deg": 17.349999999999966
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002361380701316119,
+          "phase_bias_rad": -0.0008909458322046307,
+          "phase_rmse_rad": 0.004552559354475448,
+          "rmse_mm": 0.0015195493093533505,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0004218836636845368,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.349999999999966
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": -2.5822176037894455,
+      "result": {
+        "angle_error_deg": -0.0200000000000351,
+        "bartlett_peak": 0.9990636260491086,
+        "conversion_ratio": 0.9998908829138581,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9885165866346398,
+          "theta_hat_deg": 17.349999999999966
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002361380701316141,
+          "phase_bias_rad": -0.0008909458322053772,
+          "phase_rmse_rad": 0.004552559354475626,
+          "rmse_mm": 0.001519549309353409,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0004218836636845368,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.349999999999966
+      },
+      "seed": 4201
+    },
+    {
+      "factor": "offgrid_only",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9995909825764058,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9879352589222722,
+          "theta_hat_deg": 17.25
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0020452963944699817,
+          "phase_bias_rad": 0.006544125739875723,
+          "phase_rmse_rad": 0.007886806619762812,
+          "rmse_mm": 0.002335557405039021,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_only",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9995909825764058,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9879352589222722,
+          "theta_hat_deg": 17.25
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0020452963944700073,
+          "phase_bias_rad": 0.006544125739877699,
+          "phase_rmse_rad": 0.007886806619764417,
+          "rmse_mm": 0.002335557405039515,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_only",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 0.9995909825764058,
+        "conversion_ratio": 0.9999999999999998,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9880157467284305,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002044249581549239,
+          "phase_bias_rad": 0.006507015033358551,
+          "phase_rmse_rad": 0.007854475458447651,
+          "rmse_mm": 0.002619620324009079,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.00028587120554867735,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_only",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 0.9995909825764058,
+        "conversion_ratio": 0.9999999999999998,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9880157467284305,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0020442495815492408,
+          "phase_bias_rad": 0.006507015033359419,
+          "phase_rmse_rad": 0.007854475458448336,
+          "rmse_mm": 0.0026196203240093077,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.00028587120554867735,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9996191800156127,
+        "conversion_ratio": 1.0143376924694987,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9877983287659832,
+          "theta_hat_deg": 17.25
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002601698023894991,
+          "phase_bias_rad": 0.006599959901734514,
+          "phase_rmse_rad": 0.007931095893525277,
+          "rmse_mm": 0.014185214262158661,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9996191800156127,
+        "conversion_ratio": 1.0143376924694987,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9877983287659832,
+          "theta_hat_deg": 17.25
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0026016980238949858,
+          "phase_bias_rad": 0.006599959901735419,
+          "phase_rmse_rad": 0.007931095893526,
+          "rmse_mm": 0.0141852142621589,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 0.9996191800156127,
+        "conversion_ratio": 1.0149999999999997,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9878782931832064,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0026495010756770864,
+          "phase_bias_rad": 0.00656518271033187,
+          "phase_rmse_rad": 0.007900622529654885,
+          "rmse_mm": 0.014746788193836582,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.00028586315828847025,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 0.9996191800156127,
+        "conversion_ratio": 1.0149999999999997,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9878782931832064,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0026495010756770777,
+          "phase_bias_rad": 0.006565182710331936,
+          "phase_rmse_rad": 0.007900622529654917,
+          "rmse_mm": 0.014746788193836595,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.00028586315828847025,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9995309956740089,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9878977151331054,
+          "theta_hat_deg": 17.25
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0020452756699417774,
+          "phase_bias_rad": 0.006541895577586513,
+          "phase_rmse_rad": 0.007884893441664468,
+          "rmse_mm": 0.0023349888037631173,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 0.9995309956740089,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9878977151331054,
+          "theta_hat_deg": 17.25
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0020452756699417636,
+          "phase_bias_rad": 0.006541895577586827,
+          "phase_rmse_rad": 0.007884893441664738,
+          "rmse_mm": 0.0023349888037632062,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -0.0200000000000351,
+        "bartlett_peak": 0.9995309956740089,
+        "conversion_ratio": 0.9998908829138581,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9879457997814515,
+          "theta_hat_deg": 17.349999999999966
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0020442549892097112,
+          "phase_bias_rad": 0.006511147411590772,
+          "phase_rmse_rad": 0.007858148026977188,
+          "rmse_mm": 0.002565251152469912,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0003994592781235134,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.349999999999966
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": 1.983635669588499,
+      "result": {
+        "angle_error_deg": -0.0200000000000351,
+        "bartlett_peak": 0.9995309956740089,
+        "conversion_ratio": 0.9998908829138581,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9879457997814515,
+          "theta_hat_deg": 17.349999999999966
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0020442549892097346,
+          "phase_bias_rad": 0.006511147411591315,
+          "phase_rmse_rad": 0.007858148026977695,
+          "rmse_mm": 0.002565251152470069,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0003994592781235134,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.349999999999966
+      },
+      "seed": 4202
+    },
+    {
+      "factor": "offgrid_only",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 1.0007663495820553,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9875653271283706,
+          "theta_hat_deg": 17.25
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002238418260882849,
+          "phase_bias_rad": -0.009846762031686416,
+          "phase_rmse_rad": 0.010856510683584128,
+          "rmse_mm": 0.003203723678083075,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4203
+    },
+    {
+      "factor": "offgrid_only",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 1.0007663495820553,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9875653271283706,
+          "theta_hat_deg": 17.25
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002238418260882824,
+          "phase_bias_rad": -0.009846762031687476,
+          "phase_rmse_rad": 0.01085651068358509,
+          "rmse_mm": 0.0032037236780833875,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4203
+    },
+    {
+      "factor": "offgrid_only",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 1.0007663495820553,
+        "conversion_ratio": 0.9999999999999998,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9876691181540682,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0022414874751819545,
+          "phase_bias_rad": -0.009868772053847745,
+          "phase_rmse_rad": 0.010879567729995687,
+          "rmse_mm": 0.0036285474304050777,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0002767621178678487,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4203
+    },
+    {
+      "factor": "offgrid_only",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 1.0007663495820553,
+        "conversion_ratio": 0.9999999999999998,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9876691181540682,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002241487475181953,
+          "phase_bias_rad": -0.009868772053847199,
+          "phase_rmse_rad": 0.010879567729995175,
+          "rmse_mm": 0.003628547430404908,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0002767621178678487,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4203
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 1.0007634691783596,
+        "conversion_ratio": 1.0143376924694987,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9875035924912418,
+          "theta_hat_deg": 17.25
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002779613555698051,
+          "phase_bias_rad": -0.00985635358895197,
+          "phase_rmse_rad": 0.01086711014319843,
+          "rmse_mm": 0.016433886403028376,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4203
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 1.0007634691783596,
+        "conversion_ratio": 1.0143376924694987,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9875035924912418,
+          "theta_hat_deg": 17.25
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0027796135556980243,
+          "phase_bias_rad": -0.009856353588952151,
+          "phase_rmse_rad": 0.010867110143198569,
+          "rmse_mm": 0.016433886403028414,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4203
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 1.0007634691783596,
+        "conversion_ratio": 1.0149999999999997,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9876083373510692,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0028282945592916914,
+          "phase_bias_rad": -0.009879294990739638,
+          "phase_rmse_rad": 0.010890965084309728,
+          "rmse_mm": 0.01706459071925164,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0002767629870522593,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4203
+    },
+    {
+      "factor": "offgrid_beta",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -3.552713678800501e-14,
+        "bartlett_peak": 1.0007634691783596,
+        "conversion_ratio": 1.0149999999999997,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9876083373510692,
+          "theta_hat_deg": 17.369999999999965
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002828294559291697,
+          "phase_bias_rad": -0.009879294990739109,
+          "phase_rmse_rad": 0.01089096508430923,
+          "rmse_mm": 0.01706459071925146,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.0002767629870522593,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.369999999999965
+      },
+      "seed": 4203
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 1.000705942545792,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9875379848730643,
+          "theta_hat_deg": 17.25
+        },
+        "init": "cold",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.0022386228351550575,
+          "phase_bias_rad": -0.00984806055335243,
+          "phase_rmse_rad": 0.010858050810039694,
+          "rmse_mm": 0.003204214291542102,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4203
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -0.120000000000001,
+        "bartlett_peak": 1.000705942545792,
+        "conversion_ratio": 0.9993474802655161,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9875379848730643,
+          "theta_hat_deg": 17.25
+        },
+        "init": "warm",
+        "method": "bartlett",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002238622835155097,
+          "phase_bias_rad": -0.009848060553352526,
+          "phase_rmse_rad": 0.010858050810039807,
+          "rmse_mm": 0.003204214291542135,
+          "score_samples": 108
+        },
+        "profile_objective": null,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.25
+      },
+      "seed": 4203
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -0.0200000000000351,
+        "bartlett_peak": 1.000705942545792,
+        "conversion_ratio": 0.9998908829138581,
+        "estimator_reference_frame": 128,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9876055755059385,
+          "theta_hat_deg": 17.349999999999966
+        },
+        "init": "cold",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002241063356185861,
+          "phase_bias_rad": -0.009866736467814182,
+          "phase_rmse_rad": 0.010877610475600034,
+          "rmse_mm": 0.003553963452241347,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.000408192631066869,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.349999999999966
+      },
+      "seed": 4203
+    },
+    {
+      "factor": "offgrid_array",
+      "phase_seed": -1.2240597949818703,
+      "result": {
+        "angle_error_deg": -0.0200000000000351,
+        "bartlett_peak": 1.000705942545792,
+        "conversion_ratio": 0.9998908829138581,
+        "estimator_reference_frame": 148,
+        "guard": {
+          "amplitude_floor": 0.022228492625486537,
+          "covered": true,
+          "failure": null,
+          "min_test_abs": 0.9876055755059385,
+          "theta_hat_deg": 17.349999999999966
+        },
+        "init": "warm",
+        "method": "profile_ls",
+        "metrics": {
+          "dynamic_proxy_delta_rmse_mm": 0.002241063356185826,
+          "phase_bias_rad": -0.009866736467814123,
+          "phase_rmse_rad": 0.010877610475599939,
+          "rmse_mm": 0.0035539634522413124,
+          "score_samples": 108
+        },
+        "profile_bounds_deg": [
+          15.75,
+          18.75
+        ],
+        "profile_objective": 0.000408192631066869,
+        "score_start_frame": 148,
+        "theta_bartlett_deg": 17.25,
+        "theta_hat_deg": 17.349999999999966
+      },
+      "seed": 4203
+    }
+  ],
+  "schema": "profile_ls_matched_factorial_diagnostic",
+  "seeds": [
+    4201,
+    4202,
+    4203
+  ],
+  "source_sha256": "58912266c6929c6a36ff721accf45643522f1899d87eee7d2aa9e87007c45162",
+  "status": "NEW_SYNTHETIC_MATCHED_FACTORIAL",
+  "truth_access": "post_run_scoring_only",
+  "truth_free_geometry": true
+}

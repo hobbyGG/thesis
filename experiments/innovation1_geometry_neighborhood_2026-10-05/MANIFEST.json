@@ -1,0 +1,99 @@
+{
+  "date": "2026-10-05",
+  "status": "completed_bounded_geometry_neighborhood_holdout",
+  "rows": 37,
+  "cells": 9,
+  "accepted": 13,
+  "rejected": 24,
+  "accepted_high_error_gt_0p01mm": 5,
+  "source": "neighborhood_results.json",
+  "protocol": "PROTOCOL.md",
+  "runner": "run_neighborhood.py",
+  "report": "REPORT.md",
+  "truth_free_selector": true,
+  "fallback": false,
+  "hashes": {
+    "PROTOCOL.md": "d339de2aaaf40d00e7740043b17047cd076ece5752e702e49e42d2a722cabe4f",
+    "run_neighborhood.py": "a8cc458ce2d94e0fe17dd5eae84e6e8ed3e6ec6b288d546ad51ed4362fc85ca0",
+    "neighborhood_results.json": "02b608294dbd436493562ff6ba445c582e6a3033615da9466778b382a90a11d4"
+  },
+  "cell_seeds": [
+    {
+      "cell_id": "span24_gap005",
+      "projection_gap": 0.05,
+      "seed": 3000,
+      "span_deg": 24.0
+    },
+    {
+      "cell_id": "span28_gap005",
+      "projection_gap": 0.05,
+      "seed": 3001,
+      "span_deg": 28.0
+    },
+    {
+      "cell_id": "span30_gap005",
+      "projection_gap": 0.05,
+      "seed": 3002,
+      "span_deg": 30.0
+    },
+    {
+      "cell_id": "span32_gap005",
+      "projection_gap": 0.05,
+      "seed": 3003,
+      "span_deg": 32.0
+    },
+    {
+      "cell_id": "span36_gap005",
+      "projection_gap": 0.05,
+      "seed": 3004,
+      "span_deg": 36.0
+    },
+    {
+      "cell_id": "span30_gap000",
+      "projection_gap": 0.0,
+      "seed": 3005,
+      "span_deg": 30.0
+    },
+    {
+      "cell_id": "span30_gap002",
+      "projection_gap": 0.02,
+      "seed": 3006,
+      "span_deg": 30.0
+    },
+    {
+      "cell_id": "span30_gap008",
+      "projection_gap": 0.08,
+      "seed": 3007,
+      "span_deg": 30.0
+    },
+    {
+      "cell_id": "span30_gap012",
+      "projection_gap": 0.12,
+      "seed": 3008,
+      "span_deg": 30.0
+    }
+  ],
+  "frozen_rule": {
+    "condition_lte": 20.0,
+    "fallback": false,
+    "projection_gap_lt": 0.05,
+    "span_lt_deg": 30.0
+  },
+  "controls": {
+    "span_sweep_gap": [
+      24,
+      28,
+      30,
+      32,
+      36
+    ],
+    "projection_sweep_span": 30,
+    "projection_gaps": [
+      0.0,
+      0.02,
+      0.08,
+      0.12
+    ]
+  },
+  "claim_boundary": "bounded feature-boundary smoke; no generalization or innovation validation claim"
+}

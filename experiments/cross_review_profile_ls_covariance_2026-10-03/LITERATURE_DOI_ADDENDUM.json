@@ -1,0 +1,205 @@
+{
+  "schema": "thesis.cross_review.literature_doi_addendum",
+  "date": "2026-10-03",
+  "status": "completed_with_pending_items",
+  "baseline_sibling": "experiments/cross_review_profile_ls_covariance_2026-10-03/DOI_SUPPLEMENT_2026-10-03.md",
+  "direct_profile_ls_doi": "pending",
+  "acceleration_aided_kalman_doi": "pending",
+  "supplements": [
+    "experiments/cross_review_profile_ls_covariance_2026-10-03/AUDIT_NOTE.md",
+    "experiments/cross_review_profile_ls_covariance_2026-10-03/NEXT_PROTOCOL.json"
+  ],
+  "checkout_evidence": {
+    "fresh_validation_claim": "package_guard_truth_free_post_run_bookkeeping_only",
+    "fresh_validation_strict_heldout": false,
+    "calibration_only_wrapper": {
+      "calibration_frames": [0, 199],
+      "test_frames": [200, 399],
+      "exploratory_rows": "2 seeds x 5 strata",
+      "test_only_geometry_probe": true,
+      "strict_bias_initial_r_defined": false
+    },
+    "p3_covariance": {
+      "rows": 6,
+      "innovation_correlation_is_truth_error_covariance": false,
+      "diagonal_route_is_full_gls": false,
+      "n_eff_is_independent_target_count": false
+    },
+    "fresh_profile_ls_covariance_artifact_found_in_checkout": false
+  },
+  "questions": [
+    {
+      "id": "calibration_only_offgrid_profile_ls",
+      "facts": [
+        "Current local implementation is local-MUSIC-seeded profile residual refinement J(u)=||X-A(u)A(u)^dagger X||_F^2.",
+        "Conditional ML/profile-out interpretation requires a declared array manifold and white-noise model; colored noise requires weighting or whitening.",
+        "Off-grid and array-error references establish local mismatch and calibration models, but do not validate the exact thesis hardware route.",
+        "Calibration-only freeze is supported as a protocol inference; no single cited paper proves the exact 200/200 split."
+      ],
+      "inferences": [
+        "Call the method local profile-residual refinement, not a new ML or Bayesian off-grid estimator.",
+        "Freeze support, angle, beta, and declared nuisance parameters after calibration; project test observations without geometry updates."
+      ],
+      "needs_validation": [
+        "off-grid angle bias versus grid/refinement step",
+        "snapshot/SNR/local-identifiability limits",
+        "array-error confounding and calibration-only whitening"
+      ],
+      "references": [
+        "10.1088/0266-5611/19/2/201",
+        "10.1109/29.57542",
+        "10.1109/29.17564",
+        "10.1109/78.97999",
+        "10.1109/78.709536",
+        "10.1016/j.sigpro.2022.108513",
+        "10.1109/TSP.2012.2222378",
+        "10.1109/8.509886"
+      ]
+    },
+    {
+      "id": "coherent_sources_and_array_errors",
+      "facts": [
+        "Fully coherent sources make the source covariance rank deficient and can break ordinary covariance-subspace MUSIC/ESPRIT.",
+        "Spatial smoothing/FBSS restores usable rank only under ULA/subarray/plane-wave and snapshot assumptions, with aperture loss.",
+        "Local SpSF record assumes uncorrelated targets.",
+        "Gain/phase/position/mutual-coupling calibration requires an explicit error model and a gauge/reference."
+      ],
+      "inferences": [
+        "Direct complex profile fitting, smoothing, and structured covariance are separate routes with separate assumptions.",
+        "Noise-free same-range separation cannot be generalized to coherent or mismatched real arrays."
+      ],
+      "needs_validation": [
+        "rho/angle spacing/SNR/snapshot/amplitude-ratio stress grid",
+        "MUSIC versus FBSS versus direct profile residual",
+        "gain-phase-position-coupling perturbations and abstention"
+      ],
+      "references": [
+        "10.1109/TASSP.1985.1164649",
+        "10.1007/BF01201215",
+        "10.1109/TSP.2009.2022894",
+        "10.1109/TSP.2022.3214383",
+        "10.3390/electronics9030389"
+      ]
+    },
+    {
+      "id": "phase_reference_beta",
+      "facts": [
+        "Local structural-radar work estimates an LOS-to-structure conversion factor; range-angle vibration work supports angle-gated complex components.",
+        "For beta=1/|cos(theta)|, first-order beta sensitivity is approximately beta*tan(theta)*delta_theta away from the cusp.",
+        "A phase-reference error contributes approximately lambda*beta*delta_b/(4*pi) under the declared round-trip phase convention."
+      ],
+      "inferences": [
+        "Beta is a frozen model parameter for a declared geometry/window, not a universal physical constant.",
+        "Angle, reference phase, mounting direction, and mixed-scatterer composition can create multiplicative or additive displacement bias."
+      ],
+      "needs_validation": [
+        "the existing seven-angle-offset v1 probe",
+        "reference-phase perturbation after geometry-fence checks",
+        "angle/beta bias and variance without test-truth tuning"
+      ],
+      "references": [
+        "10.1016/j.ymssp.2022.109582",
+        "10.1016/j.ymssp.2022.109178",
+        "10.34133/2021/9787484",
+        "10.1109/TMC.2021.3118349",
+        "10.1109/JERM.2022.3143431"
+      ]
+    },
+    {
+      "id": "gls_full_covariance",
+      "facts": [
+        "Full GLS uses Sigma including off-diagonal residual correlations; diagonal WLS is a special approximation.",
+        "Covariance Intersection gives a conservative route when cross-correlation is unknown.",
+        "NIS is an online consistency diagnostic; NEES requires truth and belongs to post-run scoring.",
+        "Current P3 innovation correlations are not truth-error covariance and current N_eff is weight diversity only."
+      ],
+      "inferences": [
+        "Estimate and freeze Sigma from calibration observables before a full-GLS claim.",
+        "CI is a reference for unknown correlation, not evidence of optimal thesis RMSE."
+      ],
+      "needs_validation": [
+        "diagonal WLS versus full/block-Sigma GLS versus CI",
+        "positive-definiteness/conditioning and clipping counts",
+        "predeclared NIS interval and empirical coverage"
+      ],
+      "references": [
+        "10.1109/ACC.1997.609105",
+        "10.1109/ICIF.2002.1020908",
+        "10.1109/LSP.2015.2390417",
+        "10.1002/acs.2571",
+        "10.1006/dspr.1998.0316"
+      ]
+    },
+    {
+      "id": "same_range_identifiability",
+      "facts": [
+        "Range-angle component processing can separate same-range targets when finite-aperture/SNR/angle conditions permit.",
+        "Coherent sources and cancellation can defeat ordinary covariance peaks or create false peaks.",
+        "Local same-range v2 is a bounded synthetic mechanism check, not a universal resolution result."
+      ],
+      "inferences": [
+        "split, merge, and abstain must be declared routes tied to identifiability diagnostics.",
+        "Unresolved clusters may use an effective beta only when phase stability is demonstrated."
+      ],
+      "needs_validation": [
+        "coherent-source stress cases",
+        "angle spacing and finite-aperture limits",
+        "phase residual and abstention reporting"
+      ],
+      "references": [
+        "10.1016/j.ymssp.2022.109178",
+        "10.1109/JERM.2022.3143431",
+        "10.1109/TASSP.1985.1164649",
+        "10.3390/electronics9030389"
+      ]
+    }
+  ],
+  "verified_doi_registry": [
+    "10.1088/0266-5611/19/2/201",
+    "10.1109/29.57542",
+    "10.1109/29.17564",
+    "10.1109/78.97999",
+    "10.1109/78.709536",
+    "10.1109/TASSP.1987.1165144",
+    "10.1007/BF01201215",
+    "10.1109/8.509886",
+    "10.1109/TSP.2009.2022894",
+    "10.1109/TSP.2022.3214383",
+    "10.1109/TSP.2012.2222378",
+    "10.1016/j.sigpro.2022.108513",
+    "10.1109/TASSP.1985.1164649",
+    "10.1109/TSP.2010.2090525",
+    "10.1006/dspr.1998.0316",
+    "10.1109/ACC.1997.609105",
+    "10.1109/ICIF.2002.1020908",
+    "10.1109/LSP.2015.2390417",
+    "10.1002/acs.2571",
+    "10.1016/j.ymssp.2022.109582",
+    "10.1016/j.ymssp.2022.109178",
+    "10.34133/2021/9787484",
+    "10.1109/TMC.2021.3118349",
+    "10.1109/JERM.2022.3143431",
+    "10.1109/PIERS62282.2024.10618454"
+  ],
+  "pending_items": [
+    "Standalone fresh profile-LS/covariance artifact for the referenced 400-402 diagnostic was not found in checkout.",
+    "A DOI directly matching the thesis complex profile-LS geometry objective was not identified; adjacent ML/variable-projection/off-grid references are not substitutes.",
+    "The DOI for the local acceleration-aided Kalman phase paper remains pending.",
+    "Exact DOI strings for several Ma bridge-occlusion/deployment records remain unverified in this addendum.",
+    "No cited paper validates full-Sigma GLS for the current IWR1843 natural-scatterer geometry."
+  ],
+  "minimal_next_experiment": {
+    "run_now": false,
+    "first_probe": "existing calibration_only_frozen_beta_angle_sensitivity_v1",
+    "protocol_path": "experiments/cross_review_profile_ls_covariance_2026-10-03/NEXT_PROTOCOL.json",
+    "followups_design_only": [
+      "coherent-source MUSIC versus FBSS versus direct profile residual",
+      "calibration-only diagonal WLS versus full-Sigma GLS versus CI with NIS/coverage"
+    ],
+    "full_40_seed_blockers": [
+      "strict calibration-only estimator wiring",
+      "seed/provenance mapping",
+      "strict bias and initial-R initialization definition"
+    ]
+  }
+}

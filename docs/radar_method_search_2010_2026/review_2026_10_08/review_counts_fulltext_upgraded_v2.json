@@ -1,0 +1,35 @@
+{
+  "input": 1779,
+  "applied_audit_batches": [
+    "pending_01"
+  ],
+  "counts": {
+    "module": 684,
+    "context": 530,
+    "exclude": 508,
+    "pending": 57
+  },
+  "modules": {
+    "M01": 71,
+    "M02": 100,
+    "M03": 18,
+    "M04": 4,
+    "M05": 106,
+    "M06": 38,
+    "M07": 9,
+    "M08": 140,
+    "M09": 22,
+    "M10": 48,
+    "M11": 67,
+    "M12": 10,
+    "M13": 19,
+    "M14": 68,
+    "M15": 57,
+    "M16": 171,
+    "M17": 148,
+    "M18": 43,
+    "M19": 66,
+    "M20": 160
+  },
+  "status": "stage-1 abstract plus first fulltext upgrades and pending_01 audit; not final exhaustive full-text screening"
+}

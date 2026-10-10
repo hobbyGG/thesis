@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-04",
+  "scope": "read-only local inventory for same-range split/merge/abstain and calibration-only profile-LS geometry",
+  "execution": {
+    "new_experiment_run": false,
+    "large_matrix_run": false,
+    "tracked_code_changed": false,
+    "git_commit_or_push": false,
+    "archive_transfer_retried": false
+  },
+  "same_range_v2": {
+    "status": "present_corrected_v2",
+    "evidence_level": "bounded_synthetic_mechanism_check",
+    "directory": "experiments/same_range_merge_mechanism_v2",
+    "tracked_files": [
+      "EVIDENCE_NOTE.md",
+      "FINDINGS.md",
+      "PROTOCOL.md",
+      "multiseed.json",
+      "run_experiment.py",
+      "smoke.json"
+    ],
+    "superseded_directory": "experiments/same_range_merge_mechanism",
+    "seeds": [200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211],
+    "scenes": [
+      "close_benign",
+      "separated_benign",
+      "separated_unequal",
+      "close_destructive",
+      "coincident_cancel",
+      "symmetric_control"
+    ],
+    "hashes": {
+      "run_experiment.py": "4d524eab105dac4e2360f2c1aa0b49366a411475307228afd7e973e826bc66c9",
+      "PROTOCOL.md": "e9089a42a90686954dd4b3619ff89a55d42c7c52f340672b8154e708b0ee3ac0",
+      "declared_archive": "202b6b2481dc07578b12742dda439f92c116819fedd94c25eb62b139d3915ed8"
+    },
+    "unit_checks": {
+      "positive_angle_check_deg": 25.0,
+      "covariance_vs_direct_max_abs": 2.7755575615628914e-15,
+      "identical_opposite_max_abs": 1.5700924586837752e-16,
+      "single_source_noiseless_rmse_mm": 7.632566385979466e-17
+    },
+    "summary": {
+      "separated_benign": {
+        "split_coverage": "12/12",
+        "split_wins_vs_merge": "12/12",
+        "median_split_minus_merge_rmse_mm": -0.021186629060639284
+      },
+      "separated_unequal": {
+        "split_coverage": "12/12",
+        "split_wins_vs_merge": "12/12",
+        "median_split_minus_merge_rmse_mm": -0.01114835998763974
+      },
+      "close_benign": {
+        "split_coverage": "0/12",
+        "merge_coverage": "12/12",
+        "merge_median_rmse_mm": 0.0014181747620556284
+      },
+      "symmetric_control": {
+        "median_split_minus_merge_rmse_mm": 0.0015020740427955578
+      },
+      "coincident_cancel": {
+        "all_routes_coverage": "0/12",
+        "failure": "test_amplitude_guard"
+      }
+    },
+    "reproduction_commands_not_run": [
+      "python3 experiments/same_range_merge_mechanism_v2/run_experiment.py --seeds 100 --out /tmp/same_range_v2_smoke_repro.json",
+      "python3 experiments/same_range_merge_mechanism_v2/run_experiment.py --seeds 200 201 202 203 204 205 206 207 208 209 210 211 --out /tmp/same_range_v2_multiseed_repro.json"
+    ],
+    "forbidden_claims": [
+      "universal angular threshold",
+      "real-radar or field performance",
+      "0.01 mm guarantee",
+      "coverage as proof of correct split",
+      "general validity under range leakage, multipath, drift, migration, association, Kalman fusion, or ADXL timing"
+    ]
+  },
+  "profile_ls_400_402": {
+    "status": "missing_current_checkout",
+    "evidence_level": "no fresh profile-LS or held-out evidence available locally",
+    "expected_directory": "experiments/same_range_geometry_reference_diagnostic/heldout_20261003",
+    "directory_found": false,
+    "matching_runner_or_compact_artifact_found": false,
+    "existing_fail_closed_protocol": "experiments/profile_ls_init_pairing_2026-10-04/PROTOCOL.json",
+    "minimum_restore_set": [
+      {"path": "protocol.json", "required": true, "purpose": "frozen protocol, seeds, split, estimator and scoring contract"},
+      {"path": "manifest.json", "required": true, "purpose": "source/artifact hashes and exact 400/401/402 provenance"},
+      {"path": "original runner/source script(s)", "required": true, "purpose": "reproduce the original diagnostic"},
+      {"path": "capture package or compact IQ for seeds 400, 401, 402", "required": true, "purpose": "original estimator input"},
+      {"path": "calibration/test split and physical reference definition", "required": true, "purpose": "preserve scoring origin and held-out boundary"},
+      {"path": "Bartlett/profile-LS route configuration", "required": true, "purpose": "objective, bounds/grid, nuisance, weights, regularization and frozen geometry fields"},
+      {"path": "compact prior outputs and per-seed output manifest", "required": false, "purpose": "provenance check for the historical claim"}
+    ],
+    "archive_record": {
+      "version": 22,
+      "size_bytes": 3723687,
+      "expected_sha256": "f692ad87a6258b680ad8d5873ac7d653c45bf64e42adb9df557118c55d545c1b",
+      "transfer_validated_in_this_audit": false
+    },
+    "blocked_until_restore": [
+      "Do not call the profile-LS result fresh held-out evidence.",
+      "Do not substitute angle/beta pilots for the profile-LS artifact.",
+      "Do not start 40 seeds.",
+      "Do not infer profile-LS gain from the separate causal initialization pilot."
+    ]
+  }
+}

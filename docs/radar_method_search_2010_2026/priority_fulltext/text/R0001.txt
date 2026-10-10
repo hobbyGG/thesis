@@ -1,0 +1,798 @@
+                                                 Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+                                                            Contents lists available at ScienceDirect
+
+
+                                      Mechanical Systems and Signal Processing
+                                                  journal homepage: www.elsevier.com/locate/ymssp
+
+
+
+
+Structural displacement estimation using accelerometer and
+FMCW millimeter wave radar
+Zhanxiong Ma a, Jaemook Choi a, Liu Yang a, b, Hoon Sohn a, *
+a
+    Department of Civil and Environmental Engineering, Korea Advanced Institute of Science and Technology, Daejeon, South Korea
+b
+    Department of Civil and Environmental Engineering, The Hong Kong University of Science and Technology, Clear Water Bay, Kowloon, Hong Kong
+
+
+
+
+A R T I C L E I N F O                                     A B S T R A C T
+
+Communicated by Paulo Kurka                               Structural displacement plays a crucial role in structural health monitoring. However, its mea­
+                                                          surement remains challenging for many civil infrastructure applications. This study proposes a
+Keywords:                                                 structural displacement estimation technique that fuses measurements from a collocated accel­
+Displacement estimation                                   erometer and frequency-modulated continuous-wave millimeter wave radar at displacement
+Frequency-modulated continuous wave
+                                                          estimation location on a structure. Automated initial calibration was first performed using short-
+Millimeter wave radar
+                                                          period (less than 1 min) radar and acceleration measurements. The best target is automatically
+Finite impulse response filter
+Accelerometer                                             selected from the surroundings, and a conversion factor to convert the line-of-sight displacement
+Data fusion                                               to the structural displacement in the actual vibration direction is automatically estimated for the
+                                                          target. After calibration, the displacement is estimated in real time from radar measurements
+                                                          using the selected best target and its estimated conversion factor. Note that an accelerometer-
+                                                          aided phase-unwrapping algorithm is proposed and applied to address the phase-wrapping
+                                                          issue when the structural displacement is larger than the radar wavelength. The radar-based
+                                                          displacement is further fused with the acceleration measurement using a finite impulse
+                                                          response filter to estimate the displacement with improved accuracy at the cost of a short time
+                                                          delay. Laboratory tests on a four-story building model and a field test on a pedestrian bridge were
+                                                          conducted to validate the proposed displacement estimation technique. The displacements esti­
+                                                          mated by the proposed technique had an error of less than 1 mm in both tests compared to the
+                                                          ground-truth displacements measured by laser-based displacement sensors.
+
+
+
+
+1. Introduction
+
+    Displacement response plays a crucial role in structural health monitoring because it helps to understand the global behavior of a
+structure, assess structural safety, and can be used for structural control and disaster prevention and mitigation. Displacement has been
+directly considered in structural design codes of several countries as a safety indicator [1–3]. For example, the bridge design code in the
+United States requires the bridge displacement to be less than 1/1000 of the bridge length under normal vehicle and pedestrian loads
+[1]. In addition, displacement response has been used for bridge loading rating [4], system identification [5], and finite element model
+updating [6]. Therefore, it is essential to monitor structural displacement. Note that that the displacement discussed in this study is the
+displacement relative to a fixed ground.
+    In practice, accelerometers are commonly used for structural displacement estimation. The displacement can be easily obtained
+
+
+
+    * Corresponding author.
+      E-mail address: hoonsohn@kaist.ac.kr (H. Sohn).
+
+https://doi.org/10.1016/j.ymssp.2022.109582
+Received 4 February 2022; Received in revised form 18 May 2022; Accepted 14 July 2022
+0888-3270/© 2022 Elsevier Ltd. All rights reserved.
+Z. Ma et al.                                                                            Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+                             Fig. 1. Overview of frequency-modulated continuous-wave (FMCW) radar ranging.
+
+
+from acceleration measurements using double integration. However, the double integration process can amplify the measurement
+noise in acceleration measurements, and a large low-frequency drift is commonly observed in acceleration-based displacements. Note
+that the drift induced by the accelerometer measurement noise may be reduced by using a quiet accelerometer, but cannot be fully
+avoided. Several techniques, including finite impulse response (FIR) filters [7–9] and a state-space approach [10], have been devel­
+oped to remove such drift, but these techniques also remove low-frequency structural displacement.
+    Displacement can also be directly measured with linear variable differential transformer (LVDT), real-time kinematic global
+navigation satellite system (RTK-GNSS), laser Doppler vibrometer (LDV), and vision cameras. However, the application of LVDT is
+limited to small-scale structures and short time measurement due to the use of a temporary scaffold, and its measurement accuracy is
+very sensitive to scaffold vibration. Though RTK-GNSS is applicable to large-scale structures, it has a limited accuracy of around 10
+mm, and its sampling rate is only up to 20 Hz. LDV is rather expensive and not suitable for long-term continues displacement
+monitoring. As for vision cameras, their displacement measurement accuracy is highly affected by light and weather conditions. In
+addition, they are not suitable for long-term continuous monitoring due to high-computational costs.
+    Efforts have been made to fuse accelerometers with other types of sensors that can measure or estimate the displacement to obtain
+an improved displacement [11–19]. Examples include the fusion of a RTK-GNSS and accelerometer [11], and the fusion of strain
+sensors and accelerometers [12,13]. However, the former does not work in a GNSS-denied environment and may suffer from low
+accuracy due to multi-path errors; the latter only works for beam-like structures and may have large errors when the mode shapes of a
+target structure differ significantly from the assumed mode shapes. The fusion of vision cameras and accelerometers has also been
+explored [14,18,19], but the displacement estimation accuracy is significantly affected by weather and light conditions.
+    Radar systems have been studied for over a decade for structural displacement measurement. A radar system transmits a frequency-
+modulated signal and receives a signal reflected by an object. The displacement is estimated in the line-of-sight (LOS) direction from
+the time delay between the transmitted and received signals. Radar systems are not affected by weather or light conditions and have
+been used to monitor displacements of long-span bridges [20], pedestrian bridges [21,22] traffic light structures [23], etc. In these
+applications, centimeter wave radars with a radio frequency (RF) within 30 GHz were used. Currently, millimeter wave (mmWave)
+radar has been developed and is a promising technique for measuring small displacements owing to its short wavelength [24]. In
+addition, mmWave radar is small, lightweight, low-powered, cost-efficient, and suitable for any extreme weather [25]. However, there
+are the following limitations when measuring structural displacement using mmWave radar. First, a manual initial calibration is
+required to identify the locations of radar-detected targets and estimate the conversion factors necessary for converting the LOS
+displacements to structural displacements in an actual vibration direction. In addition, the raw phase directly extracted from the radar
+measurement is constrained to the range of [− π, π], and phase wrapping occurs when the true phase is outside this range, resulting in
+inaccurate displacement estimation.
+    This study proposes a continuous structural displacement estimation technique using the fusion of frequency-modulated contin­
+uous-wave (FMCW) mmWave radar and acceleration measurements. Automated initial calibration was first performed using short-
+period (less than 1 min) radar and acceleration measurements to select the best target from the surroundings, and estimate its con­
+version factor for converting the LOS displacement to the structural displacement in an actual vibration direction. After the calibration,
+the displacement is estimated in real time from radar measurement using the selected best target and its estimated conversion factor,
+and the radar-based displacement is further fused with acceleration measurement using an FIR filter to estimate the displacement with
+an improved accuracy at the cost of a short time delay. The main contributions of this study include: (1) collocated FMCW mmWave
+radar and accelerometer at displacement estimation location on a structure are fused for structural displacement estimation, (2) the
+best target necessary for radar-based displacement estimation is automatically selected from the surroundings, (3) an accelerometer-
+aided phase-unwrapping algorithm is developed to recover the unwrapped phase from the radar measurement, and the LOS
+displacement is estimated from the radar measurement using the unwrapped phase, and (4) a conversion factor necessary for con­
+verting the LOS displacement to structural displacement in an actual vibration direction is automatically estimated.
+    The remainder of this paper is organized as follows. The FMCW radar ranging principle and conventional structural displacement
+estimation using an FMCW radar are briefly presented in Section 2, and Section 3 illustrates the working principle of the proposed
+technique. The validation of the proposed technique on a four-story building model and a pedestrian bridge is presented in Section 4
+and Section 5, respectively. Concluding remarks are provided in Section 6.
+
+
+
+
+                                                                    2
+Z. Ma et al.                                                                                            Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+                                                                  Fig. 2. Frequency-modulated signal.
+
+
+2. Overview of FMCW radar-based displacement estimation
+
+2.1. FMCW radar ranging principle
+
+    An overview of the FMCW radar ranging is shown in Fig. 1. Radar transmits a frequency-modulated signal and receives a signal
+reflected by a target. By extracting the time delay (Δt) between the transmitted and reflected signals, the distance (D) between the
+radar and the target is estimated,
+               cΔt
+        D=                                                                                                                                                   (1)
+                2
+
+where c denotes the speed of light.
+   Several different frequency-modulated signals can be used as transmission signals, and the one employed in this study was a chirp
+signal [24],
+
+        T(t) = ej(2πfs t+πKt )                                                                                                                               (2)
+                                  2
+
+
+
+
+and thereafter the reflected signal becomes,
+
+                                                                                                                                                             (3)
+                                                              2
+        R(t) = δT(t − Δt) = δej(2πfs (t− Δt)+πK(t− Δt) )
+
+where fs , K, and Tc denote the start frequency, frequency slope, and time duration of the chirp signal, respectively (Fig. 2).δ denotes the
+amplitude attenuation factor.
+  To extract the time delay (Δt), an intermediate frequency (IF) signal is defined as:
+
+        IF(t) = T(t) × R* (t) ≈ δej(φ+ωt) , 0 < t < Tc                                                                                                       (4)
+
+        ω = 2πKΔt
+
+        φ = 2πfs Δt
+
+    Thus, Δt can be extracted from either the frequency (ω) or phase (φ) of the IF signal. Note that R* (t) denotes the complex conjugate
+of R(t). By combining Equation (1) and Equation (4), the distance can be estimated as follows:
+                c       c
+        D=          ω=       φ                                                                                                                               (5)
+               4π K    4π fs
+   Note that the above explanation is based on a single target, and in the case of multiple targets, the reflected signal (Equation (3))
+becomes:
+                 ∑
+                 Q
+                                                                                                                                                             (6)
+                                                      m 2
+                           δm ej{2πfs (t− Δt )+πK(t− Δt ) }
+                                              m
+        R(t) =
+                 m=1
+
+
+and IF signal (Equation (4)) becomes,
+                  ∑
+                  Q
+                                                                                                                                                             (7)
+                                      m   m
+        IF(t) ≈             δm ej(φ +ω t)
+                     j=1
+
+
+        ωm = 2π KΔtm
+
+
+                                                                                  3
+Z. Ma et al.                                                                            Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+Fig. 3. Overview of conventional structural displacement estimation using a FMCW radar: (a) sensor setup and (b) overall flowchart for
+displacement estimation.
+
+
+        φm = 2π fs Δtm
+
+where δm is the amplitude attenuation factor of the mth target. Δt m is the time delay between the transmitted signal and reflected signal
+from the mth target, and Q is the number of targets. Similarly, the distance for the mth target can be estimated from either the frequency
+or the phase:
+                  c m      c m
+        Dm =          ω =       φ                                                                                                            (8)
+                 4π K     4π fs
+
+2.2. Conventional structural displacement estimation using FMCW radar
+
+    Fig. 3 shows sensor setup and overall flowchart of the conventional structural displacement estimation technique using a FMCW
+radar. A radar is installed at a fixed location near a structure of which displacement is to be estimated (Fig. 3(a)). By continuously
+estimating distances between the radar and detected targets, distance variances from initial distances become displacements of these
+targets [20]. Note that the phase extracted from radar measurement is more sensitive and thereby used here for displacement esti­
+mation. The radar usually detects multiple targets (i.e., the different parts of the structure), and estimates the displacement of each
+target in a LOS direction. Therefore, an initial calibration is first, manually performed to select a target near the location where
+displacement to be estimated and estimate a conversion factor for the target to convert the LOS displacement to the displacement in the
+actual vibration direction. Thereafter, displacement is continuously estimated in the actual vibration direction using the selected target
+and the estimated conversion factor. (Fig. 3(b)). Note that in the case of multiple displacement estimation, multiple targets should be
+selected. More details are explained below:
+    (1) Conventional initial calibration: The radar transmits a frequency-modulated signal and receives a signal reflected by multiple
+targets. Based on the radar ranging principle, as explained in Section 2.1, the LOS distance between these targets and the radar was
+estimated. The locations of these targets on the structure were identified using a laser rangefinder, and a target near the desired
+displacement estimation location was selected. Subsequently, a conversion factor is estimated for the target from the geometric
+relationship between the radar and selected target [20],
+                    D
+        β = √̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅̅                                                                                                         (9)
+             (D) − (L)2
+                    2
+
+
+
+where D and L denote the distances between the radar and selected target in the LOS and horizontal directions, respectively.
+   (2) Conventional displacement estimation: The radar continuously transmits a chirp signal and receives a reflected signal. At
+each time step (e.g., the kth time step), the phase corresponding to the selected target (φk ) is extracted from the radar measurement.
+Once the LOS distance between the radar and target is estimated from the extracted phase, the variation in the initial distance (D0 )
+becomes the LOS displacement. Finally, the LOS displacement was converted to the displacement in the actual vibration direction (uk )
+using the previously estimated conversion factor (β):
+                                        c
+        uk = β(Dk − D0 ) = β               (φ − φ0 )                                                                                        (10)
+                                       4πfs k
+
+
+                                                                    4
+Z. Ma et al.                                                                             Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+Fig. 4. Overview of the proposed displacement estimation technique using mmWave radar and accelerometer: (a) sensor setup and (b) overall
+flowchart for displacement estimation.
+
+
+where φ0 denotes an initial phase.
+    However, the conventional technique has the following limitations. First, the conventional techniques commonly installed radar
+sensors at a fixed location, but securing such installation location for long-term monitoring can be challenging because the radar sensor
+can be stolen or damaged when it is permanently installed in public open space. Cabling for permanent power supply and data retrieval
+can be issues, and getting permission to install the radar in privately owned properties can be difficult. Second, there is no guarantee
+that a stable refection could be obtained from the displacement estimation location of the target structure. In such cases, an artificial
+reflector needs to be placed at displacement estimation location. Third, to select a target near the desired displacement estimation
+location, the locations on the structure of all targets detected by the radar should be identified, which is cumbersome in practice. In
+addition, estimating the conversion factor is cumbersome because the horizontal distance between the selected target and the radar
+needs to be manually measured. Last, the raw phase directly extracted from the radar measurement is constrained to the range of [− π,
+π], and phase wrapping occurs when the true phase is outside this range. Based on the relationship between phase and displacement
+given in Equation (5), the estimated displacement is constrained to [− 1/4 λ, 1/4 λ]. Here, λ denotes the radar wavelength. Actual
+structures commonly have displacement outside of this range, and therefore their displacements cannot be correctly estimated from
+the raw phase.
+
+3. Development of structural displacement estimation technique based on FMCW mmWave radar and accelerometer
+measurements
+
+    To address the limitations of only using radar, this study proposes a new displacement estimation technique using an FMCW
+mmWave radar and accelerometer. As shown in Fig. 4(a), an mmWave radar (including transmitter and receiver) and accelerometer
+are placed at the same location, that is, the displacement estimation location, eliminating the need for a fixed installation location for
+long-term continues monitoring. Because the radar is installed at the displacement estimation location, multiple targets will be
+available within the field of view of the radar, and the best target with stable reflection can be selected for displacement estimation.
+The collocated installation of the radar and accelerometer on the structure also allows for the fusion of two sensors, which offers
+following additional benefits: (1) automatic selection of the best target required for radar-based displacement estimation, (2) auto­
+matic estimation of the conversion factor, (3) adaptive phase unwrapping, and (4) improved displacement estimation accuracy. A
+flowchart of the proposed technique is shown in Fig. 4(b) and consists of two parts.
+    (1) Automated initial calibration: Radar and acceleration measurements were initially collected for a short period (less than 1
+min) to automatically select the best target and estimate its conversion factor. Further details are provided in Section 3.1.
+    (2) Continuous displacement estimation: The raw phase corresponding to the best target is measured using radar, and an
+acceleration-aided phase-unwrapping algorithm is developed to recover the true phase from the raw phase. More details of the al­
+gorithm are provided in Section 3.2. Thereafter, the radar-based displacement was estimated in the actual vibration direction using the
+unwrapped phase and the estimated conversion factor (β). Finally, the radar-based displacement was fused with the acceleration
+measurement using an FIR filter to obtain a fusion-based displacement with improved accuracy (Section 3.3).
+
+
+3.1. Automated best target selection and conversion factor estimation
+
+    In this section, automated initial calibration is performed to select the best target and estimate the conversion factor of the target.
+
+                                                                     5
+Z. Ma et al.                                                                                      Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+Fig. 5. Automated best target selection and conversion factor estimation: (a) Step 1: RMSE estimation for target 1 using an initial conversion factor
+of 0.5, (b) Step 2: selection of best conversion factor by repeating Step 1 with different conversion factor values, and (c) Step 3: best target selection
+by repeating Steps 1 and 2 for all targets.
+
+
+
+
+                Fig. 6. Definition of the conversion factor with a generalized geometric relationship between a radar and a target.
+
+
+The high-frequency displacement from acceleration is used as the reference, and the selection of the best target and estimation of its
+conversion factor are performed by minimizing the root-mean-square error (RMSE) of the high-frequency displacement from the radar
+with respect to the reference. The detailed procedure is shown in Fig. 5, and consists of three steps.
+    Step 1: Select target 1, set an initial value (0.5 in this study) for its conversion factor, and calculate the RMSE between two high-
+frequency displacements independently estimated from radar and acceleration measurements (Fig. 5(a)). Note that the displacement
+estimated from acceleration through double integration has a large low-frequency drift, and the purpose of using high-pass filtering
+with a cut-off frequency of 0.5 Hz is to remove the drift. The value of 0.5 Hz is determined for the accelerometer used in this study
+(EpiSensor ES-U2) after a series of laboratory tests. A different value could be used if other accelerometers are used.
+    Step 2: Obtain the RMSE vs conversion factor curve by gradually varying the conversion factor value from 0.5 to 2 and repeating
+Step 1. The conversion factor corresponding to the smallest RMSE was selected as the final value (Fig. 5(b)). The smallest RMSE value is
+denoted as E, which is used later for the best target selection.
+    Step 3: Repeat Steps 1 and 2 to obtain the E values and conversion factors for all targets, and the target with the smallest E value is
+defined as the best target (Fig. 5(c)). The selected best target and its estimated conversion factor were used for continuous
+
+
+                                                                            6
+Z. Ma et al.                                                                                  Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+                                              Fig. 7. Simple example of the wrapped and unwrapped phases.
+
+
+displacement estimation.
+   There are two things that need to be mentioned. First, Fig. 6 shows the definition of the conversion factor considering a generalized
+geometric relationship between a radar and a target. The conversion factor (β) should be defined as,
+                           1
+        β=                       (      )                                                                                                         (11)
+               cos(θ) + sin(θ)tan π2 − ϕ
+
+where θ denotes the angle between the actual movement direction and the LOS direction, and ϕ denotes the angle between the LOS
+direction and the surface of the target. In practice, the θ value can be calculated by measuring vertical and LOS distances between the
+radar and the target using a laser rangefinder, but it is difficult to obtain the ϕ value. Thus, the simplified equation (Equation (9)) was
+used in existing techniques to define the conversion factor. Note that, the proposed technique estimates the conversion factor using
+initial radar and acceleration measurements without knowing the values of ϕ and θ. Second, it is apparent that the selected best target
+should have no self-movement. In addition to that, the best target should have a flat surface. As shown in Fig. 6, the conversion factor
+was assumed to be constant and the assumption was valid only when the target has a flat surface. In cases that the target has a curved or
+rough surface, the conversion factor is not constant and using a constant conversion factor will introduce errors in the estimated
+displacement. Note that, though displacement may be better estimated with an artificial-designed reflector, the installation of such a
+reflector may not be convenient in real applications.
+
+3.2. Accelerometer-aided phase-unwrapping algorithm
+
+    Phase wrapping can be a serious problem when the structural displacement is larger than the radar wavelength, thus causing
+inaccurate displacement estimation. The existing phase-unwrapping algorithm [26] assumes that the phase change between any
+consecutive time steps is smaller than π. For each time step, if the phase jump relative to the previous time step is greater than or equal
+to π, the phase is shifted by adding multiples of ±2π until the phase jump is less than π. A simple example of the wrapped and
+unwrapped phases is shown in the Fig. 7. However, the assumption may not always be valid, and then causes incorrect phase
+unwrapping.
+    This section proposes an accelerometer-aided phase-unwrapping algorithm to overcome this limitation. At each time step (e.g., the
+kth time step), the displacement is first predicted using the displacement estimation at the (k-1)th and (k-2)th time steps (i.e.,uk− 1 and
+uk− 2 ) and acceleration at the (k-1)th time step (ak− 1 ),
+
+         u k = 2uk− 1 − uk− 2 + (Δt)2 ak− 1
+         ̂                                                                                                                                        (12)
+    Thereafter, the phase is predicted as,
+                       uk
+                       ̂
+         ̂ k = 4π fs
+         φ                                                                                                                                        (13)
+                       βc
+    Assuming that the raw phase is extracted as φk , the unwrapped phase is as follows:
+        {φk ± 2pπ }                                                                                                                               (14)
+
+where p is an integer. Finally, the unwrapping phase (φk ) is estimated as the one in this list and is closest to the predicted phase (̂
+                                                                                                                                       φ k ),
+                                  (φ
+                                   ̂ k − φk )
+        φk = φk + 2π × round                                                                                                                      (15)
+                                      2π
+    The radar-based displacement is then estimated using the unwrapped phase (φk ) instead of the raw phase φk ,
+                  c
+        uk = β       (φ − φ0 )                                                                                                                    (16)
+                 4πfs k
+   Note that it is assumed that the test structure does not vibrate or vibrates weakly during the initial two time step and then phase
+wrapping does not occur. This can be achieved by setting the start point to a time point where the acceleration is very small.
+
+                                                                          7
+Z. Ma et al.                                                                                 Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+Fig. 8. Experimental setup for short-range displacement estimation test: (a) overview, (b) an LDV used for reference displacement measurement, (c)
+mmWave radar, and (d) accelerometer installed at the top of the building model.
+
+
+3.3. FIR-filter-based displacement estimation by fusing radar-based displacement and acceleration
+
+    An FIR-filter-based technique has been developed for dynamic displacement estimation using acceleration measurements [7], and
+has been extended to fuse acceleration and inaccurate displacement measurements for displacement estimation with improved ac­
+curacy [13,15]. The FIR filter was adopted in this study to fuse the estimated radar-based displacement with acceleration measure­
+ments to further improve the displacement estimation accuracy.
+    Provided that the acceleration measurement (a) and radar-based displacement (u) are available within a given time window
+[(k − M)Δt, (k + M)Δt],
+
+        a = [ak− M+1 , ak− M+2 , ⋯, ak+M− 1 ]T                                                                                                   (17)
+
+        u = [uk− M , uk− M+1 , ⋯, uk+M ]T
+
+    An error function Π{u* } is defined for the final fusion-based displacement (u* ), as follows:
+
+                1                           λ2
+        Π(u* ) = ‖La Lc u* − La (Δt)2 a)‖2 + ‖u* − u‖2                                                                                           (18)
+                                         2           2
+
+                2                           2
+            [                             ]T
+        u* = u*k− M , u*k− M+1 , ⋯, u*k+M                                                                                                        (19)
+
+where La and Lc denote the weighting matrix and second-order differential operator matrix, respectively. ‖ • ‖2 denotes the two-norm
+of a vector, and λ is the regularization factor. The first item of Equation (18) denotes the error between a and the acceleration
+calculated from u* , and the second item denotes the error between u* and u. By minimizing Π{u* } with respect to u* , u* can be
+estimated as.
+                 (         )− 1         (         )− 1
+       u* = (Δt)2 LT L+λ2 I LT La a + λ2 LT L+λ2 I u                                                                             (20)
+
+        L = La L c
+    Because the highest estimation accuracy is achieved at the center of the time window [(k − N)Δt, (k + N)Δt], only the displacement
+estimated at the center was retained,
+
+        u*k = CH a + CL u                                                                                                                        (21)
+
+
+                                                                        8
+Z. Ma et al.                                                                                    Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+     Table 1
+     Radar specification and chirp configuration.
+                                                             Parameters (Units)                                                     Specifications
+
+        mmWave Radar (TI IWR1642)                            Start frequency (GHz)                                                  77
+                                                             Bandwidth (GHz)                                                        Up to 4
+                                                             Transmit power (dBm)                                                   12.5
+                                                             RX Noise Figure (dB)                                                   15
+                                                             Phase Noise at 1 MHz (dBc/Hz)                                          − 93
+                                                             Operating Temp Range (◦ C)                                             –40 to 105
+        Chirp Signal                                         Frequency slope (MHz/μs)                                               64.985
+                                                             Number of ADC samples                                                  256
+                                                             ADC sampling frequency (ks/s)                                          6000
+                                                             Chirp duration (Ramp end – Ramp start) (μs)                            60
+
+
+
+
+                                                    Fig. 9. Conversion factor estimation result.
+
+                                                    {     (         )− 1  }   { (           )− 1 }
+where CH and CL denote the (M + 1)th row of          (Δt)2 LT L+λ2 I LT La and λ2 LT L+λ2 I        , respectively. Note that CH acts as
+double integration and high-pass filter, while CL acts as low-pass filtering. Therefore, u*k is estimated as the combination of the high-
+frequency displacement from u and the low-frequency displacement from a. To estimate the displacement at the kth time step, radar-
+based displacement and acceleration measurements up to the (k + M)th time step are required, thus causing a time delay of MΔt.
+Further details can be found in the study of Lee et al. [7].
+
+4. Four-story building model test
+
+   The proposed displacement estimation technique was first validated using a four-story building model. Two different experimental
+setups were considered for displacement estimation using long- and short-distance targets.
+
+4.1. Short-range (1.318 m) test
+
+    First, the experiments were conducted using a short-range target. As shown in Fig. 8(a), an EpiSensor ES-U2 force balance
+accelerometer (Fig. 8(d)) and a TI IWR1642 mmWave radar (Fig. 8(c)) were placed on top of a four-story building model, and an APS
+400 ELECTRO-SEIS shaker moved the model in the horizontal direction. A concrete wall located at a distance of approximately 1.318
+m was selected as the fixed target for the radar. A Polytech RSV-150 LDV (Fig. 8(b)) measured the ground truth displacement of the
+model with a resolution of 0.3 nm [27]. All measurements from the radar, accelerometer, and LDV were obtained at a sampling rate of
+100 Hz. The chirp configuration of the radar is listed in Table 1. With the given chirp configuration, the radar can detect targets up to a
+distance of 12 m with a resolution of 4.89 cm. Four different excitation signals were input into the shaker in this test: (1) 0.1 Hz, (2) 0.3
+Hz, (3) 1 Hz sinusoidal inputs, and (4) a recorded real bridge vibration.
+    The best target was selected at the distance of 1.3137 m, and the conversion factor was estimated as β1 = 0.985 using radar and
+acceleration measurements with 1 Hz sinusoidal inputs (Fig. 9). Note that the distance of the best target estimated from radar mea­
+surement is smaller than the perpendicular distance between the radar and the wall (1.318 m). Considering that the radar has only
+4.89 cm distance resolution, these two distances are considered equal, and thereafter the existing algorithm [20] estimates the con­
+version factor as β2 = 1 using Equation (9).
+    Radar-based displacements are first estimated using β1 but with different phase-unwrapping algorithms (i.e., the proposed and
+existing phase-unwrapping algorithms [26]) to examine the effectiveness of the proposed phase-unwrapping algorithm. As shown in
+Fig. 10, in all four cases, the proposed phase-unwrapping algorithm properly estimated displacements with RMSEs of the estimated
+displacements smaller than 0.32 mm. The existing phase-unwrapping algorithm assumes that the phase change between consecutive
+
+                                                                         9
+Z. Ma et al.                                                                              Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+Fig. 10. Comparison of radar-based displacements estimated with the proposed and existing phase-unwrapping algorithms [26] when the four-story
+building model is subjected to (a) 0.3 Hz, (b) 0.5 Hz, (c) 1 Hz sinusoidal inputs, and (d) recorded real bridge vibration excitation signals.
+
+
+time steps is smaller than π [26]. With a slowly changing displacement (i.e., 0.3 Hz sinusoidal excitation), the displacement estimated
+using the existing phase-unwrapping algorithm is essentially the same as the reference displacement (Fig. 10(a)). However, when there
+are sudden phase changes (i.e., 0.5 Hz, 1 Hz, and recorded real bridge excitations), the existing unwrapping algorithm fails to properly
+estimate displacement owing to the violation of the assumption. (Fig. 10(b), (c), and (d)).
+    Next, radar-based displacements were estimated using the proposed phase-unwrapping algorithm but with different conversion
+factors (i.e., β1 and β2 ) to examine the effectiveness of the proposed conversion factor estimation algorithm. The use of β1 reduced the
+RMSEs of the estimated displacements by approximately 38 %, as shown in Fig. 11(a). Finally, radar-based displacements estimated
+
+
+                                                                     10
+Z. Ma et al.                                                                                Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+Fig. 11. (a) Accuracy improvement in radar-based displacement estimation using the proposed conversion factor estimation algorithm and (b)
+comparison of the displacement estimation performance before and after FIR-filter-based fusion in short-range test.
+
+
+
+
+                      Fig. 12. Experimental setup for long-range test: (a) test location and (b) overview of sensor setup.
+
+
+using β1 and the proposed phase-unwrapping algorithm were fused with acceleration measurements using an FIR filter to obtain
+fusion-based displacements. The order of the FIR filter is set to 101 in this study, considering the noise characteristics of the radar and
+accelerometer, and thereafter a 0.5 s time delay is introduced. An RMSE reduction of approximately 27 % was achieved after the FIR-
+filter-based fusion (Fig. 11(b)).
+
+
+4.2. Long-range (54 m) test
+
+    In practice, it is often difficult to find a fixed target near the radar for large-scale structures. For example, to estimate the
+displacement at the mid-span point of large-scale river-crossing bridges, the nearest target would be the foundation of the pylon, but it
+is at least a few tens of meters away from the radar installation location (i.e., the mid-span point). The ability of high-accuracy
+displacement estimation with a long-distance target is important for the future practical application of the proposed technique.
+
+                                                                      11
+Z. Ma et al.                                                                                  Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+                                                     Fig. 13. Best target selection result.
+
+
+
+
+ Fig. 14. Comparison of radar-based displacements estimated by the proposed technique using targets at different distances in long-range test.
+
+
+Therefore, experiments were then conducted on the same building model considering long-distance targets (Fig. 12). An actual
+building located at a distance of approximately 30–60 m was selected as a fixed target for the radar system (Fig. 12(a)). The ground
+truth displacement was measured using a KAIS KL3-W400 laser displacement sensor (LDS) with a resolution of 10 µm [28]. The
+frequency slope of the chirp signal was changed from 64.985 MHz/μs to 15.015 MHz/μs, and the radar could detect targets up to a
+distance of 54 m with a resolution of 21 cm. Unless otherwise stated, all other test parameters remained the same as those used in the
+previous short-range tests.
+    The best target is automatically selected at a distance of 48 m, but the other four targets (labeled targets 1–4) at distances of 31–42
+m have approximately identical E values, as shown in Fig. 13. Using the proposed conversion factor estimation and phase-unwrapping
+algorithms, the displacements estimated from these five targets are compared in Fig. 14. Although the distances from the radar to these
+targets were different, almost identical displacement estimation performances were achieved.
+    The effectiveness of the proposed phase-unwrapping algorithm was examined by comparing the radar-based displacements esti­
+mated using the best target and the proposed conversion factor estimation algorithm. The proposed phase-unwrapping algorithm
+properly estimates displacements once again, for all four excitations, while the existing phase-unwrapping algorithm properly esti­
+mates displacements only at 0.3 Hz sinusoidal excitation (Fig. 15(a)). The radar-based displacements estimated using the best target,
+the proposed conversion factor estimation, and phase-unwrapping algorithms were further fused with acceleration measurements
+using the FIR filter, and an RMSE reduction of approximately 11 % was achieved (Fig. 15(b)).
+
+
+                                                                      12
+Z. Ma et al.                                                                               Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+Fig. 15. (a) Accuracy improvement in radar-based displacement estimation using the proposed phase unwrapping algorithm and (b) comparison of
+the displacement estimation performance before and after FIR-filter-based fusion in long-range test.
+
+
+
+
+Fig. 16. Overview of experimental setup considering the deviation between LOS and actual movement directions: (a) front view and (b) top view.
+
+
+
+
+                            Fig. 17. (a) Targets detected by the radar and (b) conversion factor estimation result.
+
+
+
+
+                                                                      13
+Z. Ma et al.                                                                             Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+   Fig. 18. Final displacements estimated by the proposed technique considering the deviation between LOS and actual movement directions.
+
+
+4.3. Additional test considering the deviation between LOS and actual movement directions
+
+   In the previous two tests, the LOS direction of the best target basically coincides with the actual structural vibration direction.
+However, when measuring displacement on river-crossing bridges, the unstable water surface cannot be used as the best target. Then,
+the LOS direction of the best target will deviate from the actual bridge vibration direction as shown in Fig. 4(a). An additional test was
+performed using the experimental setup shown in Fig. 16. Except that another building model instead of the wall was used as a target,
+the experimental setup is identical to that used in the short distance test.
+   Fig. 17(a) shows the target detected by the radar. The additional building model was detected at a distance of 2.0543 m, and
+
+                                                                    14
+Z. Ma et al.                                                                                 Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+Fig. 19. Pedestrian bridge test: (a) bridge overview, (b) overview of sensor setup, (c) an accelerometer, (d) a mmWave radar, and (e) an LDV for
+reference displacement measurement.
+
+
+
+
+         Fig. 20. Target detected by radar and the best target automatically selected by the proposed algorithm in pedestrian bridge test.
+
+
+selected as the best target. The conversion factor was estimated as 1.2748, and a good linear relationship was found between the high-
+frequency displacement from acceleration and high-frequency LOS displacement from radar as shown in Fig. 17(b).
+    Fig. 18 shows the final displacements estimated by the proposed technique. Though the LOS direction deviates from the structural
+actual movement direction, the proposed technique still estimates displacement accurately with RMSEs less than 0.4 mm. Note that the
+effectiveness of the proposed conversion factor estimation, best target selection, and accelerometer-aided phase unwrapping algo­
+rithms have been verified in the previous two tests, and then similar results were not repeatedly reported here.
+
+5. Pedestrian bridge test
+
+    A pedestrian bridge test was conducted to further validate the proposed technique. The experimental setup is shown in Fig. 19. The
+same mmWave radar (Fig. 19(d)) and accelerometer (Fig. 19(c)) were installed at the one-half span of the bridge, as in the previous
+tests. A Polytech RSV-150 LDV was installed under the bridge to measure the ground truth displacement of the bridge (Fig. 19(e)). Note
+that LDV has following limitations, and then is not a good option for continues displacement monitoring of practical structures: (1)
+securing a permeant installation location for long-term monitoring can be challenging; (2) cabling for permanent power supply and
+data retrieval can be issues; (3) A reflector with retroreflective film should be installed at displacement estimation location, and the
+laser beam should be perpendicular to the reflector surface to ensure a stable reflection; (4) the LDV is rather expensive; (5) long
+
+
+                                                                        15
+Z. Ma et al.                                                                                   Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+Fig. 21. Comparison of radar-based displacements estimated using three different targets in pedestrian bridge test: (a) 14 people slowly passing, (b)
+14 people slowly passing +5 people jumping, and (c) 6 people jumping.
+
+
+
+
+Fig. 22. (a) Accuracy improvement in radar-based displacement estimation using the proposed conversion factor estimation algorithm and (b)
+comparison of the displacement estimation performance before and after FIR-filter-based fusion in pedestrian bridge test.
+
+
+
+                                                                         16
+Z. Ma et al.                                                                            Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+
+
+Fig. 23. Comparison of raw phase and unwrapped phase recovered by the proposed phase-unwrapping algorithm when 14 people slowly passing
+the bridge and 5 people jumping at one-half span point.
+
+
+distance measurement requires the use of a high-intensity laser beam that would endanger human health [29].
+    The chirp configuration of the radar system was the same as that in the previous short-range building model test, and the radar
+could detect targets with a maximum distance of 12 m and a distance resolution of 4.89 cm. In this test, the bridge vibration was
+excited by (1) 14 people slowly passing the bridge, (2) 14 people slowly passing the bridge and 5 people jumping at the one-half span
+point, and (3) 6 people jumping at the one-half span point.
+    The target detection result of the radar is shown in Fig. 20, and the best target is automatically selected at a distance of 7.4605 m.
+Note that it is intuitive to choose the target with the largest amplitude; however, the best target does not have the largest amplitude in
+this test. Two other targets with larger amplitudes (labeled targets 1 and 2) were used to examine the effectiveness of the proposed best
+target selection algorithm. The displacements were estimated from these three targets using the proposed phase-unwrapping and
+conversion factor estimation algorithms. As shown in Fig. 21, using the best target estimates the displacements with the smallest
+RMSEs for all three excitations.
+    Radar-based displacements estimated using the proposed phase-unwrapping algorithm, but with two different conversion factor
+estimation algorithms, are compared in Fig. 22(a). For all three excitations, the proposed algorithm produces smaller RMSEs. The
+radar-based displacements estimated using the best target, the proposed conversion factor estimation, and phase-unwrapping algo­
+rithms were further fused with acceleration measurements using the FIR filter, and an RMSE reduction of approximately 16 % was
+achieved (Fig. 22(b)).
+    Fig. 23 compares the raw and unwrapped phases after using the proposed phase-unwrapping algorithm with 14 people slowly
+passing the bridge and 5 people jumping at the one-half span point. Phase wrapping occurs when the phase is larger than π or smaller
+than − π. Because the bridge displacements are small, up to 3 mm, as shown in Fig. 21, the assumption of the existing phase-
+unwrapping algorithm [26] is valid in the bridge test, and both the existing and proposed phase-unwrapping algorithms produce
+the same phase-unwrapping results.
+
+6. Conclusions
+
+    This study proposed a displacement estimation technique through the fusion of a collocated FMCW mmWave radar and an
+accelerometer on a structure. An automated initial calibration is first performed to select the best target among all targets detected by
+radar from the surroundings of the structure and estimate a conversion factor for the best target. Thereafter, the displacement was
+initially estimated from radar measurements in real time using the selected best target and its estimated conversion factor. An
+accelerometer-aided phase-unwrapped algorithm was developed and applied in the radar-based displacement estimation process to
+address the phase-wrapping issue. The real-time estimated displacement from radar measurement is further fused with acceleration
+measurement to estimate a fusion-based displacement with an improved accuracy at the cost of short time delay (0.5 s in this study).
+The displacement estimation performance of the proposed technique was experimentally validated through laboratory tests on a four-
+story building model and a field test on a pedestrian bridge. The overall RMSEs of both the radar- and fusion-based displacements for
+all cases investigated in this study were less than 1 mm. Although the proposed technique shows a potential for practical applications in
+long-term continuous structural displacement monitoring, there are still limitations that need to be addressed. Firstly, the presented
+tests estimated displacement using a target distance of up to 48 m, which may not be sufficient for long-span bridges. In addition, LOS
+blockage issue may occur in long term continuous displacement monitoring, especially for bridges with intermittent traffic under­
+neath. Future works are warranted to further advance displacement measurement range and address the LOS blockage issue.
+
+Declaration of Competing Interest
+
+    The authors declare that they have no known competing financial interests or personal relationships that could have appeared to
+influence the work reported in this paper.
+
+
+
+
+                                                                   17
+Z. Ma et al.                                                                                               Mechanical Systems and Signal Processing 182 (2023) 109582
+
+
+Acknowledgements
+
+   This study was supported by the National Research Foundation of Korea (NRF) grant funded by the Korean Government (MSIT)
+(No. 2017R1A5A1014883). We also thank the students from the Smart Structures and Systems Lab at KAIST for their assistance during
+the field test.
+
+References
+
+ [1] AASHTO, AASHTO LRFD Bridge Design Specifications, in: the American Association of State Highway and Transportation Officials, Washington, D.C., 2017.
+ [2] MLTM, Korea highway bridge design code (in Korean), in: Ministry of Land, Infrastructure and Transport, Seoul, 2010.
+ [3] MOHURD, GB 50017–2017 Code for Design of Steel Structures (in Chinese), in: China Machine Press, Beijing, 2020.
+ [4] M.A. Vicente, D.C. González, G. Fu, Static and dynamic testing of high-speed rail bridges in Spain, J. Bridge Eng. 20 (2015) 06014006, https://doi.org/10.1061/
+     (ASCE)BE.1943-5592.0000654.
+ [5] S. Bhowmick, S. Nagarajaiah, Spatiotemporal compressive sensing of full-field Lagrangian continuous displacement response from optical flow of edge:
+     Identification of full-field dynamic modes, Mech. Syst. Sig. Process. 164 (2022), 108232.
+ [6] M. Civera, L.Z. Fragonara, C. Surace, A computer vision-based approach for non-contact modal analysis and finite element model updating, in: P. Rizzo,
+     A. Milazzo (Eds.), European Workshop on Structural Health Monitoring, Springer International Publishing, Cham, 2021, pp. 481–493.
+ [7] H.S. Lee, Y.H. Hong, H.W. Park, Design of an FIR filter for the displacement reconstruction using measured acceleration in low-frequency dominant structures,
+     Int. J. Numer. Meth. Eng. 82 (2010) 403–434, https://doi.org/10.1002/nme.2769.
+ [8] F. Moreu, J. Li, H. Jo, R.E. Kim, S. Scola, B.F. Spencer, J.M. LaFave, Reference-free displacements for condition assessment of timber railroad bridges, J. Bridge
+     Eng. 21 (2016) 04015052.
+ [9] A.I. Ozdagli, B. Liu, F. Moreu, Low-cost, efficient wireless intelligent sensors (LEWIS) measuring real-time reference-free dynamic displacements, Mech. Syst.
+     Sig. Process. 107 (2018) 343–356.
+[10] M. Gindy, R. Vaccaro, H. Nassif, J. Velde, A state-space approach for deriving bridge displacement from acceleration, Comp.-Aided Civil Infrastr. Eng. 23 (2008)
+     281–290, https://doi.org/10.1111/j.1467-8667.2007.00536.x.
+[11] K. Kim, J. Choi, J. Chung, G. Koo, I.-H. Bae, H. Sohn, Structural displacement estimation through multi-rate fusion of accelerometer and RTK-GPS displacement
+     and velocity measurements, Measurement 130 (2018) 223–235, https://doi.org/10.1016/j.measurement.2018.07.090.
+[12] Z. Ma, J. Chung, P. Liu, H. Sohn, Bridge displacement estimation by fusing accelerometer and strain gauge measurements, Struct. Control Health Monitor.. 28
+     (2021), e2733, https://doi.org/10.1002/stc.2733.
+[13] J.-W. Park, S.-H. Sim, H.-J. Jung, Displacement estimation using multimetric data fusion, IEEE-ASME Trans. Mechatr. 18 (2013) 1675–1682, https://doi.org/
+     10.1109/TMECH.2013.2275187.
+[14] Y. Xu, J.M. Brownjohn, F. Huseynov, Accurate deformation monitoring on bridge structures using a cost-effective sensing system combined with a camera and
+     accelerometers: Case study, J. Bridge Eng. 24 (2019) 05018014, https://doi.org/10.1061/(ASCE)BE.1943-5592.0001330.
+[15] Y.H. Hong, S.G. Lee, H.S. Lee, Design of the FEM-FIR filter for displacement reconstruction using accelerations and displacements measured at different
+     sampling rates, Mech. Syst. Sig. Process. 38 (2013) 460–481, https://doi.org/10.1016/j.ymssp.2013.02.007.
+[16] J. Kim, K. Kim, H. Sohn, Autonomous dynamic displacement estimation from data fusion of acceleration and intermittent displacement measurements, Mech.
+     Syst. Sig. Process. 42 (2014) 194–205.
+[17] A. Smyth, M. Wu, Multi-rate Kalman filtering for the data fusion of displacement and acceleration response measurements in dynamic system monitoring, Mech.
+     Syst. Sig. Process. 21 (2007) 706–723, https://doi.org/10.1016/j.ymssp.2006.03.005.
+[18] Z. Ma, J. Choi, P. Liu, H. Sohn, Structural displacement estimation by fusing vision camera and accelerometer using hybrid computer vision algorithm and
+     adaptive multi-rate Kalman filter, Autom. Constr. 140 (2022), 104338, https://doi.org/10.1016/j.autcon.2022.104338.
+[19] Z. Ma, J. Choi, H. Sohn, Real-time structural displacement estimation by fusing asynchronous acceleration and computer vision measurements, Comp.-Aided
+     Civil Infr. Eng. 37 (2022) 688–703, https://doi.org/10.1111/mice.12767.
+[20] G. Zhang, Y. Wu, W. Zhao, J. Zhang, Radar-based multipoint displacement measurements of a 1200-m-long suspension bridge, ISPRS J. Photogramm. Remote
+     Sens. 167 (2020) 71–84, https://doi.org/10.1016/j.isprsjprs.2020.06.017.
+[21] S. Guan, J.A. Rice, C. Li, Y. Li, G. Wang, Structural displacement measurements using DC coupled radar with active transponder, Struct. Control Health Monit.
+     24 (2017), e1909.
+[22] S. Guan, J.A. Bridge, C. Li, N.J. DeMello, Smart radar sensor network for bridge displacement monitoring, J. Bridge Eng. 23 (2018) 04018102.
+[23] D.V.Q. Rodrigues, D. Zuo, C. Li, Wind-induced displacement analysis for a traffic light structure based on a low-cost doppler radar array, IEEE Trans. Instrum.
+     Meas. 70 (2021) 1–9, https://doi.org/10.1109/TIM.2021.3098380.
+[24] J. Guo, Y. He, C. Jiang, M. Jin, S. Li, J. Zhang, R. Xi, Y. Liu, Measuring micrometer-level vibrations with mmWave radar, IEEE Trans. Mob. Comput. 1–1 (2021).
+[25] H. Liu, Robot Systems for Rail Transit Applications, Elsevier, 2020.
+[26] G. Wang, J.-M. Munoz-Ferreras, C. Gu, C. Li, R. Gomez-Garcia, Application of linear-frequency-modulated continuous-wave (LFMCW) radars for tracking of vital
+     signs, IEEE Trans. Microw. Theory Tech. 62 (2014) 1387–1399, https://doi.org/10.1109/TMTT.2014.2320464.
+[27] Polytech GmbH, RSV-150 Scanning Vibrometer Datasheet, (2019). https://www.atecorp.com/products/polytec/rsv-150 (accessed March 24, 2022).
+[28] KAIS Co., Ltd, KL3 series Laser Displacement Sensor Datasheet, (2019). https://ekais.kr/ekaisbiz/wp-content/uploads/2019/05/KL3-Series.pdf (accessed
+     October 9, 2021).
+[29] H.H. Nassif, M. Gindy, J. Davis, Comparison of laser Doppler vibrometer with contact sensors for monitoring bridge deflection and vibration, NDT and E Int. 38
+     (2005) 213–218, https://doi.org/10.1016/j.ndteint.2004.06.012.
+
+
+
+
+                                                                                  18
+

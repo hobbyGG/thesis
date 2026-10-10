@@ -1,0 +1,253 @@
+Displacement Estimation of Reactor
+Containment Buildings Using
+Accelerometer and FMCW
+Millimeter-Wave Radar
+HOON SOHN and JIGU LEE
+
+
+
+
+ABSTRACT
+
+       This study presents an advanced fusion-based sensing methodology designed
+specifically for precise displacement and acceleration monitoring of Reactor
+Containment Buildings (RCBs). Reliable measurement of structural displacement in
+RCBs is critical for ensuring structural integrity and operational safety. To address
+challenges associated with traditional displacement monitoring techniques, this research
+integrates data from a three-axis MEMS accelerometer and phase-shift measurements
+obtained from millimeter-wave frequency-modulated continuous-wave (FMCW) radar.
+By fusing these distinct sensor modalities, we significantly enhance measurement
+accuracy, achieving displacement estimation resolutions superior to 0.1 mm for both
+static and dynamic structural responses. The proposed sensor's hardware architecture
+emphasizes cost-efficiency, compactness, and reliability. The sensor system employs an
+Infineon 60 GHz radar chipset, combined with a MEMS accelerometer and a
+microcontroller supporting multiple wireless communication protocols (2.4/5.0 GHz
+Wi-Fi, Bluetooth, and Gigabit Ethernet). This robust yet economical sensor design
+results in a compact device (100 × 80 × 50 mm³) and is projected to cost under $1,000
+per unit when mass-produced, making it highly suitable for wide-scale deployments in
+nuclear facilities. A key innovation of the developed fusion sensor is its automated best-
+target selection capability, which utilizes initial short-duration radar and accelerometer
+readings to efficiently determine the most stable structural reflections and establish
+accurate conversion factors between line-of-sight displacement and actual structural
+displacement. Additionally, the accelerometer data aids in addressing the radar phase-
+wrapping issue through an adaptive phase-unwrapping algorithm, thus significantly
+enhancing measurement reliability and accuracy. To further improve displacement
+estimation, radar-derived displacement data is combined with accelerometer
+measurements using a finite impulse response (FIR) filter, which mitigates noise and
+drift typically observed in acceleration-based displacement estimations. Through
+experimental validations conducted on structural models, this sensor fusion method
+demonstrated improved displacement measurement accuracy with errors consistently
+below 1 mm. Given its capacity for automatic calibration, effective target selection, and
+enhanced resilience against occlusions and environmental interferences, the sensor
+offers a reliable solution for continuous monitoring of RCBs. Ultimately, the proposed
+sensor fusion approach presents significant potential for adoption in nuclear power
+facilities, enhancing predictive maintenance, optimizing structural health management
+strategies, and reinforcing overall operational safety.
+INTRODUCTION
+
+      Reliable monitoring of structural integrity in RCBs is critical for ensuring safety
+and operational continuity within nuclear power plants. Displacement measurements
+are particularly important as they directly reflect structural stability and performance
+under various loading conditions, including environmental influences, operational
+stresses, and extreme events. However, traditional displacement measurement methods,
+such as Linear Variable Differential Transformers (LVDTs) or optical systems, face
+significant challenges in nuclear environments. These conventional methods can be
+prohibitively expensive, difficult to maintain, and sensitive to external factors such as
+radiation, temperature fluctuations, and humidity, thus limiting their long-term
+reliability and effectiveness.
+      Recent technological advancements in sensing provide promising alternatives. In
+particular, millimeter-wave Frequency-Modulated Continuous-Wave (FMCW) radar
+sensors offer distinct advantages including high accuracy, robustness against
+environmental disturbances, compact size, and remote sensing capabilities [1].
+Concurrently, Micro-Electro-Mechanical System (MEMS)-based accelerometers have
+emerged as highly accurate, low-cost sensors capable of capturing dynamic acceleration
+with minimal drift and high reliability under harsh conditions. Despite their individual
+strengths, both sensors exhibit inherent limitations: radar sensors can experience phase
+ambiguity issues due to wavelength constraints, while accelerometers are prone to drift
+accumulation over time, impacting long-term displacement accuracy [3, 4].
+      To overcome these challenges, this paper proposes an innovative sensor fusion
+approach combining the complementary strengths of FMCW radar and MEMS
+accelerometers to achieve robust, high-resolution displacement monitoring in RCBs.
+The developed integrated sensor system, which incorporates an Infineon 60 GHz radar
+chipset, a three-axis MEMS accelerometer, and a multi-communication microcontroller,
+aims to reliably estimate structural displacement at resolutions better than 0.1 mm under
+both static and dynamic loading conditions. Moreover, automated calibration and
+advanced data fusion techniques are employed to enhance measurement precision,
+simplify sensor installation and maintenance, and ensure continuous real-time structural
+assessment capability.
+      The remainder of this paper is structured as follows. Section 2 describes the
+detailed methodology of the sensor fusion process, emphasizing automated calibration,
+phase-unwrapping algorithms, and filtering techniques. Section 3 outlines planned
+experimental validations, highlighting data acquisition, processing workflows, and
+structural assessment applications. Section 4 presents expected outcomes and
+implications of this approach, emphasizing its practical benefits and scalability for
+structural health monitoring in nuclear power facilities. Lastly, Section 5 concludes the
+paper and outlines directions for future research.
+Figure 1. (a) Schematic illustration of the integrated sensor system for monitoring RCBs. (b) Procedure
+for displacement estimation combining radar and accelerometer data.
+
+
+
+METHODOLOGY
+
+         The proposed displacement monitoring system integrates a MEMS
+accelerometer and FMCW millimeter-wave radar in a compact sensor module,
+specifically developed for RCBs. Both sensors are collocated and directly mounted on
+structural measurement points, eliminating the need for external reference targets and
+significantly simplifying installation. The system consists of an Infineon 60 GHz radar
+chipset, a high-precision three-axis MEMS accelerometer, and a microcontroller
+supporting multiple wireless communication protocols, including Wi-Fi (2.4/5.0
+GHz), Bluetooth, and Gigabit Ethernet. This integrated design ensures reliability,
+robustness against harsh nuclear environments, low power consumption, and cost-
+effectiveness, with projected unit costs below $1,000 in mass production.
+         To maximize measurement accuracy, the monitoring system includes an
+automated calibration procedure executed at the start of sensor deployment. Initially,
+short-duration (approximately one minute) simultaneous data acquisitions from the
+radar and accelerometer are performed to determine the most reliable radar reflection
+target within the detection range. During this calibration phase, the optimal radar
+target is automatically identified by minimizing the RMSE between radar-derived and
+accelerometer-derived displacement signals. Subsequently, the system calculates a
+precise conversion factor between the radar’s line-of-sight displacement measurement
+and the actual structural displacement, ensuring accurate and stable long-term
+monitoring without continuous manual adjustments.
+         A key limitation in radar-based displacement estimation is phase ambiguity,
+known as phase wrapping, especially under large dynamic structural movements. To
+address this, an accelerometer-aided adaptive phase-unwrapping algorithm is utilized.
+At each measurement instance, displacement is predicted using recent accelerometer
+data and prior radar measurements. This predictive displacement estimation helps
+resolve radar phase ambiguities by identifying and correcting integer multiples of 2π
+in the radar-measured phase. Consequently, this method significantly improves the
+accuracy and reliability of displacement measurements, particularly under dynamic
+loading scenarios typical of nuclear containment structures.
+         After phase-unwrapped radar displacement data are accurately determined,
+further refinement is achieved through advanced sensor data fusion techniques,
+specifically employing finite impulse response (FIR) filters FIR filtering
+systematically integrates high-frequency radar displacement data with low-frequency
+accelerometer measurements, effectively mitigating the accelerometer’s inherent drift
+and radar measurement noise as [2]. The fusion process exploits the complementary
+strengths of both sensors—radar’s precise high-frequency response and
+accelerometer’s stable low-frequency characteristics—resulting in highly accurate
+displacement measurements. Additionally, the sensor system incorporates
+complementary and Madgwick filters for enhanced accuracy in displacement,
+acceleration, and structural tilt estimation, ultimately ensuring robust and reliable
+long-term monitoring suitable for RCB safety management.
+
+
+
+
+Figure 2. Photograph of the integrated monitoring sensor, illustrating the compact arrangement of the
+FMCW radar, MEMS accelerometer, microcontroller, and wireless communication interfaces designed
+for robust structural monitoring in nuclear environments.
+Figure 3. Data fusion workflow diagrams for (a) displacement estimation, (b) acceleration measurement,
+and (c) structural tilt evaluation, illustrating the integration of radar, accelerometer, and gyroscope data
+through FIR, complementary, and Madgwick filtering techniques.
+
+PLANNED VALIDATION
+
+        The proposed sensor fusion approach will undergo comprehensive validation
+through laboratory and field experiments simulating realistic Reactor RCB conditions.
+The validation procedure begins with synchronized acquisition of displacement and
+acceleration data from the collocated FMCW radar and MEMS accelerometer sensors.
+Radar signals will first undergo phase extraction and adaptive phase-unwrapping to
+address inherent ambiguities. Radar-derived displacement data will then be processed
+through low-pass filtering to remove high-frequency noise, whereas accelerometer data
+will be double-integrated and high-pass filtered to reduce drift effects. Subsequently,
+these processed datasets will be fused using FIR filters, providing precise and reliable
+displacement estimations essential for structural integrity assessments.
+        For comprehensive structural monitoring, further processing will extract
+acceleration from displacement measurements via double differentiation and filtering.
+Additionally, structural tilt will be evaluated using integrated gyroscope and
+accelerometer data processed through complementary and Madgwick filters, enhancing
+overall reliability and accuracy of structural health evaluations.
+        An essential component of RCB structural integrity is maintaining appropriate
+tension levels in Post-Tensioning (PT) tendons. The proposed system aims to estimate
+PT tendon tension indirectly by correlating structural displacement and acceleration
+data with structural characteristics obtained from finite element models. Continuous
+monitoring of vertical and horizontal displacements, accelerations, and structural tilt
+will provide valuable insights into changes in tendon tension over time, facilitating early
+detection of structural deterioration and enabling proactive maintenance strategies.
+        The sensor system incorporates on-board TinyAI technology to enable
+continuous real-time structural safety assessment. By analyzing incoming sensor data
+streams in real-time, the system can swiftly detect abnormal structural events such as
+excessive deformation or sudden anomalies, immediately triggering safety alerts. This
+approach provides operators with rapid identification of potential risks, significantly
+improving response time and mitigating safety hazards within nuclear facilities.
+         Extensive field validation tests are planned in collaboration with nuclear facility
+operators. These tests will evaluate the sensor system’s accuracy, reliability, and
+robustness under diverse operational scenarios within actual RCB environments. Field-
+collected sensor data will be rigorously compared against benchmark measurements
+from validated structural analysis models and existing conventional monitoring
+techniques. These validations will confirm the practical applicability, accuracy, and
+reliability of the proposed sensor fusion methodology, facilitating confident
+implementation in real-world nuclear safety management applications.
+
+
+EXPECTED OUTCOMES AND IMPLICATIONS
+
+
+
+
+Figure 4. Structural safety evaluation approach for RCBs, showing (a) extraction of risk indicator
+features, (b) feature-level data fusion, and (c) scenario-based safety assessment using real-time sensor
+data.
+
+        The primary expected outcome of the proposed sensor fusion approach is
+significantly enhanced accuracy in structural displacement and acceleration
+measurements within RCBs. By effectively integrating FMCW radar and MEMS
+accelerometer data through advanced filtering and adaptive phase-unwrapping
+algorithms, the system aims to consistently achieve displacement estimation resolutions
+finer than 0.1 mm. This increased accuracy enables early and reliable detection of subtle
+structural changes, greatly enhancing the capability to prevent severe structural failures.
+        Integrating radar, accelerometer, and gyroscope measurements with advanced
+data processing algorithms provides a comprehensive structural health assessment
+framework. This integrated approach will facilitate not only precise displacement and
+acceleration monitoring but also accurate structural tilt estimations. Additionally,
+correlating these structural responses with PT tendon tension through structural analysis
+models further strengthens predictive maintenance capabilities, supporting proactive
+decision-making and extending the operational lifespan of critical nuclear infrastructure.
+        By incorporating TinyAI-based real-time analytics directly within the sensor
+system, the proposed method significantly enhances the capability for immediate risk
+detection and rapid response. Real-time structural anomaly detection, facilitated by
+continuous data evaluation against established safety thresholds, will enable prompt
+alerts and timely interventions, substantially reducing safety hazards and improving
+overall operational safety within nuclear facilities.
+        The proposed sensor system’s compact, integrated design ensures cost-
+effectiveness, ease of installation, and minimal maintenance requirements, facilitating
+widespread deployment within nuclear power plants. With a projected mass-production
+cost of under $1,000 per unit, this affordable solution can feasibly support extensive
+monitoring networks. Consequently, broader adoption can significantly increase
+monitoring coverage, enhancing structural safety and operational efficiency across
+nuclear facilities.
+        The successful validation and practical implementation of the developed sensor
+fusion methodology hold potential implications far beyond nuclear power applications.
+This adaptable monitoring technology can be similarly implemented in other critical
+infrastructure sectors, such as bridges, dams, tunnels, and large industrial facilities. Thus,
+the proposed approach demonstrates significant promise in advancing structural health
+monitoring practices industry-wide, promoting enhanced safety, reliability, and
+operational performance on a broader scale.
+
+CONCLUSIONS
+
+        This paper introduced a novel sensor fusion methodology combining FMCW
+millimeter-wave radar and MEMS accelerometers for precise displacement and
+structural health monitoring of Reactor Containment Buildings (RCBs). The proposed
+integrated sensor system effectively addresses common limitations in traditional
+monitoring approaches, such as environmental sensitivity, high costs, and measurement
+ambiguity. Key advancements include automated radar target selection, adaptive
+accelerometer-aided phase unwrapping, and advanced filtering techniques to achieve
+displacement resolutions better than 0.1 mm under diverse operational conditions.
+REFERENCES
+
+1.   Guo, J., He, Y., Jiang, C., Jin, M., Li, S., Zhang, J., Xi, R., & Liu, Y. (2023). Measuring micrometer-
+     level vibrations with mmWave radar. IEEE Transactions on Mobile Com-puting, 22(4), 2248-2259.
+2.   Lee, H. S., Hong, Y. H., & Park, H. W. (2010). Design of an FIR filter for the displace-ment
+     reconstruction using measured acceleration in low-frequency dominant structures. International
+     Journal for Numerical Methods in Engineering, 82(4), 403-434.
+3.   Ma, Z., Choi, J., Yang, L., & Sohn, H. (2023). Structural displacement estimation using ac-
+     celerometer and FMCW millimeter wave radar. Mechanical Systems and Signal Pro-cessing, 182,
+     109582.
+4.   Ma, Z., Han, K., Choi, J., Lee, J., Kwon, O., Sohn, H., Liu, J., Hwang, D., Aggarwal, J., Noh, H., Cai,
+     E., & Zhang, Y. (2024). Development and field deployment validation of a low-cost and high-
+     precision displacement sensing system by fusing millimeter-wave radar and accelerometer.
+     Engineering Structures, 321, 118926.
+

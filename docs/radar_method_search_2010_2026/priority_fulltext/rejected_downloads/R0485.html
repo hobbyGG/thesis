@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en" xml:lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>
+		PHASE-BASED INTERFEROMETRIC METHOD FOR PRECISE DISPLACEMENT ESTIMATION: THEORY AND COMPUTATIONAL POTENTIAL
+							| Journal of Problems in Computer Science and Information Technologies
+			</title>
+
+	
+<link rel="icon" href="https://jpcsit.kaznu.kz/public/journals/1/favicon_en_US.ico" />
+<meta name="csrf-token" content="HbNh089NqIA35SETp2pRdUfxTkC4oKAH3MMilqVw" />
+<meta name="generator" content="Open Journal Systems 3.5.0.5" />
+<link rel='alternate' hreflang='en' href='https://jpcsit.kaznu.kz/index.php/kaznu/en/article/view/217' />
+<link rel='alternate' hreflang='kk' href='https://jpcsit.kaznu.kz/index.php/kaznu/kk/article/view/217' />
+<link rel='alternate' hreflang='ru' href='https://jpcsit.kaznu.kz/index.php/kaznu/ru/article/view/217' />
+<link rel='alternate' hreflang='x-default' href='https://jpcsit.kaznu.kz/index.php/kaznu/article/view/217' />
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/" />
+<meta name="DC.Creator.PersonalName" content="Amirkhan Temirbayev"/>
+<meta name="DC.Date.created" scheme="ISO8601" content="2025-10-02"/>
+<meta name="DC.Date.dateSubmitted" scheme="ISO8601" content="2025-05-24"/>
+<meta name="DC.Date.issued" scheme="ISO8601" content="2025-09-30"/>
+<meta name="DC.Date.modified" scheme="ISO8601" content="2025-10-17"/>
+<meta name="DC.Description" xml:lang="en" content="This paper presents the theoretical foundation and computational modeling of a novel phase-based interferometric method for precise displacement estimation in environmental monitoring applications. The method leverages the phase difference between two coherent radio signals transmitted over a wireless forward link, enabling sub-millimeter resolution without relying on reflected signals or embedded sensors. Unlike radar interferometry and distributed fiber optic systems, the proposed technique operates entirely in a forward-link architecture, making it more scalable, energy-efficient, and suitable for low-infrastructure deployments. Special attention is given to the computational procedures required for real-time signal interpretation, including instantaneous phase extraction using the Hilbert transform, phase unwrapping algorithms, and noise mitigation via digital filters. Simulation results confirm that the method is theoretically robust and computationally tractable, offering a practical path toward implementation using lightweight embedded platforms such as software-defined radios (SDRs) with GPS-disciplined oscillators. The results also demonstrate how design parameters such as carrier frequency and dual-tone spacing – affect the sensitivity and resolution of displacement estimates. This study lies at the intersection of applied computer science, signal processing, and geospatial engineering. It provides both a mathematical and algorithmic foundation for future systems aimed at distributed, real-time sensing in civil infrastructure and geohazard management."/>
+<meta name="DC.Description" xml:lang="kk" content="Бұл мақалада қоршаған ортаны бақылау жүйелерінде орын ауытқуларын дәл бағалауға арналған жаңа фазалық интерферометриялық әдістің теориялық негізі мен есептеу үлгісі ұсынылған. Әдіс екі когерентті радиосигнал арасындағы фазалық айырманы қолданады, ал тікелей сымсыз байланыс арнасы арқылы қабылданған сигналдар миллиметрлік дәлдікті қамтамасыз етеді. Әдіс шағылған сигналдар мен ендірілген сенсорларды қажет етпейді. Радиолокациялық интерферометрия мен талшықты-оптикалық жүйелерден айырмашылығы, бұл әдіс толығымен тікелей байланысты қолданатын архитектураға негізделген, бұл қасиеті оны ауқымды, энергияны үнемдейтін және инфрақұрылымы шектеулі аймақтарда қолдануға ыңғайлы етеді. Нақты уақыт режимінде сигналды өңдеу үшін қажетті есептеу процедураларына ерекше көңіл бөлінген, атап айтқанда: Гильберт түрлендіруін пайдалана отырып, лездік фазаны алу, фазаны анықтау алгоритмдері және сандық сүзгілер арқылы шуылды азайту. Модельдеу нәтижелері әдістің теориялық тұрғыдан орнықты және есептеу жағынан тиімді екенін растайды, сондай-ақ GPS синхрондалған генераторлармен жабдықталған бағдарламалық түрде анықталатын радиоқұрылғылар (SDR) секілді жеңіл енгізілетін платформаларда іске асыруға мүмкіндік бар екенін көрсетеді. Зерттеу нәтижелері сонымен қатар негізгі жиілік пен қос сигнал арасындағы айырмашылық сияқты конструкциялық параметрлердің сезімталдық пен өлшеу дәлдігіне қалай әсер ететінін көрсетеді. Бұл зерттеу қолданбалы информатика, сигналдарды өңдеу және геоинженерия салаларының түйісінде орналасқан және азаматтық инфрақұрылымды және геологиялық қауіптерді нақты уақыт режимінде бақылауға арналған болашақ жүйелерге математикалық және алгоритмдік негіз ұсынады."/>
+<meta name="DC.Description" xml:lang="ru" content="В данной работе представлена теоретическая основа и вычислательная модель нового фазового интерферометрического метода для точной оценки смещений в задачах мониторинга окружающей среды. Метод использует разность фаз между двумя когерентными радиосигналами, передаваемыми по беспроводному каналу связи, что позволяет достигать субмиллиметрового разрешения без использования отражённых сигналов или встроенных сенсоров. В отличие от радарной интерферометрии и распределённых волоконно-оптических систем, предложенная технология полностью реализуется в архитектуре прямой передачи, что делает её более масштабируемой, энергоэффективной и подходящей для применения в условиях ограниченной инфраструктуры. Особое внимание уделяется вычислительным процедурам, необходимым для интерпретации сигнала в реальном времени, включая извлечение мгновенной фазы с использованием преобразования Гильберта, алгоритмы фазовой развёртки и фильтрацию шумов с помощью цифровых фильтров. Результаты моделирования подтверждают теоретическую надёжность и вычислительную реализуемость метода, а также демонстрируют возможность его внедрения с использованием встраиваемых платформ, таких как программно-определяемые радиостанции (SDR) с GPS-синхронизированными генераторами. Также показано, как параметры конструкции, такие как несущая частота и разность между двумя частотами, влияют на чувствительность и точность оценки смещения. Исследование находится на пересечении прикладной информатики, обработки сигналов и геоинженерии, обеспечивая как математическую, так и алгоритмическую основу для создания будущих распределённых систем реального времени для мониторинга инфраструктуры и геологических угроз."/>
+<meta name="DC.Format" scheme="IMT" content="application/pdf"/>
+<meta name="DC.Identifier" content="217"/>
+<meta name="DC.Identifier.pageNumber" content="37-43"/>
+<meta name="DC.Identifier.DOI" content="10.26577/jpcsit2025334"/>
+<meta name="DC.Identifier.URI" content="https://jpcsit.kaznu.kz/index.php/kaznu/article/view/217"/>
+<meta name="DC.Language" scheme="rfc5646" content="en"/>
+<meta name="DC.Rights" content="Copyright (c) 2025 Journal of Problems in Computer Science and Information Technologies"/>
+<meta name="DC.Source" content="Journal of Problems in Computer Science and Information Technologies"/>
+<meta name="DC.Source.ISSN" content="2958-0854"/>
+<meta name="DC.Source.Issue" content="3"/>
+<meta name="DC.Source.Volume" content="3"/>
+<meta name="DC.Source.URI" content="https://jpcsit.kaznu.kz/index.php/kaznu/kaznu"/>
+<meta name="DC.Subject" xml:lang="en" content="Wireless monitoring"/>
+<meta name="DC.Subject" xml:lang="en" content="signal processing"/>
+<meta name="DC.Subject" xml:lang="en" content="intelligent systems"/>
+<meta name="DC.Subject" xml:lang="en" content="phase-based interferometry"/>
+<meta name="DC.Subject" xml:lang="en" content="displacement monitoring"/>
+<meta name="DC.Subject" xml:lang="en" content="Hilbert transform"/>
+<meta name="DC.Subject" xml:lang="kk" content="Сымсыз мониторинг"/>
+<meta name="DC.Subject" xml:lang="kk" content="сигналдарды өңдеу"/>
+<meta name="DC.Subject" xml:lang="kk" content="интеллектуалды жүйелер"/>
+<meta name="DC.Subject" xml:lang="kk" content="фазалық интерферометрия"/>
+<meta name="DC.Subject" xml:lang="kk" content="орын ауытқуын бақылау"/>
+<meta name="DC.Subject" xml:lang="kk" content="Гильберт түрлендіруі"/>
+<meta name="DC.Subject" xml:lang="ru" content="Беспроводной мониторинг"/>
+<meta name="DC.Subject" xml:lang="ru" content="обработка сигналов"/>
+<meta name="DC.Subject" xml:lang="ru" content="интеллектуальные системы"/>
+<meta name="DC.Subject" xml:lang="ru" content="фазовая интерферометрия"/>
+<meta name="DC.Subject" xml:lang="ru" content="мониторинг смещений"/>
+<meta name="DC.Subject" xml:lang="ru" content="преобразование Гильберта"/>
+<meta name="DC.Title" content="PHASE-BASED INTERFEROMETRIC METHOD FOR PRECISE DISPLACEMENT ESTIMATION: THEORY AND COMPUTATIONAL POTENTIAL"/>
+<meta name="DC.Title.Alternative" xml:lang="kk" content="Орын ауытқуларын дәл анықтауға арналған фазалық интерферометриялық әдіс: теориясы және есептеу мүмкіндіктері"/>
+<meta name="DC.Title.Alternative" xml:lang="ru" content="Фазовый интерферометрический метод точной оценки смещений: теория и вычислительный потенциал"/>
+<meta name="DC.Type" content="Text.Serial.Journal"/>
+<meta name="DC.Type.articleType" content=""/>
+<meta name="gs_meta_revision" content="1.1"/>
+<meta name="citation_journal_title" content="Journal of Problems in Computer Science and Information Technologies"/>
+<meta name="citation_journal_abbrev" content="JPCSIT"/>
+<meta name="citation_issn" content="2958-0854"/> 
+<meta name="citation_author" content="Amirkhan Temirbayev"/>
+<meta name="citation_author_institution" content="Al-Farabi Kazakh National University, Almaty, Kazakhstan"/>
+<meta name="citation_title" content="PHASE-BASED INTERFEROMETRIC METHOD FOR PRECISE DISPLACEMENT ESTIMATION: THEORY AND COMPUTATIONAL POTENTIAL"/>
+<meta name="citation_language" content="en"/>
+<meta name="citation_date" content="2025/10/02"/>
+<meta name="citation_volume" content="3"/>
+<meta name="citation_issue" content="3"/>
+<meta name="citation_firstpage" content="37"/>
+<meta name="citation_lastpage" content="43"/>
+<meta name="citation_doi" content="10.26577/jpcsit2025334"/>
+<meta name="citation_abstract_html_url" content="https://jpcsit.kaznu.kz/index.php/kaznu/article/view/217"/>
+<meta name="citation_abstract" xml:lang="en" content="This paper presents the theoretical foundation and computational modeling of a novel phase-based interferometric method for precise displacement estimation in environmental monitoring applications. The method leverages the phase difference between two coherent radio signals transmitted over a wireless forward link, enabling sub-millimeter resolution without relying on reflected signals or embedded sensors. Unlike radar interferometry and distributed fiber optic systems, the proposed technique operates entirely in a forward-link architecture, making it more scalable, energy-efficient, and suitable for low-infrastructure deployments. Special attention is given to the computational procedures required for real-time signal interpretation, including instantaneous phase extraction using the Hilbert transform, phase unwrapping algorithms, and noise mitigation via digital filters. Simulation results confirm that the method is theoretically robust and computationally tractable, offering a practical path toward implementation using lightweight embedded platforms such as software-defined radios (SDRs) with GPS-disciplined oscillators. The results also demonstrate how design parameters such as carrier frequency and dual-tone spacing – affect the sensitivity and resolution of displacement estimates. This study lies at the intersection of applied computer science, signal processing, and geospatial engineering. It provides both a mathematical and algorithmic foundation for future systems aimed at distributed, real-time sensing in civil infrastructure and geohazard management."/>
+<meta name="citation_keywords" xml:lang="en" content="Wireless monitoring"/>
+<meta name="citation_keywords" xml:lang="en" content="signal processing"/>
+<meta name="citation_keywords" xml:lang="en" content="intelligent systems"/>
+<meta name="citation_keywords" xml:lang="en" content="phase-based interferometry"/>
+<meta name="citation_keywords" xml:lang="en" content="displacement monitoring"/>
+<meta name="citation_keywords" xml:lang="en" content="Hilbert transform"/>
+<meta name="citation_pdf_url" content="https://jpcsit.kaznu.kz/index.php/kaznu/article/download/217/80"/>
+	<link rel="stylesheet" href="https://jpcsit.kaznu.kz/index.php/kaznu/$$$call$$$/page/page/css?name=stylesheet" type="text/css" /><link rel="stylesheet" href="https://jpcsit.kaznu.kz/index.php/kaznu/$$$call$$$/page/page/css?name=font" type="text/css" /><link rel="stylesheet" href="https://jpcsit.kaznu.kz/lib/pkp/styles/fontawesome/fontawesome.css?v=3.5.0.5" type="text/css" /><link rel="stylesheet" href="https://jpcsit.kaznu.kz/plugins/themes/default/js/lib/swiper/swiper-bundle.min.css?v=3.5.0.5" type="text/css" /><link rel="stylesheet" href="https://jpcsit.kaznu.kz/plugins/themes/kaznuMigration/styles/sidebar.css?v=3.5.0.5" type="text/css" /><link rel="stylesheet" href="https://jpcsit.kaznu.kz/public/journals/1/styleSheet.css?d=2026-09-23+12%3A11%3A25" type="text/css" /><link rel="stylesheet" href="https://jpcsit.kaznu.kz/plugins/generic/citationStyleLanguage/css/citationStyleLanguagePlugin.css?v=3.5.0.5" type="text/css" />
+</head>
+<body class="pkp_page_article pkp_op_view has_site_logo" dir="ltr">
+
+	<div class="pkp_structure_page">
+
+				<header class="pkp_structure_head" id="headerNavigationContainer" role="banner">
+						 <nav class="cmp_skip_to_content" aria-label="Jump to content links">
+	<a href="#pkp_content_main">Skip to main content</a>
+	<a href="#siteNav">Skip to main navigation menu</a>
+		<a href="#pkp_content_footer">Skip to site footer</a>
+</nav>
+
+			<div class="pkp_head_wrapper">
+
+				<div class="pkp_site_name_wrapper">
+					<button class="pkp_site_nav_toggle">
+						<span>Open Menu</span>
+					</button>
+										<div class="pkp_site_name">
+																<a href="						https://jpcsit.kaznu.kz/index.php/kaznu/en/index
+					" class="is_img">
+							<img src="https://jpcsit.kaznu.kz/public/journals/1/pageHeaderLogoImage_en_US.png" width="2000" height="686"  />
+						</a>
+										</div>
+				</div>
+
+				
+				<nav class="pkp_site_nav_menu" aria-label="Site Navigation">
+					<a id="siteNav"></a>
+					<div class="pkp_navigation_primary_row">
+						<div class="pkp_navigation_primary_wrapper">
+																				<ul id="navigationPrimary" class="pkp_navigation_primary pkp_nav_list">
+								<li class="">
+				<a href="https://jpcsit.kaznu.kz/index.php/kaznu">
+					Home
+				</a>
+							</li>
+								<li class="">
+				<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/articles_issues">
+					Articles & Issues
+				</a>
+									<ul>
+																					<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/issue/current">
+										Latest issue
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/issue/archive">
+										All issues
+									</a>
+								</li>
+																		</ul>
+							</li>
+								<li class="">
+				<a href="https://jpcsip.kaznu.kz/index.php/kaznu/about">
+					About the Journal
+				</a>
+									<ul>
+																					<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/aims_scopes">
+										Aims & Scopes
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/politika-zhurnala">
+										Policy of the Journal
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/ind_and_abs">
+										Indexing & Abstracting
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/announcement">
+										Announcement
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/about/editorialHistory">
+										Editorial Masthead
+									</a>
+								</li>
+																		</ul>
+							</li>
+								<li class="">
+				<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/about/submissions">
+					Submission
+				</a>
+									<ul>
+																					<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/about/submissions">
+										Submit a manuscript
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/prp">
+										Peer Review Process
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/auth_guide">
+										Author Guidelines
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/public-ethics">
+										Publication ethics and Malpractice Statement
+									</a>
+								</li>
+																												<li class="">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/apc">
+										Article Processing Charge
+									</a>
+								</li>
+																		</ul>
+							</li>
+								<li class="">
+				<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/about/contact">
+					Contacts
+				</a>
+							</li>
+			</ul>
+
+				
+
+																						<div class="pkp_navigation_search_wrapper">
+									<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/search" class="pkp_search pkp_search_desktop">
+										<span class="fa fa-search" aria-hidden="true"></span>
+										Search
+									</a>
+								</div>
+													</div>
+					</div>
+					<div class="pkp_navigation_user_wrapper" id="navigationUserWrapper">
+							<ul id="navigationUser" class="pkp_navigation_user pkp_nav_list">
+								<li class="profile">
+				<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/user/register">
+					Register
+				</a>
+							</li>
+								<li class="profile">
+				<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/login">
+					Login
+				</a>
+							</li>
+										</ul>
+
+					</div>
+				</nav>
+			</div><!-- .pkp_head_wrapper -->
+		</header><!-- .pkp_structure_head -->
+
+						<div class="pkp_structure_content has_sidebar">
+			<div class="pkp_structure_main" role="main">
+				<a id="pkp_content_main"></a>
+
+<div class="page page_article">
+			<nav class="cmp_breadcrumbs" role="navigation" aria-label="You are here:">
+	<ol>
+		<li>
+			<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/index">
+				Home
+			</a>
+			<span class="separator">/</span>
+		</li>
+		<li>
+			<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/issue/archive">
+				Archives
+			</a>
+			<span class="separator">/</span>
+		</li>
+					<li>
+				<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/issue/view/12">
+					Vol. 3 No. 3 (2025): Journal of problems in computer science and information technologies
+				</a>
+				<span class="separator">/</span>
+			</li>
+				<li class="current" aria-current="page">
+			<span aria-current="page">
+									Articles
+							</span>
+		</li>
+	</ol>
+</nav>
+	
+		  	 <article class="obj_article_details">
+
+		
+	<h1 class="page_title">
+		PHASE-BASED INTERFEROMETRIC METHOD FOR PRECISE DISPLACEMENT ESTIMATION: THEORY AND COMPUTATIONAL POTENTIAL
+	</h1>
+
+	
+	<div class="row">
+		<div class="main_entry">
+
+							<section class="item authors">
+					<h2 class="pkp_screen_reader">Authors</h2>
+					<ul class="authors">
+											<li>
+							<span class="name">
+								Amirkhan Temirbayev
+							</span>
+															<span class="affiliation">
+																																																		<span>Al-Farabi Kazakh National University, Almaty, Kazakhstan</span>																																																	</span>
+																																				<span class="orcid">
+																			<svg class="orcid_icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+	<path fill-rule="evenodd" clip-rule="evenodd" d="M29.474 16c0 7.442-6.032 13.474-13.474 13.474S2.526 23.442 2.526 16 8.558 2.526 16 2.526 29.474 8.558 29.474 16Z" fill="#fff"/>
+	<path fill-rule="evenodd" clip-rule="evenodd" d="M32 16c0 8.837-7.163 16-16 16S0 24.837 0 16 7.163 0 16 0s16 7.163 16 16ZM16 29.474c7.442 0 13.474-6.032 13.474-13.474S23.442 2.526 16 2.526 2.526 8.558 2.526 16 8.558 29.474 16 29.474Z" fill="#7FAA26"/>
+	<path fill-rule="evenodd" clip-rule="evenodd" d="M18.22 10.973h-4.547v11.6h4.569c3.8 0 6.133-2.82 6.133-5.8 0-1.365-.469-2.815-1.478-3.925-1.013-1.115-2.557-1.875-4.676-1.875Zm-.177 9.732h-2.347v-7.864h2.264c1.521 0 2.603.46 3.304 1.167.703.709 1.046 1.688 1.046 2.765 0 .654-.2 1.641-.83 2.46-.621.808-1.677 1.473-3.437 1.473Zm-.083-8.073c3.13 0 4.558 1.898 4.558 4.141 0-2.243-1.429-4.141-4.558-4.141h-2.472 2.472Zm6.205 4.017.001.124c0 2.869-2.242 5.591-5.924 5.591h-4.36V11.182v11.182h4.36c3.682 0 5.924-2.722 5.924-5.591l-.001-.124ZM9.5 11.005v11.588h2.024V11.005H9.5Zm1.815.208v11.172-11.172H9.71h1.606ZM10.512 10.15c.7 0 1.262-.575 1.262-1.263 0-.687-.561-1.262-1.262-1.262-.7 0-1.262.563-1.262 1.262 0 .688.561 1.262 1.262 1.262Zm.614-.408a1.044 1.044 0 0 0 0 0Z" fill="#7FAA26"/>
+</svg>
+
+																		<a href="https://orcid.org/0000-0001-6759-2774" target="_blank">
+										https://orcid.org/0000-0001-6759-2774 (unauthenticated)
+									</a>
+								</span>
+													</li>
+										</ul>
+				</section>
+			
+																	<section class="item doi">
+					<h2 class="label">
+												DOI: 
+					</h2>
+					<span class="value">
+						<a href="https://doi.org/10.26577/jpcsit2025334">
+							https://doi.org/10.26577/jpcsit2025334
+						</a>
+					</span>
+				</section>
+			
+									<section class="item keywords">
+				<h2 class="label">
+										Keywords: 
+				</h2>
+				<span class="value">
+											Wireless monitoring, 					
+											signal processing, 					
+											intelligent systems, 					
+											phase-based interferometry, 					
+											displacement monitoring, 					
+											Hilbert transform					
+									</span>
+			</section>
+			
+										<section class="item abstract">
+					<h2 class="label">Abstract</h2>
+					<p>This paper presents the theoretical foundation and computational modeling of a novel phase-based interferometric method for precise displacement estimation in environmental monitoring applications. The method leverages the phase difference between two coherent radio signals transmitted over a wireless forward link, enabling sub-millimeter resolution without relying on reflected signals or embedded sensors. Unlike radar interferometry and distributed fiber optic systems, the proposed technique operates entirely in a forward-link architecture, making it more scalable, energy-efficient, and suitable for low-infrastructure deployments. Special attention is given to the computational procedures required for real-time signal interpretation, including instantaneous phase extraction using the Hilbert transform, phase unwrapping algorithms, and noise mitigation via digital filters. Simulation results confirm that the method is theoretically robust and computationally tractable, offering a practical path toward implementation using lightweight embedded platforms such as software-defined radios (SDRs) with GPS-disciplined oscillators. The results also demonstrate how design parameters such as carrier frequency and dual-tone spacing – affect the sensitivity and resolution of displacement estimates. This study lies at the intersection of applied computer science, signal processing, and geospatial engineering. It provides both a mathematical and algorithmic foundation for future systems aimed at distributed, real-time sensing in civil infrastructure and geohazard management.</p>
+				</section>
+			
+			
+
+										
+				<section class="item downloads_chart">
+					<h2 class="label">
+						Downloads
+					</h2>
+					<div class="value">
+						<canvas class="usageStatsGraph" data-object-type="Submission" data-object-id="217"></canvas>
+						<div class="usageStatsUnavailable" data-object-type="Submission" data-object-id="217">
+							Download data is not yet available.
+						</div>
+					</div>
+				</section>
+			
+																																<section class="item author_bios">
+					<h2 class="label">
+													Author Biography
+											</h2>
+					<ul class="authors">
+																		<li class="sub_item">
+								<div class="label">
+																																							Amirkhan Temirbayev,  Al-Farabi Kazakh National University, Almaty, Kazakhstan 
+																	</div>
+								<div class="value">
+									<p>AMIRKHAN TEMIRBAYEV was born in Tashkent, Uzbekistan, in April 1986. He received the Ph.D. degree in Physics from the Al Farabi KazNU, in 2012, Kazakhstan. Currently he is a General Director of Cluster of Engineering and High Technologies at Al-Farabi KazNU. Dr. Amirkhan A. Temirbayev is involved in the design of a KazNU’s nanosatellites. Repeatedly passed scientific training in leading centers in Germany, Japan, Holland. His research interests include nanosatellites, subsystems for CubeSats, STEM education, Information and Communication Technologies.</p>
+								</div>
+							</li>
+																</ul>
+				</section>
+			
+						
+		</div><!-- .main_entry -->
+
+		<div class="entry_details">
+
+										<div class="item cover_image">
+					<div class="sub_item">
+													<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/issue/view/12">
+								<img src="https://jpcsit.kaznu.kz/public/journals/1/cover_issue_12_en.png" alt="">
+							</a>
+											</div>
+				</div>
+			
+										<div class="item galleys">
+					<h2 class="pkp_screen_reader">
+						Downloads
+					</h2>
+					<ul class="value galleys_links">
+													<li>
+								
+	
+													
+
+<a class="obj_galley_link pdf" href="https://jpcsit.kaznu.kz/index.php/kaznu/en/article/view/217/80">
+		
+	PDF
+
+	</a>
+							</li>
+											</ul>
+				</div>
+						
+						<div class="item published">
+				<section class="sub_item">
+					<h2 class="label">
+						Published
+					</h2>
+					<div class="value">
+																			<span>2025-10-02</span>
+																	</div>
+				</section>
+							</div>
+			
+						
+										<div class="item issue">
+
+											<section class="sub_item">
+							<h2 class="label">
+								Issue
+							</h2>
+							<div class="value">
+								<a class="title" href="https://jpcsit.kaznu.kz/index.php/kaznu/en/issue/view/12">
+									Vol. 3 No. 3 (2025): Journal of problems in computer science and information technologies
+								</a>
+							</div>
+						</section>
+					
+											<section class="sub_item">
+							<h2 class="label">
+								Section
+							</h2>
+							<div class="value">
+								Articles
+							</div>
+						</section>
+					
+									</div>
+			
+						
+						
+				<div class="item citation">
+		<section class="sub_item citation_display">
+			<h2 class="label">
+				How to Cite
+			</h2>
+			<div class="value">
+				<div id="citationOutput" role="region" aria-live="polite">
+					<div class="csl-bib-body">
+  <div class="csl-entry">PHASE-BASED INTERFEROMETRIC METHOD FOR PRECISE DISPLACEMENT ESTIMATION: THEORY AND COMPUTATIONAL POTENTIAL. (2025). <i>Journal of Problems in Computer Science and Information Technologies</i>, <i>3</i>(3), 37-43. <a href="https://doi.org/10.26577/jpcsit2025334">https://doi.org/10.26577/jpcsit2025334</a></div>
+</div>
+				</div>
+				<div class="citation_formats">
+					<button class="citation_formats_button label" aria-controls="cslCitationFormats" aria-expanded="false" data-csl-dropdown="true">
+						More Citation Formats
+					</button>
+					<div id="cslCitationFormats" class="citation_formats_list" aria-hidden="true">
+						<ul class="citation_formats_styles">
+															<li>
+									<a
+											rel="nofollow"
+											aria-controls="citationOutput"
+											href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/associacao-brasileira-de-normas-tecnicas?submissionId=217&amp;publicationId=207&amp;issueId=12"
+											data-load-citation
+											data-json-href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/associacao-brasileira-de-normas-tecnicas?submissionId=217&amp;publicationId=207&amp;issueId=12&amp;return=json"
+									>
+										ABNT
+									</a>
+								</li>
+															<li>
+									<a
+											rel="nofollow"
+											aria-controls="citationOutput"
+											href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/acm-sig-proceedings?submissionId=217&amp;publicationId=207&amp;issueId=12"
+											data-load-citation
+											data-json-href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/acm-sig-proceedings?submissionId=217&amp;publicationId=207&amp;issueId=12&amp;return=json"
+									>
+										ACM
+									</a>
+								</li>
+															<li>
+									<a
+											rel="nofollow"
+											aria-controls="citationOutput"
+											href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/acs-nano?submissionId=217&amp;publicationId=207&amp;issueId=12"
+											data-load-citation
+											data-json-href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/acs-nano?submissionId=217&amp;publicationId=207&amp;issueId=12&amp;return=json"
+									>
+										ACS
+									</a>
+								</li>
+															<li>
+									<a
+											rel="nofollow"
+											aria-controls="citationOutput"
+											href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/ama?submissionId=217&amp;publicationId=207&amp;issueId=12"
+											data-load-citation
+											data-json-href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/ama?submissionId=217&amp;publicationId=207&amp;issueId=12&amp;return=json"
+									>
+										AMA
+									</a>
+								</li>
+															<li>
+									<a
+											rel="nofollow"
+											aria-controls="citationOutput"
+											href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/apa?submissionId=217&amp;publicationId=207&amp;issueId=12"
+											data-load-citation
+											data-json-href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/apa?submissionId=217&amp;publicationId=207&amp;issueId=12&amp;return=json"
+									>
+										APA
+									</a>
+								</li>
+															<li>
+									<a
+											rel="nofollow"
+											aria-controls="citationOutput"
+											href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/chicago-author-date?submissionId=217&amp;publicationId=207&amp;issueId=12"
+											data-load-citation
+											data-json-href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/chicago-author-date?submissionId=217&amp;publicationId=207&amp;issueId=12&amp;return=json"
+									>
+										Chicago
+									</a>
+								</li>
+															<li>
+									<a
+											rel="nofollow"
+											aria-controls="citationOutput"
+											href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/harvard-cite-them-right?submissionId=217&amp;publicationId=207&amp;issueId=12"
+											data-load-citation
+											data-json-href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/harvard-cite-them-right?submissionId=217&amp;publicationId=207&amp;issueId=12&amp;return=json"
+									>
+										Harvard
+									</a>
+								</li>
+															<li>
+									<a
+											rel="nofollow"
+											aria-controls="citationOutput"
+											href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/ieee?submissionId=217&amp;publicationId=207&amp;issueId=12"
+											data-load-citation
+											data-json-href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/ieee?submissionId=217&amp;publicationId=207&amp;issueId=12&amp;return=json"
+									>
+										IEEE
+									</a>
+								</li>
+															<li>
+									<a
+											rel="nofollow"
+											aria-controls="citationOutput"
+											href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/modern-language-association?submissionId=217&amp;publicationId=207&amp;issueId=12"
+											data-load-citation
+											data-json-href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/modern-language-association?submissionId=217&amp;publicationId=207&amp;issueId=12&amp;return=json"
+									>
+										MLA
+									</a>
+								</li>
+															<li>
+									<a
+											rel="nofollow"
+											aria-controls="citationOutput"
+											href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/turabian-fullnote-bibliography?submissionId=217&amp;publicationId=207&amp;issueId=12"
+											data-load-citation
+											data-json-href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/turabian-fullnote-bibliography?submissionId=217&amp;publicationId=207&amp;issueId=12&amp;return=json"
+									>
+										Turabian
+									</a>
+								</li>
+															<li>
+									<a
+											rel="nofollow"
+											aria-controls="citationOutput"
+											href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/vancouver?submissionId=217&amp;publicationId=207&amp;issueId=12"
+											data-load-citation
+											data-json-href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/get/vancouver?submissionId=217&amp;publicationId=207&amp;issueId=12&amp;return=json"
+									>
+										Vancouver
+									</a>
+								</li>
+													</ul>
+													<div class="label">
+								Download Citation
+							</div>
+							<ul class="citation_formats_styles">
+																	<li>
+										<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/download/ris?submissionId=217&amp;publicationId=207&amp;issueId=12">
+											<span class="fa fa-download"></span>
+											Endnote/Zotero/Mendeley (RIS)
+										</a>
+									</li>
+																	<li>
+										<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/citationstylelanguage/download/bibtex?submissionId=217&amp;publicationId=207&amp;issueId=12">
+											<span class="fa fa-download"></span>
+											BibTeX
+										</a>
+									</li>
+															</ul>
+											</div>
+				</div>
+			</div>
+		</section>
+	</div>
+
+
+		</div><!-- .entry_details -->
+	</div><!-- .row -->
+
+</article>
+
+	<div class="kaznu_jpcsit_main_blocks">
+			<div class="kaznu_article_metrics">
+			<span title="Views"><span class="fa fa-eye" aria-hidden="true"></span> 168</span>
+			<span title="Downloads"><span class="fa fa-download" aria-hidden="true"></span> 153</span>
+		</div>
+	
+			<section class="pkp_block block_developed_by kaznu_most_read" aria-labelledby="kaznu-jpcsit-most-read-title">
+			<h2 class="title" id="kaznu-jpcsit-most-read-title">Most Read</h2>
+			<div class="content">
+				<ul class="most_read">
+											<li>
+							<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/article/view/209">Forecast of Housing Prices in Almaty Using Machine Learning Algorithms</a>
+							<span class="kaznu_most_read__metric"><span class="fa fa-eye" aria-hidden="true"></span> 743</span>
+						</li>
+											<li>
+							<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/article/view/64">CHATBOT ASSISTANTS: IMPLEMENTATION AND ANALYSIS OF THE EFFICIENCY</a>
+							<span class="kaznu_most_read__metric"><span class="fa fa-eye" aria-hidden="true"></span> 571</span>
+						</li>
+											<li>
+							<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/article/view/202">SPATIOTEMPORAL ASSESSMENT OF SOIL SALINITY IN IRRIGATED AGRICULTURAL LANDS OF KAZAKHSTAN USING REMOTE SENSING</a>
+							<span class="kaznu_most_read__metric"><span class="fa fa-eye" aria-hidden="true"></span> 295</span>
+						</li>
+											<li>
+							<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/article/view/230">APPLICATION OF RULE-BASED METHOD FOR AUTOMATIC EXTRACTION OF TAGS FROM COLUMN-STYLE PDF-DOCUMENTS</a>
+							<span class="kaznu_most_read__metric"><span class="fa fa-eye" aria-hidden="true"></span> 190</span>
+						</li>
+											<li>
+							<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/article/view/222">INTEGRATED ENVIRONMENTAL AND PHYSIOLOGICAL MONITORING FOR CARDIOVASCULAR RISK DETECTION USING IOT AND MACHINE LEARNING</a>
+							<span class="kaznu_most_read__metric"><span class="fa fa-eye" aria-hidden="true"></span> 165</span>
+						</li>
+									</ul>
+			</div>
+		</section>
+	
+	<div class="pkp_block block_web_feed">
+		<h2 class="title">Latest publications</h2>
+		<div class="content">
+			<ul>
+				<li><a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/gateway/plugin/WebFeedGatewayPlugin/atom"><img src="https://jpcsit.kaznu.kz/lib/pkp/templates/images/atom.svg" alt="Atom logo"></a></li>
+				<li><a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/gateway/plugin/WebFeedGatewayPlugin/rss2"><img src="https://jpcsit.kaznu.kz/lib/pkp/templates/images/rss20_logo.svg" alt="RSS2 logo"></a></li>
+				<li><a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/gateway/plugin/WebFeedGatewayPlugin/rss"><img src="https://jpcsit.kaznu.kz/lib/pkp/templates/images/rss10_logo.svg" alt="RSS1 logo"></a></li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+
+</div><!-- .page -->
+
+	</div><!-- pkp_structure_main -->
+
+									<div class="pkp_structure_sidebar left" role="complementary">
+							<div class="pkp_block block_information kaznu_sidebar kaznu_sidebar_jpcsit">
+							<h2 class="title">Information</h2>
+				<div class="content">
+					<ul>
+																					<li><a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/information/readers">For Readers</a></li>
+																												<li><a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/information/authors">For Authors</a></li>
+																												<li><a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/information/librarians">For Librarians</a></li>
+																		</ul>
+				</div>
+
+									<div class="content kaznu_rates">
+						<p><strong>Acceptance Rate: 39%</strong></p><p><strong>Days to First Editorial Decision: 18</strong></p>					</div>
+							
+			
+							<div class="content kaznu_indexing">
+										<div class="indexing-logos">
+													<a href="https://www.gov.kz/memleket/entities/quality?lang=ru" target="_blank" rel="noopener noreferrer"><img src="https://jpcsit.kaznu.kz/plugins/themes/kaznuMigration/images/legacy/jpcsit/monrknew1.jpeg" alt="Science and Higher Education Quality Assurance Committee"></a>
+													<a href="https://www.doi.org/" target="_blank" rel="noopener noreferrer"><img src="https://jpcsit.kaznu.kz/plugins/themes/kaznuMigration/images/legacy/jpcsit/doinew.jpeg" alt="Digital Object Identifier"></a>
+													<a href="https://www.crossref.org/" target="_blank" rel="noopener noreferrer"><img src="https://jpcsit.kaznu.kz/plugins/themes/kaznuMigration/images/legacy/jpcsit/crossnew2.jpeg" alt="Crossref"></a>
+													<a href="https://www.ebsco.com/" target="_blank" rel="noopener noreferrer"><img src="https://jpcsit.kaznu.kz/plugins/themes/kaznuMigration/images/legacy/jpcsit/ebsconew.jpeg" alt="EBSCO"></a>
+													<a href="https://portal.issn.org/resource/ISSN/2958-0854" target="_blank" rel="noopener noreferrer"><img src="https://jpcsit.kaznu.kz/plugins/themes/kaznuMigration/images/legacy/jpcsit/road.jpg" alt="ROAD"></a>
+											</div>
+				</div>
+			
+							<div class="pkp_block block_editors">
+					<div class="content">
+													<p><strong>Editor-in-Chief</strong><br>Timur Imankulov</p>
+													<p><strong>Associate Editor</strong><br>Beimbet Daribayev</p>
+													<p><strong>Executive Editor</strong><br>Zholdas Buribayev</p>
+												<p><strong>Print ISSN</strong> 2958-0846<br><strong>Online ISSN</strong> 2958-0854</p>
+						<p><strong>Publisher</strong><br>Al-Farabi Kazakh National University<br><a href="https://farabi.university/" target="_blank" rel="noopener noreferrer">farabi.university</a></p>
+					</div>
+				</div>
+					</div>
+
+				<div class="pkp_block block_make_submission">
+			<h2 class="pkp_screen_reader">Make a Submission</h2>
+			<div class="content"><a class="block_make_submission_link" href="https://jpcsit.kaznu.kz/index.php/kaznu/en/about/submissions">Make a Submission</a></div>
+		</div>
+
+	
+			</div><!-- pkp_sidebar.left -->
+			</div><!-- pkp_structure_content -->
+
+<div class="pkp_structure_footer_wrapper" role="contentinfo">
+	<a id="pkp_content_footer"></a>
+
+	<div class="pkp_structure_footer">
+
+					<div class="pkp_footer_content">
+				<p><a href="http://creativecommons.org/licenses/by-nc/4.0/" rel="license"><img src="https://i.creativecommons.org/l/by-nc/4.0/80x15.png" alt="Creative Commons License" /></a><br />This work is licensed under a <a style="color: #ffffff;" href="http://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="license noopener">Creative Commons Attribution-NonCommercial 4.0 International License</a>.</p>
+<p>© 2022-2024 | Journal of Problems in Computer Science and Information Technologies. Designed by <a style="color: #ffffff;" href="https://farabi.university" target="_blank" rel="noopener">al-Farabi Kazakh National University</a></p>
+<p>al-Farabi ave., 71/19 Almaty, A15E3C7 KAZAKHSTAN</p>
+			</div>
+		
+		<div class="pkp_brand_footer">
+			<a href="https://jpcsit.kaznu.kz/index.php/kaznu/en/about/aboutThisPublishingSystem">
+				<img alt="More information about the publishing system, Platform and Workflow by OJS/PKP." src="https://jpcsit.kaznu.kz/templates/images/ojs_brand.png">
+			</a>
+		</div>
+	</div>
+</div><!-- pkp_structure_footer_wrapper -->
+
+</div><!-- pkp_structure_page -->
+
+<script src="https://jpcsit.kaznu.kz/js/build/jquery/jquery.min.js?v=3.5.0.5" type="text/javascript"></script><script src="https://jpcsit.kaznu.kz/js/build/jquery-ui/jquery-ui.min.js?v=3.5.0.5" type="text/javascript"></script><script src="https://jpcsit.kaznu.kz/plugins/themes/default/js/lib/popper/popper.js?v=3.5.0.5" type="text/javascript"></script><script src="https://jpcsit.kaznu.kz/plugins/themes/default/js/lib/bootstrap/util.js?v=3.5.0.5" type="text/javascript"></script><script src="https://jpcsit.kaznu.kz/plugins/themes/default/js/lib/bootstrap/dropdown.js?v=3.5.0.5" type="text/javascript"></script><script src="https://jpcsit.kaznu.kz/plugins/themes/default/js/lib/swiper/swiper-bundle.min.js?v=3.5.0.5" type="text/javascript"></script><script type="text/javascript">var pkpDefaultThemeI18N = {"nextSlide":"Next slide","prevSlide":"Previous slide"}</script><script src="https://jpcsit.kaznu.kz/plugins/themes/default/js/main.js?v=3.5.0.5" type="text/javascript"></script><script src="https://jpcsit.kaznu.kz/plugins/themes/kaznuMigration/scripts/jpcsitArticleLayout.js?v=3.5.0.5" type="text/javascript"></script><script src="https://jpcsit.kaznu.kz/plugins/generic/citationStyleLanguage/js/articleCitation.js?v=3.5.0.5" type="text/javascript"></script><script type="text/javascript">var pkpUsageStats = pkpUsageStats || {};pkpUsageStats.data = pkpUsageStats.data || {};pkpUsageStats.data.Submission = pkpUsageStats.data.Submission || {};pkpUsageStats.data.Submission[217] = {"data":{"2025":{"10":"9","11":"3","12":"8"},"2026":{"1":"4","2":"7","3":"5","4":"9","5":"12","6":"14","7":"7","8":"40","9":"27","10":"8"}},"label":"All Downloads","color":"79,181,217","total":153};</script><script src="https://jpcsit.kaznu.kz/js/build/chart.js/chart.umd.js?v=3.5.0.5" type="text/javascript"></script><script type="text/javascript">var pkpUsageStats = pkpUsageStats || {};pkpUsageStats.locale = pkpUsageStats.locale || {};pkpUsageStats.locale.months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];pkpUsageStats.config = pkpUsageStats.config || {};pkpUsageStats.config.chartType = "line";</script><script src="https://jpcsit.kaznu.kz/lib/pkp/js/usage-stats-chart.js?v=3.5.0.5" type="text/javascript"></script>
+
+
+</body>
+</html>
