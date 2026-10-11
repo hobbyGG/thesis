@@ -14,13 +14,14 @@ from .response import (
     simulate_response,
 )
 
-# This is a direct IWR1843 profile/frame model.  The radar frame rate is the
-# physical acquisition rate; the 3 kHz A20 reference response is only used to
-# evaluate the displacement at the individual TX chirp times.
-RADAR_RATE_HZ = 100.0
+# This is a direct IWR1843 profile/frame model.  One externally triggered
+# frame contains one TX0+TX2 MIMO loop and is the slow-time observation used by
+# the retained estimator.  The frame/loop rate is therefore the physical
+# chirp-level acquisition rate: 2 kHz.
+RADAR_RATE_HZ = 2000.0
 RADAR_EXTERNAL_TRIGGER_PERIOD_S = 1.0 / RADAR_RATE_HZ
-RADAR_MINIMUM_FRAME_PERIOD_S = 9.0e-3
-ADXL_RATE_HZ = 1000.0
+RADAR_MINIMUM_FRAME_PERIOD_S = 0.45e-3
+ADXL_RATE_HZ = 2000.0
 C_LIGHT_MPS = 299_792_458.0
 RADAR_IDLE_TIME_S = 70.0e-6
 RADAR_ADC_START_TIME_S = 7.0e-6
@@ -28,7 +29,7 @@ RADAR_ADC_START_TIME_S = 7.0e-6
 # value (7 us start plus 256/5.209 MS/s is about 56.1 us).
 RADAR_RAMP_END_TIME_S = 57.14e-6
 RADAR_TX_CHIRPS_PER_LOOP = 2
-RADAR_LOOPS_PER_FRAME = 16
+RADAR_LOOPS_PER_FRAME = 1
 RADAR_CHIRP_CYCLE_S = RADAR_IDLE_TIME_S + RADAR_RAMP_END_TIME_S
 RADAR_LOOP_START_INTERVAL_S = RADAR_TX_CHIRPS_PER_LOOP * RADAR_CHIRP_CYCLE_S
 BASE_TIME_NS = 1_000_000_000
@@ -123,9 +124,9 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int) -> None:
     rng = np.random.default_rng(seed)
     chirp = np.zeros((frames, loops, VIRTUAL_RX, ADC_SAMPLES), dtype=np.complex128)
     # TX0/RX0..3 and TX2/RX0..3 are stored as one virtual snapshot for each
-    # loop.  Each group of four channels is produced by its own physical TDM
-    # chirp; the pair is combined only at export so the existing algorithm
-    # contract can consume eight virtual antennas per loop.
+    # 2 kHz observation. Each group of four channels is produced by its own
+    # physical TDM chirp; the pair is combined only at export so the algorithm
+    # receives eight virtual antennas without averaging slow-time samples.
     rx_positions = np.arange(4, dtype=float) * 0.5
     tx_positions = np.asarray((0.0, 2.0), dtype=float)
     positions = np.concatenate([tx + rx_positions for tx in tx_positions])
@@ -303,7 +304,7 @@ def _adxl_package(root: Path, acceleration: np.ndarray, seed: int) -> None:
     rng = np.random.default_rng(seed + 1)
     sample_count = acceleration.size
     values = np.zeros((sample_count, 3), dtype=np.float64)
-    # ADXL355 at the configured 1 kHz ODR: use the ±2 g noise density from
+    # ADXL355 at the configured 2 kHz ODR: use the ±2 g noise density from
     # the data sheet, a small fixed bias, and a sub-percent scale error.  The
     # other two axes contain only cross-axis leakage and sensor noise.
     noise_std = (
@@ -345,7 +346,7 @@ def _adxl_package(root: Path, acceleration: np.ndarray, seed: int) -> None:
     })
 
 
-def generate(output: str | Path, *, duration_s: float = 4.0, seed: int = 2026) -> Path:
+def generate(output: str | Path, *, duration_s: float = DURATION_S, seed: int = 2026) -> Path:
     output = Path(output)
     if duration_s <= 0.0 or duration_s > DURATION_S:
         raise ValueError(f"duration must be in (0, {DURATION_S:g}] seconds")
@@ -353,13 +354,13 @@ def generate(output: str | Path, *, duration_s: float = 4.0, seed: int = 2026) -
     count = round(duration_s * RADAR_RATE_HZ)
     if count < 2:
         raise ValueError("duration does not contain enough radar frames")
-    adxl_step = round(REFERENCE_RATE_HZ / ADXL_RATE_HZ)
     frame_time_s = np.arange(count, dtype=float) / RADAR_RATE_HZ + RADAR_APERTURE_CENTER_OFFSET_S
     loop_offsets_s = (np.arange(RADAR_LOOPS_PER_FRAME, dtype=float) - (RADAR_LOOPS_PER_FRAME - 1) / 2.0) * RADAR_LOOP_START_INTERVAL_S
     tx_offsets_s = (np.arange(RADAR_TX_CHIRPS_PER_LOOP) - (RADAR_TX_CHIRPS_PER_LOOP - 1) / 2.0) * (RADAR_IDLE_TIME_S + RADAR_RAMP_END_TIME_S)
     tx_time_s = frame_time_s[:, None, None] + loop_offsets_s[None, :, None] + tx_offsets_s[None, None, :]
     tx_q = np.interp(tx_time_s, reference_time_s, displacement)
-    frame_a = acceleration[::adxl_step][: round(duration_s * ADXL_RATE_HZ)]
+    adxl_time_s = np.arange(round(duration_s * ADXL_RATE_HZ), dtype=float) / ADXL_RATE_HZ
+    frame_a = np.interp(adxl_time_s, reference_time_s, acceleration)
     with tempfile.TemporaryDirectory(prefix="bridge-package-") as temporary:
         staging = Path(temporary) / "package"
         staging.mkdir()

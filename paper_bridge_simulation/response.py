@@ -20,10 +20,11 @@ GUIDEWAY_SPAN_M = 24.768
 SPEED_KMH = 300.0
 PEAK_DEFLECTION_M = 1.712e-3  # A20 Fig. 4 measured value, not modal amplitude.
 REFERENCE_RATE_HZ = 3000.0
-DURATION_S = 4.0
+DURATION_S = 13.0
 
 # Assumptions, not values identified from the paper.
 ARRIVAL_S = 0.5
+STATIC_INTERVAL_S = 5.0
 CAR_COUNT = 5
 PASSAGE_DURATION_S = 0.8
 TRANSITION_DURATION_S = 0.12
@@ -53,20 +54,26 @@ def simulate_response():
     """
     dt = 1.0 / REFERENCE_RATE_HZ
     time_s = np.arange(round(DURATION_S * REFERENCE_RATE_HZ)) * dt
-    # The event duration is chosen to match the roughly 1 s laser response
-    # observed for a train passage.  A 0.12 s C2 transition gives the desired
-    # fast rise/fall while leaving a short plateau where the modal oscillation
-    # is visible around the peak displacement.
-    exit_s = ARRIVAL_S + PASSAGE_DURATION_S - TRANSITION_DURATION_S
-    rise, rise_second = _smooth_step(time_s, ARRIVAL_S, TRANSITION_DURATION_S)
-    fall, fall_second = _smooth_step(time_s, exit_s, TRANSITION_DURATION_S)
-    envelope = rise - fall
-    envelope_second = rise_second - fall_second
-    drive = envelope * np.sum(
-        EXCITATION_WEIGHTS[:, None]
-        * np.sin(2.0 * np.pi * excitation_frequencies_hz()[:, None] * (time_s - ARRIVAL_S)),
-        axis=0,
-    )
+    # Each event matches the roughly 1 s laser response: a fast 0.12 s rise,
+    # 0.56 s near-peak interval, and fast 0.12 s fall. Five seconds of quiet
+    # time separates consecutive responses so the three responses can be
+    # inspected independently in one deterministic run.
+    event_starts = ARRIVAL_S + np.arange(3, dtype=float) * (PASSAGE_DURATION_S + STATIC_INTERVAL_S)
+    envelope = np.zeros_like(time_s)
+    envelope_second = np.zeros_like(time_s)
+    drive = np.zeros_like(time_s)
+    for event_start in event_starts:
+        exit_s = event_start + PASSAGE_DURATION_S - TRANSITION_DURATION_S
+        rise, rise_second = _smooth_step(time_s, event_start, TRANSITION_DURATION_S)
+        fall, fall_second = _smooth_step(time_s, exit_s, TRANSITION_DURATION_S)
+        event_envelope = rise - fall
+        envelope += event_envelope
+        envelope_second += rise_second - fall_second
+        drive += event_envelope * np.sum(
+            EXCITATION_WEIGHTS[:, None]
+            * np.sin(2.0 * np.pi * excitation_frequencies_hz()[:, None] * (time_s - event_start)),
+            axis=0,
+        )
 
     omega = 2.0 * np.pi * MODAL_FREQUENCIES_HZ
     state = np.zeros((2, omega.size))
@@ -98,6 +105,7 @@ def simulate_response():
 
 def reference_metadata() -> dict:
     """Keep published quantities separate from assumed synthesis parameters."""
+    event_starts = ARRIVAL_S + np.arange(3, dtype=float) * (PASSAGE_DURATION_S + STATIC_INTERVAL_S)
     return {
         "source_type": "paper_parameterized_synthetic",
         "paper": REFERENCE_TITLE,
@@ -113,8 +121,10 @@ def reference_metadata() -> dict:
         },
         "assumed": {
             "arrival_s": ARRIVAL_S,
+            "event_start_s": event_starts.tolist(),
             "car_count": CAR_COUNT,
             "passage_duration_s": PASSAGE_DURATION_S,
+            "static_interval_s": STATIC_INTERVAL_S,
             "transition_duration_s": TRANSITION_DURATION_S,
             "envelope": "quintic entry/exit transitions around a short laser-like passage",
             "excitation_weights": EXCITATION_WEIGHTS.tolist(),

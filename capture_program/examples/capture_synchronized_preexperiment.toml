@@ -4,7 +4,7 @@ dataset_dir = "preexperiment_synchronized_dataset"
 title = "Maglev beam IWR1843 and ADXL355 preexperiment"
 creator = "unknown"
 subject = "IWR1843, DCA1000, ADXL355, SYNC_IN"
-description = "Pi-local 4 s maglev beam capture at 2 kHz with one MIMO loop per frame"
+description = "Pi-local 13 s maglev beam capture at 2 kHz with one MIMO loop per frame"
 date = "<today>"
 license = "CC-BY-SA-4.0"
 
@@ -46,8 +46,8 @@ dca_config_port = 4096
 dca_data_port = 4098
 host_ip = "192.168.33.30"
 radar_config_filename = "examples/configs/iwr1843_hardware_trigger.cfg"
-# About 4 s at 2 kHz; each frame contains one TX0+TX2 MIMO loop.
-capture_frames = 8000
+# About 13 s at 2 kHz; each frame contains one TX0+TX2 MIMO loop.
+capture_frames = 26000
 export_algorithm_data = true
 # Required while export_sync_timeline=true: decoded radar metadata is the
 # timeline source, so configured frame counts are never used as a fallback.
@@ -77,10 +77,11 @@ use_loopback = false
 # To enable optional edge-observation diagnostics, set both fields:
 # use_loopback = true
 # loopback_line = 24
-# A 0.45 ms frameCfg minimum period preserves the coordinator's 10% guard
-# for 2 kHz external triggers. Each trigger produces one MIMO loop.
+# The 450 us frameCfg minimum leaves the coordinator's 10% guard for each
+# 500 us trigger. Each trigger produces one TX0+TX2 MIMO loop, which is one
+# 2 kHz chirp-level observation for the estimator.
 frequency_hz = 2000.0
-count = 8000
+count = 26000
 pulse_width_us = 100
 # Both this delay and the inter-trigger period must stay below the conservative
 # 5 s DCA1000 no-LVDS guard.

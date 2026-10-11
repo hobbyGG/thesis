@@ -77,8 +77,9 @@ use_loopback = false
 # To enable optional edge-observation diagnostics, set both fields:
 # use_loopback = true
 # loopback_line = 24
-# A 0.45 ms frameCfg minimum period preserves the coordinator's 10% guard
-# for 2 kHz external triggers. Each trigger produces one MIMO loop.
+# The 450 us frameCfg minimum leaves the coordinator's 10% guard for each
+# 500 us trigger. Each trigger produces one TX0+TX2 MIMO loop, which is one
+# 2 kHz chirp-level observation for the estimator.
 frequency_hz = 2000.0
 count = 200
 pulse_width_us = 100

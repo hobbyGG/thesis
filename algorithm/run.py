@@ -15,7 +15,7 @@ def run(
     input_dir: str | Path,
     output: str | Path,
     *,
-    radar_mode: str = "frame",
+    radar_mode: str = "chirp",
     range_fft_method: str = "fft",
     range_window: str = "hamming",
 ) -> tuple[Path, Path]:
@@ -139,7 +139,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Run the thesis displacement algorithm on a capture package.")
     parser.add_argument("--input", required=True, type=Path, help="capture package directory")
     parser.add_argument("--output", required=True, type=Path, help="result .npz path or output directory")
-    parser.add_argument("--radar-mode", choices=("frame", "chirp"), default="frame")
+    parser.add_argument("--radar-mode", choices=("frame", "chirp"), default="chirp")
     parser.add_argument("--range-fft-method", choices=("fft", "apfft"), default="fft")
     parser.add_argument(
         "--range-window",

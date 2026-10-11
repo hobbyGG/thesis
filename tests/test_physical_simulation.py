@@ -152,9 +152,8 @@ class PhysicalSimulationTest(unittest.TestCase):
         lsb = float(quant["lsb_v"])
         self.assertEqual(bits, int(self.radar_meta.get("adc_bits", bits)))
         self.assertAlmostEqual(lsb, 2.0 * full_scale / (2**bits), places=15)
-        # The saved frame cube is a coherent mean of 16 quantized loop
-        # snapshots, so its levels are fractional LSBs.  Quantization is
-        # checked on the lossless chirp cube instead.
+        # The saved frame cube is the coherent mean of the single 2 kHz loop
+        # snapshot. Quantization is checked on the lossless chirp cube.
         i = np.real(self.chirp).astype(float)
         q = np.imag(self.chirp).astype(float)
         np.testing.assert_allclose(i / lsb, np.rint(i / lsb), atol=2.0e-4)

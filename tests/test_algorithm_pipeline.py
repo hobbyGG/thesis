@@ -27,7 +27,8 @@ class AlgorithmPipelineTest(unittest.TestCase):
             self.assertEqual(json.loads((package / "status.json").read_text(encoding="utf-8"))["source_type"], "paper_bridge_simulation")
             self.assertEqual(payload["method"], "fixed_geometry_beta_structural_kalman")
             arrays = np.load(output)
-            self.assertEqual(arrays["q_hat_m"].shape, (100,))
+            self.assertEqual(payload["radar_mode"], "chirp")
+            self.assertEqual(arrays["q_hat_m"].shape, (2000,))
             self.assertEqual(arrays["selected_target_indices"].size, 5)
 
     def test_chirp_mode_expands_the_saved_loop_cube(self):
@@ -39,18 +40,21 @@ class AlgorithmPipelineTest(unittest.TestCase):
             payload = json.loads(summary.read_text(encoding="utf-8"))
             arrays = np.load(output)
             self.assertEqual(payload["radar_mode"], "chirp")
-            self.assertEqual(payload["radar_frames"], 100)
-            self.assertEqual(payload["radar_samples"], 1600)
-            self.assertEqual(arrays["q_hat_m"].shape, (1600,))
-            self.assertEqual(arrays["radar_time_ns"].shape, (1600,))
+            self.assertEqual(payload["radar_frames"], 2000)
+            self.assertEqual(payload["radar_samples"], 2000)
+            self.assertEqual(payload["adxl_samples"], 2000)
+            self.assertEqual(arrays["q_hat_m"].shape, (2000,))
+            self.assertEqual(arrays["radar_time_ns"].shape, (2000,))
             chirp = np.load(package / "radar" / "algorithm_input" / "chirp_cube.npy")
             adc = np.load(package / "radar" / "algorithm_input" / "adc_cube.npy")
-            self.assertGreater(float(np.std(chirp[:, 1] - chirp[:, 0])), 0.0)
+            self.assertEqual(chirp.shape[1], 1)
+            self.assertGreater(float(np.std(chirp[:, 0, 4:] - chirp[:, 0, :4])), 0.0)
             self.assertTrue(np.allclose(adc, np.mean(chirp, axis=1)))
+            self.assertAlmostEqual(float(np.median(np.diff(arrays["radar_time_ns"]))), 500000.0)
 
     def test_paper_response_has_consistent_acceleration_and_sampling_margin(self):
         time_s, displacement, acceleration, _ = simulate_response()
-        self.assertEqual(time_s.size, round(4.0 * REFERENCE_RATE_HZ))
+        self.assertEqual(time_s.size, round(13.0 * REFERENCE_RATE_HZ))
         self.assertAlmostEqual(float(np.max(np.abs(displacement))), 1.712e-3, places=9)
         dt = 1.0 / REFERENCE_RATE_HZ
         numerical_acceleration = np.gradient(np.gradient(displacement, dt), dt)

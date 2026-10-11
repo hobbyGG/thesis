@@ -105,7 +105,7 @@ def _radar_timestamps(capture: CapturePackage, radar_mode: str) -> np.ndarray:
     return (capture.radar_time_ns[:, None] + loop_offsets_ns[None, :]).reshape(-1)
 
 
-def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "frame"):
+def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "chirp"):
     from .frontend import extract_dbf_targets, range_angle_process
     from .phase import causal_iq_circle_phase
     from .selection import detect_target_bins, select_targets
