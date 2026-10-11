@@ -14,13 +14,11 @@ from .response import (
     simulate_response,
 )
 
-# This is a direct IWR1843 profile/frame model.  One externally triggered
-# frame contains one TX0+TX2 MIMO loop and is the slow-time observation used by
-# the retained estimator.  The frame/loop rate is therefore the physical
-# chirp-level acquisition rate: 2 kHz.
-RADAR_RATE_HZ = 2000.0
-RADAR_EXTERNAL_TRIGGER_PERIOD_S = 1.0 / RADAR_RATE_HZ
-RADAR_MINIMUM_FRAME_PERIOD_S = 0.45e-3
+# Four TX0+TX2 loops are coherently averaged into each slow-time frame.
+# Match the hardware trigger's 10% timing margin; round the period up to ns.
+RADAR_EXTERNAL_TRIGGER_PERIOD_S = 1.130134e-3
+RADAR_RATE_HZ = 1.0 / RADAR_EXTERNAL_TRIGGER_PERIOD_S
+RADAR_MINIMUM_FRAME_PERIOD_S = 1.01712e-3
 ADXL_RATE_HZ = 2000.0
 C_LIGHT_MPS = 299_792_458.0
 RADAR_IDLE_TIME_S = 70.0e-6
@@ -29,7 +27,7 @@ RADAR_ADC_START_TIME_S = 7.0e-6
 # value (7 us start plus 256/5.209 MS/s is about 56.1 us).
 RADAR_RAMP_END_TIME_S = 57.14e-6
 RADAR_TX_CHIRPS_PER_LOOP = 2
-RADAR_LOOPS_PER_FRAME = 1
+RADAR_LOOPS_PER_FRAME = 4
 RADAR_CHIRP_CYCLE_S = RADAR_IDLE_TIME_S + RADAR_RAMP_END_TIME_S
 RADAR_LOOP_START_INTERVAL_S = RADAR_TX_CHIRPS_PER_LOOP * RADAR_CHIRP_CYCLE_S
 BASE_TIME_NS = 1_000_000_000
@@ -124,9 +122,9 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int) -> None:
     rng = np.random.default_rng(seed)
     chirp = np.zeros((frames, loops, VIRTUAL_RX, ADC_SAMPLES), dtype=np.complex128)
     # TX0/RX0..3 and TX2/RX0..3 are stored as one virtual snapshot for each
-    # 2 kHz observation. Each group of four channels is produced by its own
+    # MIMO loop. Each group of four channels is produced by its own
     # physical TDM chirp; the pair is combined only at export so the algorithm
-    # receives eight virtual antennas without averaging slow-time samples.
+    # receives eight virtual antennas; the frame export averages four loops.
     rx_positions = np.arange(4, dtype=float) * 0.5
     tx_positions = np.asarray((0.0, 2.0), dtype=float)
     positions = np.concatenate([tx + rx_positions for tx in tx_positions])
@@ -368,7 +366,7 @@ def generate(output: str | Path, *, duration_s: float = DURATION_S, seed: int = 
         _adxl_package(staging, frame_a, seed)
         sync = staging / "sync"
         sync.mkdir()
-        radar_time = BASE_TIME_NS + np.arange(count, dtype=np.int64) * round(1.0e9 / RADAR_RATE_HZ)
+        radar_time = BASE_TIME_NS + np.rint(np.arange(count) / RADAR_RATE_HZ * 1.0e9).astype(np.int64)
         np.save(sync / "radar_frame_monotonic_ns.npy", radar_time, allow_pickle=False)
         radar_adc_time = radar_time + round(RADAR_APERTURE_CENTER_OFFSET_S * 1.0e9)
         np.save(sync / "radar_adc_sample_monotonic_ns.npy", radar_adc_time, allow_pickle=False)

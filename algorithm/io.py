@@ -105,7 +105,7 @@ def _radar_timestamps(capture: CapturePackage, radar_mode: str) -> np.ndarray:
     return (capture.radar_time_ns[:, None] + loop_offsets_ns[None, :]).reshape(-1)
 
 
-def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "chirp"):
+def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "frame"):
     from .frontend import extract_dbf_targets, range_angle_process
     from .phase import causal_iq_circle_phase
     from .selection import detect_target_bins, select_targets
@@ -114,7 +114,7 @@ def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "chirp"
 
     # Select geometry from the first observation only.  For chirp mode the
     # cube is flattened to one stream of MIMO-loop observations; for frame
-    # mode the exported adc_cube already contains the configured first loop.
+    # mode the exported adc_cube contains the configured coherent loop mean.
     if radar_mode == "chirp":
         if capture.chirp_cube is None:
             raise ValueError("chirp radar mode requires radar/algorithm_input/chirp_cube.npy")

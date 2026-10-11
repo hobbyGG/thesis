@@ -29,8 +29,8 @@ dca_config_port = 4096
 dca_data_port = 4098
 host_ip = "192.168.33.30"  # Static address on the Pi's DCA interface
 radar_config_filename = "examples/configs/iwr1843_software_trigger.cfg"
-# 1 s at 2 kHz; each frame contains one TX0+TX2 MIMO loop.
-capture_frames = 2000
+# 1 s at about 885 Hz; each frame averages four TX0+TX2 MIMO loops.
+capture_frames = 885
 export_algorithm_data = true
-algorithm_chirp_aggregation = "first"
+algorithm_chirp_aggregation = "coherent_mean"
 save_chirp_cube = true

@@ -16,7 +16,7 @@ python3 -m algorithm.run \
 
 输出包含 `radar/algorithm_input/`、`adxl355/algorithm_input/`、`sync/` 和可选的 `truth/`。算法只读取前三者，`truth/` 仅用于末端 RMSE 评价。响应的公开参数、仿真假设和限制写入 `paper_response_metadata.json`。
 
-仿真雷达使用本仓库 IWR1843 采集配置的 77 GHz 起始频率、70 µs idle、7 µs ADC start、57.14 µs ramp end、70 MHz/µs 斜率、256 点、5.209 MS/s、2 kHz 外部触发帧率和每帧 1 个 MIMO loop。每个 loop 顺序使用 TX0、TX2 两个 TDM chirp，每个 chirp 同时采集 4 RX；ADXL355 为 2 kHz。每个 ADC 采样点由窄带 FMCW 点散射模型生成：
+仿真雷达使用本仓库 IWR1843 采集配置的 77 GHz 起始频率、70 µs idle、7 µs ADC start、57.14 µs ramp end、70 MHz/µs 斜率、256 点、5.209 MS/s、约 884.851 Hz 外部触发帧率和每帧 4 个 MIMO loop。每个 loop 顺序使用 TX0、TX2 两个 TDM chirp，每个 chirp 同时采集 4 RX；4 个 loop 的复数 ADC 做相干平均；ADXL355 为 2 kHz。每个 ADC 采样点由窄带 FMCW 点散射模型生成：
 
 \[
 f_b=2S R/c,\qquad \phi_R=4\pi R/\lambda,
@@ -24,13 +24,13 @@ f_b=2S R/c,\qquad \phi_R=4\pi R/\lambda,
 
 论文响应 `q(t)` 表示离地约 10 m 轨道梁沿主方向的位移，目标使用相对该结构的地面点几何。模型包含传播相位、距离拍频、阵列角度相位、距离衰减、逐 TX/loop 散射系数复扰动、接收白噪声、固定 RX 幅相误差、简化 PLL 公共相噪、12 bit 有效 I/Q 量化和饱和。一条 0.08 m 等效距离增量与 8% 幅度的弱路径表示简化 multipath；沙土地面和树丛用低幅散射点表示。ADXL355 采用 22.5 µg/√Hz 噪声密度、约 1.78 ms 数字滤波延迟、小偏置和比例误差。
 
-`chirp_cube.npy` 的形状是 `[frame, loop, 8 virtual antenna, 256 ADC sample]`，其中 `loop=1`：前 4 个通道来自 TX0/RX0–3，后 4 个通道来自同一观测间隔内稍后发射的 TX2/RX0–3，构成一次 TDM 虚拟快照。每个 frame/loop 直接作为一个 2 kHz slow-time 观测；`adc_cube.npy` 只是该单 loop 的同值导出。manifest 同时保存 3.9998 GHz 全 ramp 带宽和约 3.4402 GHz ADC 有效采样带宽；距离 FFT bin 间隔由后者决定，约为 43.57 mm。该复数 ADC 模型的拍频无混叠距离上限约为 11.15 m，散射体与弱路径均限制在这一范围内。
+`chirp_cube.npy` 的形状是 `[frame, loop, 8 virtual antenna, 256 ADC sample]`，其中 `loop=4`：前 4 个通道来自 TX0/RX0–3，后 4 个通道来自同一观测间隔内稍后发射的 TX2/RX0–3，构成一次 TDM 虚拟快照。每个 frame 的 4 个 loop 保留在 `chirp_cube.npy`，`adc_cube.npy` 是 4-loop 的复数相干平均，作为约 884.851 Hz slow-time 观测。manifest 同时保存 3.9998 GHz 全 ramp 带宽和约 3.4402 GHz ADC 有效采样带宽；距离 FFT bin 间隔由后者决定，约为 43.57 mm。该复数 ADC 模型的拍频无混叠距离上限约为 11.15 m，散射体与弱路径均限制在这一范围内。
 
 这是“硬件链路一致”的点目标仿真，不是全波电磁仿真：尚未复现 IWR1843 芯片内部 PLL 相噪的具体统计量，也没有建立完整的连续地形和车辆—梁电磁散射模型。因此它适合验证 range-angle 选点、chirp 级融合和噪声敏感性；最终精度仍需用户外静态/动态 IWR1843 数据校准。
 
 当前五个几何目标在 3°、9°、15°、21°、25° 的注入 SNR 分别为
 30、27.5、25、22.5、20 dB。该数值定义在每个 TX、每个 loop 的目标域
-散射系数上，随后经过阵列投影、距离拍频、传播相位和 16-loop 平均；参数写入
+散射系数上，随后经过阵列投影、距离拍频、传播相位和 4-loop 平均；参数写入
 radar manifest 的 `source` 中用于实验追溯，算法不读取它们决定权重。manifest
 同时记录按整段 chirp cube 的距离 FFT 估计 `range_fft_snr_db`，用于区分注入
 SNR 与接收处理后的实际 bin SNR。
