@@ -37,6 +37,7 @@ physical adaptation time. The `frame` mode remains available for comparison.
 3. `angle_estimation.py` 用局部 MUSIC/ML 将角度从 FFT 粗网格精修为连续值。
 4. `selection.py` 合并近邻峰并保留记录级有效目标。
 5. `acceleration.py` 将 native ADXL 样本预积分到雷达相邻帧区间。
-6. `kalman.py` 冻结 `beta=1/|cos(theta)|`，用加速度预测结构主相位并做多目标 Kalman 更新。
+6. `beta.py` 以 AoA 的 `beta=1/|cos(theta)|` 为默认值；只有测得的距离 FFT SNR 不低于 15 dB、ADXL 匹配位移激励持续至少 0.10 s，且至少两个目标的 AoA–ADXL beta 相对差达到 1% 时，才切换到因果 ADXL 匹配 beta。
+7. `kalman.py` 用加速度预测结构主相位，并将通过门控的 beta 送入多目标 Kalman 更新。
 
 算法不生成数据，也不读取 `truth/` 参与估计。`truth/` 只在 `run.py` 写结果摘要时计算仿真 RMSE。

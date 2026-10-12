@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 
 import numpy as np
 
+from .beta import conditional_beta_correction
 from .config import AlgorithmConfig
 from .phase import prediction_correct_wrapped_phase
 from .types import AccelerationInput, RadarInput
@@ -29,24 +30,43 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
     """
 
     targets, samples = radar.wrapped_phase_rad.shape
-    beta = np.asarray(radar.measured_beta, dtype=float).copy()
+    beta_aoa = np.asarray(radar.measured_beta, dtype=float).copy()
     initial_r = np.clip(
         np.asarray(radar.initial_r, dtype=float).copy(),
         config.min_measurement_variance,
         config.max_measurement_variance,
     )
     selected = np.asarray(radar.selected_indices, dtype=int)
+    corrected = np.full((targets, samples), np.nan, dtype=float)
+    previous_phase = np.full(targets, np.nan, dtype=float)
+    preintegration = acceleration.preintegration
+    reference_dt = float(radar.extra.get("sample_period_s", 1.0 / config.sample_rate_hz))
+
+    # First pass: ordinary nearest-2pi continuation.  It remains independent
+    # of acceleration and supplies the causal phase stream to the beta gate.
+    for k in range(samples):
+        active = [i for i in selected if radar.available_mask[i, k] and np.isfinite(radar.wrapped_phase_rad[i, k])]
+        for i in active:
+            wrapped = float(radar.wrapped_phase_rad[i, k])
+            if np.isfinite(previous_phase[i]):
+                # Ordinary nearest-2pi continuation from the preceding target
+                # phase; no acceleration-assisted unwrap branch.
+                los = float(prediction_correct_wrapped_phase(wrapped, previous_phase[i]))
+            else:
+                los = wrapped
+            previous_phase[i] = los
+            corrected[i, k] = los
+
+    beta_correction = conditional_beta_correction(radar, acceleration, corrected, config)
+    beta = beta_correction.used_beta
+
     x = np.array([0.0, 0.0], dtype=float)
     p = np.diag([config.initial_state_variance, config.initial_rate_variance])
     r = initial_r.copy()
     theta = np.zeros(samples, dtype=float)
     rate = np.zeros(samples, dtype=float)
-    corrected = np.full((targets, samples), np.nan, dtype=float)
     innovation = np.full((targets, samples), np.nan, dtype=float)
     r_history = np.full((targets, samples), np.nan, dtype=float)
-    previous_phase = np.full(targets, np.nan, dtype=float)
-    preintegration = acceleration.preintegration
-    reference_dt = float(radar.extra.get("sample_period_s", 1.0 / config.sample_rate_hz))
     for k in range(samples):
         duration = reference_dt
         if k:
@@ -57,21 +77,12 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
             q0 = np.array([[duration**3 / 3.0, duration**2 / 2.0], [duration**2 / 2.0, duration]])
             x = a @ x + (4.0 * np.pi / config.wavelength_m()) * np.array([delta_q, delta_v])
             p = a @ p @ a.T + config.process_noise_intensity * q0
-        active = [i for i in selected if radar.available_mask[i, k] and np.isfinite(radar.wrapped_phase_rad[i, k])]
+        active = [i for i in selected if np.isfinite(corrected[i, k])]
         if active:
             observations = []
             variances = []
             for i in active:
-                wrapped = float(radar.wrapped_phase_rad[i, k])
-                if np.isfinite(previous_phase[i]):
-                    # Ordinary nearest-2pi continuation from the preceding
-                    # target phase; no acceleration-assisted unwrap branch.
-                    los = float(prediction_correct_wrapped_phase(wrapped, previous_phase[i]))
-                else:
-                    los = wrapped
-                previous_phase[i] = los
-                corrected[i, k] = los
-                observations.append(beta[i] * los)
+                observations.append(beta[i, k] * corrected[i, k])
                 variances.append(r[i])
             observations = np.asarray(observations)
             variances = np.asarray(variances)
@@ -105,15 +116,26 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
         theta_hat_rad=theta,
         theta_dot_hat_radps=rate,
         los_corrected_phase_rad=corrected,
-        beta_hat=beta,
+        # Preserve the retained result contract (one beta per target).  The
+        # complete causal history is exported separately as ``beta_used``.
+        beta_hat=beta[:, -1] if samples else beta_aoa,
         r_theta_history=r_history,
         innovation_rad=innovation,
         extra={
             "selected_indices": selected,
-            "beta_source": "angle_geometry",
+            "beta_source": "angle_geometry_with_conditional_adxl_match",
             "adaptive_r_mode": "causal_posterior",
             "phase_unwrap_mode": "previous_target_phase",
             "circle_source": "causal_algebraic_fit",
             "initial_r": initial_r,
+            "beta_aoa": beta_aoa,
+            "beta_matched": beta_correction.matched_beta,
+            "beta_used": beta,
+            "beta_ready": beta_correction.ready,
+            "beta_excitation_m": beta_correction.excitation_m,
+            "beta_discrepancy": beta_correction.discrepancy,
+            "beta_snr_db": beta_correction.snr_db,
+            "beta_trigger": beta_correction.trigger,
+            "beta_corrected_target_mask": beta_correction.used_beta != beta_aoa[:, None],
         },
     )

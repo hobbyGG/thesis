@@ -1,0 +1,76 @@
+{
+  "seeds": [
+    2026,
+    2027,
+    2028
+  ],
+  "event_intervals_s": [
+    [
+      0.5,
+      1.3
+    ],
+    [
+      6.3,
+      7.1
+    ],
+    [
+      12.1,
+      12.9
+    ]
+  ],
+  "angle_offsets_deg": [
+    -3.0,
+    -2.0,
+    -1.0,
+    -0.5,
+    0.0,
+    0.5,
+    1.0,
+    2.0,
+    3.0
+  ],
+  "nominal_range_fft_snr_db": [
+    20,
+    15,
+    10
+  ],
+  "beta_hp_hz": 3.0,
+  "beta_lp_hz": 100.0,
+  "excitation_threshold_m": 5e-06,
+  "excitation_duration_s": 0.1,
+  "regularization_adxl_fraction": 0.25,
+  "regularization": "lambda=3*Sxx; 75% AoA prior + 25% matched beta; fixed before final runs",
+  "estimator": "prefix-only causal matched filters and LS; startup uses AoA; all three events scored",
+  "fusion": "retained single common structural Kalman; equal algorithm for all beta methods",
+  "snr_semantics": "measured signal/noise power after Hamming range FFT, before four-loop average and DBF",
+  "beta_only_semantics": "paired output difference vs true-beta run; only where detected points map uniquely; not total-RMSE subtraction",
+  "merged_beta_semantics": "no unique true beta assigned to coherent mixtures; report total displacement RMSE",
+  "generation": "same A20 response, N=4, 884.850823 Hz frame stream, ADXL 2 kHz; all scenes at 10 m vertical separation",
+  "close_angles_deg": [
+    [
+      3,
+      9,
+      15,
+      20,
+      21
+    ],
+    [
+      3,
+      9,
+      15,
+      20,
+      20.3
+    ],
+    [
+      19.4,
+      19.7,
+      20,
+      20.3,
+      20.6
+    ]
+  ],
+  "no_future_data": "no whole-record FFT or zero-phase filter in beta fit; prefix equality checked",
+  "software": {
+    "numpy": "2.5.4"
+  }
+}

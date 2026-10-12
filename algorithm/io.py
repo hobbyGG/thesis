@@ -106,7 +106,7 @@ def _radar_timestamps(capture: CapturePackage, radar_mode: str) -> np.ndarray:
 
 
 def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "frame"):
-    from .frontend import extract_dbf_targets, range_angle_process
+    from .frontend import extract_dbf_targets, estimate_range_fft_snr_db, range_angle_process
     from .phase import causal_iq_circle_phase
     from .selection import detect_target_bins, select_targets
 
@@ -128,6 +128,20 @@ def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "frame"
 
     first = range_angle_process(stream_cube[:1], capture.frontend)
     range_bins, angle_bins, detection = detect_target_bins(first.cube, first.angle_axis_deg, max_candidates=5)
+    # Prefer the saved lossless chirp observations for the quality estimate;
+    # ``adc_cube`` is already a coherent four-loop mean and would hide the
+    # low-SNR boundary that the conditional beta gate is meant to protect.
+    if capture.chirp_cube is not None:
+        snr_cube = np.asarray(capture.chirp_cube).reshape(
+            -1, capture.chirp_cube.shape[-2], capture.chirp_cube.shape[-1]
+        )
+    else:
+        snr_cube = stream_cube
+    range_fft_snr_db = estimate_range_fft_snr_db(
+        snr_cube,
+        capture.frontend,
+        range_bins,
+    )
     processed = range_angle_process(stream_cube, capture.frontend)
     targets = extract_dbf_targets(processed, range_bins, angle_bins)
     wrapped, centers, radii, circle_residual, normalized_iq = causal_iq_circle_phase(targets.slow_time)
@@ -162,6 +176,9 @@ def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "frame"
     )
     acceleration = AccelerationInput(capture.adxl_time_ns, structural_accel, measured, preintegration)
     selected, initial_r, scores = select_targets(targets)
+    adxl_manifest = _manifest(capture.root / "adxl355" / "algorithm_input" / "manifest.json")
+    adxl_capture = adxl_manifest.get("capture", {})
+    adxl_group_delay_s = float(adxl_capture.get("group_delay_ns", 0.0)) * 1.0e-9
     radar = RadarInput(
         targets.measured_beta,
         targets.wrapped_phase_rad,
@@ -182,6 +199,10 @@ def build_algorithm_inputs(capture: CapturePackage, *, radar_mode: str = "frame"
             "circle_radius": radii,
             "circle_residual": circle_residual,
             "normalized_iq": normalized_iq,
+            "range_fft_snr_db": range_fft_snr_db,
+            "range_fft_snr_calibration_observations": int(min(256, snr_cube.shape[0])),
+            "range_fft_snr_input": "chirp_cube" if capture.chirp_cube is not None else "adc_cube",
+            "adxl_group_delay_s": adxl_group_delay_s,
         },
         iq_slow_time=targets.slow_time,
     )

@@ -53,7 +53,6 @@ def _range_spectrum(adc: np.ndarray, config: FrontendConfig) -> np.ndarray:
         return np.fft.fft(samples, n=config.num_range_bins, axis=-1)
     if config.range_fft_method != "apfft":
         raise ValueError(f"unsupported range FFT method: {config.range_fft_method}")
-
     length = samples.shape[-1]
     sub_length = (length + 1) // 2
     all_phase = np.zeros(samples.shape[:-1] + (sub_length,), dtype=complex)
@@ -64,6 +63,48 @@ def _range_spectrum(adc: np.ndarray, config: FrontendConfig) -> np.ndarray:
     all_phase /= float(sub_length)
     return np.fft.fft(all_phase, n=config.num_range_bins, axis=-1)
 
+
+def estimate_range_fft_snr_db(
+    adc_cube: np.ndarray,
+    config: FrontendConfig,
+    target_range_bins: Sequence[int],
+    *,
+    block_size: int = 128,
+    calibration_observations: int = 256,
+) -> np.ndarray:
+    """Estimate per-target range-FFT SNR without using scene metadata.
+
+    Power is accumulated from the first startup observations before DBF.  A
+    robust median of non-target range bins is the noise floor, with a guard
+    interval around every detected target.  Limiting the estimate to the
+    startup prefix keeps the gate causal when later vibration samples arrive;
+    the block loop keeps the retained long capture path bounded in memory.
+    """
+
+    samples = np.asarray(adc_cube)
+    if samples.ndim != 3:
+        raise ValueError("SNR input must have [observation, virtual, adc] axes")
+    ranges = np.asarray(target_range_bins, dtype=int)
+    if ranges.ndim != 1:
+        raise ValueError("target range bins must be one dimensional")
+    calibration_count = min(max(int(calibration_observations), 1), samples.shape[0])
+    power_sum = np.zeros(config.num_range_bins, dtype=float)
+    observation_count = 0
+    for start in range(0, calibration_count, max(int(block_size), 1)):
+        spectrum = _range_spectrum(samples[start:start + block_size], config)
+        power_sum += np.sum(np.abs(spectrum) ** 2, axis=(0, 1))
+        observation_count += int(spectrum.shape[0] * spectrum.shape[1])
+    if observation_count <= 0:
+        return np.full(ranges.shape, np.nan, dtype=float)
+    mean_power = power_sum / float(observation_count)
+    excluded = np.zeros(mean_power.size, dtype=bool)
+    for target_range in ranges:
+        if 0 <= target_range < excluded.size:
+            excluded[max(0, target_range - 4):min(excluded.size, target_range + 5)] = True
+    floor_values = mean_power[~excluded]
+    noise_floor = float(np.median(floor_values)) if floor_values.size else float(np.median(mean_power))
+    signal_power = np.maximum(mean_power[ranges] - noise_floor, 1.0e-30)
+    return 10.0 * np.log10(signal_power / max(noise_floor, 1.0e-30))
 
 @dataclass(frozen=True)
 class RangeAngleData:
