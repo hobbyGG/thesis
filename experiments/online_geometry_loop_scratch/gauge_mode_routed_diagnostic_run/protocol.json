@@ -1,7 +1,0 @@
-{
-  "schema": "online_geometry_loop_gauge_mode_routed_protocol",
-  "route_rule": "first-20 truth-free classifier: gauge_boundary_candidate -> rolling_bias_transport; all other decisions -> rolling_raw",
-  "inputs": "existing truth-free fixed/raw/transport route records with post-run truth score metadata",
-  "routing_uses_truth": false,
-  "accuracy_claim": false
-}

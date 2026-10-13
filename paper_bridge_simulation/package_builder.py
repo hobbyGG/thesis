@@ -15,11 +15,13 @@ from .response import (
 )
 
 # Four TX0+TX2 loops are coherently averaged into each slow-time frame.
-# Match the hardware trigger's 10% timing margin; round the period up to ns.
-RADAR_EXTERNAL_TRIGGER_PERIOD_S = 1.130134e-3
+# Use an integer-friendly 2 ms trigger period for the retained 500 Hz path.
+RADAR_FRAME_PERIOD_NS = 2_000_000
+RADAR_EXTERNAL_TRIGGER_PERIOD_S = RADAR_FRAME_PERIOD_NS * 1.0e-9
 RADAR_RATE_HZ = 1.0 / RADAR_EXTERNAL_TRIGGER_PERIOD_S
 RADAR_MINIMUM_FRAME_PERIOD_S = 1.01712e-3
-ADXL_RATE_HZ = 2000.0
+# Both sensors have a nominal 2 ms period; retain their timestamp alignment.
+ADXL_RATE_HZ = 500.0
 C_LIGHT_MPS = 299_792_458.0
 RADAR_IDLE_TIME_S = 70.0e-6
 RADAR_ADC_START_TIME_S = 7.0e-6
@@ -52,7 +54,7 @@ PLL_PHASE_NOISE_STD_RAD = 2.5e-3
 PLL_PHASE_NOISE_RHO = 0.98
 ADXL_NOISE_DENSITY_G_PER_SQRT_HZ = 22.5e-6
 ADXL_BIAS_MPS2 = np.asarray((4.0e-4, -3.0e-4, 2.0e-4))
-ADXL_GROUP_DELAY_S = 1.78e-3
+ADXL_GROUP_DELAY_S = 3.26e-3  # ADXL355 Rev. D, Table 10, 500 Hz ODR.
 RADAR_LOOP_REFERENCE_OFFSET_S = (
     RADAR_IDLE_TIME_S + RADAR_ADC_START_TIME_S
     + (ADC_SAMPLES - 1) / (2.0 * ADC_SAMPLE_RATE_HZ)
@@ -73,6 +75,10 @@ TARGET_REFERENCE_RANGE_M = GUIDEWAY_TO_GROUND_HEIGHT_M
 # for the outermost (25 degree) ground point at about 11.03 m.
 MULTIPATH_DELAY_M = 0.08
 MULTIPATH_AMPLITUDE_RATIO = 0.08
+# Keep the synthetic writer's working set independent of the requested capture
+# duration.  The resulting .npy files still contain the complete record, but
+# only this many frames are materialised while generating each block.
+RADAR_GENERATION_BLOCK_FRAMES = 32
 
 # Outdoor scene assumptions for the field site: the guideway is about 10 m
 # above sandy soil and trees.  These are weak stationary point scatterers,
@@ -91,6 +97,14 @@ def _json(path: Path, value: dict) -> None:
 def _array(path: Path, values: np.ndarray, axes: list[str]) -> dict:
     np.save(path, values, allow_pickle=False)
     return {"file": path.name, "dtype": values.dtype.name, "shape": list(values.shape), "axes": axes}
+
+
+def _open_array(path: Path, shape: tuple[int, ...], dtype: np.dtype, axes: list[str]):
+    """Create a .npy-backed array without materialising the whole record."""
+    values = np.lib.format.open_memmap(path, mode="w+", dtype=dtype, shape=shape)
+    description = {"file": path.name, "dtype": values.dtype.name,
+                   "shape": list(values.shape), "axes": axes}
+    return values, description
 
 
 def _scatterer_if(
@@ -120,7 +134,6 @@ def _scatterer_if(
 def _radar_package(root: Path, tx_q: np.ndarray, seed: int) -> None:
     frames, loops = tx_q.shape[:2]
     rng = np.random.default_rng(seed)
-    chirp = np.zeros((frames, loops, VIRTUAL_RX, ADC_SAMPLES), dtype=np.complex128)
     # TX0/RX0..3 and TX2/RX0..3 are stored as one virtual snapshot for each
     # MIMO loop. Each group of four channels is produced by its own
     # physical TDM chirp; the pair is combined only at export so the algorithm
@@ -134,85 +147,110 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int) -> None:
     # bin would hide range leakage and bias the propagation phase.
     target_ranges_m = TARGET_RANGES_M.copy()
 
-    # Fixed-world environmental reference points.  The radar is attached to
-    # the guideway, so tx_q is evaluated at each physical TDM chirp time and
-    # its radial projection changes the range in the radar coordinate frame.
-    for angle, range_m, amplitude, snr_db in zip(TARGET_ANGLES_DEG, target_ranges_m, TARGET_AMPLITUDES, TARGET_SNR_DB):
-        radial_q = tx_q * np.cos(np.deg2rad(angle))
-        ranges = range_m + radial_q
-        range_attenuation = (TARGET_REFERENCE_RANGE_M / ranges) ** 2
-        target_amplitude = amplitude * range_attenuation
-        target_noise_std = target_amplitude / np.sqrt(2.0 * 10.0 ** (snr_db / 10.0))
-        target_noise = target_noise_std * (
-            rng.standard_normal(target_amplitude.shape) + 1j * rng.standard_normal(target_amplitude.shape)
-        )
-        propagation_bias = rng.uniform(-np.pi, np.pi)
-        multipath_bias = rng.uniform(-np.pi, np.pi)
-        for tx in range(RADAR_TX_CHIRPS_PER_LOOP):
-            channel_slice = slice(tx * 4, (tx + 1) * 4)
-            contribution = _scatterer_if(
-                ranges[:, :, tx], angle,
-                target_amplitude[:, :, tx] + target_noise[:, :, tx],
-                propagation_bias, positions[channel_slice], adc_time_s,
-            )
-            chirp[:, :, channel_slice, :] += contribution
-
-            # One weak reflected path for every moving target.  The excess
-            # path is intentionally resolvable but remains below the target
-            # selection floor.
-            multipath_ranges = ranges[:, :, tx] + MULTIPATH_DELAY_M
-            chirp[:, :, channel_slice, :] += _scatterer_if(
-                multipath_ranges, angle + 2.0,
-                MULTIPATH_AMPLITUDE_RATIO * target_amplitude[:, :, tx]
-                * (ranges[:, :, tx] / multipath_ranges) ** 2,
-                multipath_bias, positions[channel_slice], adc_time_s,
-            )
+    directory = root / "radar" / "algorithm_input"
+    directory.mkdir(parents=True)
+    chirp, chirp_description = _open_array(
+        directory / "chirp_cube.npy",
+        (frames, loops, VIRTUAL_RX, ADC_SAMPLES), np.dtype(np.complex64),
+        ["frame", "chirp_loop", "virtual_antenna", "adc_sample"],
+    )
+    adc, adc_description = _open_array(
+        directory / "adc_cube.npy",
+        (frames, VIRTUAL_RX, ADC_SAMPLES), np.dtype(np.complex64),
+        ["frame", "virtual_antenna", "adc_sample"],
+    )
 
     # The radar is fixed to the guideway, so a world-fixed ground/tree
     # scatterer has the same guideway displacement projected onto its LOS.
-    # It is stationary in the scene, but its range is not constant in the
-    # radar coordinate frame.
-    for scatterer in STATIC_SCATTERERS:
-        static_ranges = scatterer["range_m"] + tx_q * np.cos(np.deg2rad(scatterer["angle_deg"]))
-        static_amplitude = np.full(
-            (frames, loops),
-            scatterer["amplitude"] * (TARGET_REFERENCE_RANGE_M / scatterer["range_m"]) ** 2,
-            dtype=float,
-        )
-        propagation_bias = rng.uniform(-np.pi, np.pi)
-        for tx in range(RADAR_TX_CHIRPS_PER_LOOP):
-            channel_slice = slice(tx * 4, (tx + 1) * 4)
-            chirp[:, :, channel_slice, :] += _scatterer_if(
-                static_ranges[:, :, tx], scatterer["angle_deg"], static_amplitude,
-                propagation_bias, positions[channel_slice], adc_time_s,
-            )
-
-    # Independent receiver noise is added at the ADC input.  Quantisation and
-    # saturation are applied to I and Q independently, like a complex ADC
-    # assembled from two signed converter channels.
-    # The gain/phase mismatch is a fixed per-RX calibration error and the PLL
-    # term is common to the four RX channels of each physical TX chirp.
+    # Generate and flush one bounded block at a time; no full-record complex128
+    # array is needed by the method.
     gain = 10.0 ** (rng.normal(0.0, RX_GAIN_MISMATCH_DB_STD, VIRTUAL_RX) / 20.0)
     phase = np.deg2rad(rng.normal(0.0, RX_PHASE_MISMATCH_DEG_STD, VIRTUAL_RX))
-    chirp *= (gain * np.exp(1j * phase))[None, None, :, None]
-    pll = np.zeros((frames, loops, RADAR_TX_CHIRPS_PER_LOOP), dtype=float)
+    rx_calibration = gain * np.exp(1j * phase)
     innovation_std = PLL_PHASE_NOISE_STD_RAD * np.sqrt(1.0 - PLL_PHASE_NOISE_RHO**2)
-    for frame in range(frames):
-        for loop in range(loops):
-            previous = pll[frame - 1, loop, :] if frame else np.zeros(RADAR_TX_CHIRPS_PER_LOOP)
-            pll[frame, loop, :] = PLL_PHASE_NOISE_RHO * previous + innovation_std * rng.standard_normal(RADAR_TX_CHIRPS_PER_LOOP)
-    for tx in range(RADAR_TX_CHIRPS_PER_LOOP):
-        chirp[:, :, tx * 4:(tx + 1) * 4, :] *= np.exp(1j * pll[:, :, tx, None, None])
-    chirp += RECEIVER_NOISE_STD * (
-        rng.standard_normal(chirp.shape) + 1j * rng.standard_normal(chirp.shape)
-    )
-    real = np.clip(np.real(chirp), -ADC_FULL_SCALE, ADC_FULL_SCALE - ADC_LSB)
-    imag = np.clip(np.imag(chirp), -ADC_FULL_SCALE, ADC_FULL_SCALE - ADC_LSB)
-    chirp = (np.rint(real / ADC_LSB) + 1j * np.rint(imag / ADC_LSB)) * ADC_LSB
-    chirp = chirp.astype(np.complex64)
-    adc = np.mean(chirp, axis=1).astype(np.complex64, copy=False)
-    range_spectrum = np.fft.fft(chirp.astype(np.complex128), axis=-1)
-    range_power = np.median(np.abs(range_spectrum) ** 2, axis=(0, 1, 2))
+    pll_previous = np.zeros((loops, RADAR_TX_CHIRPS_PER_LOOP), dtype=float)
+    # These are fixed scattering phases, not blockwise motion.  Drawing them
+    # inside the loop introduces artificial phase jumps every 32 frames.
+    target_phases = rng.uniform(-np.pi, np.pi, (len(TARGET_ANGLES_DEG), 2))
+    static_phases = rng.uniform(-np.pi, np.pi, len(STATIC_SCATTERERS))
+    range_power_blocks = []
+    saturated_i_count = 0
+    saturated_q_count = 0
+    for start in range(0, frames, RADAR_GENERATION_BLOCK_FRAMES):
+        end = min(frames, start + RADAR_GENERATION_BLOCK_FRAMES)
+        block_q = tx_q[start:end]
+        block_frames = end - start
+        block = np.zeros((block_frames, loops, VIRTUAL_RX, ADC_SAMPLES), dtype=np.complex128)
+
+        for target_index, (angle, range_m, amplitude, snr_db) in enumerate(zip(TARGET_ANGLES_DEG, target_ranges_m, TARGET_AMPLITUDES, TARGET_SNR_DB)):
+            radial_q = block_q * np.cos(np.deg2rad(angle))
+            ranges = range_m + radial_q
+            range_attenuation = (TARGET_REFERENCE_RANGE_M / ranges) ** 2
+            target_amplitude = amplitude * range_attenuation
+            target_noise_std = target_amplitude / np.sqrt(2.0 * 10.0 ** (snr_db / 10.0))
+            target_noise = target_noise_std * (
+                rng.standard_normal(target_amplitude.shape) + 1j * rng.standard_normal(target_amplitude.shape)
+            )
+            propagation_bias, multipath_bias = target_phases[target_index]
+            for tx in range(RADAR_TX_CHIRPS_PER_LOOP):
+                channel_slice = slice(tx * 4, (tx + 1) * 4)
+                block[:, :, channel_slice, :] += _scatterer_if(
+                    ranges[:, :, tx], angle,
+                    target_amplitude[:, :, tx] + target_noise[:, :, tx],
+                    propagation_bias, positions[channel_slice], adc_time_s,
+                )
+                multipath_ranges = ranges[:, :, tx] + MULTIPATH_DELAY_M
+                block[:, :, channel_slice, :] += _scatterer_if(
+                    multipath_ranges, angle + 2.0,
+                    MULTIPATH_AMPLITUDE_RATIO * target_amplitude[:, :, tx]
+                    * (ranges[:, :, tx] / multipath_ranges) ** 2,
+                    multipath_bias, positions[channel_slice], adc_time_s,
+                )
+
+        for scatterer_index, scatterer in enumerate(STATIC_SCATTERERS):
+            static_ranges = scatterer["range_m"] + block_q * np.cos(np.deg2rad(scatterer["angle_deg"]))
+            static_amplitude = np.full(
+                (block_frames, loops),
+                scatterer["amplitude"] * (TARGET_REFERENCE_RANGE_M / scatterer["range_m"]) ** 2,
+                dtype=float,
+            )
+            propagation_bias = static_phases[scatterer_index]
+            for tx in range(RADAR_TX_CHIRPS_PER_LOOP):
+                channel_slice = slice(tx * 4, (tx + 1) * 4)
+                block[:, :, channel_slice, :] += _scatterer_if(
+                    static_ranges[:, :, tx], scatterer["angle_deg"], static_amplitude,
+                    propagation_bias, positions[channel_slice], adc_time_s,
+                )
+
+        block *= rx_calibration[None, None, :, None]
+        pll_block = np.empty((block_frames, loops, RADAR_TX_CHIRPS_PER_LOOP), dtype=float)
+        for frame in range(block_frames):
+            for loop in range(loops):
+                pll_previous[loop, :] = PLL_PHASE_NOISE_RHO * pll_previous[loop, :] + innovation_std * rng.standard_normal(RADAR_TX_CHIRPS_PER_LOOP)
+                pll_block[frame, loop, :] = pll_previous[loop, :]
+        for tx in range(RADAR_TX_CHIRPS_PER_LOOP):
+            block[:, :, tx * 4:(tx + 1) * 4, :] *= np.exp(1j * pll_block[:, :, tx, None, None])
+
+        # Add I and Q noise separately so the temporary working set is bounded.
+        block += RECEIVER_NOISE_STD * rng.standard_normal(block.shape)
+        block += 1j * RECEIVER_NOISE_STD * rng.standard_normal(block.shape)
+        real = np.clip(np.real(block), -ADC_FULL_SCALE, ADC_FULL_SCALE - ADC_LSB)
+        imag = np.clip(np.imag(block), -ADC_FULL_SCALE, ADC_FULL_SCALE - ADC_LSB)
+        quantized = (np.rint(real / ADC_LSB) + 1j * np.rint(imag / ADC_LSB)) * ADC_LSB
+        block = quantized.astype(np.complex64)
+        saturated_i_count += int(np.count_nonzero((block.real <= -ADC_FULL_SCALE) | (block.real >= ADC_FULL_SCALE - ADC_LSB)))
+        saturated_q_count += int(np.count_nonzero((block.imag <= -ADC_FULL_SCALE) | (block.imag >= ADC_FULL_SCALE - ADC_LSB)))
+        chirp[start:end] = block
+        adc[start:end] = np.mean(block, axis=1).astype(np.complex64, copy=False)
+
+        range_spectrum = np.fft.fft(block.astype(np.complex128), axis=-1)
+        range_power_blocks.append(np.median(np.abs(range_spectrum) ** 2, axis=(0, 1, 2)))
+
+    chirp.flush()
+    adc.flush()
+    chirp_payload_bytes = int(np.prod((frames, loops, VIRTUAL_RX, ADC_SAMPLES)) * 4)
+    del chirp, adc
+    range_power = np.median(np.stack(range_power_blocks, axis=0), axis=0)
     excluded = np.zeros(ADC_SAMPLES, dtype=bool)
     for target_bin in TARGET_RANGE_BINS:
         excluded[max(0, target_bin - 2):min(ADC_SAMPLES, target_bin + 3)] = True
@@ -221,12 +259,10 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int) -> None:
         float(10.0 * np.log10(max(range_power[int(target_bin)], 1.0e-30) / max(noise_floor, 1.0e-30)))
         for target_bin in TARGET_RANGE_BINS
     ]
-    directory = root / "radar" / "algorithm_input"
-    directory.mkdir(parents=True)
     arrays = {
-        "adc_cube": _array(directory / "adc_cube.npy", adc, ["frame", "virtual_antenna", "adc_sample"]),
+        "adc_cube": adc_description,
         "frame_times_s": _array(directory / "frame_times_s.npy", np.arange(frames) / RADAR_RATE_HZ, ["frame"]),
-        "chirp_cube": _array(directory / "chirp_cube.npy", chirp, ["frame", "chirp_loop", "virtual_antenna", "adc_sample"]),
+        "chirp_cube": chirp_description,
     }
     _json(directory / "manifest.json", {
         "schema": "mmwavecapture.algorithm-input", "schema_version": 1,
@@ -245,11 +281,12 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int) -> None:
                    "target_snr_db": TARGET_SNR_DB.tolist(),
                    "snr_semantics": "per-target, per-TX, per-loop complex scattering coefficient before array projection and loop averaging",
                    "range_fft_snr_db": range_fft_snr_db,
+                   "range_fft_snr_statistic": "median of bounded-block medians",
                    "scene": {"guideway_height_m": GUIDEWAY_TO_GROUND_HEIGHT_M, "surface": "sandy soil with tree line",
                              "static_scatterers": list(STATIC_SCATTERERS),
                              "multipath_excess_path_m": MULTIPATH_DELAY_M,
                              "multipath_amplitude_ratio": MULTIPATH_AMPLITUDE_RATIO}},
-        "packet_integrity": {"complete": True, "mode": "synthetic_payload_integrity", "payload_bytes": int(chirp.size * 4)},
+        "packet_integrity": {"complete": True, "mode": "synthetic_payload_integrity", "payload_bytes": chirp_payload_bytes},
         "radar": {
             "frames": frames, "frame_period_s": 1.0 / RADAR_RATE_HZ, "frame_rate_hz": RADAR_RATE_HZ,
             "minimum_frame_period_s": RADAR_MINIMUM_FRAME_PERIOD_S,
@@ -283,8 +320,8 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int) -> None:
                 "bits": ADC_BITS, "full_scale_v": ADC_FULL_SCALE,
                 "lsb_v": ADC_LSB, "stored_dtype": "complex64",
                 "quantized_array": "chirp_cube",
-                "saturated_i_count": int(np.count_nonzero((np.real(chirp) <= -ADC_FULL_SCALE) | (np.real(chirp) >= ADC_FULL_SCALE - ADC_LSB))),
-                "saturated_q_count": int(np.count_nonzero((np.imag(chirp) <= -ADC_FULL_SCALE) | (np.imag(chirp) >= ADC_FULL_SCALE - ADC_LSB))),
+                "saturated_i_count": saturated_i_count,
+                "saturated_q_count": saturated_q_count,
             },
             "receiver_impairments": {
                 "rx_gain_mismatch_db_std": RX_GAIN_MISMATCH_DB_STD,
@@ -302,7 +339,7 @@ def _adxl_package(root: Path, acceleration: np.ndarray, seed: int) -> None:
     rng = np.random.default_rng(seed + 1)
     sample_count = acceleration.size
     values = np.zeros((sample_count, 3), dtype=np.float64)
-    # ADXL355 at the configured 2 kHz ODR: use the ±2 g noise density from
+    # ADXL355 at the configured 500 Hz ODR: use the ±2 g noise density from
     # the data sheet, a small fixed bias, and a sub-percent scale error.  The
     # other two axes contain only cross-axis leakage and sensor noise.
     noise_std = (
@@ -366,7 +403,7 @@ def generate(output: str | Path, *, duration_s: float = DURATION_S, seed: int = 
         _adxl_package(staging, frame_a, seed)
         sync = staging / "sync"
         sync.mkdir()
-        radar_time = BASE_TIME_NS + np.rint(np.arange(count) / RADAR_RATE_HZ * 1.0e9).astype(np.int64)
+        radar_time = BASE_TIME_NS + np.arange(count, dtype=np.int64) * RADAR_FRAME_PERIOD_NS
         np.save(sync / "radar_frame_monotonic_ns.npy", radar_time, allow_pickle=False)
         radar_adc_time = radar_time + round(RADAR_APERTURE_CENTER_OFFSET_S * 1.0e9)
         np.save(sync / "radar_adc_sample_monotonic_ns.npy", radar_adc_time, allow_pickle=False)
@@ -374,7 +411,7 @@ def generate(output: str | Path, *, duration_s: float = DURATION_S, seed: int = 
         _json(sync / "timeline.json", {"schema_version": 1, "status": "complete",
                                         "sync_mode": "software_timestamp", "timestamp_quality": "sensor_start_bracket_estimate",
                                         "hardware_validated": False, "clock": "CLOCK_MONOTONIC", "unit": "nanoseconds",
-                                        "frame_count": count, "nominal_frame_period_ns": round(1.0e9 / RADAR_RATE_HZ),
+                                        "frame_count": count, "nominal_frame_period_ns": RADAR_FRAME_PERIOD_NS,
                                         "radar_algorithm_manifest": "../radar/algorithm_input/manifest.json",
                                         "radar_packet_integrity_complete": True,
                                         "array": {"file": "radar_frame_monotonic_ns.npy", "dtype": "int64", "shape": [count], "axes": ["radar_frame"]},

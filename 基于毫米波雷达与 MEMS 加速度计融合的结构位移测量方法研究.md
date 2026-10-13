@@ -33,15 +33,15 @@
 
 ### 1.4 本阶段研究目标与技术路线概述
 
-本阶段研究目标是在无外部静态参考系条件下，利用倒挂式毫米波雷达与共址 MEMS 加速度计估计结构测点主振动方向的相对位移。当前论文主方法以代码中的 fixed_geometry_beta_structural_kalman 为准，研究链条必须按以下顺序理解：
+本阶段研究目标是在无外部静态参考系条件下，利用倒挂式毫米波雷达与共址 MEMS 加速度计估计结构测点主振动方向的相对位移。当前论文主方法以代码中的 base_iq_circle_structural_kalman 为准，研究链条必须按以下顺序理解：
 
-1. 对每条记录建立 Range-Angle 候选目标。前端先做 Range FFT，再按阵列配置使用 Angle FFT 或几何 DBF；在距离—角度幅值图上检测峰值，同一距离内的近角峰合并，远角峰保留为不同候选。
-2. 对候选的同一距离复数序列做局部 MUSIC/ML AoA 估计，并用局部估计结果重建每个候选的 slow-time IQ。这里的候选确定和局部 AoA 处理是记录级批处理，不是已经完成的全在线目标跟踪器。
+1. 对每条记录建立 Range-Angle 候选目标。前端先做 Hamming 窗 Range FFT，再按 8 个虚拟阵元做固定角度 DBF；在距离—角度幅值图上检测峰值，同一距离内的近角峰合并，远角峰保留为不同候选。
+2. 对每个候选 range/angle bin 直接提取复数 slow-time IQ。候选确定是记录级处理，之后的 IQ 圆拟合、相位连续和 Kalman 更新按时间顺序递推。
 3. 用 AoA 与安装几何计算每个目标的转换系数初值
    $$
    \beta_{i,0}=1/\max(|\cos\hat\theta_i|,\epsilon_p),
    $$
-   进入当前主方法后保持不变。独立 rank-1/ADXL beta 预校准、在线 beta 反馈和对应的 confidence-gated R 属于历史或消融路径，不是当前 fixed_geometry_beta_structural_kalman 的主链。
+   进入当前主方法后保持不变。历史 beta 预校准、在线反馈和质量门控分支不属于当前主链。
 4. 用加速度帧区间预积分和实际时间步长进行状态预测，把结构主相位映射到各目标的 LoS 相位，选择最接近的 wrapped-phase 分支；再将校正后的 LoS 相位乘以固定 beta，形成统一结构主相位观测。
 5. 对多个目标运行结构主相位 Kalman。当前 direct 主线先在冷启动窗口用目标间结构主相位残差初始化各目标的观测噪声，再用后验残差递推更新；没有启用额外的质量门控 R。没有有效目标时，滤波器保留预测分支。
 
@@ -81,11 +81,11 @@ $$
 
 ### 2.2 基于距离—角度图的多目标方案
 
-当前前端的目标单元不是单独的 range-bin，也不是跨时间自动维护的 track，而是记录级距离—角度候选。capture_reader.py 对每条记录的 range-angle cube 取幅值统计量，进行二维峰值检测，再按距离和角度阈值合并近邻峰；候选数量受动态范围和最大候选数限制。这样，同一距离内的远角散射体可以保留为不同候选，同一物理散射体附近的重复峰则合并。
+当前前端的目标单元不是单独的 range-bin，也不是跨时间自动维护的 track，而是记录级距离—角度候选。对第一帧的 range-angle 幅值图进行二维峰值检测，再按距离和角度阈值合并近邻峰；候选数量受动态范围和最大候选数限制。这样，同一距离内的远角散射体可以保留为不同候选，同一物理散射体附近的重复峰则合并。
 
-候选确定后，frontend.py 对每个候选提取同一距离的阵列数据，使用 local_music 或 local_music_ml 在候选邻域内估计 AoA，并通过固定 steering matrix 重建 slow-time IQ。local_music_ml 在局部协方差和噪声子空间基础上，用变量投影/非线性最小二乘细化角度；如果候选数量超出局部处理能力，则回退到粗角度 FFT，保证整条记录仍能完成处理。
+候选确定后，frontend.py 在固定 DBF 网格上提取每个候选的复数 slow-time IQ，并由 IQ 圆模块得到圆心、半径归一化相位。该前端保持复数相位和目标索引不变，交给后端按时间递推。
 
-因此，本研究的第一个创新点应写成“记录级距离—角度参考目标构造与局部 AoA 相位提取”。它解决的是同 range 多角度散射体的目标定义和相位分离问题，当前代码已经实现；后续仍需用实测数据验证角度轴、阵列误差和多径条件下的稳定性。
+因此，本研究的第一个方法模块是“记录级距离—角度参考目标构造与 DBF 相位提取”。它解决的是同 range 多角度散射体的目标定义和相位分离问题，当前代码已经实现；后续仍需用实测数据验证角度轴、阵列误差和多径条件下的稳定性。
 
 ### 2.3 直接 AoA 与固定几何转换系数
 
@@ -95,11 +95,11 @@ p_i=|\cos\hat\theta_i|,
 \qquad
 \beta_i=1/\max(p_i,\epsilon_p)
 $$
-计算 LoS 位移到结构方向位移的转换系数。fixed_geometry_beta_structural_kalman 将该 beta 作为固定观测几何，整段记录内不再用 Kalman 后验或加速度数据反向更新。
+计算 LoS 位移到结构方向位移的转换系数。base_iq_circle_structural_kalman 将该 beta 作为固定观测几何，整段记录内不再用 Kalman 后验或加速度数据反向更新。
 
 这条路径的研究意义是提供一个可复现的、因果边界清楚的基线主方法：AoA 负责几何冷启动，Kalman 负责相位分支和结构主相位融合。它把阵列角度误差、安装姿态误差和真实 target 几何误差暴露为可单独评估的误差源，便于后续开展角度标定或 beta 消融。
 
-rank-1/ADXL 独立 beta 预校准、公共角度偏差搜索、holdout 门控以及 beta-confidence 路径仍保留在代码中，可作为历史方案或消融对照；论文正文不能把它们写成当前 direct 主链已经使用的步骤。
+历史 beta 预校准、在线反馈和质量门控分支已从当前算法代码移除，不属于论文主链。
 
 ### 2.4 固定几何下的结构主相位 Kalman 融合
 
@@ -177,7 +177,7 @@ ADC cube
   -> 记录级 range-angle 幅值统计和二维峰值
   -> 近角峰合并、远角峰保留、动态范围和候选数限制
   -> 候选复数序列
-  -> local_music / local_music_ml AoA 与局部 steering 重建
+  -> 固定 DBF 角度 bin 提取目标 IQ
   -> beta_i = 1 / max(abs(cos(theta_i)), eps)
   -> 加速度实际 dt 预积分
   -> 结构主相位预测与 LoS 2pi 分支选择
@@ -319,13 +319,13 @@ $$
 
 ### 4.7 转换系数的直接 AoA 计算与冻结
 
-当前主方法中，AoA 是 beta 的唯一在线前端来源。对第 i 个候选，局部 MUSIC/ML 估计得到角度 theta_i 后，代码按
+当前主方法中，AoA 是 beta 的唯一在线前端来源。对第 i 个候选，固定 DBF 角度网格 估计得到角度 theta_i 后，代码按
 $$
 \beta_i=\frac{1}{\max(|\cos\theta_i|,\epsilon_p)}
 $$
-计算固定转换系数。fixed_geometry_beta_structural_kalman 在正式滤波前把 beta 写入算法输入，之后整段记录保持不变。
+计算固定转换系数。base_iq_circle_structural_kalman 在正式滤波前把 beta 写入算法输入，之后整段记录保持不变。
 
-这里的“冻结”指不做以下操作：不做 rank-1 公共波形预校准、不读取 ADXL 做 beta 绝对尺度拟合、不用 holdout 门控选择 beta、不用 Kalman 后验重新估计 beta。这样可以清楚区分当前主方法与代码中保留的 beta-confidence、posterior-r 和 doc-strict 等旧/消融路径。
+这里的“冻结”指在记录内只由第一帧检测到的角度 bin 计算一次 beta，随后不读取 ADXL 反向拟合尺度，也不用 Kalman 后验重新估计 beta。
 
 当前结果应主要用于回答两个问题：局部 AoA 相比粗 FFT 是否改善了 beta 几何误差；固定 beta 的结构主相位融合能否在强缠绕、同 range 远角和目标 SNR 退化场景保持稳定。真实阵列幅相标定、角度轴校准和安装姿态误差仍需后续实验单独验证。
 
@@ -335,23 +335,20 @@ $$
 
 需要区分两类机制：
 
-- 当前主链：冷启动残差初始化后，再做后验残差驱动的 R 更新，Direct-AoA 配置中 use_quality_gated_r 为关闭；
-- 历史/消融路径：根据 SNR、幅值或质量分数启用额外 quality-gated R，或在前端在线增删目标。
-
-因此，目标退化实验可以检验固定目标集合、available mask 和后验残差 R 的组合鲁棒性，但不能把当前实现概括为“基于目标质量门控的在线目标管理器”。目标是否在某一帧可用由前端提供的 mask 决定，没有有效目标时滤波器只做预测。
+当前主链只使用冷启动残差初始化和后验残差驱动的目标测量方差更新，不启用额外的 SNR 门控或在线增删目标。目标是否在某一帧可用由前端提供的 mask 决定，没有有效目标时滤波器只做预测。
 
 ## 5. 论文参数仿真实验
 
-当前实验只保留 A20 论文参数驱动的仿真场景。`paper_bridge_simulation/response.py` 固定 24.768 m 梁、300 km/h、六阶频率与阻尼比，在 3 kHz、4 s 时间轴上生成准静态通车挠度和阻尼模态响应；总位移峰值与加速度由同一响应整体缩放到 1.712 mm，0.45 m/s² 仅是按论文图量级设置的假设参数。之后按 200 Hz 雷达和 1 kHz ADXL355 导出与 `capture_program/` 相同的输入目录。A20 响应真值只用于末端评价，雷达 ADC/IQ、ADXL 噪声和时间轴是可复现实验变量。
+当前实验只保留 A20 论文参数驱动的仿真场景。`paper_bridge_simulation/response.py` 固定 24.768 m 梁、300 km/h、六阶频率与阻尼比，在参考时间轴上生成三次 0.8 s 响应和 5 s 静止间隔；总位移峰值缩放到 1.712 mm。随后按 500 Hz 雷达帧率、每帧 4 个 MIMO loop 和 500 Hz ADXL355 时间轴导出与 `system/capture_program/` 相同的输入目录。A20 响应真值只用于末端评价，雷达 ADC/IQ、ADXL 噪声和时间轴是可复现实验变量。
 
 实验运行：
 
 ```bash
-python3 -m paper_bridge_simulation --output /tmp/paper_bridge_capture --duration 4 --seed 2026
-python3 -m algorithm.run --input /tmp/paper_bridge_capture --output /tmp/paper_bridge_result.npz
+python3 -m paper_bridge_simulation --output /tmp/paper_bridge_capture --duration 13 --seed 2026
+python3 -m system.algorithm.run --input /tmp/paper_bridge_capture --output /tmp/paper_bridge_result.npz
 ```
 
-算法链为：Range FFT 和 Angle DBF、记录级峰值检测、局部 MUSIC/ML AoA、冻结几何 beta、ADXL 原生时间轴预积分、加速度预测的结构主相位 Kalman，以及后验残差测量噪声更新。仿真 `truth/` 只用于输出 RMSE，不参与估计。
+算法链为：Hamming Range FFT、固定 Angle DBF、记录级峰值检测、因果 IQ 圆拟合、冻结几何 beta、ADXL 原生时间轴预积分、加速度预测的结构主相位 Kalman，以及后验残差测量噪声更新。仿真 `truth/` 只用于输出 RMSE，不参与估计。
 
 评价对象为冷启动相对位移：
 
@@ -364,7 +361,7 @@ $$
 ## 6. 论文创新点
 
 1. **记录级多目标参考构造**：从统一雷达 ADC 输入中得到距离—角度候选，合并近邻峰并保留有效参考目标。
-2. **连续 AoA 驱动的固定转换因子**：用局部 MUSIC/ML 精修目标角度，按安装几何计算 `beta=1/|cos(theta)|` 并整段冻结。
+2. **固定 DBF 角度驱动的几何转换因子**：按目标角度 bin 计算 `beta=1/|cos(theta)|` 并整段冻结。
 3. **异步加速度辅助的多目标结构主相位 Kalman**：保留雷达和 ADXL 原生时间轴，对 ADXL 做雷达区间预积分，利用多个目标共同更新结构主相位并按后验残差调整 `R`。
 
-Ma、旧多场景、online beta 和扩展 baseline 不属于当前主方法。
+历史比较分支和临时实验不属于当前主方法。

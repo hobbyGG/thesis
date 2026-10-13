@@ -8,9 +8,9 @@
 
 研究代码分成三个边界：
 
-1. `capture_program/` 负责真实 IWR1843/DCA1000 与 ADXL355 采集，并导出统一 `capture_root`。
+1. `system/capture_program/` 负责真实 IWR1843/DCA1000 与 ADXL355 采集，并导出统一 `capture_root`。
 2. `paper_bridge_simulation/` 以 A20 论文公开参数合成结构响应，生成雷达 ADC/IQ、ADXL355 和同步时间轴，也导出同一 `capture_root`。
-3. `algorithm/` 只读取 `capture_root`，运行论文算法，不生成场景、不读取真值参与估计、不控制硬件。
+3. `system/algorithm/` 只读取 `capture_root`，运行论文算法，不生成场景、不读取真值参与估计、不控制硬件。
 
 共同输入格式是：
 
@@ -30,7 +30,7 @@ ADC cube
 → Range FFT
 → Angle DBF / range-angle map
 → 整段记录级峰值检测与近邻峰合并
-→ 局部 MUSIC/ML 连续 AoA
+→ 固定 DBF 角度网格 AoA
 → slow-time IQ 与 wrapped LoS phase
 → beta_i = 1 / |cos(theta_i)|，整段冻结
 → ADXL 原生时间轴区间预积分
@@ -44,9 +44,9 @@ ADC cube
 
 对每帧 ADC cube 做距离 FFT，在虚拟阵元方向做角度 DBF，得到 (Z_k(r,\theta))。整段记录的中位数幅值图用于检测候选距离和角度。候选只来自 ADC，不使用目标真值。
 
-### 2. 连续 AoA 与等效转换因子
+### 2. 固定 DBF 角度与等效转换因子
 
-角度 FFT 只提供粗候选。对每个候选距离的阵元快拍做局部 MUSIC/ML 精修，得到连续角度 (hat\theta_i)。倒挂雷达的结构位移与视线位移关系写为：
+角度 DBF 直接给出可复现的离散角度候选。对每个候选距离—角度 bin 提取复数 slow-time IQ，倒挂雷达的结构位移与视线位移关系写为：
 
 \[
 \beta_i = \frac{1}{|\cos\hat\theta_i|},\qquad
@@ -94,7 +94,7 @@ z_{i,k}=\beta_i(\phi_{i,k}^{corr}-b_i),
 当前实验只保留 A20 论文参数驱动的仿真场景：A20 论文参数提供可复现的结构响应波形，雷达和 ADXL 观测按固定硬件参数合成，然后经过与实测采集相同的输入目录进入算法。实验重点是验证：
 
 - 论文参数合成运动能否通过统一采集包进入算法；
-- Range-Angle 与连续 AoA 是否能给出稳定的 (\beta_i)；
+- Range-Angle 与固定角度 bin 是否能给出稳定的 (\beta_i)；
 - 异步 ADXL 预测和多目标相位融合是否能恢复结构位移；
 - 输出结果是否可直接对照 A20 响应真值。
 
@@ -103,7 +103,7 @@ z_{i,k}=\beta_i(\phi_{i,k}^{corr}-b_i),
 论文只保留三点：
 
 1. **记录级多目标参考构造**：从距离—角度图提取多个参考目标，并结合有效性保留稳定目标集合。
-2. **连续 AoA 驱动的固定转换因子**：用局部 MUSIC/ML 替代角度 FFT 离散格点，得到连续角度和冻结几何 (\beta_i)。
+2. **固定 DBF 角度驱动的几何转换因子**：按角度 bin 计算并冻结几何 (\beta_i)，让每个参考目标在同一个结构主相位空间中可比。
 3. **异步加速度辅助的多目标结构主相位 Kalman**：原生时间轴预积分提供预测，多目标观测共同更新主相位，并用后验残差调整 (R_i)。
 
-Ma、旧多场景、online beta、自适应 beta 和扩展 baseline 不属于当前论文主链。
+历史比较分支和临时实验不属于当前论文主链。

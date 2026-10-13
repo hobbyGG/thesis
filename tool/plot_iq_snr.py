@@ -248,7 +248,7 @@ def main() -> None:
     parser.add_argument(
         "--output",
         type=Path,
-        default=ROOT / "reports/numerical_simulation_assets_png/iq_snr_target_comparison.png",
+        default=ROOT / "/tmp/iq_snr_target_comparison.png",
     )
     parser.add_argument("--duration", type=float, default=4.0, help="paper-response duration available to the plot")
     parser.add_argument("--frames", type=int, default=800, help="number of samples/frames to draw")

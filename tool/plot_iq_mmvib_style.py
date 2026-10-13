@@ -64,12 +64,12 @@ def main():
 
     axes[0].plot(target_iq[entry].real, target_iq[entry].imag, color="#0072B2", linewidth=0.9)
     axes[0].plot(np.cos(target_phase[entry]), np.sin(target_phase[entry]), color="#111111", linewidth=1.0)
-    axes[0].set_title(f"A20 entry segment\nraw 200 Hz, {TARGET_SNR_DB[0]:g} dB")
+    axes[0].set_title(f"A20 entry segment\nraw 500 Hz, {TARGET_SNR_DB[0]:g} dB")
     axes[0].text(0.04, 0.04, "60 samples, phase span 311°", transform=axes[0].transAxes, fontsize=8)
 
     axes[1].plot(target_iq[plateau].real, target_iq[plateau].imag, color="#D55E00", linewidth=0.9)
     axes[1].plot(np.cos(target_phase[plateau]), np.sin(target_phase[plateau]), color="#111111", linewidth=1.0)
-    axes[1].set_title(f"A20 plateau segment\nraw 200 Hz, {TARGET_SNR_DB[0]:g} dB")
+    axes[1].set_title(f"A20 plateau segment\nraw 500 Hz, {TARGET_SNR_DB[0]:g} dB")
     axes[1].text(0.04, 0.04, "60 samples, phase span 5.5°", transform=axes[1].transAxes, fontsize=8)
 
     for g, color in enumerate(MMVIB_COLORS):
@@ -83,7 +83,7 @@ def main():
 
     figure.suptitle("mmVib-inspired IQ presentation: raw A20 versus controlled reference", fontsize=11)
     figure.subplots_adjust(top=0.78, bottom=0.12, left=0.055, right=0.98, wspace=0.30)
-    output = ROOT / "reports/numerical_simulation_assets_png/iq_mmvib_style_comparison.png"
+    output = ROOT / "/tmp/iq_mmvib_style_comparison.png"
     figure.savefig(output, dpi=300, bbox_inches="tight")
     plt.close(figure)
     print(output)

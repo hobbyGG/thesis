@@ -4,10 +4,10 @@ This repository is an offline academic experiment, not a deployable service.
 
 The active data path has three parts:
 
-1. `capture_program/` acquires hardware data and exports the capture package.
+1. `system/capture_program/` acquires hardware data and exports the capture package.
 2. `paper_bridge_simulation/` uses the A20 paper-parameterized guideway response
    to produce the same capture package for repeatable parameterized simulations.
-3. `algorithm/` reads either package and writes the displacement result.
+3. `system/algorithm/` reads either package and writes the displacement result.
 
 Keep these boundaries explicit. Do not reintroduce Ma, legacy scenario
 registries, broad baseline runners, service layers, retry frameworks, or generic
@@ -18,7 +18,7 @@ arrays out. Numerical operations that are part of the method, such as phase
 wrapping, finite-value masks, covariance clipping, and measurement-noise
 clipping, are allowed and should stay close to the corresponding equation.
 
-`capture_program/` is the only boundary that may retain hardware lifecycle,
+`system/capture_program/` is the only boundary that may retain hardware lifecycle,
 packet-integrity, cleanup, and package-completeness checks. Those checks protect
 the acquisition contract and must not spread into the offline algorithm.
 

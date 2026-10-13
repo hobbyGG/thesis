@@ -96,8 +96,8 @@ def plot_response(output: str | Path, csv_output: str | Path) -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", type=Path, default=ROOT / "reports/numerical_simulation_assets_png/a20_paper_response.png")
-    parser.add_argument("--csv", type=Path, default=ROOT / "reports/numerical_simulation_assets_csv/a20_paper_response.csv")
+    parser.add_argument("--output", type=Path, default=ROOT / "/tmp/a20_paper_response.png")
+    parser.add_argument("--csv", type=Path, default=ROOT / "/tmp/a20_paper_response.csv")
     args = parser.parse_args()
     plot_response(args.output, args.csv)
 

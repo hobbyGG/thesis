@@ -97,7 +97,7 @@ def plot_results(result_path: str | Path, output: str | Path) -> Path:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--result", type=Path, required=True)
-    parser.add_argument("--output", type=Path, default=ROOT / "reports/numerical_simulation_assets_png/a20_algorithm_diagnostics.png")
+    parser.add_argument("--output", type=Path, default=ROOT / "/tmp/a20_algorithm_diagnostics.png")
     args = parser.parse_args()
     plot_results(args.result, args.output)
 

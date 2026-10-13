@@ -1,6 +1,6 @@
 """Observable physics checks for the paper-parameterized capture package.
 
-These tests deliberately consume the same files as ``algorithm.run``.  They
+These tests deliberately consume the same files as ``system.algorithm.run``.  They
 do not inspect private simulation state: a generated package is the boundary
 between the physical model and the retained algorithm.
 """
