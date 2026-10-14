@@ -101,7 +101,7 @@ def run(input_dir: str | Path, output: str | Path) -> tuple[Path, Path]:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Run the base displacement algorithm on a capture package.")
+    parser = argparse.ArgumentParser(description="Run the structural displacement estimation algorithm on a capture package.")
     parser.add_argument("--input", required=True, type=Path, help="capture package directory")
     parser.add_argument("--output", required=True, type=Path, help="result .npz path or output directory")
     args = parser.parse_args()

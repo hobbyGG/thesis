@@ -1,7 +1,7 @@
-# Base 数据流与实验边界
+# 本文算法数据流与实验边界
 
-本文档与 [Base 方法说明](current_method_specification.md) 配套，说明从硬件采集或
-A20 参数仿真到结构位移输出的唯一数据路径。
+本文档与 [本文算法方法说明](current_method_specification.md) 配套，说明从硬件采集或
+A20 参数化仿真到结构位移输出的唯一数据路径。
 
 ## 1. 三层边界
 
@@ -10,20 +10,20 @@ system/capture_program/
   IWR1843 + DCA1000 + ADXL355 + 时间轴
           ↓ capture_root
 paper_bridge_simulation/
-  A20 q(t)、a(t) 和同格式观测包
+  A20 q(t)、a(t) 与同格式采集包
           ↓ capture_root
 system/algorithm/
-  Range FFT → DBF → IQ 圆 → beta → ADXL 预积分 → Kalman
+  Range FFT → DBF → IQ 圆心补偿 → β_i → ADXL 预积分 → Kalman
 ```
 
-算法只读取输入包，不读取 PCAP、不控制设备、不生成场景。仿真 `truth/` 只用于
-末端评价。
+算法只读取采集包，不读取 PCAP、不控制设备、不生成仿真场景。仿真 `truth/` 仅用于
+末端评估。
 
 ## 2. 实测采集链
 
 IWR1843BOOST 产生 TX0/TX2 TDM-MIMO chirp，DCA1000 接收 LVDS 数据；树莓派负责
-雷达 UART、DCA 数据、ADXL355 SPI/DRDY 和同步时间轴。采集程序先完成硬件生命周期、
-包完整性和文件完整性检查，再导出：
+雷达 UART、DCA 数据、ADXL355 SPI/DRDY 及同步时间轴。采集程序先完成硬件生命周期、
+数据包完整性与文件完整性检查，再导出：
 
 ```text
 radar/algorithm_input/adc_cube.npy
@@ -37,87 +37,92 @@ sync/timeline.json
 sync/radar_adc_sample_monotonic_ns.npy
 ```
 
-雷达使用 77 GHz、256 ADC 点、5.209 MS/s、70 MHz/μs 斜率、4 个 MIMO loop、
-500 Hz 帧周期。每帧的 4 个 loop 保留在无损 `chirp_cube`，并沿 loop 做复数平均，
-得到 base 使用的 `adc_cube`。ADXL355 使用 500 Hz ODR，算法保留其原生时间戳，
-不把两个时钟伪造为同一采样流。
+雷达参数为：起始载频 77 GHz，256 个 ADC 采样点，采样率 5.209 MS/s，调频斜率
+70 MHz/μs，每帧 4 个 MIMO loop，帧周期 2 ms（500 Hz）。每帧的 4 个 loop 保留在无损
+`chirp_cube` 中，并沿 loop 维做复数相干平均，得到算法使用的 `adc_cube`。ADXL355
+输出数据率为 500 Hz，算法保留其原生时间戳，不将两个独立时钟的数据重采样为同一
+采样流。
 
-## 3. A20 参数仿真
+## 3. A20 参数化仿真
 
-`response.py` 根据 A20 公开的梁长、车速、六阶频率和阻尼生成共同的结构位移
-(q(t)) 与加速度 (a(t))。每次响应为 0.8 s，响应间隔 5 s，总记录 13 s；总位移
-峰值缩放到 1.712 mm。
+`response.py` 依据 A20 文献公开的梁长、车速、六阶模态频率与阻尼，生成共同的结构
+位移 $q(t)$ 与加速度 $a(t)$。每次车辆通过响应持续 0.8 s，响应间隔 5 s，总记录 13 s；
+总位移峰值缩放至 1.712 mm。
 
-`package_builder.py` 按同一硬件时间参数生成每个 ADC 快时间点：
+`package_builder.py` 按与实测一致的硬件时序参数逐 ADC 快时间采样点生成信号。
+目标差拍频率与相位为
 
-\[
-f_b=2SR/c,
+$$
+f_b = \frac{2SR}{c},
 \qquad
-\phi_R=4\pi R/\lambda.
-\]
+\phi_R = \frac{4\pi R}{\lambda}.
+$$
 
-模型包含目标 LOS 投影、传播相位、TDM 阵列相位、距离衰减、弱多径、静态散射、
-RX 幅相误差、简化公共相噪、接收噪声和 ADC 量化。雷达数据按 32 帧分块写入
-memmap，固定散射相位贯穿整段记录，避免分块边界产生非物理跳变。
+模型包含目标 LOS 投影、传播相位、TDM 阵列相位、距离衰减、弱多径、静态散射体、
+接收通道幅相失配、简化的公共相位噪声、接收机噪声与 ADC 量化。雷达数据按每块 32 帧
+写入内存映射文件，静态散射体的相位在整段记录内保持连续，避免分块边界处出现非物理
+的相位跳变。
 
-## 4. Base 算法
+## 4. 本文算法
 
-### 4.1 读包和时间轴
+### 4.1 采集包读取与时间轴
 
-`io.load_capture_package()` 读取帧级 `adc_cube`、雷达参考时间、ADXL 原生加速度
-和时间戳。算法使用 ADC 孔径中心对应的雷达时间，随后以每两个雷达时间戳之间的
-区间作为预积分边界。
+`io.load_capture_package()` 读取帧级 `adc_cube`、雷达参考时间、ADXL 原生加速度及其
+时间戳。算法采用与 ADC 孔径中心对应的雷达时间，并以相邻雷达时间戳之间的区间作为
+预积分边界。
 
-### 4.2 Range FFT 和 Angle DBF
+### 4.2 Range FFT 与 DBF
 
-每帧 ADC 沿快时间乘 Hamming 窗后做普通 FFT。对 8 个虚拟阵元使用半波长 steering
-vector 做 DBF，得到距离—角度复数图。首个观测的幅值图通过局部峰值、MAD 阈值、
-近邻峰合并和动态范围筛选出最多 5 个候选。
+每帧 ADC 数据沿快时间乘 Hamming 窗后做 FFT。对 8 个虚拟阵元，采用半波长间距的
+导向矢量做 DBF，得到距离—角度复数图。首帧幅值图经局部峰值检测、MAD 阈值、近邻
+峰合并与动态范围筛选，至多保留 5 个候选目标。
 
-### 4.3 目标 IQ
+### 4.3 目标慢时间 IQ 与转换系数
 
-后续所有帧只从冻结的目标 range/angle bin 读取复数 DBF 输出，得到目标级
-(z_{i,k}=I_{i,k}+jQ_{i,k})。目标角度由 DBF bin 给出，
-(\betaeta_i=1/|\cos\theta_i|) 并在记录内冻结。
+其后各帧仅在固定的目标 range/angle 单元处读取复数 DBF 输出，得到目标级慢时间序列
+$z_{i,k}=I_{i,k}+jQ_{i,k}$。目标角度 $\theta_i$ 由 DBF 角度单元给出，转换系数
+$\beta_i = 1/|\cos\theta_i|$ 在整段记录内保持固定。
 
-### 4.4 因果 IQ 圆和相位
+### 4.4 IQ 圆心补偿与相位提取
 
-每个目标独立递推代数圆拟合。当前点及此前点估计圆心后，计算：
+对每个目标独立递推地做代数（Kåsa 型）圆拟合，第 $k$ 帧的圆心 $c_{i,k}$ 仅由
+$0,\dots,k$ 时刻的样本估计。相位增量以当前圆心作为相邻两个样本的共同参考：
 
-\[
-\Delta\phi_{i,k}=\arg[(z_{i,k}-c_{i,k})(z_{i,k-1}-c_{i,k})^*].
-\]
+$$
+\Delta\phi_{i,k} = \arg\!\left[(z_{i,k}-c_{i,k})\,(z_{i,k-1}-c_{i,k})^{*}\right].
+$$
 
-累积相位取包裹值，Kalman 输入阶段以目标上一时刻相位做最近 (2\pi) 分支连续。
-ADXL 不参与圆拟合和解缠分支选择。
+累积相位取主值包裹，随后以目标上一时刻的展开相位为参考做最近邻 $2\pi$ 展开。
+ADXL 不参与圆拟合与相位展开。
 
 ### 4.5 ADXL 预积分
 
-对每个雷达区间使用原生 ADXL 样本做梯形积分，得到：
+对每个雷达区间，以区间内的 ADXL 原生采样为节点对加速度做分段线性积分，区间端点
+取不晚于端点的最近 ADXL 样本，得到
 
-\[
-\Delta v_k=\int_{t_k}^{t_{k+1}}a(t)dt,
+$$
+\Delta v_k = \int_{t_{k-1}}^{t_k} a(t)\,\mathrm{d}t,
 \qquad
-\Delta q_k=\int_{t_k}^{t_{k+1}}v(t)dt.
-\]
+\Delta q_k = \int_{t_{k-1}}^{t_k}\!\!\int_{t_{k-1}}^{s} a(\tau)\,\mathrm{d}\tau\,\mathrm{d}s .
+$$
 
-### 4.6 共享结构相位 Kalman
+### 4.6 共享结构相位 Kalman 滤波
 
-状态为结构主相位和相位变化率。ADXL 预积分进入状态预测；每个目标的 LOS 相位乘
-冻结 (\betaeta_i) 后形成同一结构状态的观测。当前有效目标先按 (R_i^{-1}) 做一次
-加权合并，再执行一次 Kalman 更新。(R_i) 根据每个目标后验残差递推，输出
-(q=\lambda\Theta/(4\pi))。
+状态为结构主相位及其变化率。ADXL 预积分量作为控制输入进入状态预测；各目标 LOS
+相位乘以固定转换系数 $\beta_i$ 后，构成对同一结构状态的观测。当前有效目标按
+$R_i^{-1}$ 加权合并后执行一次 Kalman 更新；$R_i$ 由各目标的后验残差递推更新。
+位移输出为 $q=\lambda\Theta/(4\pi)$。
 
-## 5. 评价边界
+## 5. 评估边界
 
-仿真结果可报告统一输入包、目标提取、相位圆拟合、ADXL 预积分和共享 Kalman 的
-链路 RMSE。它不能替代真实激光对照；真实数据还需要独立确认阵列幅相、安装角、
-雷达有效载频、雷达时间延迟和 ADXL 轴向/延迟校准。
+仿真结果可用于评估统一采集包、目标提取、IQ 圆心补偿、ADXL 预积分与共享 Kalman
+滤波整条处理链的误差（RMSE）。其结论不能替代与激光位移计的实测对比；实测数据还须
+独立标定阵列幅相、安装角、雷达等效载频、雷达时间延迟，以及 ADXL 的轴向与延迟。
 
 完整入口：
 
 ```bash
 python3 -m system.algorithm.run \
   --input /path/to/capture_root \
-  --output /tmp/base-result.npz
+  --output /tmp/algorithm-result.npz
 ```

@@ -1,6 +1,6 @@
 # A20 论文参数响应仿真
 
-该目录生成与真实采集一致的 `capture_root`，供唯一 base 算法直接读取。它不读取
+该目录生成与真实采集一致的 `capture_root`，供算法直接读取。它不读取
 激光 TDMS，也不复现未公开的完整车辆—梁耦合模型；`response.py` 使用 A20 公开
 参数合成可重复的结构响应。
 
@@ -21,7 +21,7 @@ python3 -m system.algorithm.run \
 
 雷达观测模型使用 IWR1843 参数：77 GHz、70 MHz/µs 斜率、256 ADC 点、5.209 MS/s、
 500 Hz 外部触发、每帧 4 个 MIMO loop。每个 loop 包含 TX0 和 TX2 两个 TDM chirp，
-每个 chirp 使用 4 RX；4 个 loop 的复数数据平均得到 base 使用的 `adc_cube.npy`。
+每个 chirp 使用 4 RX；4 个 loop 的复数数据平均得到算法使用的 `adc_cube.npy`。
 无损 `chirp_cube.npy` 同时保留在输入包中，用于采集契约和后续数据追溯。
 
 雷达数组按 32 帧分块生成并直接写入 `.npy`，不会把完整记录的 `complex128` 数组

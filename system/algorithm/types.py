@@ -33,7 +33,6 @@ class RadarInput:
     available_mask: np.ndarray
     selected_indices: np.ndarray
     initial_r: np.ndarray
-    selection_scores: np.ndarray
     extra: dict[str, Any] = field(default_factory=dict)
 
 

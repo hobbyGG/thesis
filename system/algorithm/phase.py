@@ -1,24 +1,38 @@
 import numpy as np
 
 
-def prediction_correct_wrapped_phase(wrapped, prediction):
-    wrapped = np.asarray(wrapped, dtype=float)
-    prediction = np.asarray(prediction, dtype=float)
-    return wrapped + 2.0 * np.pi * np.round((prediction - wrapped) / (2.0 * np.pi))
+def unwrap_nearest_branch(wrapped_phase_rad, available_mask, selected_indices):
+    """Nearest-2*pi unwrapping of each selected target from its previous valid phase.
+
+    phi_u[k] = phi_w[k] + 2*pi*round((phi_u[k-1] - phi_w[k]) / (2*pi)).
+    The first valid sample is kept as is; a missing sample leaves the
+    reference at the last valid unwrapped phase.  Acceleration is not used.
+    """
+
+    wrapped = np.asarray(wrapped_phase_rad, dtype=float)
+    unwrapped = np.full(wrapped.shape, np.nan, dtype=float)
+    for i in np.asarray(selected_indices, dtype=int):
+        previous = np.nan
+        for k in range(wrapped.shape[1]):
+            phase = wrapped[i, k]
+            if not (available_mask[i, k] and np.isfinite(phase)):
+                continue
+            if np.isfinite(previous):
+                phase += 2.0 * np.pi * np.round((previous - phase) / (2.0 * np.pi))
+            unwrapped[i, k] = previous = phase
+    return unwrapped
 
 
-def causal_iq_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e-12):
-    """Estimate a running IQ-circle center and return wrapped phase.
+def recursive_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e-12):
+    """Recursive algebraic (Kasa) circle fit of slow-time IQ and phase extraction.
 
-    The sufficient statistics are updated in time order.  At sample ``k`` the
-    circle fit therefore uses samples through ``k`` only.  A changing center
-    must not create a fictitious phase step, so each increment uses the
-    current center for both the current and previous IQ sample.  The returned
-    phase is referenced to zero at the first valid sample and is wrapped to
-    ``(-pi, pi]``; the Kalman stage performs only the ordinary nearest-branch
-    continuation from the previous target phase.  The fifth return value is
-    the centered, radius-normalized IQ stream for diagnostics and later
-    fusion extensions.
+    The normal equations are accumulated in time order, so the circle centre
+    c_k depends on samples 0..k only.  Each phase increment is the angle
+    between consecutive samples measured about the current centre c_k, which
+    prevents a centre update from producing a spurious phase step.  The
+    accumulated phase is zero at the first valid sample and is wrapped to
+    (-pi, pi].  Returns (wrapped phase, centre, radius, radial residual,
+    centred radius-normalised IQ); the last three are diagnostics only.
     """
 
     values = np.asarray(iq_slow_time, dtype=np.complex128)

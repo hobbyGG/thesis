@@ -1,6 +1,6 @@
-# Base 结果工具
+# 结果分析工具
 
-这些脚本只服务于当前 A20 仿真和 base 算法结果，不参与采集或估计主链。
+这些脚本只服务于当前 A20 仿真和算法结果，不参与采集或估计主链。
 
 生成 A20 响应图：
 
@@ -12,7 +12,7 @@ python3 tool/simulate_a20_response.py
 
 ```bash
 python3 tool/plot_algorithm_results.py \
-  --result /tmp/base-result.npz
+  --result /tmp/algorithm-result.npz
 ```
 
 `plot_iq_mmvib_style.py` 和 `plot_iq_snr.py` 用于检查 IQ 轨迹与噪声敏感性；

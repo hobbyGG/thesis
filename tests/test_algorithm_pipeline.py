@@ -11,6 +11,7 @@ from system.algorithm.config import AlgorithmConfig
 from system.algorithm.frontend import extract_dbf_targets_streaming, range_angle_process
 from system.algorithm.io import build_algorithm_inputs, load_capture_package
 from system.algorithm.kalman import run_fixed_beta_kalman
+from system.algorithm.phase import recursive_circle_phase, unwrap_nearest_branch
 from system.algorithm.run import run
 from system.algorithm.selection import detect_target_bins
 
@@ -37,7 +38,7 @@ class AlgorithmPipelineTest(unittest.TestCase):
             self.assertEqual(streamed.wrapped_phase_rad.shape, (5, 500))
             self.assertTrue(np.all(streamed.available_mask))
 
-    def test_paper_bridge_package_uses_base_algorithm_contract(self):
+    def test_paper_bridge_package_matches_algorithm_contract(self):
         with tempfile.TemporaryDirectory() as temporary:
             package = Path(temporary) / "capture"
             result = Path(temporary) / "result.npz"
@@ -71,25 +72,43 @@ class AlgorithmPipelineTest(unittest.TestCase):
         ) / np.linalg.norm(acceleration[interior])
         self.assertLess(relative_error, 2.0e-3)
 
-    def test_cold_start_initializes_target_measurement_variances(self):
+    def test_initial_measurement_variance_decreases_with_amplitude(self):
         with tempfile.TemporaryDirectory() as temporary:
             package = Path(temporary) / "capture"
             package_builder.generate(package, duration_s=1.0, seed=2026)
             capture = load_capture_package(package)
-            radar, acceleration, _, radar_rate = build_algorithm_inputs(capture)
-            residual = run_fixed_beta_kalman(
-                radar,
-                acceleration,
-                AlgorithmConfig(sample_rate_hz=radar_rate, min_measurement_variance=1.0e-8),
-            )
-            self.assertGreater(np.ptp(residual.extra["initial_r"][radar.selected_indices]), 0.0)
+            radar, acceleration, targets, radar_rate = build_algorithm_inputs(capture)
+            selected = radar.selected_indices
+            amplitude = np.abs(targets.slow_time[selected, 0])
+            initial_r = radar.initial_r[selected]
+            self.assertGreater(np.ptp(initial_r), 0.0)
+            self.assertTrue(np.all(np.diff(initial_r[np.argsort(amplitude)]) <= 1.0e-12))
+            result = run_fixed_beta_kalman(radar, acceleration, AlgorithmConfig(sample_rate_hz=radar_rate))
+            np.testing.assert_allclose(result.beta_hat, radar.measured_beta)
 
-            fixed = run_fixed_beta_kalman(
-                radar,
-                acceleration,
-                AlgorithmConfig(sample_rate_hz=radar_rate, cold_start_r_mode="fixed"),
-            )
-            self.assertTrue(np.allclose(fixed.extra["initial_r"], radar.initial_r))
+    def test_recursive_circle_phase_is_causal_and_removes_center_offset(self):
+        k = np.arange(400)
+        true_phase = 1.5 * np.sin(2.0 * np.pi * k / 200.0)
+        iq = (0.8 + 0.5j) + np.exp(1j * true_phase)
+        wrapped, centers, radii, _, _ = recursive_circle_phase(iq[None, :])
+        # Before the first accepted fit the phase is referenced to the origin;
+        # that cold-start error remains as a constant offset afterwards.
+        converged = np.flatnonzero(np.abs(centers[0]) > 0.0)[0]
+        error = wrapped[0, converged:] - true_phase[converged:]
+        self.assertLess(np.max(np.abs(error - np.mean(error))), 1.0e-6)
+        self.assertLess(abs(centers[0, -1] - (0.8 + 0.5j)), 1.0e-6)
+        self.assertLess(abs(radii[0, -1] - 1.0), 1.0e-6)
+        prefix, _, _, _, _ = recursive_circle_phase(iq[None, :250])
+        np.testing.assert_array_equal(prefix[0], wrapped[0, :250])
+
+    def test_nearest_branch_unwrapping_continues_across_wrap_and_gaps(self):
+        true_phase = np.linspace(0.0, 6.0 * np.pi, 120)
+        wrapped = np.angle(np.exp(1j * true_phase))[None, :]
+        available = np.ones_like(wrapped, dtype=bool)
+        available[0, 40:43] = False
+        unwrapped = unwrap_nearest_branch(wrapped, available, [0])
+        self.assertTrue(np.all(np.isnan(unwrapped[0, 40:43])))
+        np.testing.assert_allclose(unwrapped[0, available[0]], true_phase[available[0]], atol=1.0e-12)
 
 
 if __name__ == "__main__":

@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 import numpy as np
 
 from .config import AlgorithmConfig
-from .phase import prediction_correct_wrapped_phase
+from .phase import unwrap_nearest_branch
 from .types import AccelerationInput, RadarInput
 
 
@@ -21,11 +21,14 @@ class AlgorithmResult:
 
 
 def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, config: AlgorithmConfig) -> AlgorithmResult:
-    """Fuse causal IQ-circle phase observations with native-time acceleration.
+    """Shared structural-phase Kalman filter.
 
-    Phase continuation uses the previous valid phase of each target.  The
-    acceleration prediction is used by the state model and update weighting;
-    it is deliberately not used to choose a phase-wrap branch.
+    State: [Theta, Theta_dot] with Theta = 4*pi*q/lambda.  The preintegrated
+    ADXL increments enter the prediction as a control input.  Each target's
+    wrapped phase is continued to the 2*pi branch nearest its own previous
+    phase; acceleration is not used to select the branch.  Valid targets are
+    merged by inverse-variance weighting into one scalar update per frame, and
+    each target's variance is then updated from its posterior residual.
     """
 
     targets, samples = radar.wrapped_phase_rad.shape
@@ -36,26 +39,10 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
         config.max_measurement_variance,
     )
     selected = np.asarray(radar.selected_indices, dtype=int)
-    corrected = np.full((targets, samples), np.nan, dtype=float)
-    previous_phase = np.full(targets, np.nan, dtype=float)
     preintegration = acceleration.preintegration
     reference_dt = float(radar.extra.get("sample_period_s", 1.0 / config.sample_rate_hz))
 
-    # First pass: ordinary nearest-2pi continuation, independent of ADXL.
-    for k in range(samples):
-        active = [i for i in selected if radar.available_mask[i, k] and np.isfinite(radar.wrapped_phase_rad[i, k])]
-        for i in active:
-            wrapped = float(radar.wrapped_phase_rad[i, k])
-            if np.isfinite(previous_phase[i]):
-                # Ordinary nearest-2pi continuation from the preceding target
-                # phase.
-                los = float(prediction_correct_wrapped_phase(wrapped, previous_phase[i]))
-            else:
-                los = wrapped
-            previous_phase[i] = los
-            corrected[i, k] = los
-
-    beta = np.broadcast_to(beta_aoa[:, None], (targets, samples)).copy()
+    corrected = unwrap_nearest_branch(radar.wrapped_phase_rad, radar.available_mask, selected)
 
     x = np.array([0.0, 0.0], dtype=float)
     p = np.diag([config.initial_state_variance, config.initial_rate_variance])
@@ -79,7 +66,7 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
             observations = []
             variances = []
             for i in active:
-                observations.append(beta[i, k] * corrected[i, k])
+                observations.append(beta_aoa[i] * corrected[i, k])
                 variances.append(r[i])
             observations = np.asarray(observations)
             variances = np.asarray(variances)
@@ -109,15 +96,15 @@ def run_fixed_beta_kalman(radar: RadarInput, acceleration: AccelerationInput, co
         theta_hat_rad=theta,
         theta_dot_hat_radps=rate,
         los_corrected_phase_rad=corrected,
-        beta_hat=beta[:, -1] if samples else beta_aoa,
+        beta_hat=beta_aoa,
         r_theta_history=r_history,
         innovation_rad=innovation,
         extra={
             "selected_indices": selected,
             "beta_source": "frozen_aoa_geometry",
-            "adaptive_r_mode": "causal_posterior",
+            "adaptive_r_mode": "posterior_residual",
             "phase_unwrap_mode": "previous_target_phase",
-            "circle_source": "causal_algebraic_fit",
+            "circle_source": "recursive_algebraic_fit",
             "initial_r": initial_r,
         },
     )

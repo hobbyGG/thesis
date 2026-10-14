@@ -67,7 +67,7 @@ def load_capture_package(root: str | Path) -> CapturePackage:
 
 def build_algorithm_inputs(capture: CapturePackage):
     from .frontend import extract_dbf_targets_streaming, range_angle_process
-    from .phase import causal_iq_circle_phase
+    from .phase import recursive_circle_phase
     from .selection import detect_target_bins, select_targets
 
     radar_time_ns = np.asarray(capture.radar_time_ns, dtype=np.int64)
@@ -82,7 +82,7 @@ def build_algorithm_inputs(capture: CapturePackage):
     targets = extract_dbf_targets_streaming(
         stream_cube, range_bins, angle_bins, capture.frontend
     )
-    wrapped, centers, radii, circle_residual, normalized_iq = causal_iq_circle_phase(
+    wrapped, centers, radii, circle_residual, normalized_iq = recursive_circle_phase(
         targets.slow_time
     )
     targets = type(targets)(
@@ -108,14 +108,13 @@ def build_algorithm_inputs(capture: CapturePackage):
     acceleration = AccelerationInput(
         capture.adxl_time_ns, structural_accel, preintegration
     )
-    selected, initial_r, scores = select_targets(targets)
+    selected, initial_r = select_targets(targets)
     radar = RadarInput(
         targets.measured_beta,
         targets.wrapped_phase_rad,
         targets.available_mask,
         selected,
         initial_r,
-        scores,
         {
             "angle_deg": targets.angle_deg,
             "range_bins": targets.range_bins,

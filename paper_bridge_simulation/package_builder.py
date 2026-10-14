@@ -346,6 +346,8 @@ def _adxl_package(root: Path, acceleration: np.ndarray, seed: int) -> None:
         ADXL_NOISE_DENSITY_G_PER_SQRT_HZ * 9.80665
         * np.sqrt(ADXL_RATE_HZ / 2.0)
     )
+    # The delay is applied to the samples but not removed from the timestamps,
+    # so it acts as an uncalibrated timing error for the estimator.
     delay_samples = int(round(ADXL_GROUP_DELAY_S * ADXL_RATE_HZ))
     delayed_acceleration = np.empty_like(acceleration)
     delayed_acceleration[:delay_samples] = acceleration[0]
@@ -371,9 +373,11 @@ def _adxl_package(root: Path, acceleration: np.ndarray, seed: int) -> None:
                    "noise_density_g_per_sqrt_hz": ADXL_NOISE_DENSITY_G_PER_SQRT_HZ,
                    "bias_mps2": ADXL_BIAS_MPS2.tolist(), "scale_x": 1.0003,
                    "cross_axis_coefficients": [0.001, -0.0007],
-                   "digital_group_delay_s": ADXL_GROUP_DELAY_S},
+                   "digital_group_delay_s": ADXL_GROUP_DELAY_S,
+                   "applied_delay_samples": round(ADXL_GROUP_DELAY_S * ADXL_RATE_HZ)},
         "capture": {"complete": True, "samples": sample_count, "odr_hz_nominal": ADXL_RATE_HZ, "range_g": 2,
-                    "group_delay_ns": round(ADXL_GROUP_DELAY_S * 1.0e9), "group_delay_calibrated": True,
+                    "group_delay_ns": round(round(ADXL_GROUP_DELAY_S * ADXL_RATE_HZ) / ADXL_RATE_HZ * 1.0e9),
+                    "group_delay_calibrated": False,
                     "native_summary": {"samples": sample_count, "mock": True, "simulation": True}},
         "timing": {"clock": "CLOCK_MONOTONIC", "drdy_monotonic_ns_semantics": "synthetic nominal DRDY schedule",
                    "estimated_sample_monotonic_ns_semantics": "synthetic nominal sample schedule"},
