@@ -2,6 +2,9 @@
 
 本目录服务于“毫米波雷达 + ADXL355 测量磁浮轨道梁振动”的方法拼接。目标是先把已有雷达链路拆成可复用模块，再讨论论文主创新。这里收集的是**方法模块**，不把论文摘要中的所有贡献都当作新方法。
 
+IQ 圆拟合、CW 圆心/DC offset、I/Q 椭圆校正的集中参考索引见
+[`01_cw_iq_interferometry/IQ_circle_and_CW_references.md`](01_cw_iq_interferometry/IQ_circle_and_CW_references.md)。
+
 更新时间：2026-10-08。源目录中的 PDF 通过硬链接汇总到本目录，因此不会额外复制一份大文件；`_web_supplements/` 是本轮从作者、机构仓储或公开出版社入口取得的补充全文。原始目录仍保留。
 
 ### 统计口径
@@ -70,6 +73,7 @@
 
 | 论文 | 主要模块 | 原始体制/场景 | 与 mmVib 或本课题的关系 | 来源 |
 |---|---|---|---|---|
+| Kåsa, 1976, A Curve Fitting Procedure and Its Error Analysis | M04：代数圆拟合 | 通用最小二乘/微波测量 | 当前递推 IQ 圆拟合的数学基础；不是雷达专属创新 | [DOI](https://doi.org/10.1109/TIM.1976.6312298) |
 | Park et al., 2007, Arctangent Demodulation With DC Offset Compensation in Quadrature Doppler Radar Receiver Systems | M03/M05：DC offset 补偿 + atan2 解调 | 微波正交 CW Doppler，生命体征 | 圆弧 I/Q 解调的早期代表；不是 mmVib 首创 | [DOI](https://doi.org/10.1109/TMTT.2007.895653) |
 | Mikhelson et al., 2011, Remote Sensing of Heart Rate and Patterns of Respiration on a Stationary Subject Using 94-GHz Millimeter-Wave Interferometry | M04/M05/M06：I/Q 去均值、圆弧中心、相位解缠 | 94 GHz CW 干涉 | 证明圆弧中心去偏和相位→位移可迁移到毫米波 | [DOI](https://doi.org/10.1109/TBME.2011.2111371) |
 | Wang et al., 2014, Noncontact Distance and Amplitude-Independent Vibration Measurement Based on an Extended DACM Algorithm | M05：extended DACM | 微波 CW | 绕开 atan2 值域与零点问题的相位模块 | [DOI](https://doi.org/10.1109/TIM.2013.2277530) |
@@ -80,6 +84,7 @@
 | Li et al., 2015, A Noncontact FMCW Radar Sensor for Displacement Measurement in SHM | M01/M09：beat、Range FFT、range-bin 相位、多目标距离分离 | FMCW 结构监测 | FMCW 位移链的基础前序 | [DOI](https://doi.org/10.3390/s150407412) |
 | Ding et al., 2016, Vibration Parameter Estimation Using FMCW Radar | M01/M02/M07：FMCW 振动模型、参数估计、CRLB | FMCW | 把振动频率/幅值估计写成参数估计问题 | [DOI](https://doi.org/10.1109/ICASSP.2016.7472072) |
 | Xiong et al., 2018, Accurate and Robust Displacement Measurement for FMCW Radar Vibration Monitoring | M01/M05/M06：零填充 FFT + approximate ML 跨 sweep 相位 | FMCW 振动监测 | 复杂相位估计的 FMCW 路线 | [DOI](https://doi.org/10.1109/JSEN.2017.2778294) |
+| Mercuri et al., 2022, Analysis of Signal Processing Methods to Reject the DC Offset Contribution of Static Reflectors in FMCW Radar-Based Vital Signs Monitoring | M03/M04：AC coupling、代数/几何圆拟合、圆心相减 | FMCW/mmWave range-bin IQ | 直接验证 IQ 圆心补偿从 CW 迁移到 FMCW/mmWave；开放全文 | [DOI](https://doi.org/10.3390/s22249697)，[PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC9781610/) |
 | mmVib, MobiCom 2020, Measuring Micrometer-Level Vibrations With mmWave Radar | M04/M07/M10/M11/M20：virtual Chirp、consolidated common-radius、IQM、AoA/方向修正 | 77 GHz FMCW IWR1642 | 代表性胶水：已有圆拟合/多弧/阵列模块被统一成共享振动潜变量 | [作者 PDF](https://tns.thss.tsinghua.edu.cn/sun/publications/mmVib_MobiCom2020.pdf)，本地 `03_range_velocity_target_processing/mmVib_MobiCom2020.pdf` |
 | Li et al., 2022, Multi-scale and full-field vibration measurement via millimetre-wave sensing | M01/M06/M09/M11/M15：ASPD、range-angle joint phase tracking | LFMCW mmWave | 处理跨 range bin、大位移和同距多目标；是 mmVib 后续重要迁移 | [DOI](https://doi.org/10.1016/j.ymssp.2022.109178) |
 | Guerzoni et al., 2025, A novel Doppler-based phase unwrapping algorithm for mmWave MIMO radars | M02/M06：Doppler 增量辅助迭代解缠 | mmWave MIMO FMCW | 针对大相位增量的近期 radar-native 解缠模块 | [DOI](https://doi.org/10.1016/j.ymssp.2025.112777) |
