@@ -1,15 +1,16 @@
 dataset_dir = "train_captures"
 
 [metadata]
-title = "Train passage: 5 s IWR1843 and ADXL355 hardware-triggered capture"
+title = "Operator-controlled IWR1843 and ADXL355 hardware-triggered capture"
 creator = "unknown"
 subject = "IWR1843, DCA1000, ADXL355, SYNC_IN"
 description = "Pi-local capture with finite GPIO radar frame triggers"
 date = "<today>"
 license = "CC-BY-SA-4.0"
 
+# The interactive recorder owns the terminal; details go to capture.log.
 [logging.stderr]
-enable = true
+enable = false
 level = "INFO"
 
 [logging.logfile]
@@ -46,8 +47,9 @@ dca_config_port = 4096
 dca_data_port = 4098
 host_ip = "192.168.33.30"
 radar_config_filename = "examples/configs/iwr1843_hardware_trigger.cfg"
-# 5 s at 500 Hz; each frame averages four TX0+TX2 MIMO loops.
-capture_frames = 2500
+# 0 = continuous radar capture that ends when the operator stops it (or when
+# the trigger train below reaches its last pulse).
+capture_frames = 0
 export_algorithm_data = true
 # Required while export_sync_timeline=true: decoded radar metadata is the
 # timeline source, so configured frame counts are never used as a fallback.
@@ -80,7 +82,10 @@ use_loopback = false
 # Four MIMO loops occupy 1017.12 us; the 2000 us trigger period
 # leaves a fixed 982.88 us guard. One coherent mean per trigger.
 frequency_hz = 500.0
-count = 2500
+# Upper bound on recording length: count / frequency_hz = 30 s. Radar data is
+# about 16 MB/s, so every extra minute costs roughly 1 GB of pcap and a larger
+# export; raise this deliberately.
+count = 15000
 pulse_width_us = 100
 # Both this delay and the inter-trigger period must stay below the conservative
 # 5 s DCA1000 no-LVDS guard.

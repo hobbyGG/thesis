@@ -85,7 +85,7 @@ def test_adxl_process_uses_expected_pi_lines_and_validates_summary(tmp_path):
     command = observed["command"]
     assert command[command.index("--spi-device") + 1] == "/dev/spidev0.0"
     assert command[command.index("--drdy-line") + 1] == "25"
-    assert command[command.index("--odr-hz") + 1] == "1000"
+    assert command[command.index("--odr-hz") + 1] == "500"
     assert summary["samples"] == 3
     assert capture._process.signals == [signal.SIGINT]
 

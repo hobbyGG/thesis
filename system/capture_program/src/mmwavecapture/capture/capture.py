@@ -39,7 +39,7 @@ import importlib
 import json
 import pathlib
 import sys
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 import toml
 from loguru import logger
@@ -193,8 +193,17 @@ class Capture:
         self._cap_hw.append(hw)
 
     @logger.catch(reraise=True)
-    def capture(self) -> None:
+    def capture(self, before_start: Optional[Callable[[], None]] = None) -> None:
+        """Run prepare, start, stop and finalization in order.
+
+        ``before_start`` blocks before any data-path resource is armed, so an
+        operator may hold an initialized system and release it on demand.
+        Raising from it aborts the capture through the normal failure path.
+        """
+
         try:
+            if before_start is not None:
+                before_start()
             logger.info("Preparing capture hardware")
             for hw in self._cap_hw:
                 hw.prepare_capture()
@@ -484,7 +493,23 @@ class CaptureManager:
             f"Total of {len(self._config['hardware'])} capture hardware initialized"
         )
 
-    def capture(self) -> None:
+    @property
+    def capture_dir(self) -> pathlib.Path:
+        return self._capture_dir
+
+    @property
+    def hardware(self) -> tuple:
+        return tuple(self._hw)
+
+    def request_stop(self) -> None:
+        """Ask running hardware that supports an operator stop to finish."""
+
+        for hw in self._hw:
+            stop = getattr(hw, "request_stop", None)
+            if callable(stop):
+                stop()
+
+    def capture(self, before_start: Optional[Callable[[], None]] = None) -> None:
         if not self._hw:
             error = RuntimeError("Capture hardware is not initialized")
             self._record_failure("capture", error)
@@ -498,7 +523,7 @@ class CaptureManager:
 
         self._write_status(status="running", phase="capture")
         try:
-            capture.capture()
+            capture.capture(before_start)
         except BaseException as exc:
             self._record_failure("capture", exc)
             raise

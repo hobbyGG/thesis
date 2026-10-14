@@ -25,6 +25,7 @@ realsense = [
 
 [project.scripts]
 mmwavecapture-std = "mmwavecapture.cli:cli"
+mmwavecapture-record = "mmwavecapture.record_cli:cli"
 mmwavecapture-preflight = "mmwavecapture.preflight:cli"
 mmwavecapture-export = "mmwavecapture.export_cli:cli"
 mmwavecapture-adxl-export = "mmwavecapture.adxl355_export_cli:cli"

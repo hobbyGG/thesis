@@ -327,6 +327,41 @@ This keeps the pre-roll delay outside DCA1000's no-LVDS timeout window.
 Failures are cleaned up in reverse order and partial files are retained for
 diagnosis.
 
+### 7.1 Interactive recorder for waiting on a train
+
+For events that arrive at unpredictable times, use the interactive recorder
+instead of a fixed-length run:
+
+```bash
+cd ~/thesis/system/capture_program
+uv run mmwavecapture-record            # uses examples/capture_record.toml
+```
+
+It initializes the radar, DCA1000 and ADXL355, then stays idle: nothing is
+armed and no file grows until you press a key. Run it inside `tmux` so an SSH
+drop cannot kill an active capture.
+
+| Key | Effect |
+| --- | --- |
+| `Enter` | arm and start recording (READY only) |
+| `s` or space | stop and save (STARTING or RECORDING) |
+| `q` or Ctrl-C | quit without recording (READY only); the empty capture directory is removed |
+
+One status line is rewritten in place twice a second, for example
+`RECORDING 3.2/30s | radar 51.2MB 16.0MB/s | adxl 1602 500Hz | vib 3.2mm/s2 | s=stop+save`.
+`STALL` replaces the radar rate if no pcap bytes arrive; `vib` is the peak
+x-axis deviation of the last 0.5 s, so a passing train is visible as it happens.
+Ctrl-C is ignored while SAVING. The stop is a normal capture stop: the partial
+pulse train is validated and the usual pcap export and manifests are written.
+
+Limits and caveats: the trigger count in `capture_record.toml` bounds a
+recording to 30 s (about 16 MB/s of pcap, and the export holds the arrays in
+memory), and the recording ends and saves by itself at that limit. Arming starts
+after `Enter` (ADXL start, pre-roll, tcpdump, sensorStart), so expect a delay of
+a few seconds before RECORDING appears; press `Enter` ahead of the train, not on
+sight of it. The long idle between initialization and `Enter` and the cancel
+path have been exercised only against fakes, not on hardware.
+
 ## 8. Output and timestamp contract
 
 A successful synchronized run has this layout (array lists abbreviated):

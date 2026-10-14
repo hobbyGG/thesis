@@ -86,6 +86,7 @@ class FrameTriggerProcess:
         self._popen = popen
         self._process: Optional[Any] = None
         self._summary: Optional[Dict[str, Any]] = None
+        self._interrupted = False
         self._stderr = ""
 
         if self.loopback_line == self.output_line:
@@ -241,7 +242,9 @@ class FrameTriggerProcess:
             raise FrameTriggerError("frame-trigger summary must be a JSON object")
         return payload
 
-    def _validate_summary(self, payload: Dict[str, Any]) -> None:
+    def _validate_summary(
+        self, payload: Dict[str, Any], interrupted: bool = False
+    ) -> None:
         if payload.get("schema_version") != 1:
             raise FrameTriggerError("frame-trigger summary schema_version must be 1")
         for field in (
@@ -260,13 +263,15 @@ class FrameTriggerProcess:
             if self.loopback_line is not None and not self.mock
             else "userspace_set_completed"
         )
+        emitted = payload.get("emitted_count")
         expected = {
-            "status": "ok",
+            "status": "interrupted" if interrupted else "ok",
             "requested_count": self.count,
-            "emitted_count": self.count,
             "timestamp_quality": expected_quality,
             "clock": "CLOCK_MONOTONIC",
         }
+        if not interrupted:
+            expected["emitted_count"] = self.count
         for key, value in expected.items():
             if payload.get(key) != value:
                 raise FrameTriggerError(
@@ -274,10 +279,16 @@ class FrameTriggerProcess:
                         key, payload.get(key), value
                     )
                 )
+        if interrupted and not 1 <= emitted <= self.count:
+            raise FrameTriggerError(
+                "interrupted frame-trigger emitted {!r} of {} pulses".format(
+                    emitted, self.count
+                )
+            )
         observed = payload.get("observed_count")
         missed = payload.get("missed_loopback")
         if self.loopback_line is not None and not self.mock:
-            if observed != self.count or missed != 0:
+            if observed != emitted or missed != 0:
                 raise FrameTriggerError(
                     "invalid loopback counts: observed={!r}, missed={!r}".format(
                         observed, missed
@@ -324,11 +335,32 @@ class FrameTriggerProcess:
                 "frame-trigger configuration frequency_hz disagrees with request"
             )
 
-    def wait(self, timeout: Optional[float] = None) -> Dict[str, Any]:
+    def finished(self) -> bool:
+        """Whether the native helper has exited."""
+
+        return self._process is not None and self._process.poll() is not None
+
+    def stop(self, timeout: float = 5.0) -> Dict[str, Any]:
+        """End the pulse train early and return the validated partial summary.
+
+        The helper stops after the pulse in progress and writes events for the
+        pulses actually emitted, so the capture remains consistent with the
+        decoded radar frames.
+        """
+
+        if self._process is None:
+            raise RuntimeError("frame-trigger process has not been started")
+        if self._process.poll() is None:
+            self._process.terminate()
+        return self.wait(timeout, allow_interrupted=True)
+
+    def wait(
+        self, timeout: Optional[float] = None, allow_interrupted: bool = False
+    ) -> Dict[str, Any]:
         """Wait for completion, then validate and return the native summary."""
 
         if self._summary is not None:
-            self._validate_summary(self._summary)
+            self._validate_summary(self._summary, self._interrupted)
             return dict(self._summary)
         effective_timeout = self.wait_timeout_s if timeout is None else timeout
         try:
@@ -347,6 +379,15 @@ class FrameTriggerProcess:
                     "frame-trigger exited with code {}: {}".format(returncode, detail)
                 )
             raise
+        if (
+            allow_interrupted
+            and returncode == 130
+            and payload.get("status") == "interrupted"
+        ):
+            self._validate_summary(payload, interrupted=True)
+            self._summary = payload
+            self._interrupted = True
+            return dict(payload)
         if returncode != 0:
             self._summary = payload
             detail = self._stderr.strip() or str(

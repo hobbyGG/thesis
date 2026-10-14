@@ -57,6 +57,8 @@ class SynchronizedRadarAdxl(CaptureHardware):
     DCA_NO_LVDS_GUARD_S = 5.0
     ADXL_SUPERVISION_INTERVAL_S = 0.05
     ADXL_SUPERVISION_ABORT_TIMEOUT_S = 5.0
+    EARLY_STOP_POLL_INTERVAL_S = 0.02
+    EARLY_STOP_SETTLE_S = 0.05
 
     def __init__(
         self,
@@ -359,6 +361,7 @@ class SynchronizedRadarAdxl(CaptureHardware):
         self.trigger_capture = trigger_capture
 
         self._state = "initialized" if self._initialized else "new"
+        self._stop_requested = threading.Event()
         self._closed = False
         self._events: List[Dict[str, Any]] = []
         self._adxl_summary: Optional[Dict[str, Any]] = None
@@ -388,6 +391,32 @@ class SynchronizedRadarAdxl(CaptureHardware):
         if isinstance(value, bool) or not isinstance(value, int) or value < 0:
             raise ValueError(f"{label} must be a nonnegative integer or null")
         return value
+
+    def request_stop(self) -> None:
+        """End a running continuous hardware-trigger capture before its pulse
+        count is reached; the partial capture is validated and saved normally.
+        """
+
+        if self.sync_mode != "hardware_trigger" or not self._radar_continuous:
+            raise RuntimeError(
+                "early stop requires hardware_trigger mode with capture_frames = 0"
+            )
+        self._require_state("request stop", ("started",))
+        self._stop_requested.set()
+
+    def _wait_for_trigger_train(self) -> Any:
+        finished = getattr(self.trigger_capture, "finished", None)
+        if callable(finished):
+            while not self._stop_requested.wait(self.EARLY_STOP_POLL_INTERVAL_S):
+                if finished():
+                    break
+            if self._stop_requested.is_set() and not finished():
+                self._event("trigger_early_stop_begin")
+                summary = self.trigger_capture.stop()
+                # Let the frame triggered by the last pulse reach the host.
+                self._sleep(self.EARLY_STOP_SETTLE_S)
+                return summary
+        return self.trigger_capture.wait()
 
     def _require_state(self, action: str, allowed: Sequence[str]) -> None:
         if self._state not in allowed:
@@ -768,7 +797,7 @@ class SynchronizedRadarAdxl(CaptureHardware):
             if self.sync_mode == "hardware_trigger":
                 self._event("trigger_wait_begin")
                 result = self._run_with_adxl_supervision(
-                    self.trigger_capture.wait,
+                    self._wait_for_trigger_train,
                     wait_label="frame-trigger wait",
                     interrupt=self._interrupt_trigger_wait,
                 )
@@ -1102,9 +1131,10 @@ class SynchronizedRadarAdxl(CaptureHardware):
         quality = self._trigger_summary.get("timestamp_quality")
         if quality not in ("kernel_loopback_edge", "userspace_set_completed"):
             raise RuntimeError(f"unsupported frame-trigger timestamp quality {quality!r}")
-        if (
-            int(self._trigger_summary.get("requested_count", -1)) != frames
-            or int(self._trigger_summary.get("emitted_count", -1)) != frames
+        requested = int(self._trigger_summary.get("requested_count", -1))
+        emitted = int(self._trigger_summary.get("emitted_count", -1))
+        if emitted != frames or (
+            requested != frames and self._trigger_summary.get("status") != "interrupted"
         ):
             raise RuntimeError(
                 "frame-trigger summary count disagrees with decoded radar frames"
