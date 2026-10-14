@@ -9,21 +9,24 @@ from __future__ import annotations
 
 import tempfile
 from dataclasses import replace
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 
-from functools import lru_cache
-
 from paper_bridge_simulation.package_builder import (
-    ADXL_RATE_HZ,
     Impairments,
     PEAK_DEFLECTION_M,
     _adxl_package,
+    adxl_sensed_acceleration,
     generate,
 )
 from paper_bridge_simulation.response import simulate_response
-from system.algorithm.acceleration import RadarIntervalPreintegration, preintegrate_acceleration_to_radar
+from system.algorithm.acceleration import (
+    RadarIntervalPreintegration,
+    preintegrate_acceleration_to_radar,
+    remove_static_bias,
+)
 from system.algorithm.config import AlgorithmConfig
 from system.algorithm.io import build_algorithm_inputs, load_capture_package
 from system.algorithm.kalman import run_fixed_beta_kalman
@@ -153,16 +156,18 @@ def _load_or_build_inputs(impairments: Impairments, seed: int, duration_s: float
 
     reference_time_s, _, acceleration_ref, _ = _cached_response()
     amplitude_scale = impairments.peak_deflection_m / PEAK_DEFLECTION_M
-    adxl_time_s = np.arange(round(duration_s * ADXL_RATE_HZ), dtype=float) / ADXL_RATE_HZ
-    frame_a = np.interp(adxl_time_s, reference_time_s, amplitude_scale * acceleration_ref)
+    sensed_a = adxl_sensed_acceleration(reference_time_s, amplitude_scale * acceleration_ref, duration_s)
     with tempfile.TemporaryDirectory(prefix="sim_adxl_") as tmp:
         root = Path(tmp)
-        _adxl_package(root, frame_a, seed, impairments)
+        _adxl_package(root, sensed_a, seed, impairments)
         adxl_dir = root / "adxl355" / "algorithm_input"
         adxl_accel = np.load(adxl_dir / "acceleration_mps2.npy", allow_pickle=False)
         adxl_time_ns = np.load(adxl_dir / "estimated_sample_monotonic_ns.npy", allow_pickle=False)
-    structural_accel = np.asarray(adxl_accel[:, 0], dtype=float)
     radar_time_ns = np.asarray(radar.extra["radar_time_ns"], dtype=np.int64)
+    # Same ADXL path as system.algorithm.io.build_algorithm_inputs.
+    structural_accel, _ = remove_static_bias(
+        radar_time_ns, adxl_time_ns, adxl_accel[:, 0], AlgorithmConfig().cold_start_duration_s
+    )
     preintegration = preintegrate_acceleration_to_radar(radar_time_ns, adxl_time_ns, structural_accel)
     acceleration = AccelerationInput(adxl_time_ns, structural_accel, preintegration)
     return base_capture, radar, acceleration, radar_rate

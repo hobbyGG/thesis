@@ -28,18 +28,17 @@ RESULTS = Path(__file__).parent / "results"
 DURATION_S = 4.0
 TRAIN_SEEDS = list(range(1000, 1010))
 TEST_SEEDS = list(range(2000, 2030))
-DEFAULT_PROCESS_NOISE = 5.0e4
-TUNING_GRID = (1.0e1, 1.0e2, 1.0e3, 1.0e4, 5.0e4, 1.0e5, 1.0e6)
+TUNING_GRID = (1.0, 3.0, 1.0e1, 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 5.0e4)
 TUNING_CONDITIONS = {"snr0": {}, "snr-10": {"snr_offset_db": -10.0}, "snr-20": {"snr_offset_db": -20.0}}
 LOW_SNR = {"snr_offset_db": -10.0}
 REGIMES = {"nominal": {}, "snr-10dB": LOW_SNR}
 
 # (group, parameter name, values, Impairments field, scale to field units)
 ADXL_AND_SCENE_SWEEPS = [
-    ("adxl_bias", "x-axis bias [m/s^2]", [0.0, 0.02, 0.05, 0.1, 0.2], "adxl_bias_x_mps2", 1.0),
+    ("adxl_bias", "static axis offset incl. gravity [m/s^2]", [0.0, 0.2, 2.0, 9.80665], "adxl_bias_x_mps2", 1.0),
     ("adxl_noise", "noise scale [x]", [1.0, 3.0, 10.0, 30.0], "adxl_noise_scale", 1.0),
-    ("adxl_time_offset", "timestamp offset [ms]", [-20.0, -5.0, 0.0, 5.0, 20.0], "adxl_timestamp_offset_s", 1.0e-3),
-    ("adxl_jitter", "timestamp jitter std [ms]", [0.0, 1.0, 3.0, 10.0], "adxl_timestamp_jitter_std_s", 1.0e-3),
+    ("adxl_time_offset", "residual timestamp offset [ms]", [-10.0, -5.0, -2.0, 0.0, 2.0, 5.0, 10.0], "adxl_timestamp_offset_s", 1.0e-3),
+    ("adxl_jitter", "timestamp jitter std [ms]", [0.0, 0.5, 1.0, 3.0], "adxl_timestamp_jitter_std_s", 1.0e-3),
     ("adxl_bias_walk", "bias walk [m/s^2/sqrt(s)]", [0.0, 0.005, 0.02, 0.05, 0.1], "adxl_bias_walk_mps2_per_sqrt_s", 1.0),
     ("radar_dropout", "radar dropout [ms]", [0.0, 6.0, 12.0, 20.0, 30.0], "radar_dropout_s", 1.0e-3),
     ("target_sway", "target sway std [um]", [0.0, 5.0, 10.0, 20.0, 50.0], "target_sway_std_m", 1.0e-6),
@@ -139,7 +138,7 @@ def choose() -> None:
 
 def test() -> None:
     tuned = json.loads((RESULTS / "tuning.json").read_text())
-    noises = tuple(dict.fromkeys((tuned["fusion_process_noise"], tuned["kf_only_process_noise"], DEFAULT_PROCESS_NOISE)))
+    noises = tuple(dict.fromkeys((tuned["fusion_process_noise"], tuned["kf_only_process_noise"])))
     _run_conditions_by_seed(test_conditions(), TEST_SEEDS, noises, True, RESULTS / "test.csv")
 
 
@@ -161,8 +160,6 @@ def report() -> None:
     methods = [
         (f"kf+adxl@{qf:g}", f"fusion (q={qf:g})"),
         (f"kf-only@{qk:g}", f"KF no ADXL (q={qk:g})"),
-        (f"kf+adxl@{DEFAULT_PROCESS_NOISE:g}", "fusion (default q)"),
-        (f"kf-only@{DEFAULT_PROCESS_NOISE:g}", "KF no ADXL (default q)"),
         (f"kf+adxl-fixedR@{qf:g}", "fusion, fixed R"),
         (f"kf+adxl-single@{qf:g}", "single-target fusion"),
         ("radar-unfiltered", "radar only, no filter"),
@@ -186,8 +183,11 @@ def report() -> None:
         "",
         f"Duration {DURATION_S:g} s per trial (one train event at 0.5-1.3 s), {len(TEST_SEEDS)} held-out seeds "
         f"({TEST_SEEDS[0]}-{TEST_SEEDS[-1]}) per condition. Process noise tuned on seeds "
-        f"{TRAIN_SEEDS[0]}-{TRAIN_SEEDS[-1]}, separately per method: fusion q = {qf:g}, KF without ADXL q = {qk:g} (default {DEFAULT_PROCESS_NOISE:g}).",
-        "Cells are RMSE over the whole trial in um, mean±std over seeds; a trial fails when RMSE exceeds 6 % of the peak deflection.",
+        f"{TRAIN_SEEDS[0]}-{TRAIN_SEEDS[-1]}, separately per method: fusion q = {qf:g}, KF without ADXL q = {qk:g}.",
+        "ADXL timestamps are exported as DRDY time minus the calibrated 3.26 ms group delay; the static axis offset "
+        "(gravity projection and turn-on bias) is removed over the first 0.2 s, as in system.algorithm.io.",
+        "Cells are RMSE over the whole trial in um, mean±std over seeds; a trial fails when RMSE exceeds 6 % of the peak deflection. "
+        "'ADXL gain' is the reduction of the mean RMSE of fusion relative to the Kalman filter without ADXL.",
         "",
     ]
     groups = []
@@ -197,7 +197,7 @@ def report() -> None:
     for group, regime in groups:
         name = labels[group][0]
         title = f"{group} ({regime})" if regime != "-" else group
-        lines += [f"## {title}", "", "| " + name + " | " + " | ".join(m[1] for m in methods) + " | fusion beats KF-only (each at own q) |", "|" + "---|" * (len(methods) + 2)]
+        lines += [f"## {title}", "", "| " + name + " | " + " | ".join(m[1] for m in methods) + " | ADXL gain | fusion beats KF-only (each at own q) |", "|" + "---|" * (len(methods) + 3)]
         values = sorted({r["value"] for r in rows if r["group"] == group and r["regime"] == regime})
         for value in values:
             sel = [r for r in rows if r["group"] == group and r["regime"] == regime and r["value"] == value]
@@ -205,7 +205,8 @@ def report() -> None:
             fusion = {r["seed"]: r["rmse_um"] for r in sel if r["method"] == methods[0][0]}
             kf = {r["seed"]: r["rmse_um"] for r in sel if r["method"] == methods[1][0]}
             wins = sum(fusion[s] < kf[s] for s in fusion if s in kf)
-            lines.append(f"| {value:g} | " + " | ".join(cells) + f" | {wins}/{len(fusion)} |")
+            gain = 1.0 - np.mean(list(fusion.values())) / np.mean(list(kf.values()))
+            lines.append(f"| {value:g} | " + " | ".join(cells) + f" | {100.0 * gain:.0f} % | {wins}/{len(fusion)} |")
         lines.append("")
     (RESULTS / "summary.md").write_text("\n".join(lines) + "\n")
     print("\n".join(lines))

@@ -6,7 +6,8 @@ from typing import Any
 
 import numpy as np
 
-from .acceleration import preintegrate_acceleration_to_radar
+from .acceleration import preintegrate_acceleration_to_radar, remove_static_bias
+from .config import AlgorithmConfig
 from .types import AccelerationInput, CapturePackage, FrontendConfig, RadarInput
 
 
@@ -101,7 +102,12 @@ def build_algorithm_inputs(capture: CapturePackage):
     else:
         radar_rate = 1.0
         sample_period_s = 1.0
-    structural_accel = np.asarray(capture.adxl_acceleration_mps2[:, 0], dtype=float)
+    structural_accel, static_bias = remove_static_bias(
+        radar_time_ns,
+        capture.adxl_time_ns,
+        capture.adxl_acceleration_mps2[:, 0],
+        AlgorithmConfig().cold_start_duration_s,
+    )
     preintegration = preintegrate_acceleration_to_radar(
         radar_time_ns, capture.adxl_time_ns, structural_accel
     )
@@ -123,6 +129,7 @@ def build_algorithm_inputs(capture: CapturePackage):
             "detection": detection,
             "radar_time_ns": radar_time_ns,
             "sample_period_s": sample_period_s,
+            "adxl_static_bias_mps2": static_bias,
             "circle_center": centers,
             "circle_radius": radii,
             "circle_residual": circle_residual,

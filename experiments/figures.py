@@ -11,7 +11,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from experiments.sweep import DEFAULT_PROCESS_NOISE, RESULTS, _read
+from experiments.sweep import RESULTS, _read
 
 tuned = json.loads((RESULTS / "tuning.json").read_text())
 qf, qk = tuned["fusion_process_noise"], tuned["kf_only_process_noise"]

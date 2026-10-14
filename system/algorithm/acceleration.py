@@ -11,6 +11,27 @@ class RadarIntervalPreintegration:
     delta_q_m: np.ndarray
 
 
+def remove_static_bias(
+    radar_time_ns: Iterable[int],
+    adxl_time_ns: Iterable[int],
+    acceleration_mps2: Iterable[float],
+    static_window_s: float,
+) -> tuple[np.ndarray, float]:
+    """Subtract the mean ADXL output of the initial static window.
+
+    The record starts with the structure at rest, the same window that defines
+    the displacement reference.  Its mean is the gravity projection plus the
+    turn-on offset of the structural axis: b = mean(a(t)), t <= t_0 + T_s.
+    """
+
+    radar = np.asarray(radar_time_ns, dtype=np.int64)
+    adxl = np.asarray(adxl_time_ns, dtype=np.int64)
+    accel = np.asarray(acceleration_mps2, dtype=float)
+    static = adxl <= radar[0] + round(static_window_s * 1.0e9)
+    bias = float(np.mean(accel[static])) if np.any(static) else 0.0
+    return accel - bias, bias
+
+
 def preintegrate_acceleration_to_radar(
     radar_time_ns: Iterable[int],
     adxl_time_ns: Iterable[int],

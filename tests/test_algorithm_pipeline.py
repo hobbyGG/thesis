@@ -7,6 +7,7 @@ import numpy as np
 
 from paper_bridge_simulation import package_builder
 from paper_bridge_simulation.response import REFERENCE_RATE_HZ, simulate_response
+from system.algorithm.acceleration import preintegrate_acceleration_to_radar, remove_static_bias
 from system.algorithm.config import AlgorithmConfig
 from system.algorithm.frontend import extract_dbf_targets_streaming, range_angle_process
 from system.algorithm.io import build_algorithm_inputs, load_capture_package
@@ -71,6 +72,38 @@ class AlgorithmPipelineTest(unittest.TestCase):
             numerical_acceleration[interior] - acceleration[interior]
         ) / np.linalg.norm(acceleration[interior])
         self.assertLess(relative_error, 2.0e-3)
+
+    def test_adxl_increments_are_time_aligned_with_structural_acceleration(self):
+        # The exported ADXL timestamps remove the 3.26 ms filter delay, so the
+        # radar-interval velocity increments match the true acceleration at
+        # zero lag; a residual delay of one radar interval is clearly worse.
+        with tempfile.TemporaryDirectory() as temporary:
+            package = Path(temporary) / "capture"
+            package_builder.generate(package, duration_s=1.0, seed=2026)
+            capture = load_capture_package(package)
+            radar, acceleration, _, _ = build_algorithm_inputs(capture)
+            truth_a = np.load(package / "truth" / "acceleration_mps2.npy")
+            truth_t = np.load(package / "truth" / "adxl_time_ns.npy")
+        radar_time = radar.extra["radar_time_ns"]
+        reference = preintegrate_acceleration_to_radar(radar_time, truth_t, truth_a).delta_v_mps
+        measured = acceleration.preintegration.delta_v_mps
+
+        def relative_error(lag):
+            a = measured[max(0, lag):measured.size + min(0, lag)]
+            b = reference[max(0, -lag):reference.size + min(0, -lag)]
+            return np.linalg.norm(a - b) / np.linalg.norm(b)
+
+        self.assertLess(relative_error(0), 0.1)
+        self.assertLess(relative_error(0), relative_error(1))
+        self.assertLess(relative_error(0), relative_error(-1))
+
+    def test_static_window_removes_gravity_and_offset(self):
+        radar_time = 1_000_000_000 + np.arange(200, dtype=np.int64) * 2_000_000
+        adxl_time = radar_time - 3_260_000
+        dynamic = np.where(adxl_time > radar_time[0] + 200_000_000, np.sin(np.arange(200) / 5.0), 0.0)
+        corrected, bias = remove_static_bias(radar_time, adxl_time, dynamic + 9.80665 + 0.02, 0.2)
+        self.assertAlmostEqual(bias, 9.80665 + 0.02, places=12)
+        np.testing.assert_allclose(corrected, dynamic, atol=1.0e-12)
 
     def test_initial_measurement_variance_decreases_with_amplitude(self):
         with tempfile.TemporaryDirectory() as temporary:

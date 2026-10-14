@@ -208,6 +208,18 @@ class PhysicalSimulationTest(unittest.TestCase):
             shifted_time = load(noisy, "adxl355", "estimated_sample_monotonic_ns")
             np.testing.assert_array_equal(shifted_time - nominal_time, np.full(nominal_time.shape, 10_000_000))
 
+    def test_adxl_timestamps_remove_calibrated_group_delay(self):
+        def load(name):
+            return np.load(self.adxl_dir / self.adxl_manifest["arrays"][name]["file"])
+
+        capture = self.adxl_manifest["capture"]
+        self.assertTrue(capture["group_delay_calibrated"])
+        self.assertEqual(capture["group_delay_ns"], package_builder.ADXL_GROUP_DELAY_NS)
+        np.testing.assert_array_equal(
+            load("drdy_monotonic_ns") - load("estimated_sample_monotonic_ns"),
+            np.full(load("drdy_monotonic_ns").shape, package_builder.ADXL_GROUP_DELAY_NS),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

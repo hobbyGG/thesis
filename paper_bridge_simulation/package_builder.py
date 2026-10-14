@@ -57,6 +57,7 @@ PLL_PHASE_NOISE_RHO = 0.98
 ADXL_NOISE_DENSITY_G_PER_SQRT_HZ = 22.5e-6
 ADXL_BIAS_MPS2 = np.asarray((4.0e-4, -3.0e-4, 2.0e-4))
 ADXL_GROUP_DELAY_S = 3.26e-3  # ADXL355 Rev. D, Table 10, 500 Hz ODR.
+ADXL_GROUP_DELAY_NS = round(ADXL_GROUP_DELAY_S * 1.0e9)
 RADAR_LOOP_REFERENCE_OFFSET_S = (
     RADAR_IDLE_TIME_S + RADAR_ADC_START_TIME_S
     + (ADC_SAMPLES - 1) / (2.0 * ADC_SAMPLE_RATE_HZ)
@@ -408,16 +409,12 @@ def _adxl_package(root: Path, acceleration: np.ndarray, seed: int, impairments: 
     bias = ADXL_BIAS_MPS2.copy()
     if impairments.adxl_bias_x_mps2 is not None:
         bias[0] = impairments.adxl_bias_x_mps2
-    # The delay is applied to the samples but not removed from the timestamps,
-    # so it acts as an uncalibrated timing error for the estimator.
-    delay_samples = int(round(ADXL_GROUP_DELAY_S * ADXL_RATE_HZ))
-    delayed_acceleration = np.empty_like(acceleration)
-    delayed_acceleration[:delay_samples] = acceleration[0]
-    delayed_acceleration[delay_samples:] = acceleration[:-delay_samples]
-    values[:, 0] = (1.0003 * delayed_acceleration + bias[0]
+    # ``acceleration`` is already the group-delayed structural input of each
+    # DRDY sample (see ``adxl_sensed_acceleration``).
+    values[:, 0] = (1.0003 * acceleration + bias[0]
                     + noise_std * rng.standard_normal(sample_count))
-    values[:, 1] = 0.001 * delayed_acceleration + bias[1] + noise_std * rng.standard_normal(sample_count)
-    values[:, 2] = -0.0007 * delayed_acceleration + bias[2] + noise_std * rng.standard_normal(sample_count)
+    values[:, 1] = 0.001 * acceleration + bias[1] + noise_std * rng.standard_normal(sample_count)
+    values[:, 2] = -0.0007 * acceleration + bias[2] + noise_std * rng.standard_normal(sample_count)
     if impairments.adxl_bias_walk_mps2_per_sqrt_s > 0.0:
         walk_rng = np.random.default_rng([seed, 3])
         step = impairments.adxl_bias_walk_mps2_per_sqrt_s * np.sqrt(1.0 / ADXL_RATE_HZ)
@@ -426,7 +423,10 @@ def _adxl_package(root: Path, acceleration: np.ndarray, seed: int, impairments: 
     directory = root / "adxl355" / "algorithm_input"
     directory.mkdir(parents=True)
     times = BASE_TIME_NS + np.arange(sample_count, dtype=np.int64) * round(1.0e9 / ADXL_RATE_HZ)
-    estimated_times = times + round(impairments.adxl_timestamp_offset_s * 1.0e9)
+    # Same export rule as system/capture_program/adxl355_input.py with a
+    # configured group delay: estimated sample time = DRDY edge - group delay.
+    # The impairment offset is the residual error of that calibration.
+    estimated_times = times - ADXL_GROUP_DELAY_NS + round(impairments.adxl_timestamp_offset_s * 1.0e9)
     if impairments.adxl_timestamp_jitter_std_s > 0.0:
         jitter_rng = np.random.default_rng([seed, 5])
         estimated_times = estimated_times + np.rint(
@@ -447,16 +447,25 @@ def _adxl_package(root: Path, acceleration: np.ndarray, seed: int, impairments: 
                    "bias_mps2": bias.tolist(), "scale_x": 1.0003,
                    "impairments": asdict(impairments),
                    "cross_axis_coefficients": [0.001, -0.0007],
-                   "digital_group_delay_s": ADXL_GROUP_DELAY_S,
-                   "applied_delay_samples": round(ADXL_GROUP_DELAY_S * ADXL_RATE_HZ)},
+                   "digital_group_delay_s": ADXL_GROUP_DELAY_S},
         "capture": {"complete": True, "samples": sample_count, "odr_hz_nominal": ADXL_RATE_HZ, "range_g": 2,
-                    "group_delay_ns": round(round(ADXL_GROUP_DELAY_S * ADXL_RATE_HZ) / ADXL_RATE_HZ * 1.0e9),
-                    "group_delay_calibrated": False,
+                    "group_delay_ns": ADXL_GROUP_DELAY_NS,
+                    "group_delay_calibrated": True,
                     "native_summary": {"samples": sample_count, "mock": True, "simulation": True}},
         "timing": {"clock": "CLOCK_MONOTONIC", "drdy_monotonic_ns_semantics": "synthetic nominal DRDY schedule",
-                   "estimated_sample_monotonic_ns_semantics": "synthetic nominal sample schedule"},
+                   "estimated_sample_monotonic_ns_semantics": "drdy_monotonic_ns - group_delay_ns + residual timing impairment"},
         "arrays": arrays,
     })
+
+
+def adxl_sensed_acceleration(reference_time_s: np.ndarray, acceleration: np.ndarray, duration_s: float) -> np.ndarray:
+    """Structural acceleration contained in each ADXL DRDY sample.
+
+    The ADXL355 digital filter delays the output by ADXL_GROUP_DELAY_S, so the
+    sample published at DRDY time t_k carries a(t_k - delay).
+    """
+    drdy_s = np.arange(round(duration_s * ADXL_RATE_HZ), dtype=float) / ADXL_RATE_HZ
+    return np.interp(drdy_s - ADXL_GROUP_DELAY_S, reference_time_s, acceleration)
 
 
 def generate(output: str | Path, *, duration_s: float = DURATION_S, seed: int = 2026,
@@ -478,11 +487,12 @@ def generate(output: str | Path, *, duration_s: float = DURATION_S, seed: int = 
     tx_q = np.interp(tx_time_s, reference_time_s, displacement)
     adxl_time_s = np.arange(round(duration_s * ADXL_RATE_HZ), dtype=float) / ADXL_RATE_HZ
     frame_a = np.interp(adxl_time_s, reference_time_s, acceleration)
+    sensed_a = adxl_sensed_acceleration(reference_time_s, acceleration, duration_s)
     with tempfile.TemporaryDirectory(prefix="bridge-package-") as temporary:
         staging = Path(temporary) / "package"
         staging.mkdir()
         _radar_package(staging, tx_q, seed, impairments)
-        _adxl_package(staging, frame_a, seed, impairments)
+        _adxl_package(staging, sensed_a, seed, impairments)
         sync = staging / "sync"
         sync.mkdir()
         radar_time = BASE_TIME_NS + np.arange(count, dtype=np.int64) * RADAR_FRAME_PERIOD_NS

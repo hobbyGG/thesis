@@ -17,7 +17,14 @@ python3 -m system.algorithm.run \
 仿真响应采用 24.768 m 梁、300 km/h 和六阶模态（10.35、13.41、27.10、43.84、
 52.93、84.44 Hz）。每次事件持续 0.8 s，事件之间静止 5 s，共生成三次响应；
 总位移峰值缩放到 1.712 mm。准静态通车挠度和阻尼模态共同构成位移，ADXL 加速度
-由同一结构响应计算后加入传感器噪声、偏置、比例误差和数字延迟。
+由同一结构响应计算后加入传感器噪声、偏置、比例误差和 3.26 ms 数字滤波群延迟。
+导出的 `estimated_sample_monotonic_ns` 与采集程序配置 `group_delay_ns` 时的规则
+相同：DRDY 时刻减去标定群延迟。
+
+`Impairments`（默认全部关闭，默认输出不变）提供鲁棒性实验所需的误差源：雷达 SNR
+偏移、位移幅值缩放、ADXL 静态偏置（含重力投影）、零偏随机游走、噪声倍率、残余
+时间偏移与抖动、最强目标与外侧目标的非刚性晃动、雷达短时缺帧。蒙特卡洛实验见
+`experiments/`（`python3 -m experiments.sweep tune|test|report`）。
 
 雷达观测模型使用 IWR1843 参数：77 GHz、70 MHz/µs 斜率、256 ADC 点、5.209 MS/s、
 500 Hz 外部触发、每帧 4 个 MIMO loop。每个 loop 包含 TX0 和 TX2 两个 TDM chirp，
