@@ -106,6 +106,10 @@
 
 用途：作为“range-angle joint component 的 interferometric phase evolution 可用于微动/振动位移恢复”的强证据。
 
+**论文支撑点（必须保留）**：这篇论文不仅做了角度定位，还直接把角度维用于目标分离，并给出振动精度对比。其 Fig. 4(e–g) 比较了两个目标落在同一 range bin 时的结果：传统只按 range 处理的方法无法可靠地对两个目标做相位演化跟踪，而 MFMS 通过 angle-dimensional demodulation 分别恢复两个目标的位移；论文同时用位移 RMSE 评价并报告了明显更稳定的结果。Fig. 4(d) 还展示了相邻 range bin 的耦合抑制，说明 range-angle 联合处理的收益不仅是“多检测一个目标”，而是减少邻近目标对相位测量的污染。
+
+这条证据可以支撑本文的研究动机：**当目标在 range 维不可分或存在强邻近散射时，引入 angle bin 不是为了增加一个定位坐标，而是为了把混合复数回波拆成更接近单目标的相位观测，从而改善位移精度。** 但写作时应准确表述为“mmWBat 的 range-angle 联合相位跟踪实验支持角度分离有利于精度”，不能写成“论文通过单独消融实验证明 angle FFT 独立贡献了全部精度提升”，因为该实验同时包含角度分离、二维相位投影和杂波抑制。
+
 创新点：提出 mmWBat，用毫米波 LFMCW 雷达在全视场中定位并量化多个微动目标；相较只看单个 range bin，相位提取建立在 range-angle joint dimension 上，更接近你要的“rangeBin target 升级为 range-angle target”。
 
 方法论：通过 range-angle processing 找到目标在二维空间中的分量，再跟踪该分量的复数相位演化；用毫米波相位位移关系恢复多目标微动，实验覆盖角反射器机械振动、多人生命体征、桥梁/结构模型和 RF microphone 类应用。

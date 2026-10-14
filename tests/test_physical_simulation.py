@@ -177,6 +177,37 @@ class PhysicalSimulationTest(unittest.TestCase):
             package_builder.generate(changed, duration_s=0.5, seed=2027)
             self.assertFalse(np.array_equal(self.adc, np.load(changed / "radar" / "algorithm_input" / "adc_cube.npy")))
 
+    def test_impairments_default_is_nominal_and_options_take_effect(self):
+        def load(root, directory, name):
+            manifest = json.loads((root / directory / "algorithm_input" / "manifest.json").read_text())
+            return np.load(root / directory / "algorithm_input" / manifest["arrays"][name]["file"])
+
+        with tempfile.TemporaryDirectory(prefix="physical-sim-impair-") as temporary:
+            explicit = Path(temporary) / "explicit"
+            package_builder.generate(explicit, duration_s=0.5, seed=2026, impairments=package_builder.Impairments())
+            np.testing.assert_array_equal(self.adc, load(explicit, "radar", "adc_cube"))
+
+            noisy = Path(temporary) / "noisy"
+            package_builder.generate(
+                noisy,
+                duration_s=0.5,
+                seed=2026,
+                impairments=package_builder.Impairments(
+                    snr_offset_db=-20.0,
+                    adxl_timestamp_offset_s=0.01,
+                    target_sway_std_m=1.0e-4,
+                    radar_dropout_s=0.02,
+                    radar_dropout_start_s=0.10,
+                ),
+            )
+            noisy_adc = load(noisy, "radar", "adc_cube")
+            self.assertFalse(np.array_equal(self.adc, noisy_adc))
+            self.assertTrue(np.all(np.isnan(noisy_adc[50:60])))
+            self.assertTrue(np.all(np.isfinite(noisy_adc[:50])))
+            nominal_time = load(self.root, "adxl355", "estimated_sample_monotonic_ns")
+            shifted_time = load(noisy, "adxl355", "estimated_sample_monotonic_ns")
+            np.testing.assert_array_equal(shifted_time - nominal_time, np.full(nominal_time.shape, 10_000_000))
+
 
 if __name__ == "__main__":
     unittest.main()
