@@ -66,9 +66,10 @@ $$
 ADXL355 的每个 DRDY 样本取 $a(t_k-\tau_g)$，$\tau_g=3.26$ ms 为 500 Hz ODR 下的
 数字滤波群延迟；导出的 `estimated_sample_monotonic_ns` 与采集程序在配置了
 `group_delay_ns` 时的规则相同，为 DRDY 时刻减去 $\tau_g$。可选的 `Impairments`
-参数（默认不启用）用于鲁棒性实验：雷达 SNR 偏移、位移幅值缩放、ADXL 静态偏置
-（含重力投影）、零偏随机游走、噪声倍率、残余时间偏移与抖动、最强目标与外侧目标的
-非刚性晃动，以及雷达短时缺帧。
+参数（默认不启用）用于鲁棒性实验：雷达 SNR 偏移与 IQ 偏置、目标晃动、雷达缺帧、ADXL
+静态偏置（含重力投影）、零偏随机游走、噪声倍率、比例误差、倾斜耦合、时间偏移与抖动、
+DRDY 时钟相位与 ODR 误差；`Scenario` 参数化结构响应与雷达场景，`ensemble.draw_case(seed)`
+给出随机场景（取值范围见 `paper_bridge_simulation/README.md`）。
 
 ## 4. 本文算法
 
@@ -76,7 +77,9 @@ ADXL355 的每个 DRDY 样本取 $a(t_k-\tau_g)$，$\tau_g=3.26$ ms 为 500 Hz O
 
 `io.load_capture_package()` 读取帧级 `adc_cube`、雷达参考时间、ADXL 原生加速度及其
 时间戳。算法采用与 ADC 孔径中心对应的雷达时间，并以相邻雷达时间戳之间的区间作为
-预积分边界。
+预积分边界。`build_algorithm_inputs()` 由 `extract_targets`（前端与目标检测）、
+`build_radar_input`（圆拟合与目标选择）和 `build_acceleration_input`（零偏扣除与预积分）
+组成，实验代码直接复用这三个函数。
 
 ### 4.2 Range FFT 与 DBF
 
@@ -124,7 +127,9 @@ $R_i^{-1}$ 加权合并后执行一次 Kalman 更新；$R_i$ 由各目标的后�
 ## 5. 评估边界
 
 仿真结果可用于评估统一采集包、目标提取、IQ 圆心补偿、ADXL 预积分与共享 Kalman
-滤波整条处理链的误差（RMSE）。其结论不能替代与激光位移计的实测对比；实测数据还须
+滤波整条处理链的误差（RMSE）。评估协议（保留种子、对比方法、统计）见
+`docs/current_method_specification.md` §9，结果见 `experiments/results/summary.md`。
+其结论不能替代与激光位移计的实测对比；实测数据还须
 独立标定阵列幅相、安装角、雷达等效载频、雷达时间延迟，以及 ADXL 的轴向与延迟。
 
 完整入口：

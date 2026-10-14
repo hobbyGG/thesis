@@ -42,7 +42,7 @@ sync/timeline.json
 
 代码职责：
 
-- `io.py`：读取统一输入包，构造雷达、ADXL 和目标输入。
+- `io.py`：读取统一输入包，构造雷达、ADXL 和目标输入；`extract_targets`（前端与目标检测）、`build_radar_input`（圆拟合与目标选择）、`build_acceleration_input`（零偏扣除与预积分）可单独调用。
 - `frontend.py`：Hamming Range FFT、Angle DBF 和目标 IQ 提取。
 - `selection.py`：首帧候选峰合并与目标保留。
 - `phase.py`：递推圆拟合、圆心补偿与最近邻相位展开。

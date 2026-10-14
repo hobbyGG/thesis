@@ -3,18 +3,20 @@ from __future__ import annotations
 import json
 import shutil
 import tempfile
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
+from functools import lru_cache
 from pathlib import Path
+from typing import NamedTuple
 
 import numpy as np
 
 from .response import (
     DURATION_S,
-    PEAK_DEFLECTION_M,
     REFERENCE_RATE_HZ,
     reference_metadata,
     simulate_response,
 )
+from .scenario import Impairments, Scenario
 
 # Four TX0+TX2 loops are coherently averaged into each slow-time frame.
 # Use an integer-friendly 2 ms trigger period for the retained 500 Hz path.
@@ -24,6 +26,11 @@ RADAR_RATE_HZ = 1.0 / RADAR_EXTERNAL_TRIGGER_PERIOD_S
 RADAR_MINIMUM_FRAME_PERIOD_S = 1.01712e-3
 # Both sensors have a nominal 2 ms period; retain their timestamp alignment.
 ADXL_RATE_HZ = 500.0
+ADXL_PERIOD_NS = round(1.0e9 / ADXL_RATE_HZ)
+# The DRDY schedule runs a few samples past the last radar frame so that the
+# clock phase and group-delay compensation never leave the end of the radar
+# record without a following sample.
+ADXL_TAIL_SAMPLES = 4
 C_LIGHT_MPS = 299_792_458.0
 RADAR_IDLE_TIME_S = 70.0e-6
 RADAR_ADC_START_TIME_S = 7.0e-6
@@ -66,13 +73,15 @@ RADAR_LOOP_REFERENCE_OFFSET_S = (
 RADAR_APERTURE_CENTER_OFFSET_S = RADAR_LOOP_REFERENCE_OFFSET_S + (RADAR_LOOPS_PER_FRAME - 1) * RADAR_LOOP_START_INTERVAL_S / 2.0
 RANGE_RESOLUTION_M = C_LIGHT_MPS * ADC_SAMPLE_RATE_HZ / (2.0 * CHIRP_SLOPE_HZ_PER_S * ADC_SAMPLES)
 MAX_BEAT_RANGE_M = C_LIGHT_MPS * ADC_SAMPLE_RATE_HZ / (2.0 * CHIRP_SLOPE_HZ_PER_S)
-GUIDEWAY_TO_GROUND_HEIGHT_M = 10.0
-TARGET_ANGLES_DEG = np.asarray((3.0, 9.0, 15.0, 21.0, 25.0))
+_NOMINAL_SCENE = Scenario()
+GUIDEWAY_TO_GROUND_HEIGHT_M = _NOMINAL_SCENE.height_m
+TARGET_ANGLES_DEG = np.asarray(_NOMINAL_SCENE.target_angles_deg)
 TARGET_X_M = GUIDEWAY_TO_GROUND_HEIGHT_M * np.tan(np.deg2rad(TARGET_ANGLES_DEG))
 TARGET_RANGES_M = np.sqrt(GUIDEWAY_TO_GROUND_HEIGHT_M**2 + TARGET_X_M**2)
 TARGET_RANGE_BINS = np.rint(TARGET_RANGES_M / RANGE_RESOLUTION_M).astype(int)
-TARGET_AMPLITUDES = np.asarray((0.25, 0.2375, 0.225, 0.2125, 0.2))
-TARGET_SNR_DB = np.asarray((30.0, 27.5, 25.0, 22.5, 20.0))
+TARGET_AMPLITUDES = np.asarray(_NOMINAL_SCENE.target_amplitudes)
+TARGET_SNR_DB = np.asarray(_NOMINAL_SCENE.target_snr_db)
+# Amplitudes refer to this range whatever the height of the drawn scene.
 TARGET_REFERENCE_RANGE_M = GUIDEWAY_TO_GROUND_HEIGHT_M
 # Keep the reflected path inside the complex-ADC beat-frequency limit even
 # for the outermost (25 degree) ground point at about 11.03 m.
@@ -87,43 +96,36 @@ RADAR_GENERATION_BLOCK_FRAMES = 32
 # above sandy soil and trees.  These are weak stationary point scatterers,
 # not an attempt to reproduce a full electromagnetic environment.  Their
 # ranges stay below the complex-ADC beat-frequency limit for this profile.
-STATIC_SCATTERERS = (
-    {"name": "sandy_ground", "range_m": 10.82, "angle_deg": -18.0, "amplitude": 0.025},
-    {"name": "tree_line", "range_m": 11.08, "angle_deg": 28.0, "amplitude": 0.01875},
-)
+STATIC_SCATTERERS = tuple(_NOMINAL_SCENE.static_scatterer_dicts())
+# Structural response is generated this much beyond the record so that the
+# chirp and DRDY instants of the last frames stay inside the reference grid.
+RESPONSE_MARGIN_S = 0.05
 
 
-@dataclass(frozen=True)
-class Impairments:
-    """Optional error sources for robustness experiments.
+@lru_cache(maxsize=16)
+def structural_response(scene: Scenario, duration_s: float):
+    """Truth displacement and acceleration of ``scene`` on the 3 kHz reference grid."""
+    time_s, displacement, acceleration, _ = simulate_response(
+        duration_s + RESPONSE_MARGIN_S, **scene.response_kwargs()
+    )
+    for array in (time_s, displacement, acceleration):
+        array.setflags(write=False)
+    return time_s, displacement, acceleration
 
-    The defaults reproduce the nominal package exactly (no extra random draws
-    are consumed from the nominal generators).
-    """
 
-    # Lowers every target's SNR and raises the receiver noise by this many dB.
-    snr_offset_db: float = 0.0
-    # Scales the whole structural response (displacement and acceleration).
-    peak_deflection_m: float = PEAK_DEFLECTION_M
-    # Constant x-axis bias replacing ADXL_BIAS_MPS2[0] (None keeps the default).
-    adxl_bias_x_mps2: float | None = None
-    # x-axis bias random walk intensity, m/s^2 per sqrt(s).
-    adxl_bias_walk_mps2_per_sqrt_s: float = 0.0
-    # Multiplies the ADXL355 white-noise standard deviation.
-    adxl_noise_scale: float = 1.0
-    # Timestamp error of the ADXL "estimated sample" stream; the samples
-    # themselves are taken on the nominal schedule.
-    adxl_timestamp_offset_s: float = 0.0
-    adxl_timestamp_jitter_std_s: float = 0.0
-    # Independent low-pass line-of-sight motion of non-rigid/disturbed radar
-    # targets (strongest reflector 0 and outer tree-line scatterer 4),
-    # stationary standard deviation in metres.
-    target_sway_std_m: float = 0.0
-    target_sway_corner_hz: float = 0.5
-    # Contiguous radar frame dropout duration (seconds) starting at
-    # radar_dropout_start_s during the train passage; 0.0 keeps all frames.
-    radar_dropout_s: float = 0.0
-    radar_dropout_start_s: float = 0.53
+def sway_series(seed: int, frames: int, n_targets: int, std_m: float, corner_hz: float, targets) -> np.ndarray:
+    """Independent first-order low-pass LOS motion of ``targets`` (zero at the first frame)."""
+    sway = np.zeros((frames, n_targets))
+    targets = [t for t in targets if t < n_targets]
+    if std_m <= 0.0 or not targets:
+        return sway
+    rho = np.exp(-2.0 * np.pi * corner_hz / RADAR_RATE_HZ)
+    innovation = np.random.default_rng([seed, 7]).standard_normal((frames, len(targets)))
+    state = np.zeros(len(targets))
+    for k in range(1, frames):
+        state = rho * state + np.sqrt(1.0 - rho**2) * innovation[k]
+        sway[k, targets] = state
+    return sway * std_m
 
 
 def _json(path: Path, value: dict) -> None:
@@ -167,7 +169,8 @@ def _scatterer_if(
     return amplitude[..., None, None] * propagation[..., None, None] * angle_tone[None, :, None] * fast_time[..., None, :]
 
 
-def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairments) -> None:
+def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairments,
+                   scene: Scenario, fast: bool) -> None:
     frames, loops = tx_q.shape[:2]
     rng = np.random.default_rng(seed)
     # TX0/RX0..3 and TX2/RX0..3 are stored as one virtual snapshot for each
@@ -181,15 +184,22 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
     # Keep the geometric ranges continuous.  The FFT bin in the manifest is
     # only the expected extraction bin; snapping the physical target to that
     # bin would hide range leakage and bias the propagation phase.
-    target_ranges_m = TARGET_RANGES_M.copy()
+    target_ranges_m = scene.target_ranges_m()
+    target_angles_deg = np.asarray(scene.target_angles_deg)
+    target_amplitudes = np.asarray(scene.target_amplitudes)
+    target_x_m = scene.height_m * np.tan(np.deg2rad(target_angles_deg))
+    target_range_bins = np.rint(target_ranges_m / RANGE_RESOLUTION_M).astype(int)
+    static_scatterers = scene.static_scatterer_dicts()
 
     directory = root / "radar" / "algorithm_input"
     directory.mkdir(parents=True)
-    chirp, chirp_description = _open_array(
-        directory / "chirp_cube.npy",
-        (frames, loops, VIRTUAL_RX, ADC_SAMPLES), np.dtype(np.complex64),
-        ["frame", "chirp_loop", "virtual_antenna", "adc_sample"],
-    )
+    chirp = chirp_description = None
+    if not fast:
+        chirp, chirp_description = _open_array(
+            directory / "chirp_cube.npy",
+            (frames, loops, VIRTUAL_RX, ADC_SAMPLES), np.dtype(np.complex64),
+            ["frame", "chirp_loop", "virtual_antenna", "adc_sample"],
+        )
     adc, adc_description = _open_array(
         directory / "adc_cube.npy",
         (frames, VIRTUAL_RX, ADC_SAMPLES), np.dtype(np.complex64),
@@ -207,21 +217,27 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
     pll_previous = np.zeros((loops, RADAR_TX_CHIRPS_PER_LOOP), dtype=float)
     # These are fixed scattering phases, not blockwise motion.  Drawing them
     # inside the loop introduces artificial phase jumps every 32 frames.
-    target_phases = rng.uniform(-np.pi, np.pi, (len(TARGET_ANGLES_DEG), 2))
-    static_phases = rng.uniform(-np.pi, np.pi, len(STATIC_SCATTERERS))
-    snr_db_all = TARGET_SNR_DB + impairments.snr_offset_db
+    target_phases = rng.uniform(-np.pi, np.pi, (len(target_angles_deg), 2))
+    static_phases = rng.uniform(-np.pi, np.pi, len(static_scatterers))
+    snr_db_all = np.asarray(scene.target_snr_db) + impairments.snr_offset_db
     receiver_noise_std = RECEIVER_NOISE_STD * 10.0 ** (-impairments.snr_offset_db / 20.0)
-    sway = np.zeros((frames, len(TARGET_ANGLES_DEG)))
-    if impairments.target_sway_std_m > 0.0:
-        sway_rng = np.random.default_rng([seed, 7])
-        rho = np.exp(-2.0 * np.pi * impairments.target_sway_corner_hz / RADAR_RATE_HZ)
-        disturbed = (0, len(TARGET_ANGLES_DEG) - 1)
-        innovation = sway_rng.standard_normal((frames, len(disturbed)))
-        state = np.zeros(len(disturbed), dtype=float)
-        for k in range(1, frames):
-            state = rho * state + np.sqrt(1.0 - rho**2) * innovation[k]
-            sway[k, disturbed] = state
-        sway *= impairments.target_sway_std_m
+    sway = sway_series(seed, frames, len(target_angles_deg), impairments.target_sway_std_m,
+                       impairments.target_sway_corner_hz, impairments.target_sway_targets)
+    # A constant term in every target's range-angle cell (DC offset, crosstalk
+    # and static clutter lumped together).  It does not follow the guideway
+    # motion, so it displaces the centre of that target's IQ circle.
+    offset_if = np.zeros((RADAR_TX_CHIRPS_PER_LOOP, 1, 1, 4, ADC_SAMPLES), dtype=complex)
+    if impairments.iq_offset_ratio > 0.0:
+        offset_phases = np.random.default_rng([seed, 13]).uniform(-np.pi, np.pi, len(target_angles_deg))
+        for index, (angle, range_m, amplitude) in enumerate(zip(target_angles_deg, target_ranges_m, target_amplitudes)):
+            offset_amplitude = np.full(
+                (1, 1), impairments.iq_offset_ratio * amplitude * (TARGET_REFERENCE_RANGE_M / range_m) ** 2
+            )
+            for tx in range(RADAR_TX_CHIRPS_PER_LOOP):
+                offset_if[tx] += _scatterer_if(
+                    np.full((1, 1), range_m), angle, offset_amplitude, offset_phases[index],
+                    positions[tx * 4:(tx + 1) * 4], adc_time_s,
+                )
     range_power_blocks = []
     saturated_i_count = 0
     saturated_q_count = 0
@@ -231,7 +247,7 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
         block_frames = end - start
         block = np.zeros((block_frames, loops, VIRTUAL_RX, ADC_SAMPLES), dtype=np.complex128)
 
-        for target_index, (angle, range_m, amplitude, snr_db) in enumerate(zip(TARGET_ANGLES_DEG, target_ranges_m, TARGET_AMPLITUDES, snr_db_all)):
+        for target_index, (angle, range_m, amplitude, snr_db) in enumerate(zip(target_angles_deg, target_ranges_m, target_amplitudes, snr_db_all)):
             radial_q = block_q * np.cos(np.deg2rad(angle))
             ranges = range_m + radial_q + sway[start:end, target_index][:, None, None]
             range_attenuation = (TARGET_REFERENCE_RANGE_M / ranges) ** 2
@@ -256,7 +272,7 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
                     multipath_bias, positions[channel_slice], adc_time_s,
                 )
 
-        for scatterer_index, scatterer in enumerate(STATIC_SCATTERERS):
+        for scatterer_index, scatterer in enumerate(static_scatterers):
             static_ranges = scatterer["range_m"] + block_q * np.cos(np.deg2rad(scatterer["angle_deg"]))
             static_amplitude = np.full(
                 (block_frames, loops),
@@ -270,6 +286,10 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
                     static_ranges[:, :, tx], scatterer["angle_deg"], static_amplitude,
                     propagation_bias, positions[channel_slice], adc_time_s,
                 )
+
+        if impairments.iq_offset_ratio > 0.0:
+            for tx in range(RADAR_TX_CHIRPS_PER_LOOP):
+                block[:, :, tx * 4:(tx + 1) * 4, :] += offset_if[tx]
 
         block *= rx_calibration[None, None, :, None]
         pll_block = np.empty((block_frames, loops, RADAR_TX_CHIRPS_PER_LOOP), dtype=float)
@@ -289,7 +309,8 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
         block = quantized.astype(np.complex64)
         saturated_i_count += int(np.count_nonzero((block.real <= -ADC_FULL_SCALE) | (block.real >= ADC_FULL_SCALE - ADC_LSB)))
         saturated_q_count += int(np.count_nonzero((block.imag <= -ADC_FULL_SCALE) | (block.imag >= ADC_FULL_SCALE - ADC_LSB)))
-        chirp[start:end] = block
+        if chirp is not None:
+            chirp[start:end] = block
         frame_adc = np.mean(block, axis=1).astype(np.complex64, copy=False)
         if impairments.radar_dropout_s > 0.0:
             drop_start = int(round(impairments.radar_dropout_start_s * RADAR_RATE_HZ))
@@ -301,38 +322,45 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
                 frame_adc[s0:s1] = np.complex64(np.nan + 1j * np.nan)
         adc[start:end] = frame_adc
 
-        range_spectrum = np.fft.fft(block.astype(np.complex128), axis=-1)
-        range_power_blocks.append(np.median(np.abs(range_spectrum) ** 2, axis=(0, 1, 2)))
+        if not fast:
+            range_spectrum = np.fft.fft(block.astype(np.complex128), axis=-1)
+            range_power_blocks.append(np.median(np.abs(range_spectrum) ** 2, axis=(0, 1, 2)))
 
-    chirp.flush()
     adc.flush()
-    chirp_payload_bytes = int(np.prod((frames, loops, VIRTUAL_RX, ADC_SAMPLES)) * 4)
-    del chirp, adc
-    range_power = np.median(np.stack(range_power_blocks, axis=0), axis=0)
-    excluded = np.zeros(ADC_SAMPLES, dtype=bool)
-    for target_bin in TARGET_RANGE_BINS:
-        excluded[max(0, target_bin - 2):min(ADC_SAMPLES, target_bin + 3)] = True
-    noise_floor = float(np.median(range_power[~excluded]))
-    range_fft_snr_db = [
-        float(10.0 * np.log10(max(range_power[int(target_bin)], 1.0e-30) / max(noise_floor, 1.0e-30)))
-        for target_bin in TARGET_RANGE_BINS
-    ]
     arrays = {
         "adc_cube": adc_description,
         "frame_times_s": _array(directory / "frame_times_s.npy", np.arange(frames) / RADAR_RATE_HZ, ["frame"]),
-        "chirp_cube": chirp_description,
     }
+    # The fast record omits the lossless chirp cube (the capture program's
+    # save_chirp_cube=False option) and the range-FFT statistic computed from it.
+    chirp_payload_bytes = 0
+    range_fft_snr_db = None
+    if chirp is not None:
+        chirp.flush()
+        chirp_payload_bytes = int(np.prod((frames, loops, VIRTUAL_RX, ADC_SAMPLES)) * 4)
+        range_power = np.median(np.stack(range_power_blocks, axis=0), axis=0)
+        excluded = np.zeros(ADC_SAMPLES, dtype=bool)
+        for target_bin in target_range_bins:
+            excluded[max(0, target_bin - 2):min(ADC_SAMPLES, target_bin + 3)] = True
+        noise_floor = float(np.median(range_power[~excluded]))
+        range_fft_snr_db = [
+            float(10.0 * np.log10(max(range_power[int(target_bin)], 1.0e-30) / max(noise_floor, 1.0e-30)))
+            for target_bin in target_range_bins
+        ]
+        arrays["chirp_cube"] = chirp_description
+    del chirp, adc
     _json(directory / "manifest.json", {
         "schema": "mmwavecapture.algorithm-input", "schema_version": 1,
         "source": {"kind": "paper_bridge_simulation", "radar_adc_iq": "synthetic_if_chirp", "seed": seed,
-                   "target_range_bins": TARGET_RANGE_BINS.tolist(),
+                   "fast_without_chirp_cube": fast,
+                   "target_range_bins": target_range_bins.tolist(),
                    "target_ranges_m": target_ranges_m.tolist(),
-                   "target_angles_deg": TARGET_ANGLES_DEG.tolist(),
+                   "target_angles_deg": target_angles_deg.tolist(),
                    "target_geometry": {
-                       "guideway_height_m": GUIDEWAY_TO_GROUND_HEIGHT_M,
+                       "guideway_height_m": scene.height_m,
                        "target_state": "fixed_world_ground_or_tree_reference; radar follows guideway",
-                       "target_x_m": TARGET_X_M.tolist(),
-                       "baseline_range_m": TARGET_RANGES_M.tolist(),
+                       "target_x_m": target_x_m.tolist(),
+                       "baseline_range_m": target_ranges_m.tolist(),
                        "radial_displacement_projection": "q(t) * cos(angle)",
                        "reference_target_range_m": TARGET_REFERENCE_RANGE_M,
                    },
@@ -340,9 +368,10 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
                    "snr_semantics": "per-target, per-TX, per-loop complex scattering coefficient before array projection and loop averaging",
                    "range_fft_snr_db": range_fft_snr_db,
                    "impairments": asdict(impairments),
+                   "scenario": asdict(scene),
                    "range_fft_snr_statistic": "median of bounded-block medians",
-                   "scene": {"guideway_height_m": GUIDEWAY_TO_GROUND_HEIGHT_M, "surface": "sandy soil with tree line",
-                             "static_scatterers": list(STATIC_SCATTERERS),
+                   "scene": {"guideway_height_m": scene.height_m, "surface": "sandy soil with tree line",
+                             "static_scatterers": static_scatterers,
                              "multipath_excess_path_m": MULTIPATH_DELAY_M,
                              "multipath_amplitude_ratio": MULTIPATH_AMPLITUDE_RATIO}},
         "packet_integrity": {"complete": True, "mode": "synthetic_payload_integrity", "payload_bytes": chirp_payload_bytes},
@@ -378,7 +407,7 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
             "adc_quantization": {
                 "bits": ADC_BITS, "full_scale_v": ADC_FULL_SCALE,
                 "lsb_v": ADC_LSB, "stored_dtype": "complex64",
-                "quantized_array": "chirp_cube",
+                "quantized_array": "chirp_cube" if chirp_description is not None else "not_saved",
                 "saturated_i_count": saturated_i_count,
                 "saturated_q_count": saturated_q_count,
             },
@@ -394,10 +423,32 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
     })
 
 
-def _adxl_package(root: Path, acceleration: np.ndarray, seed: int, impairments: Impairments) -> None:
+class AdxlStream(NamedTuple):
+    drdy_ns: np.ndarray
+    estimated_ns: np.ndarray
+    values: np.ndarray
+    bias_mps2: np.ndarray
+    # Structural acceleration at the DRDY instants (no filter delay).
+    truth_mps2: np.ndarray
+
+
+def adxl_samples(scene: Scenario, impairments: Impairments, seed: int, duration_s: float) -> AdxlStream:
+    """ADXL355 DRDY stream of one record: sampled content, errors and published times."""
+    reference_time_s, displacement, acceleration = structural_response(scene, duration_s)
+    count = round(duration_s * ADXL_RATE_HZ) + ADXL_TAIL_SAMPLES
+    index = np.arange(count, dtype=np.int64)
+    drdy_ns = (
+        BASE_TIME_NS + round(impairments.adxl_clock_phase_s * 1.0e9)
+        + np.rint(index * ADXL_PERIOD_NS * (1.0 + impairments.adxl_odr_error)).astype(np.int64)
+    )
+    drdy_s = (drdy_ns - BASE_TIME_NS) * 1.0e-9
+    # The ADXL355 digital filter delays the output by ADXL_GROUP_DELAY_S: the
+    # sample published at DRDY time t carries the structure at t - delay.
+    content_s = drdy_s - ADXL_GROUP_DELAY_S
+    sensed = np.interp(content_s, reference_time_s, acceleration)
+    local_deflection = np.interp(content_s, reference_time_s, displacement)
     rng = np.random.default_rng(seed + 1)
-    sample_count = acceleration.size
-    values = np.zeros((sample_count, 3), dtype=np.float64)
+    values = np.zeros((count, 3), dtype=np.float64)
     # ADXL355 at the configured 500 Hz ODR: use the ±2 g noise density from
     # the data sheet, a small fixed bias, and a sub-percent scale error.  The
     # other two axes contain only cross-axis leakage and sensor noise.
@@ -409,42 +460,47 @@ def _adxl_package(root: Path, acceleration: np.ndarray, seed: int, impairments: 
     bias = ADXL_BIAS_MPS2.copy()
     if impairments.adxl_bias_x_mps2 is not None:
         bias[0] = impairments.adxl_bias_x_mps2
-    # ``acceleration`` is already the group-delayed structural input of each
-    # DRDY sample (see ``adxl_sensed_acceleration``).
-    values[:, 0] = (1.0003 * acceleration + bias[0]
-                    + noise_std * rng.standard_normal(sample_count))
-    values[:, 1] = 0.001 * acceleration + bias[1] + noise_std * rng.standard_normal(sample_count)
-    values[:, 2] = -0.0007 * acceleration + bias[2] + noise_std * rng.standard_normal(sample_count)
+    values[:, 0] = ((1.0 + impairments.adxl_scale_error) * sensed
+                    + impairments.adxl_tilt_gain_mps2_per_m * local_deflection
+                    + bias[0] + noise_std * rng.standard_normal(count))
+    values[:, 1] = 0.001 * sensed + bias[1] + noise_std * rng.standard_normal(count)
+    values[:, 2] = -0.0007 * sensed + bias[2] + noise_std * rng.standard_normal(count)
     if impairments.adxl_bias_walk_mps2_per_sqrt_s > 0.0:
         walk_rng = np.random.default_rng([seed, 3])
         step = impairments.adxl_bias_walk_mps2_per_sqrt_s * np.sqrt(1.0 / ADXL_RATE_HZ)
-        values[:, 0] += np.cumsum(step * walk_rng.standard_normal(sample_count))
-    raw = np.rint(values / 9.80665 * 256000.0).astype(np.int32)
-    directory = root / "adxl355" / "algorithm_input"
-    directory.mkdir(parents=True)
-    times = BASE_TIME_NS + np.arange(sample_count, dtype=np.int64) * round(1.0e9 / ADXL_RATE_HZ)
+        values[:, 0] += np.cumsum(step * walk_rng.standard_normal(count))
     # Same export rule as system/capture_program/adxl355_input.py with a
     # configured group delay: estimated sample time = DRDY edge - group delay.
     # The impairment offset is the residual error of that calibration.
-    estimated_times = times - ADXL_GROUP_DELAY_NS + round(impairments.adxl_timestamp_offset_s * 1.0e9)
+    estimated_ns = drdy_ns - ADXL_GROUP_DELAY_NS + round(impairments.adxl_timestamp_offset_s * 1.0e9)
     if impairments.adxl_timestamp_jitter_std_s > 0.0:
         jitter_rng = np.random.default_rng([seed, 5])
-        estimated_times = estimated_times + np.rint(
-            jitter_rng.standard_normal(sample_count) * impairments.adxl_timestamp_jitter_std_s * 1.0e9
+        estimated_ns = estimated_ns + np.rint(
+            jitter_rng.standard_normal(count) * impairments.adxl_timestamp_jitter_std_s * 1.0e9
         ).astype(np.int64)
-        estimated_times = np.maximum.accumulate(estimated_times)
+        estimated_ns = np.maximum.accumulate(estimated_ns)
+    return AdxlStream(drdy_ns, estimated_ns, values, bias, np.interp(drdy_s, reference_time_s, acceleration))
+
+
+def _adxl_package(root: Path, stream: AdxlStream, impairments: Impairments) -> None:
+    values = stream.values
+    sample_count = values.shape[0]
+    raw = np.rint(values / 9.80665 * 256000.0).astype(np.int32)
+    directory = root / "adxl355" / "algorithm_input"
+    directory.mkdir(parents=True)
+    sample_times_s = (stream.drdy_ns - stream.drdy_ns[0]) * 1.0e-9
     arrays = {
         "acceleration_raw": _array(directory / "acceleration_raw.npy", raw, ["sample", "axis"]),
         "acceleration_mps2": _array(directory / "acceleration_mps2.npy", values, ["sample", "axis"]),
-        "drdy_monotonic_ns": _array(directory / "drdy_monotonic_ns.npy", times, ["sample"]),
-        "estimated_sample_monotonic_ns": _array(directory / "estimated_sample_monotonic_ns.npy", estimated_times, ["sample"]),
-        "sample_times_s": _array(directory / "sample_times_s.npy", np.arange(sample_count) / ADXL_RATE_HZ, ["sample"]),
+        "drdy_monotonic_ns": _array(directory / "drdy_monotonic_ns.npy", stream.drdy_ns, ["sample"]),
+        "estimated_sample_monotonic_ns": _array(directory / "estimated_sample_monotonic_ns.npy", stream.estimated_ns, ["sample"]),
+        "sample_times_s": _array(directory / "sample_times_s.npy", sample_times_s, ["sample"]),
     }
     _json(directory / "manifest.json", {
         "schema": "mmwavecapture.adxl355-input", "schema_version": 1,
         "source": {"kind": "paper_bridge_simulation", "structural_axis": "paper-parameterized",
                    "noise_density_g_per_sqrt_hz": ADXL_NOISE_DENSITY_G_PER_SQRT_HZ,
-                   "bias_mps2": bias.tolist(), "scale_x": 1.0003,
+                   "bias_mps2": stream.bias_mps2.tolist(), "scale_x": 1.0 + impairments.adxl_scale_error,
                    "impairments": asdict(impairments),
                    "cross_axis_coefficients": [0.001, -0.0007],
                    "digital_group_delay_s": ADXL_GROUP_DELAY_S},
@@ -452,31 +508,25 @@ def _adxl_package(root: Path, acceleration: np.ndarray, seed: int, impairments: 
                     "group_delay_ns": ADXL_GROUP_DELAY_NS,
                     "group_delay_calibrated": True,
                     "native_summary": {"samples": sample_count, "mock": True, "simulation": True}},
-        "timing": {"clock": "CLOCK_MONOTONIC", "drdy_monotonic_ns_semantics": "synthetic nominal DRDY schedule",
+        "timing": {"clock": "CLOCK_MONOTONIC", "drdy_monotonic_ns_semantics": "synthetic DRDY schedule with the configured clock phase and ODR error",
                    "estimated_sample_monotonic_ns_semantics": "drdy_monotonic_ns - group_delay_ns + residual timing impairment"},
         "arrays": arrays,
     })
 
 
-def adxl_sensed_acceleration(reference_time_s: np.ndarray, acceleration: np.ndarray, duration_s: float) -> np.ndarray:
-    """Structural acceleration contained in each ADXL DRDY sample.
-
-    The ADXL355 digital filter delays the output by ADXL_GROUP_DELAY_S, so the
-    sample published at DRDY time t_k carries a(t_k - delay).
-    """
-    drdy_s = np.arange(round(duration_s * ADXL_RATE_HZ), dtype=float) / ADXL_RATE_HZ
-    return np.interp(drdy_s - ADXL_GROUP_DELAY_S, reference_time_s, acceleration)
-
-
 def generate(output: str | Path, *, duration_s: float = DURATION_S, seed: int = 2026,
-             impairments: Impairments = Impairments()) -> Path:
+             impairments: Impairments = Impairments(), scenario: Scenario = Scenario(),
+             fast: bool = False) -> Path:
+    """Write one capture package.
+
+    ``fast`` omits the lossless chirp cube and the range-FFT statistic; the
+    ADC cube, ADXL stream, timelines and truth are unchanged.  It is meant for
+    large experiment sweeps, not for the retained nominal package.
+    """
     output = Path(output)
     if duration_s <= 0.0 or duration_s > DURATION_S:
         raise ValueError(f"duration must be in (0, {DURATION_S:g}] seconds")
-    reference_time_s, displacement, acceleration, _ = simulate_response()
-    amplitude_scale = impairments.peak_deflection_m / PEAK_DEFLECTION_M
-    displacement = amplitude_scale * displacement
-    acceleration = amplitude_scale * acceleration
+    reference_time_s, displacement, _ = structural_response(scenario, duration_s)
     count = round(duration_s * RADAR_RATE_HZ)
     if count < 2:
         raise ValueError("duration does not contain enough radar frames")
@@ -485,21 +535,19 @@ def generate(output: str | Path, *, duration_s: float = DURATION_S, seed: int = 
     tx_offsets_s = (np.arange(RADAR_TX_CHIRPS_PER_LOOP) - (RADAR_TX_CHIRPS_PER_LOOP - 1) / 2.0) * (RADAR_IDLE_TIME_S + RADAR_RAMP_END_TIME_S)
     tx_time_s = frame_time_s[:, None, None] + loop_offsets_s[None, :, None] + tx_offsets_s[None, None, :]
     tx_q = np.interp(tx_time_s, reference_time_s, displacement)
-    adxl_time_s = np.arange(round(duration_s * ADXL_RATE_HZ), dtype=float) / ADXL_RATE_HZ
-    frame_a = np.interp(adxl_time_s, reference_time_s, acceleration)
-    sensed_a = adxl_sensed_acceleration(reference_time_s, acceleration, duration_s)
+    stream = adxl_samples(scenario, impairments, seed, duration_s)
     with tempfile.TemporaryDirectory(prefix="bridge-package-") as temporary:
         staging = Path(temporary) / "package"
         staging.mkdir()
-        _radar_package(staging, tx_q, seed, impairments)
-        _adxl_package(staging, sensed_a, seed, impairments)
+        _radar_package(staging, tx_q, seed, impairments, scenario, fast)
+        _adxl_package(staging, stream, impairments)
         sync = staging / "sync"
         sync.mkdir()
         radar_time = BASE_TIME_NS + np.arange(count, dtype=np.int64) * RADAR_FRAME_PERIOD_NS
         np.save(sync / "radar_frame_monotonic_ns.npy", radar_time, allow_pickle=False)
         radar_adc_time = radar_time + round(RADAR_APERTURE_CENTER_OFFSET_S * 1.0e9)
         np.save(sync / "radar_adc_sample_monotonic_ns.npy", radar_adc_time, allow_pickle=False)
-        _json(staging / "paper_response_metadata.json", reference_metadata())
+        _json(staging / "paper_response_metadata.json", {**reference_metadata(), "scenario": asdict(scenario)})
         _json(sync / "timeline.json", {"schema_version": 1, "status": "complete",
                                         "sync_mode": "software_timestamp", "timestamp_quality": "sensor_start_bracket_estimate",
                                         "hardware_validated": False, "clock": "CLOCK_MONOTONIC", "unit": "nanoseconds",
@@ -524,8 +572,8 @@ def generate(output: str | Path, *, duration_s: float = DURATION_S, seed: int = 
         truth_count = round(duration_s * REFERENCE_RATE_HZ)
         np.save(truth / "displacement_m.npy", displacement[:truth_count], allow_pickle=False)
         np.save(truth / "time_ns.npy", BASE_TIME_NS + np.rint(reference_time_s[:truth_count] * 1.0e9).astype(np.int64), allow_pickle=False)
-        np.save(truth / "acceleration_mps2.npy", frame_a, allow_pickle=False)
-        np.save(truth / "adxl_time_ns.npy", BASE_TIME_NS + np.arange(frame_a.size, dtype=np.int64) * round(1.0e9 / ADXL_RATE_HZ), allow_pickle=False)
+        np.save(truth / "acceleration_mps2.npy", stream.truth_mps2, allow_pickle=False)
+        np.save(truth / "adxl_time_ns.npy", stream.drdy_ns, allow_pickle=False)
         _json(staging / "status.json", {"schema_version": 1, "status": "complete", "source_type": "paper_bridge_simulation", "reference": reference_metadata()["paper"]})
         if output.exists():
             shutil.rmtree(output)

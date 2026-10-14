@@ -7,28 +7,32 @@ from pathlib import Path
 import numpy as np
 
 from .config import AlgorithmConfig
-from .io import build_algorithm_inputs, load_capture_package
+from .io import build_algorithm_inputs, effective_carrier_frequency_hz, load_capture_package
 from .kalman import run_fixed_beta_kalman
+
+
+def displacement_error_m(q_hat_m, truth_m, time_s, cold_start_s) -> np.ndarray:
+    """Estimate minus truth, both referenced to their cold-start-window means.
+
+    The measured displacement is relative to the pre-passage static position,
+    so a constant offset (for example from the circle-fit cold start) is not
+    part of the error.
+    """
+    warm = np.asarray(time_s) <= cold_start_s
+    if not np.any(warm):
+        warm[0] = True
+    q_hat_m = np.asarray(q_hat_m, dtype=float)
+    truth_m = np.asarray(truth_m, dtype=float)
+    return (q_hat_m - np.mean(q_hat_m[warm])) - (truth_m - np.mean(truth_m[warm]))
 
 
 def run(input_dir: str | Path, output: str | Path) -> tuple[Path, Path]:
     capture = load_capture_package(input_dir)
     radar, acceleration, targets, radar_rate = build_algorithm_inputs(capture)
 
-    # FMCW phase is referenced to the centre of the sampled fast-time aperture.
-    radar_meta = capture.radar_metadata
-    carrier_frequency_hz = float(radar_meta.get("start_frequency_hz", 77.0e9))
-    adc_rate_hz = float(radar_meta.get("adc_sample_rate_hz", 0.0))
-    chirp_slope_hz_per_s = float(radar_meta.get("chirp_slope_hz_per_s", 0.0))
-    adc_start_time_s = float(radar_meta.get("adc_start_time_s", 0.0))
-    if adc_rate_hz > 0.0 and chirp_slope_hz_per_s != 0.0:
-        center_sample = (capture.frontend.num_adc_samples - 1) / 2.0
-        aperture_center_s = adc_start_time_s + center_sample / adc_rate_hz
-        carrier_frequency_hz += chirp_slope_hz_per_s * aperture_center_s
-
     config = AlgorithmConfig(
         sample_rate_hz=float(radar_rate),
-        carrier_frequency_hz=carrier_frequency_hz,
+        carrier_frequency_hz=effective_carrier_frequency_hz(capture),
     )
     result = run_fixed_beta_kalman(radar, acceleration, config)
     output_path = Path(output)
@@ -82,19 +86,10 @@ def run(input_dir: str | Path, output: str | Path) -> tuple[Path, Path]:
         "beta_source": result.extra["beta_source"],
     }
     if truth_aligned is not None:
-        frame_time_ns = np.asarray(capture.radar_time_ns, dtype=np.int64)
-        frame_truth = np.interp(
-            frame_time_ns.astype(np.float64),
-            np.asarray(capture.truth_time_ns, dtype=np.float64),
-            np.asarray(capture.truth_displacement_m, dtype=float),
+        error = displacement_error_m(
+            result.q_hat_m, truth_aligned, arrays["time_s"], config.cold_start_duration_s
         )
-        frame_elapsed_s = (frame_time_ns.astype(np.float64) - float(frame_time_ns[0])) * 1.0e-9
-        frame_warm = frame_elapsed_s <= float(config.cold_start_duration_s)
-        if not np.any(frame_warm):
-            frame_warm[0] = True
-        reference = float(np.mean(frame_truth[frame_warm]))
-        centered_truth = truth_aligned - reference
-        summary["truth_rmse_m"] = float(np.sqrt(np.mean((result.q_hat_m - centered_truth) ** 2)))
+        summary["truth_rmse_m"] = float(np.sqrt(np.mean(error**2)))
     summary_path = output_path.with_suffix(".json")
     summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return output_path, summary_path

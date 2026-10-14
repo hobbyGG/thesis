@@ -8,7 +8,8 @@
 | `system/capture_program/` | IWR1843/DCA1000、ADXL355、同步时间轴与采集包导出 |
 | `paper_bridge_simulation/` | A20 参数化磁浮轨道梁响应与同格式仿真包 |
 | `system/algorithm/` | Hamming 窗 Range FFT、DBF、IQ 圆心补偿、固定转换系数 β_i、ADXL 预积分、共享 Kalman 滤波 |
-| `tests/` | 采集包契约、仿真响应与算法测试 |
+| `experiments/` | 仿真蒙特卡洛实验：对比方法、调参、保留种子运行与统计；`results/` 由 `python3 -m experiments.sweep` 与 `python3 -m experiments.figures` 生成 |
+| `tests/` | 采集包契约、仿真响应、仿真旋钮标定与算法测试 |
 | `tool/` | 结果绘图和 A20 响应辅助脚本 |
 
 当前说明：
@@ -19,4 +20,4 @@
 - `ref_papers/`：论文全文、硬件资料和结构健康监测参考文献。
 - `hardware_manuals/`、`hardware_schemes/`：设备说明与采集方案。
 
-旧实验结果、比较分支、归档目录和生成图片不属于当前工作区。
+旧实验结果、比较分支和归档目录不属于当前工作区；`experiments/results/` 只保存当前协议的输出。

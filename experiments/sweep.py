@@ -1,10 +1,15 @@
-"""Monte Carlo sweeps of the simulated guideway experiment.
+"""Monte-Carlo experiments on the simulated guideway scene.
 
-    python -m experiments.sweep tune      # process noise on training seeds
-    python -m experiments.sweep test      # all conditions on held-out seeds
-    python -m experiments.sweep report    # tables from the CSV
+    python -m experiments.sweep smoke    # development seeds, every code path (about a minute)
+    python -m experiments.sweep tune     # free parameters on the development seeds
+    python -m experiments.sweep test     # held-out seeds; refuses to overwrite without --rerun
+    python -m experiments.sweep report   # tables in results/summary.md
 
-Process noise is tuned on seeds disjoint from the test seeds.
+Seed sets are disjoint.  Development seeds (1000-1009) are free to inspect and
+are the only ones used for tuning and debugging.  The held-out seeds are run
+once: 6000-6039 for the randomised ensemble (each seed is one random scene,
+structure and set of sensor errors) and 5000-5007 for the one-factor
+sensitivity study around the nominal scene.
 """
 
 from __future__ import annotations
@@ -14,6 +19,7 @@ import json
 import os
 import sys
 from concurrent.futures import ProcessPoolExecutor
+from dataclasses import dataclass, fields, replace
 from pathlib import Path
 
 for _name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "VECLIB_MAXIMUM_THREADS", "MKL_NUM_THREADS"):
@@ -21,196 +27,405 @@ for _name in ("OMP_NUM_THREADS", "OPENBLAS_NUM_THREADS", "VECLIB_MAXIMUM_THREADS
 
 import numpy as np
 
-from experiments.methods import run_trial
-from paper_bridge_simulation.package_builder import Impairments
+from experiments import stats
+from experiments.front import load_front, radar_impairments
+from experiments.methods import (
+    METHODS, Tuned, acceleration_input, event_window, kalman, phase_observer,
+    prepare_radar, radar_phase_series, run_methods, score, without_adxl,
+)
+from paper_bridge_simulation.ensemble import draw_case
+from paper_bridge_simulation.package_builder import adxl_samples
+from paper_bridge_simulation.response import DYNAMIC_ACCELERATION_PEAK_MPS2, PEAK_DEFLECTION_M
+from paper_bridge_simulation.scenario import Impairments, Scenario
 
 RESULTS = Path(__file__).parent / "results"
 DURATION_S = 4.0
-TRAIN_SEEDS = list(range(1000, 1010))
-TEST_SEEDS = list(range(2000, 2030))
-TUNING_GRID = (1.0, 3.0, 1.0e1, 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4, 5.0e4)
-TUNING_CONDITIONS = {"snr0": {}, "snr-10": {"snr_offset_db": -10.0}, "snr-20": {"snr_offset_db": -20.0}}
-LOW_SNR = {"snr_offset_db": -10.0}
-REGIMES = {"nominal": {}, "snr-10dB": LOW_SNR}
-
-# (group, parameter name, values, Impairments field, scale to field units)
-ADXL_AND_SCENE_SWEEPS = [
-    ("adxl_bias", "static axis offset incl. gravity [m/s^2]", [0.0, 0.2, 2.0, 9.80665], "adxl_bias_x_mps2", 1.0),
-    ("adxl_noise", "noise scale [x]", [1.0, 3.0, 10.0, 30.0], "adxl_noise_scale", 1.0),
-    ("adxl_time_offset", "residual timestamp offset [ms]", [-10.0, -5.0, -2.0, 0.0, 2.0, 5.0, 10.0], "adxl_timestamp_offset_s", 1.0e-3),
-    ("adxl_jitter", "timestamp jitter std [ms]", [0.0, 0.5, 1.0, 3.0], "adxl_timestamp_jitter_std_s", 1.0e-3),
-    ("adxl_bias_walk", "bias walk [m/s^2/sqrt(s)]", [0.0, 0.005, 0.02, 0.05, 0.1], "adxl_bias_walk_mps2_per_sqrt_s", 1.0),
-    ("radar_dropout", "radar dropout [ms]", [0.0, 6.0, 12.0, 20.0, 30.0], "radar_dropout_s", 1.0e-3),
-    ("target_sway", "target sway std [um]", [0.0, 5.0, 10.0, 20.0, 50.0], "target_sway_std_m", 1.0e-6),
-    ("peak_deflection", "peak deflection [mm]", [0.1, 0.3, 1.0, 1.712], "peak_deflection_m", 1.0e-3),
-]
+DEV_SEEDS = tuple(range(1000, 1010))
+SENSITIVITY_SEEDS = tuple(range(5000, 5008))
+ENSEMBLE_SEEDS = tuple(range(6000, 6040))
+Q_GRID = (1.0, 3.0, 1.0e1, 3.0e1, 1.0e2, 3.0e2, 1.0e3, 3.0e3, 1.0e4)
+R_GRID = (1.0e-4, 1.0e-3, 1.0e-2, 1.0e-1)
+CORNER_GRID = (0.3, 0.5, 1.0, 2.0, 4.0, 8.0, 16.0)
+# Failed runs enter the tuning objective at this event RMSE.
+TUNING_CAP_UM = 2000.0
+# A dropout starts at a random frame inside the passage of the nominal scene.
+DROPOUT_START_RANGE_S = (0.5, 1.26)
+FIELDS = (
+    "part", "group", "value", "seed", "method", "rmse_um", "event_rmse_um",
+    "max_err_um", "failed", "n_selected", "c_over_r", "error",
+)
 
 
-def test_conditions() -> list[tuple[str, str, float, dict]]:
-    """(group, regime, parameter value, Impairments kwargs)."""
-    conditions = [("snr", "-", offset, {"snr_offset_db": offset}) for offset in (0.0, -10.0, -15.0, -20.0, -25.0, -30.0)]
-    for group, _, values, field, scale in ADXL_AND_SCENE_SWEEPS:
-        for regime, base in REGIMES.items():
-            for value in values:
-                conditions.append((group, regime, value, {**base, field: value * scale}))
+@dataclass(frozen=True)
+class Condition:
+    group: str
+    value: float
+    scenario: Scenario
+    impairments: Impairments
+    dropout_s: float = 0.0
+
+
+NOMINAL = Scenario()
+# Value of each group's parameter that equals the nominal scene.
+NEUTRAL = {
+    "snr_offset_db": 0.0, "iq_offset_ratio": 0.0, "sway_2_targets_um": 0.0, "sway_5_targets_um": 0.0,
+    "peak_deflection_mm": PEAK_DEFLECTION_M * 1.0e3, "adxl_timing_offset_ms": 0.0,
+    "adxl_clock_phase_ms": 0.0, "adxl_noise_scale": 1.0, "adxl_bias_walk": 0.0,
+    "adxl_tilt_gain": 0.0, "adxl_scale_error": 0.0, "radar_dropout_ms": 0.0,
+}
+
+
+def sensitivity_conditions() -> list[Condition]:
+    """One factor at a time around the nominal scene (the nominal case comes first)."""
+    base = Impairments()
+    small = replace(
+        NOMINAL, peak_deflection_m=0.3e-3,
+        dynamic_acceleration_peak_mps2=DYNAMIC_ACCELERATION_PEAK_MPS2 * 0.3e-3 / PEAK_DEFLECTION_M,
+    )
+    sway = {"target_sway_std_m": 30.0e-6}
+    conditions = [Condition("nominal", 0.0, NOMINAL, base)]
+    conditions += [Condition("snr_offset_db", v, NOMINAL, replace(base, snr_offset_db=v)) for v in (-10.0, -20.0)]
+    conditions += [Condition("iq_offset_ratio", v, NOMINAL, replace(base, iq_offset_ratio=v)) for v in (0.03, 0.1, 0.3, 1.0)]
+    conditions += [
+        Condition("sway_2_targets_um", 30.0, NOMINAL, replace(base, **sway, target_sway_targets=(0, 4))),
+        Condition("sway_5_targets_um", 30.0, NOMINAL, replace(base, **sway, target_sway_targets=(0, 1, 2, 3, 4))),
+        Condition("peak_deflection_mm", 0.3, small, base),
+    ]
+    conditions += [Condition("adxl_timing_offset_ms", v, NOMINAL, replace(base, adxl_timestamp_offset_s=v * 1e-3)) for v in (-4.0, -2.0, 2.0, 4.0)]
+    conditions += [Condition("adxl_clock_phase_ms", v, NOMINAL, replace(base, adxl_clock_phase_s=v * 1e-3)) for v in (0.5, 1.0, 1.5)]
+    conditions += [Condition("adxl_noise_scale", 10.0, NOMINAL, replace(base, adxl_noise_scale=10.0))]
+    conditions += [Condition("adxl_bias_walk", v, NOMINAL, replace(base, adxl_bias_walk_mps2_per_sqrt_s=v)) for v in (0.005, 0.02)]
+    conditions += [Condition("adxl_tilt_gain", v, NOMINAL, replace(base, adxl_tilt_gain_mps2_per_m=v)) for v in (0.5, 1.5)]
+    conditions += [Condition("adxl_scale_error", 0.02, NOMINAL, replace(base, adxl_scale_error=0.02))]
+    conditions += [Condition("radar_dropout_ms", v, NOMINAL, base, dropout_s=v * 1e-3) for v in (10.0, 20.0, 30.0, 40.0)]
     return conditions
 
 
-def _work(task):
-    group, regime, value, kwargs, seed, noises, extra = task
+def _rows(part, group, value, seed, metrics, n_selected, c_over_r, error=""):
+    return [
+        {
+            "part": part, "group": group, "value": value, "seed": seed, "method": name,
+            "rmse_um": m["rmse_um"], "event_rmse_um": m["event_rmse_um"], "max_err_um": m["max_err_um"],
+            "failed": int(m["failed"]), "n_selected": n_selected, "c_over_r": c_over_r, "error": error,
+        }
+        for name, m in metrics.items()
+    ]
+
+
+def _error_rows(part, group, value, seed, exc):
+    lost = {"rmse_um": np.nan, "event_rmse_um": np.nan, "max_err_um": np.nan, "failed": True}
+    return _rows(part, group, value, seed, {name: lost for name in METHODS}, 0, np.nan, repr(exc))
+
+
+def _trial(part, group, value, seed, strict, compute):
     try:
-        metrics = run_trial(Impairments(**kwargs), seed, DURATION_S, noises, extra_methods=extra)
-        meta = metrics.pop("_meta")
-        return [(group, regime, value, seed, name, m, meta["selected_targets"]) for name, m in metrics.items()]
-    except Exception as exc:  # a failed generation or detection counts as a failed trial
-        return [(group, regime, value, seed, "ERROR", {"rmse_m": float("nan"), "event_rmse_m": float("nan"), "peak_err_m": float("nan"), "failed": True, "error": repr(exc)}, 0)]
+        side, stream, scenario, tuned = compute()
+        metrics = run_methods(side, stream, scenario, tuned)
+    except Exception as exc:
+        if strict:
+            raise
+        return _error_rows(part, group, value, seed, exc)
+    return _rows(part, group, value, seed, metrics, int(side.radar.selected_indices.size), side.center_over_radius)
 
 
-def _work_seed(seed_task):
-    seed, conditions, noises, extra = seed_task
-    out = []
-    trial_cache: dict[Impairments, dict] = {}
-    for cond_idx, (group, regime, value, kwargs) in enumerate(conditions):
-        imp = Impairments(**kwargs)
-        if imp not in trial_cache:
-            try:
-                metrics = run_trial(imp, seed, DURATION_S, noises, extra_methods=extra)
-                meta = metrics.pop("_meta")
-                trial_cache[imp] = (metrics, meta["selected_targets"])
-            except Exception as exc:
-                trial_cache[imp] = (
-                    {"ERROR": {"rmse_m": float("nan"), "event_rmse_m": float("nan"), "peak_err_m": float("nan"), "failed": True, "error": repr(exc)}},
-                    0,
-                )
-        metrics, selected = trial_cache[imp]
-        rows = [(group, regime, value, seed, name, m, selected) for name, m in metrics.items()]
-        out.append((cond_idx, seed, rows))
+def ensemble_rows(seed: int, tuned: Tuned, strict: bool) -> list[dict]:
+    def compute():
+        scenario, impairments = draw_case(seed)
+        side = prepare_radar(load_front(scenario, impairments, seed, DURATION_S))
+        return side, adxl_samples(scenario, impairments, seed, DURATION_S), scenario, tuned
+
+    return _trial("ensemble", "ensemble", 0.0, seed, strict, compute)
+
+
+def sensitivity_rows(seed: int, tuned: Tuned, strict: bool) -> list[dict]:
+    rng = np.random.default_rng([seed, 11])
+    drop_start_s = float(rng.uniform(*DROPOUT_START_RANGE_S))
+    fronts, sides, rows = {}, {}, []
+    for condition in sensitivity_conditions():
+        def compute(condition=condition):
+            key = (condition.scenario, radar_impairments(condition.impairments))
+            if key not in fronts:
+                fronts[key] = load_front(condition.scenario, condition.impairments, seed, DURATION_S)
+            dropout = (drop_start_s, condition.dropout_s) if condition.dropout_s > 0.0 else None
+            if (key, dropout) not in sides:
+                sides[(key, dropout)] = prepare_radar(fronts[key], dropout)
+            stream = adxl_samples(condition.scenario, condition.impairments, seed, DURATION_S)
+            return sides[(key, dropout)], stream, condition.scenario, tuned
+
+        rows += _trial("sensitivity", condition.group, condition.value, seed, strict, compute)
+    return rows
+
+
+def run_task(task) -> list[dict]:
+    part, seed, tuned, strict = task
+    runner = ensemble_rows if part == "ensemble" else sensitivity_rows
+    return runner(seed, tuned, strict)
+
+
+def _map(function, tasks):
+    workers = min(8, os.cpu_count() or 1)
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        return list(pool.map(function, tasks, chunksize=1))
+
+
+def load_tuned() -> Tuned:
+    path = RESULTS / "tuning.json"
+    if not path.is_file():
+        return Tuned()
+    known = {field.name for field in fields(Tuned)}
+    return Tuned(**{k: v for k, v in json.loads(path.read_text())["tuned"].items() if k in known})
+
+
+def _write(path: Path, rows: list[dict]) -> None:
+    RESULTS.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=FIELDS)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({key: (f"{value:.6g}" if isinstance(value, float) else value) for key, value in row.items()})
+
+
+def read_rows(path: Path) -> list[dict]:
+    with open(path, newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    for row in rows:
+        for key in ("value", "rmse_um", "event_rmse_um", "max_err_um", "c_over_r"):
+            row[key] = float(row[key])
+        for key in ("seed", "failed", "n_selected"):
+            row[key] = int(row[key])
+    return rows
+
+
+def smoke() -> None:
+    tuned = load_tuned()
+    tasks = [("ensemble", seed, tuned, True) for seed in DEV_SEEDS[:3]] + [("sensitivity", DEV_SEEDS[0], tuned, True)]
+    print(f"{'part':12s} {'group':22s} {'value':>8s} {'seed':>5s}  " + " ".join(f"{m[:9]:>9s}" for m in METHODS))
+    for rows in _map(run_task, tasks):
+        by_trial: dict[tuple, dict] = {}
+        for row in rows:
+            by_trial.setdefault((row["part"], row["group"], row["value"], row["seed"]), {})[row["method"]] = row
+        for (part, group, value, seed), methods in by_trial.items():
+            cells = " ".join(f"{methods[m]['event_rmse_um']:9.1f}" for m in METHODS)
+            print(f"{part:12s} {group:22s} {value:8.3g} {seed:5d}  {cells}")
+
+
+def tune_seed(seed: int) -> dict:
+    scenario, impairments = draw_case(seed)
+    side = prepare_radar(load_front(scenario, impairments, seed, DURATION_S))
+    acceleration = acceleration_input(side, adxl_samples(scenario, impairments, seed, DURATION_S))
+    window = event_window(scenario)
+    radar, config = side.radar, side.config
+
+    def objective(q_hat) -> float:
+        value = score(q_hat, side, window)["event_rmse_um"]
+        return float(np.log(min(value if np.isfinite(value) else TUNING_CAP_UM, TUNING_CAP_UM)))
+
+    theta = radar_phase_series(radar, config)
+    out = {}
+    for q in Q_GRID:
+        out[("fusion", q)] = objective(kalman(radar, acceleration, config, q))
+        out[("kf-only", q)] = objective(kalman(radar, without_adxl(acceleration), config, q))
+        for r in R_GRID:
+            out[("fixed-R", (r, q))] = objective(kalman(
+                replace(radar, initial_r=np.full_like(radar.initial_r, r)), acceleration, config, q,
+                adaptive_r_forgetting=1.0,
+            ))
+    for corner in CORNER_GRID:
+        out[("complementary", corner)] = objective(
+            phase_observer(theta, acceleration, config, corner, start_at_measurement=True))
+        out[("adxl-hp", corner)] = objective(
+            phase_observer(np.zeros(theta.size), acceleration, config, corner, start_at_measurement=False))
     return out
 
 
-def _run_conditions_by_seed(conditions: list[tuple[str, str, float, dict]], seeds: list[int], noises: tuple[float, ...], extra: bool, path: Path) -> None:
-    RESULTS.mkdir(exist_ok=True)
-    seed_tasks = [(seed, conditions, noises, extra) for seed in seeds]
-    collected = []
-    workers = min(len(seed_tasks), max(1, (os.cpu_count() or 2) - 2))
-    with ProcessPoolExecutor(max_workers=workers) as pool:
-        for done, seed_out in enumerate(pool.map(_work_seed, seed_tasks, chunksize=1), 1):
-            collected.extend(seed_out)
-            print(f"seeds {done}/{len(seed_tasks)}", end="\r", flush=True)
-    print()
-    collected.sort(key=lambda item: (item[0], item[1]))
-    with path.open("w", newline="") as handle:
-        writer = csv.writer(handle)
-        writer.writerow(["group", "regime", "value", "seed", "method", "rmse_um", "event_rmse_um", "peak_err_um", "failed", "selected_targets"])
-        for _, _, rows in collected:
-            for group, regime, value, seed, name, m, selected in rows:
-                writer.writerow([group, regime, value, seed, name, m["rmse_m"] * 1e6, m["event_rmse_m"] * 1e6, m["peak_err_m"] * 1e6, int(m["failed"]), selected])
-
-
 def tune() -> None:
-    conditions = [(name, "-", 0.0, kwargs) for name, kwargs in TUNING_CONDITIONS.items()]
-    _run_conditions_by_seed(conditions, TRAIN_SEEDS, TUNING_GRID, False, RESULTS / "tuning.csv")
-    choose()
-
-
-def choose() -> None:
-    """Pick the process noise of each method separately on the training seeds."""
-    rows = _read(RESULTS / "tuning.csv")
-    best, tables = {}, {}
-    for method in ("kf+adxl", "kf-only"):
-        score = {
-            q: float(np.mean([
-                np.mean(np.log([r["rmse_um"] for r in rows if r["method"] == f"{method}@{q:g}" and r["group"] == cond]))
-                for cond in TUNING_CONDITIONS
-            ]))
-            for q in TUNING_GRID
-        }
-        best[method] = min(score, key=score.get)
-        tables[method] = {f"{q:g}": round(float(np.exp(v)), 3) for q, v in score.items()}
+    per_seed = _map(tune_seed, DEV_SEEDS)
+    tables: dict[str, dict[str, float]] = {}
+    best: dict[str, object] = {}
+    for method in ("fusion", "kf-only", "fixed-R", "complementary", "adxl-hp"):
+        settings = [key[1] for key in per_seed[0] if key[0] == method]
+        scores = {setting: float(np.mean([seed_result[(method, setting)] for seed_result in per_seed])) for setting in settings}
+        tables[method] = {str(setting): value for setting, value in scores.items()}
+        best[method] = min(scores, key=scores.get)
+    tuned = {
+        "fusion_q": best["fusion"], "kf_only_q": best["kf-only"],
+        "fixed_r": best["fixed-R"][0], "fixed_r_q": best["fixed-R"][1],
+        "complementary_corner_hz": best["complementary"], "adxl_hp_corner_hz": best["adxl-hp"],
+    }
+    RESULTS.mkdir(parents=True, exist_ok=True)
     (RESULTS / "tuning.json").write_text(json.dumps({
-        "fusion_process_noise": best["kf+adxl"],
-        "kf_only_process_noise": best["kf-only"],
-        "geometric_mean_rmse_um_by_q": tables,
-        "train_seeds": TRAIN_SEEDS,
+        "seeds": list(DEV_SEEDS),
+        "objective": f"mean over seeds of log(min(event RMSE [um], {TUNING_CAP_UM:g})); lower is better",
+        "tuned": tuned, "tables": tables,
     }, indent=2) + "\n")
-    print("tuned process noise:", best, tables)
+    print(json.dumps(tuned, indent=2))
 
 
-def test() -> None:
-    tuned = json.loads((RESULTS / "tuning.json").read_text())
-    noises = tuple(dict.fromkeys((tuned["fusion_process_noise"], tuned["kf_only_process_noise"])))
-    _run_conditions_by_seed(test_conditions(), TEST_SEEDS, noises, True, RESULTS / "test.csv")
+def test(rerun: bool) -> None:
+    paths = (RESULTS / "ensemble.csv", RESULTS / "sensitivity.csv")
+    if not rerun and any(path.exists() for path in paths):
+        sys.exit("held-out results exist; re-running re-uses the held-out seeds, pass --rerun to overwrite")
+    if not (RESULTS / "tuning.json").is_file():
+        sys.exit("run `tune` first")
+    tuned = load_tuned()
+    tasks = [("sensitivity", seed, tuned, False) for seed in SENSITIVITY_SEEDS]
+    tasks += [("ensemble", seed, tuned, False) for seed in ENSEMBLE_SEEDS]
+    results = _map(run_task, tasks)
+    for part, path in (("ensemble", paths[0]), ("sensitivity", paths[1])):
+        part_rows = [row for task_rows in results for row in task_rows if row["part"] == part]
+        _write(path, part_rows)
+        errors = sum(1 for row in part_rows if row["error"] and row["method"] == METHODS[0])
+        print(f"{path.name}: {len(part_rows)} rows, {errors} trials raised an exception")
 
 
-def _read(path: Path) -> list[dict]:
-    with path.open() as handle:
-        rows = list(csv.DictReader(handle))
-    for row in rows:
-        row["value"] = float(row["value"])
-        for key in ("rmse_um", "event_rmse_um", "peak_err_um"):
-            row[key] = float(row[key])
-        row["failed"] = int(row["failed"])
-    return rows
+def _values(rows, **match) -> np.ndarray:
+    selected = [r for r in rows if all(r[k] == v for k, v in match.items())]
+    return np.array([r["event_rmse_um"] for r in sorted(selected, key=lambda r: r["seed"])])
+
+
+def _failures(rows, **match) -> tuple[int, int]:
+    selected = [r for r in rows if all(r[k] == v for k, v in match.items())]
+    return sum(r["failed"] for r in selected), len(selected)
+
+
+def _fmt_um(values) -> str:
+    middle, low, high = stats.median_iqr(values)
+    return f"{middle:.1f} [{low:.1f}, {high:.1f}]"
+
+
+def _fmt_gain(result) -> str:
+    return f"{100 * result['gain']:+.0f}% [{100 * result['gain_low']:+.0f}, {100 * result['gain_high']:+.0f}] (p={result['p']:.3g})"
+
+
+REPORT_METHODS = ("fusion", "kf-only", "fixed-R", "single-target", "complementary", "radar-only", "adxl-hp", "adxl-raw")
+ABLATIONS = ("no-circle", "oracle-beta")
+SENSITIVITY_METHODS = ("fusion", "kf-only", "fixed-R", "complementary", "radar-only")
+STRATUM_METHODS = ("fusion", "kf-only", "fixed-R", "complementary", "radar-only", "no-circle", "oracle-beta")
+# Ranges of the static IQ-offset ratio |c|/R in the ensemble report.
+STRATA = ((0.0, 0.05), (0.05, 0.15), (0.15, 1.0))
+
+
+def _method_table(rows, methods) -> list[str]:
+    lines = ["| method | event RMSE [um] | whole-record RMSE [um] | failures [Wilson 95%] |", "|---|---|---|---|"]
+    for method in methods:
+        failed, total = _failures(rows, method=method)
+        low, high = stats.wilson_interval(failed, total)
+        whole = [r["rmse_um"] for r in rows if r["method"] == method]
+        lines.append(
+            f"| {method} | {_fmt_um(_values(rows, method=method))} | {_fmt_um(whole)} "
+            f"| {failed}/{total} [{100 * low:.0f}%, {100 * high:.0f}%] |"
+        )
+    return lines
+
+
+def _gain_table(rows, methods) -> list[str]:
+    fusion = _values(rows, method="fusion")
+    lines = ["| fusion against | reduction of the geometric-mean event RMSE |", "|---|---|"]
+    lines += [f"| {m} | {_fmt_gain(stats.paired_gain(fusion, _values(rows, method=m)))} |" for m in methods]
+    return lines
 
 
 def report() -> None:
     tuning = json.loads((RESULTS / "tuning.json").read_text())
-    qf, qk = tuning["fusion_process_noise"], tuning["kf_only_process_noise"]
-    rows = _read(RESULTS / "test.csv")
-    methods = [
-        (f"kf+adxl@{qf:g}", f"fusion (q={qf:g})"),
-        (f"kf-only@{qk:g}", f"KF no ADXL (q={qk:g})"),
-        (f"kf+adxl-fixedR@{qf:g}", "fusion, fixed R"),
-        (f"kf+adxl-single@{qf:g}", "single-target fusion"),
-        ("radar-unfiltered", "radar only, no filter"),
-        ("adxl-double-integration", "ADXL only"),
-    ]
-    present = {r["method"] for r in rows}
-    methods = [m for m in methods if m[0] in present]
-    labels = {g: (name, scale) for g, name, _, _, scale in ADXL_AND_SCENE_SWEEPS}
-    labels["snr"] = ("radar SNR offset [dB]", 1.0)
-
-    def cell(selection):
-        values = np.array([r["rmse_um"] for r in selection])
-        failed = sum(r["failed"] for r in selection)
-        if not values.size:
-            return "-"
-        text = f"{np.nanmean(values):.1f}±{np.nanstd(values):.1f}"
-        return text + (f" ({failed}/{len(values)} fail)" if failed else "")
-
-    lines = [
-        "# Simulation experiment results",
+    ensemble = read_rows(RESULTS / "ensemble.csv")
+    sensitivity = read_rows(RESULTS / "sensitivity.csv")
+    seeds = sorted({row["seed"] for row in ensemble})
+    lines = ["# Simulation experiments", ""]
+    lines += [
+        "Generated by `python -m experiments.sweep report` from `ensemble.csv`, `sensitivity.csv` and `tuning.json`.",
         "",
-        f"Duration {DURATION_S:g} s per trial (one train event at 0.5-1.3 s), {len(TEST_SEEDS)} held-out seeds "
-        f"({TEST_SEEDS[0]}-{TEST_SEEDS[-1]}) per condition. Process noise tuned on seeds "
-        f"{TRAIN_SEEDS[0]}-{TRAIN_SEEDS[-1]}, separately per method: fusion q = {qf:g}, KF without ADXL q = {qk:g}.",
-        "ADXL timestamps are exported as DRDY time minus the calibrated 3.26 ms group delay; the static axis offset "
-        "(gravity projection and turn-on bias) is removed over the first 0.2 s, as in system.algorithm.io.",
-        "Cells are RMSE over the whole trial in um, mean±std over seeds; a trial fails when RMSE exceeds 6 % of the peak deflection. "
-        "'ADXL gain' is the reduction of the mean RMSE of fusion relative to the Kalman filter without ADXL.",
+        f"- Records: {DURATION_S:g} s, 500 Hz radar frames, one train passage.",
+        f"- Free parameters tuned on development seeds {DEV_SEEDS[0]}-{DEV_SEEDS[-1]}: `{json.dumps(tuning['tuned'])}`.",
+        f"- Ensemble: {len(seeds)} random scenes (seeds {seeds[0]}-{seeds[-1]}), each with its own structure, radar scene and sensor errors.",
+        f"- Sensitivity: one factor at a time around the nominal scene, seeds {SENSITIVITY_SEEDS[0]}-{SENSITIVITY_SEEDS[-1]}.",
+        "- Error = estimate minus truth, both referenced to their first 0.2 s mean. Event RMSE covers the passage plus 0.3 s.",
+        "- Failure: non-finite estimate or maximum error above lambda/8 (about 0.49 mm, a 2*pi branch slip).",
+        "- Values are medians with the inter-quartile range in brackets; ratios clip RMSE to [0.01, 10000] um.",
+        "- Gains are paired reductions of the geometric-mean event RMSE (positive = fusion better) with a bootstrap 95% CI and a sign-flip p-value.",
         "",
     ]
+    offset = {seed: draw_case(seed)[1].iq_offset_ratio for seed in seeds}
+    lines += [
+        "## 1. Randomised ensemble",
+        "",
+        "### 1.1 Pooled",
+        "",
+        "The pooled numbers depend on the assumed distribution of the static IQ-offset ratio |c|/R "
+        "(log-uniform 0.02-0.5, not calibrated against a measured capture); the strata in 1.2 do not.",
+        "",
+    ]
+    lines += _method_table(ensemble, REPORT_METHODS + ABLATIONS) + [""]
+    lines += _gain_table(ensemble, REPORT_METHODS[1:] + ABLATIONS) + ["", "### 1.2 By static IQ-offset ratio |c|/R", ""]
+    for low, high in STRATA:
+        members = {seed for seed in seeds if low <= offset[seed] < high}
+        if len(members) < 3:
+            continue
+        rows = [r for r in ensemble if r["seed"] in members]
+        lines += [f"**|c|/R in [{low:g}, {high:g}): {len(members)} scenes**", ""]
+        lines += _method_table(rows, STRATUM_METHODS) + [""] + _gain_table(rows, STRATUM_METHODS[1:]) + [""]
+
+    failed_cases = sorted({r["seed"] for r in ensemble if r["method"] == "fusion" and r["failed"]})
+    lines += ["", f"### 1.3 Scenes where fusion failed ({len(failed_cases)})", ""]
+    if failed_cases:
+        lines += ["| seed | event RMSE [um] | IQ offset | SNR offset [dB] | sway [um] | timing offset [ms] | bias walk |", "|---|---|---|---|---|---|---|"]
+        for seed in failed_cases:
+            _, imp = draw_case(seed)
+            value = [r for r in ensemble if r["seed"] == seed and r["method"] == "fusion"][0]["event_rmse_um"]
+            lines.append(f"| {seed} | {value:.0f} | {imp.iq_offset_ratio:.2f} | {imp.snr_offset_db:.1f} | {1e6 * imp.target_sway_std_m:.0f} | {1e3 * imp.adxl_timestamp_offset_s:+.2f} | {imp.adxl_bias_walk_mps2_per_sqrt_s:.4f} |")
+    else:
+        lines.append("None.")
+
+    by_seed: dict[int, dict] = {}
+    for row in ensemble:
+        by_seed.setdefault(row["seed"], {})[row["method"]] = row
+    unengaged = [seed for seed in seeds if by_seed[seed]["fusion"]["c_over_r"] == 0.0]
+    identical = [seed for seed in seeds if by_seed[seed]["fusion"]["rmse_um"] == by_seed[seed]["no-circle"]["rmse_um"]]
+    lines += [
+        "", "### 1.4 Engagement of the recursive circle fit", "",
+        "The fit accepts a circle only while the cumulative normal matrix has a condition number below 1e4, "
+        "so a long static prefix with a short arc can keep it from engaging.",
+        "",
+        f"- Scenes whose median fitted |c|/R at the end of the record is zero (no accepted circle for most targets): "
+        f"{len(unengaged)}/{len(seeds)}{' (seeds ' + ', '.join(map(str, unengaged)) + ')' if unengaged else ''}.",
+        f"- Scenes where fusion and no-circle are bit-identical (no accepted circle for any target): "
+        f"{len(identical)}/{len(seeds)}{' (seeds ' + ', '.join(map(str, identical)) + ')' if identical else ''}.",
+    ]
+    lines += ["", "## 2. One-factor sensitivity around the nominal scene", ""]
     groups = []
-    for r in rows:
-        if (r["group"], r["regime"]) not in groups:
-            groups.append((r["group"], r["regime"]))
-    for group, regime in groups:
-        name = labels[group][0]
-        title = f"{group} ({regime})" if regime != "-" else group
-        lines += [f"## {title}", "", "| " + name + " | " + " | ".join(m[1] for m in methods) + " | ADXL gain | fusion beats KF-only (each at own q) |", "|" + "---|" * (len(methods) + 3)]
-        values = sorted({r["value"] for r in rows if r["group"] == group and r["regime"] == regime})
-        for value in values:
-            sel = [r for r in rows if r["group"] == group and r["regime"] == regime and r["value"] == value]
-            cells = [cell([r for r in sel if r["method"] == m[0]]) for m in methods]
-            fusion = {r["seed"]: r["rmse_um"] for r in sel if r["method"] == methods[0][0]}
-            kf = {r["seed"]: r["rmse_um"] for r in sel if r["method"] == methods[1][0]}
-            wins = sum(fusion[s] < kf[s] for s in fusion if s in kf)
-            gain = 1.0 - np.mean(list(fusion.values())) / np.mean(list(kf.values()))
-            lines.append(f"| {value:g} | " + " | ".join(cells) + f" | {100.0 * gain:.0f} % | {wins}/{len(fusion)} |")
+    for row in sensitivity:
+        if row["group"] != "nominal" and row["group"] not in groups:
+            groups.append(row["group"])
+    nominal_seeds = len(_values(sensitivity, group="nominal", method="fusion"))
+    lines += [f"Cells are the median event RMSE in um over {nominal_seeds} seeds with the number of failed runs in parentheses; the last column is the paired reduction of fusion against the Kalman filter without ADXL.", ""]
+    for group in groups:
+        lines += [f"### {group}", "", "| value | " + " | ".join(SENSITIVITY_METHODS) + " | fusion vs kf-only |", "|---|" + "---|" * (len(SENSITIVITY_METHODS) + 1)]
+        levels = sorted({r["value"] for r in sensitivity if r["group"] == group})
+        for value in [NEUTRAL[group]] + levels:
+            match = {"group": "nominal", "value": 0.0} if value == NEUTRAL[group] else {"group": group, "value": value}
+            cells = []
+            for method in SENSITIVITY_METHODS:
+                failed, _ = _failures(sensitivity, method=method, **match)
+                cells.append(f"{stats.median_iqr(_values(sensitivity, method=method, **match))[0]:.1f} ({failed})")
+            gain = stats.paired_gain(_values(sensitivity, method="fusion", **match), _values(sensitivity, method="kf-only", **match))
+            lines.append(f"| {value:g} | " + " | ".join(cells) + f" | {_fmt_gain(gain)} |")
         lines.append("")
     (RESULTS / "summary.md").write_text("\n".join(lines) + "\n")
-    print("\n".join(lines))
+    print(f"wrote {RESULTS / 'summary.md'}")
+
+
+def main() -> None:
+    command = sys.argv[1] if len(sys.argv) > 1 else ""
+    if command == "smoke":
+        smoke()
+    elif command == "tune":
+        tune()
+    elif command == "test":
+        test("--rerun" in sys.argv[2:])
+    elif command == "report":
+        report()
+    else:
+        sys.exit(__doc__)
 
 
 if __name__ == "__main__":
-    {"tune": tune, "choose": choose, "test": test, "report": report}[sys.argv[1]]()
+    main()

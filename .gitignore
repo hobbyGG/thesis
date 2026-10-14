@@ -13,3 +13,4 @@ Pasted image*.png
 datafile/*.tdms
 datafile/*.csv
 system/capture_program/train_captures/
+experiments/.cache/

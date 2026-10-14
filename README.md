@@ -67,6 +67,16 @@ python3 -m paper_bridge_simulation \
 总位移峰值缩放到 1.712 mm。雷达使用 77 GHz、500 Hz 帧率、每帧 4 个 TX0+TX2
 MIMO loop、256 个 ADC 点和 8 个虚拟阵元；ADXL355 使用 500 Hz 原生时间轴。
 
+蒙特卡洛实验（随机场景集合、单因素敏感性、调参后的对比方法与统计检验）：
+
+```bash
+python3 -m experiments.sweep smoke    # 开发种子冒烟检查
+python3 -m experiments.sweep tune     # 在开发种子上整定自由参数
+python3 -m experiments.sweep test     # 保留种子，只运行一次（重跑需 --rerun）
+python3 -m experiments.sweep report   # 生成 experiments/results/summary.md
+python3 -m experiments.figures        # 图表，需要 matplotlib
+```
+
 算法和仿真代码保持直接的数组处理。仿真真值仅在输出摘要中用于计算 RMSE，不进入
 目标检测、角度估计、转换系数 β_i 计算或 Kalman 滤波。
 
@@ -77,4 +87,5 @@ MIMO loop、256 个 ADC 点和 8 个虚拟阵元；ADXL355 使用 500 Hz 原生�
 - [算法目录说明](system/algorithm/README.md)
 - [采集程序说明](system/capture_program/README.md)
 - [仿真说明](paper_bridge_simulation/README.md)
+- [仿真实验结果](experiments/results/summary.md)
 - [雷达位移测量方法文献调研](docs/radar_method_search_2010_2026/README.md)

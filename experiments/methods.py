@@ -1,227 +1,244 @@
-"""One simulation trial: generate a package, run the estimator and its baselines.
+"""Estimators and baselines evaluated on one simulated record.
 
-All methods share the same radar front end (range FFT, DBF, IQ-circle phase,
-frozen AoA beta); they differ only in how the structural phase is estimated.
-Truth is used for scoring only.
+All methods share the radar front end, the recursive circle fit and the frozen
+AoA beta, so they differ only in how the structural phase is estimated.  The
+true displacement is used for scoring and, for the oracle-beta ablation, for
+the target geometry; nowhere else.
 """
 
 from __future__ import annotations
 
-import tempfile
-from dataclasses import replace
-from functools import lru_cache
-from pathlib import Path
+from dataclasses import dataclass, replace
 
 import numpy as np
 
-from paper_bridge_simulation.package_builder import (
-    Impairments,
-    PEAK_DEFLECTION_M,
-    _adxl_package,
-    adxl_sensed_acceleration,
-    generate,
-)
-from paper_bridge_simulation.response import simulate_response
-from system.algorithm.acceleration import (
-    RadarIntervalPreintegration,
-    preintegrate_acceleration_to_radar,
-    remove_static_bias,
-)
+from experiments.front import Front, apply_dropout
+from paper_bridge_simulation.package_builder import RANGE_RESOLUTION_M, AdxlStream
+from paper_bridge_simulation.scenario import Scenario
+from system.algorithm.acceleration import RadarIntervalPreintegration
 from system.algorithm.config import AlgorithmConfig
-from system.algorithm.io import build_algorithm_inputs, load_capture_package
+from system.algorithm.frontend import TargetData
+from system.algorithm.io import build_acceleration_input, build_radar_input
 from system.algorithm.kalman import run_fixed_beta_kalman
-from system.algorithm.phase import recursive_circle_phase, unwrap_nearest_branch
+from system.algorithm.phase import unwrap_nearest_branch
+from system.algorithm.run import displacement_error_m
 from system.algorithm.types import AccelerationInput, RadarInput
 
-EVENT_WINDOW_S = (0.5, 1.3)  # first train event of the A20 envelope
-FAILURE_FRACTION_OF_PEAK = 0.06  # about 100 um for the 1.712 mm A20 peak
-_BASE_RADAR_CACHE: dict[tuple, tuple] = {}
+METHODS = (
+    "fusion", "kf-only", "fixed-R", "single-target", "complementary",
+    "radar-only", "adxl-raw", "adxl-hp", "no-circle", "oracle-beta",
+)
+# The scored event window ends this long after the train has left.
+EVENT_TAIL_S = 0.3
+# Angular scale (degrees) against one range bin when matching a detected peak
+# to the simulated target it came from.
+MATCH_ANGLE_SCALE_DEG = 6.0
 
 
-@lru_cache(maxsize=1)
-def _cached_response():
-    return simulate_response()
+@dataclass(frozen=True)
+class Tuned:
+    """Free parameters of the methods, tuned on the development seeds."""
+
+    fusion_q: float = AlgorithmConfig.process_noise_intensity
+    kf_only_q: float = 1.0e4
+    fixed_r: float = 1.0e-4
+    fixed_r_q: float = 3.0
+    complementary_corner_hz: float = 8.0
+    adxl_hp_corner_hz: float = 0.3
 
 
-def _config(capture, radar_rate: float, **overrides) -> AlgorithmConfig:
-    meta = capture.radar_metadata
-    carrier = float(meta.get("start_frequency_hz", 77.0e9))
-    adc_rate = float(meta.get("adc_sample_rate_hz", 0.0))
-    slope = float(meta.get("chirp_slope_hz_per_s", 0.0))
-    if adc_rate > 0.0 and slope != 0.0:
-        centre = (capture.frontend.num_adc_samples - 1) / 2.0
-        carrier += slope * (float(meta.get("adc_start_time_s", 0.0)) + centre / adc_rate)
-    return AlgorithmConfig(sample_rate_hz=float(radar_rate), carrier_frequency_hz=carrier, **overrides)
+@dataclass(frozen=True)
+class RadarSide:
+    front: Front
+    radar: RadarInput
+    targets: TargetData
+    config: AlgorithmConfig
+    center_over_radius: float
 
 
-def radar_only_displacement(radar, config: AlgorithmConfig, warm: np.ndarray) -> np.ndarray:
-    """Causal per-frame inverse-variance mean of beta_i * unwrapped phase_i, no filter."""
-    selected = np.asarray(radar.selected_indices, dtype=int)
-    corrected = unwrap_nearest_branch(radar.wrapped_phase_rad, radar.available_mask, selected)
-    beta = np.asarray(radar.measured_beta, dtype=float)
-    weight = 1.0 / np.asarray(radar.initial_r, dtype=float)
-    theta = np.zeros(corrected.shape[1], dtype=float)
-    last = 0.0
-    for k in range(theta.size):
-        active = [i for i in selected if np.isfinite(corrected[i, k])]
-        if active:
-            w = weight[active]
-            last = float(np.sum(w * beta[active] * corrected[active, k]) / np.sum(w))
-        theta[k] = last
-    q = theta * config.wavelength_m() / (4.0 * np.pi)
-    return q - np.mean(q[warm])
+def prepare_radar(front: Front, dropout: tuple[float, float] | None = None) -> RadarSide:
+    """Circle fit and target selection (``dropout`` = (start_s, duration_s) of lost frames)."""
+    if dropout is not None:
+        front = apply_dropout(front, *dropout)
+    radar, targets = build_radar_input(front.targets, front.detection, front.radar_time_ns)
+    selected = radar.selected_indices
+    centre = np.abs(np.asarray(radar.extra["circle_center"])[selected, -1])
+    radius = np.asarray(radar.extra["circle_radius"])[selected, -1]
+    ratio = float(np.nanmedian(centre / radius)) if selected.size else float("nan")
+    config = AlgorithmConfig(
+        sample_rate_hz=front.radar_rate_hz, carrier_frequency_hz=front.carrier_frequency_hz
+    )
+    return RadarSide(front, radar, targets, config, ratio)
 
 
-def adxl_only_displacement(acceleration: AccelerationInput, n_samples: int) -> np.ndarray:
-    """Open-loop double integration of the ADXL preintegration increments."""
+def acceleration_input(side: RadarSide, stream: AdxlStream) -> AccelerationInput:
+    acceleration, _ = build_acceleration_input(
+        side.front.radar_time_ns, stream.estimated_ns, stream.values[:, 0]
+    )
+    return acceleration
+
+
+def without_adxl(acceleration: AccelerationInput) -> AccelerationInput:
     pre = acceleration.preintegration
-    dt = pre.duration_s
-    q = np.zeros(n_samples, dtype=float)
-    v = 0.0
-    for k in range(dt.size):
-        q[k + 1] = q[k] + v * dt[k] + pre.delta_q_m[k]
-        v += pre.delta_v_mps[k]
-    return q
-
-
-def _score(q_hat: np.ndarray, truth: np.ndarray, t: np.ndarray, peak_m: float) -> dict:
-    err = q_hat - truth
-    event = (t >= EVENT_WINDOW_S[0]) & (t <= EVENT_WINDOW_S[1])
-    rmse = float(np.sqrt(np.mean(err**2)))
-    return {
-        "rmse_m": rmse,
-        "event_rmse_m": float(np.sqrt(np.mean(err[event] ** 2))),
-        "peak_err_m": float(np.max(np.abs(err))),
-        "failed": bool(not np.isfinite(rmse) or rmse > FAILURE_FRACTION_OF_PEAK * peak_m),
-    }
-
-
-def _load_or_build_inputs(impairments: Impairments, seed: int, duration_s: float):
-    base_key = (
-        seed,
-        duration_s,
-        impairments.snr_offset_db,
-        impairments.peak_deflection_m,
-        impairments.target_sway_std_m,
-        impairments.target_sway_corner_hz,
-    )
-    is_reusable_regime = (
-        impairments.snr_offset_db in (0.0, -10.0)
-        and impairments.peak_deflection_m == PEAK_DEFLECTION_M
-        and impairments.target_sway_std_m == 0.0
-    )
-    if base_key in _BASE_RADAR_CACHE:
-        base_capture, base_radar, base_targets, radar_rate = _BASE_RADAR_CACHE[base_key]
-    else:
-        with tempfile.TemporaryDirectory(prefix="sim_trial_") as tmp:
-            package = generate(
-                Path(tmp) / "pkg",
-                duration_s=duration_s,
-                seed=seed,
-                impairments=replace(impairments, radar_dropout_s=0.0),
-            )
-            base_capture = load_capture_package(package)
-            base_radar, _, base_targets, radar_rate = build_algorithm_inputs(base_capture)
-        if is_reusable_regime:
-            # Keep only the current seed's reusable regimes in cache.
-            stale = [k for k in _BASE_RADAR_CACHE if k[0] != seed]
-            for k in stale:
-                del _BASE_RADAR_CACHE[k]
-            _BASE_RADAR_CACHE[base_key] = (base_capture, base_radar, base_targets, radar_rate)
-
-    if impairments.radar_dropout_s > 0.0:
-        drop_start = int(round(impairments.radar_dropout_start_s * radar_rate))
-        drop_end = drop_start + int(round(impairments.radar_dropout_s * radar_rate))
-        slow_time = np.array(base_targets.slow_time, copy=True)
-        slow_time[:, drop_start:drop_end] = np.nan + 1j * np.nan
-        available_mask = np.array(base_targets.available_mask, copy=True)
-        available_mask[:, drop_start:drop_end] = False
-        wrapped, centers, radii, circle_residual, normalized_iq = recursive_circle_phase(slow_time)
-        radar = RadarInput(
-            base_radar.measured_beta,
-            wrapped,
-            available_mask,
-            base_radar.selected_indices,
-            base_radar.initial_r,
-            {
-                **base_radar.extra,
-                "circle_center": centers,
-                "circle_radius": radii,
-                "circle_residual": circle_residual,
-                "normalized_iq": normalized_iq,
-            },
-        )
-    else:
-        radar = base_radar
-
-    reference_time_s, _, acceleration_ref, _ = _cached_response()
-    amplitude_scale = impairments.peak_deflection_m / PEAK_DEFLECTION_M
-    sensed_a = adxl_sensed_acceleration(reference_time_s, amplitude_scale * acceleration_ref, duration_s)
-    with tempfile.TemporaryDirectory(prefix="sim_adxl_") as tmp:
-        root = Path(tmp)
-        _adxl_package(root, sensed_a, seed, impairments)
-        adxl_dir = root / "adxl355" / "algorithm_input"
-        adxl_accel = np.load(adxl_dir / "acceleration_mps2.npy", allow_pickle=False)
-        adxl_time_ns = np.load(adxl_dir / "estimated_sample_monotonic_ns.npy", allow_pickle=False)
-    radar_time_ns = np.asarray(radar.extra["radar_time_ns"], dtype=np.int64)
-    # Same ADXL path as system.algorithm.io.build_algorithm_inputs.
-    structural_accel, _ = remove_static_bias(
-        radar_time_ns, adxl_time_ns, adxl_accel[:, 0], AlgorithmConfig().cold_start_duration_s
-    )
-    preintegration = preintegrate_acceleration_to_radar(radar_time_ns, adxl_time_ns, structural_accel)
-    acceleration = AccelerationInput(adxl_time_ns, structural_accel, preintegration)
-    return base_capture, radar, acceleration, radar_rate
-
-
-def run_trial(
-    impairments: Impairments,
-    seed: int,
-    duration_s: float,
-    process_noises: tuple[float, ...],
-    extra_methods: bool = True,
-) -> dict[str, dict]:
-    """Return {method_name: metrics}.  ``kf+adxl@q`` is the proposed fusion."""
-    capture, radar, acceleration, radar_rate = _load_or_build_inputs(impairments, seed, duration_s)
-
-    radar_time_ns = np.asarray(radar.extra["radar_time_ns"], dtype=np.int64)
-    t = (radar_time_ns - radar_time_ns[0]) * 1.0e-9
-    config = _config(capture, radar_rate)
-    warm = t <= config.cold_start_duration_s
-    truth = np.interp(
-        radar_time_ns.astype(float),
-        np.asarray(capture.truth_time_ns, dtype=float),
-        np.asarray(capture.truth_displacement_m, dtype=float),
-    )
-    truth = truth - truth[warm].mean()
-
-    peak = impairments.peak_deflection_m
-    pre = acceleration.preintegration
-    no_adxl = AccelerationInput(
+    return AccelerationInput(
         acceleration.native_time_ns,
         acceleration.native_mps2,
         RadarIntervalPreintegration(pre.duration_s, np.zeros_like(pre.delta_v_mps), np.zeros_like(pre.delta_q_m)),
     )
 
-    results: dict[str, dict] = {}
-    for q in process_noises:
-        cfg = replace(config, process_noise_intensity=q)
-        results[f"kf+adxl@{q:g}"] = _score(run_fixed_beta_kalman(radar, acceleration, cfg).q_hat_m, truth, t, peak)
-        results[f"kf-only@{q:g}"] = _score(run_fixed_beta_kalman(radar, no_adxl, cfg).q_hat_m, truth, t, peak)
-    if extra_methods:
-        cfg = replace(config, process_noise_intensity=process_noises[0])
-        results["radar-unfiltered"] = _score(radar_only_displacement(radar, config, warm), truth, t, peak)
-        results["adxl-double-integration"] = _score(
-            adxl_only_displacement(acceleration, radar_time_ns.size),
-            truth,
-            t,
-            peak,
-        )
-        results[f"kf+adxl-fixedR@{cfg.process_noise_intensity:g}"] = _score(
-            run_fixed_beta_kalman(radar, acceleration, replace(cfg, adaptive_r_forgetting=1.0)).q_hat_m, truth, t, peak
-        )
-        single_radar = replace(radar, selected_indices=radar.selected_indices[:1])
-        results[f"kf+adxl-single@{cfg.process_noise_intensity:g}"] = _score(
-            run_fixed_beta_kalman(single_radar, acceleration, cfg).q_hat_m, truth, t, peak
-        )
-    results["_meta"] = {"selected_targets": int(radar.selected_indices.size)}
-    return results
+
+def kalman(radar: RadarInput, acceleration: AccelerationInput, config: AlgorithmConfig, q: float, **overrides) -> np.ndarray:
+    return run_fixed_beta_kalman(
+        radar, acceleration, replace(config, process_noise_intensity=q, **overrides)
+    ).q_hat_m
+
+
+def radar_phase_series(radar: RadarInput, config: AlgorithmConfig) -> np.ndarray:
+    """Per-frame inverse-variance mean of beta_i * unwrapped phase_i, NaN without any target."""
+    selected = np.asarray(radar.selected_indices, dtype=int)
+    corrected = unwrap_nearest_branch(radar.wrapped_phase_rad, radar.available_mask, selected)
+    variance = np.clip(
+        np.asarray(radar.initial_r, dtype=float)[selected],
+        config.min_measurement_variance, config.max_measurement_variance,
+    )
+    observation = np.asarray(radar.measured_beta, dtype=float)[selected, None] * corrected[selected]
+    valid = np.isfinite(observation)
+    weight = np.where(valid, 1.0 / variance[:, None], 0.0)
+    total = weight.sum(axis=0)
+    theta = np.sum(weight * np.where(valid, observation, 0.0), axis=0) / np.where(total > 0.0, total, 1.0)
+    theta[total == 0.0] = np.nan
+    return theta
+
+
+def hold_last(theta: np.ndarray, config: AlgorithmConfig) -> np.ndarray:
+    """Causal zero-order hold of the radar phase series, in metres."""
+    last = np.maximum.accumulate(np.where(np.isfinite(theta), np.arange(theta.size), 0))
+    return np.nan_to_num(theta[last]) * config.wavelength_m() / (4.0 * np.pi)
+
+
+def phase_observer(
+    theta_measured: np.ndarray, acceleration: AccelerationInput, config: AlgorithmConfig,
+    corner_hz: float, *, start_at_measurement: bool,
+) -> np.ndarray:
+    """Fixed-gain second-order complementary filter, in metres.
+
+    The ADXL preintegration drives the prediction; the radar phase enters only
+    through its innovation, with critically damped gains
+    (sqrt(2) w, w^2) for w = 2 pi corner_hz.  A NaN measurement skips the
+    correction.  With a constant zero measurement the same recursion is a
+    high-pass filtered double integration of the ADXL signal alone.
+    """
+    pre = acceleration.preintegration
+    scale = 4.0 * np.pi / config.wavelength_m()
+    omega = 2.0 * np.pi * corner_hz
+    theta = rate = 0.0
+    initialised = not start_at_measurement
+    out = np.empty(theta_measured.size)
+    for k in range(theta_measured.size):
+        duration = 1.0 / config.sample_rate_hz
+        if k:
+            duration = pre.duration_s[k - 1]
+            theta += rate * duration + scale * pre.delta_q_m[k - 1]
+            rate += scale * pre.delta_v_mps[k - 1]
+        z = theta_measured[k]
+        if np.isfinite(z):
+            if initialised:
+                residual = z - theta
+                theta += np.sqrt(2.0) * omega * duration * residual
+                rate += omega * omega * duration * residual
+            else:
+                theta, initialised = z, True
+        out[k] = theta
+    return out / scale
+
+
+def adxl_double_integration(acceleration: AccelerationInput, frames: int) -> np.ndarray:
+    pre = acceleration.preintegration
+    q = np.zeros(frames)
+    v = 0.0
+    for k in range(pre.duration_s.size):
+        q[k + 1] = q[k] + v * pre.duration_s[k] + pre.delta_q_m[k]
+        v += pre.delta_v_mps[k]
+    return q
+
+
+def no_circle_phase(targets: TargetData) -> np.ndarray:
+    """Phase relative to each target's first valid sample, with no centre correction."""
+    available = targets.available_mask
+    first = np.argmax(available, axis=1)
+    reference = targets.slow_time[np.arange(available.shape[0]), first]
+    wrapped = np.angle(targets.slow_time * np.conj(reference)[:, None])
+    wrapped[~available] = np.nan
+    return wrapped
+
+
+def oracle_beta(front: Front) -> np.ndarray:
+    """beta = 1/|cos| of the simulated target each detected peak is closest to."""
+    targets = front.targets
+    cost = (
+        ((targets.range_m[:, None] - front.scatterer_range_m[None, :]) / RANGE_RESOLUTION_M) ** 2
+        + ((targets.angle_deg[:, None] - front.scatterer_angle_deg[None, :]) / MATCH_ANGLE_SCALE_DEG) ** 2
+    )
+    angle = front.scatterer_angle_deg[np.argmin(cost, axis=1)]
+    return 1.0 / np.maximum(np.abs(np.cos(np.deg2rad(angle))), 1.0e-6)
+
+
+def estimate_all(side: RadarSide, acceleration: AccelerationInput, tuned: Tuned) -> dict[str, np.ndarray]:
+    """Displacement estimate (m) of every method."""
+    radar, config = side.radar, side.config
+    theta = radar_phase_series(radar, config)
+    frames = theta.size
+    return {
+        "fusion": kalman(radar, acceleration, config, tuned.fusion_q),
+        "kf-only": kalman(radar, without_adxl(acceleration), config, tuned.kf_only_q),
+        "fixed-R": kalman(
+            replace(radar, initial_r=np.full_like(radar.initial_r, tuned.fixed_r)),
+            acceleration, config, tuned.fixed_r_q, adaptive_r_forgetting=1.0,
+        ),
+        "single-target": kalman(
+            replace(radar, selected_indices=radar.selected_indices[:1]), acceleration, config, tuned.fusion_q
+        ),
+        "complementary": phase_observer(
+            theta, acceleration, config, tuned.complementary_corner_hz, start_at_measurement=True
+        ),
+        "radar-only": hold_last(theta, config),
+        "adxl-raw": adxl_double_integration(acceleration, frames),
+        "adxl-hp": phase_observer(
+            np.zeros(frames), acceleration, config, tuned.adxl_hp_corner_hz, start_at_measurement=False
+        ),
+        "no-circle": kalman(
+            replace(radar, wrapped_phase_rad=no_circle_phase(side.front.targets)),
+            acceleration, config, tuned.fusion_q,
+        ),
+        "oracle-beta": kalman(
+            replace(radar, measured_beta=oracle_beta(side.front)), acceleration, config, tuned.fusion_q
+        ),
+    }
+
+
+def event_window(scenario: Scenario) -> tuple[float, float]:
+    start = scenario.event_starts_s[0]
+    return start, start + scenario.passage_duration_s + EVENT_TAIL_S
+
+
+def score(q_hat: np.ndarray, side: RadarSide, window: tuple[float, float]) -> dict:
+    front = side.front
+    error = displacement_error_m(q_hat, front.truth_m, front.time_s, side.config.cold_start_duration_s)
+    if not np.all(np.isfinite(error)):
+        return {"rmse_um": np.nan, "event_rmse_um": np.nan, "max_err_um": np.nan, "failed": True}
+    event = (front.time_s >= window[0]) & (front.time_s <= window[1])
+    maximum = float(np.max(np.abs(error)))
+    return {
+        "rmse_um": float(np.sqrt(np.mean(error**2))) * 1.0e6,
+        "event_rmse_um": float(np.sqrt(np.mean(error[event] ** 2))) * 1.0e6,
+        "max_err_um": maximum * 1.0e6,
+        # A branch slip shifts the estimate by a fraction of half a wavelength.
+        "failed": bool(maximum > side.config.wavelength_m() / 8.0),
+    }
+
+
+def run_methods(side: RadarSide, stream: AdxlStream, scenario: Scenario, tuned: Tuned) -> dict[str, dict]:
+    """Score every method on one record."""
+    estimates = estimate_all(side, acceleration_input(side, stream), tuned)
+    window = event_window(scenario)
+    return {name: score(estimates[name], side, window) for name in METHODS}

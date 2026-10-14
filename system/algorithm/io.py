@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from dataclasses import replace
 from pathlib import Path
 from typing import Any
 
@@ -66,16 +67,28 @@ def load_capture_package(root: str | Path) -> CapturePackage:
     )
 
 
-def build_algorithm_inputs(capture: CapturePackage):
+def effective_carrier_frequency_hz(capture: CapturePackage) -> float:
+    """Carrier frequency at the centre of the sampled fast-time aperture."""
+    radar_meta = capture.radar_metadata
+    carrier_frequency_hz = float(radar_meta.get("start_frequency_hz", 77.0e9))
+    adc_rate_hz = float(radar_meta.get("adc_sample_rate_hz", 0.0))
+    chirp_slope_hz_per_s = float(radar_meta.get("chirp_slope_hz_per_s", 0.0))
+    adc_start_time_s = float(radar_meta.get("adc_start_time_s", 0.0))
+    if adc_rate_hz > 0.0 and chirp_slope_hz_per_s != 0.0:
+        center_sample = (capture.frontend.num_adc_samples - 1) / 2.0
+        aperture_center_s = adc_start_time_s + center_sample / adc_rate_hz
+        carrier_frequency_hz += chirp_slope_hz_per_s * aperture_center_s
+    return carrier_frequency_hz
+
+
+def extract_targets(capture: CapturePackage):
+    """Range-FFT, DBF and first-frame target detection over the whole record."""
     from .frontend import extract_dbf_targets_streaming, range_angle_process
-    from .phase import recursive_circle_phase
-    from .selection import detect_target_bins, select_targets
+    from .selection import detect_target_bins
 
-    radar_time_ns = np.asarray(capture.radar_time_ns, dtype=np.int64)
     stream_cube = np.asarray(capture.adc_cube)
-    if stream_cube.shape[0] != radar_time_ns.size:
+    if stream_cube.shape[0] != np.asarray(capture.radar_time_ns).size:
         raise ValueError("radar stream length and timestamp length do not match")
-
     first = range_angle_process(stream_cube[:1], capture.frontend)
     range_bins, angle_bins, detection = detect_target_bins(
         first.cube, first.angle_axis_deg, max_candidates=5
@@ -83,36 +96,21 @@ def build_algorithm_inputs(capture: CapturePackage):
     targets = extract_dbf_targets_streaming(
         stream_cube, range_bins, angle_bins, capture.frontend
     )
+    return targets, detection
+
+
+def build_radar_input(targets, detection, radar_time_ns) -> tuple[RadarInput, Any]:
+    """Recursive circle fit, target selection and the radar measurement input."""
+    from .phase import recursive_circle_phase
+    from .selection import select_targets
+
+    radar_time_ns = np.asarray(radar_time_ns, dtype=np.int64)
     wrapped, centers, radii, circle_residual, normalized_iq = recursive_circle_phase(
         targets.slow_time
     )
-    targets = type(targets)(
-        slow_time=targets.slow_time,
-        wrapped_phase_rad=wrapped,
-        available_mask=targets.available_mask,
-        angle_deg=targets.angle_deg,
-        measured_beta=targets.measured_beta,
-        range_bins=targets.range_bins,
-        angle_bins=targets.angle_bins,
-        range_m=targets.range_m,
-    )
-    if radar_time_ns.size > 1:
-        radar_rate = 1.0 / np.median(np.diff(radar_time_ns) * 1.0e-9)
-        sample_period_s = float(np.median(np.diff(radar_time_ns)) * 1.0e-9)
-    else:
-        radar_rate = 1.0
-        sample_period_s = 1.0
-    structural_accel, static_bias = remove_static_bias(
-        radar_time_ns,
-        capture.adxl_time_ns,
-        capture.adxl_acceleration_mps2[:, 0],
-        AlgorithmConfig().cold_start_duration_s,
-    )
-    preintegration = preintegrate_acceleration_to_radar(
-        radar_time_ns, capture.adxl_time_ns, structural_accel
-    )
-    acceleration = AccelerationInput(
-        capture.adxl_time_ns, structural_accel, preintegration
+    targets = replace(targets, wrapped_phase_rad=wrapped)
+    sample_period_s = (
+        float(np.median(np.diff(radar_time_ns)) * 1.0e-9) if radar_time_ns.size > 1 else 1.0
     )
     selected, initial_r = select_targets(targets)
     radar = RadarInput(
@@ -129,11 +127,38 @@ def build_algorithm_inputs(capture: CapturePackage):
             "detection": detection,
             "radar_time_ns": radar_time_ns,
             "sample_period_s": sample_period_s,
-            "adxl_static_bias_mps2": static_bias,
             "circle_center": centers,
             "circle_radius": radii,
             "circle_residual": circle_residual,
             "normalized_iq": normalized_iq,
         },
+    )
+    return radar, targets
+
+
+def build_acceleration_input(radar_time_ns, adxl_time_ns, adxl_accel_mps2) -> tuple[AccelerationInput, float]:
+    """Static-offset removal and preintegration over the radar intervals."""
+    structural_accel, static_bias = remove_static_bias(
+        radar_time_ns,
+        adxl_time_ns,
+        adxl_accel_mps2,
+        AlgorithmConfig().cold_start_duration_s,
+    )
+    preintegration = preintegrate_acceleration_to_radar(
+        radar_time_ns, adxl_time_ns, structural_accel
+    )
+    return AccelerationInput(adxl_time_ns, structural_accel, preintegration), static_bias
+
+
+def build_algorithm_inputs(capture: CapturePackage):
+    radar_time_ns = np.asarray(capture.radar_time_ns, dtype=np.int64)
+    targets, detection = extract_targets(capture)
+    radar, targets = build_radar_input(targets, detection, radar_time_ns)
+    acceleration, static_bias = build_acceleration_input(
+        radar_time_ns, capture.adxl_time_ns, capture.adxl_acceleration_mps2[:, 0]
+    )
+    radar.extra["adxl_static_bias_mps2"] = static_bias
+    radar_rate = (
+        1.0 / np.median(np.diff(radar_time_ns) * 1.0e-9) if radar_time_ns.size > 1 else 1.0
     )
     return radar, acceleration, targets, radar_rate

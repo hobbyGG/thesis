@@ -9,11 +9,10 @@ class AlgorithmConfig:
     # The retained acquisition profile emits four MIMO loops per frame at 500 Hz.
     # ``run`` still replaces this with the measured package rate.
     sample_rate_hz: float = 500.0
-    # Tuned on simulation training seeds 1000-1009 (experiments/results/
-    # tuning.json).  With ADXL increments as the control input this intensity
-    # covers ADXL noise and residual model error, so it stays small; a large
-    # value (e.g. 5e4) makes the filter ignore the ADXL prediction.
-    process_noise_intensity: float = 30.0
+    # Tuned on the development ensemble, seeds 1000-1009 (experiments/results/
+    # tuning.json).  With the adaptive measurement variance setting the gain,
+    # the development objective is nearly flat over 3 <= q <= 1e4.
+    process_noise_intensity: float = 10.0
     initial_state_variance: float = 25.0
     initial_rate_variance: float = 400.0
     min_measurement_variance: float = 1.0e-4
