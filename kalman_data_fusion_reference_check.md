@@ -1,12 +1,13 @@
 # Kalman / 数据融合参考文献补查
 
-> 当前目录说明：本文档保留补查时的历史路径。文献是否仍在本地，以各个 `ref_papers/*/README.md` 为准；当前算法主线和直接相关文献没有因本次 PINN 清理改变。
+> 当前目录说明：本文档保留补查时的历史判断。文献是否仍在本地，以各个
+> `ref_papers/*/README.md` 为准；当前算法主线和直接相关文献没有因目录整理改变。
 
 本文档专门检查“后续若使用加速度传感器 + 毫米波雷达做数据融合，尤其涉及 Kalman 滤波、状态空间、FIR/互补融合、多率传感器融合时，非 00 核心文献和无关目录中是否有可参考文献”。
 
 ## 结论
 
-当前真正值得纳入后续融合章节的文献主要还在 `ref_papers` 根目录中，不在 `99_irrelevant_literature` 中。被移入无关目录的文献里确实有若干“sensor fusion / Kalman / mmWave radar”关键词，但多为车载感知、雷达相机目标跟踪、自动驾驶综述或移动载具桥梁检测，和“结构测点加速度 + 毫米波雷达位移融合”距离较远，暂不建议移回核心参考。
+当前真正值得纳入后续融合章节的文献主要还在 `ref_papers` 根目录和分类目录中。车载感知、雷达相机目标跟踪、自动驾驶综述或移动载具桥梁检测等文献，和“结构测点加速度 + 毫米波雷达位移融合”距离较远，不纳入核心参考。
 
 建议后续写作时把融合文献分成三层：
 
@@ -148,48 +149,6 @@
 用途：GNSS + accelerometer 集成传感器，解决时间/空间参考同步问题。适合作为“共址多传感器硬件集成与同步”的背景。
 
 注意：没有毫米波雷达；适合写同步和多传感器互补，不适合支撑雷达相位处理。
-
-## 被丢弃目录中的相关性复查
-
-### Study on Multi-Heterogeneous Sensor Data Fusion Method Based on Millimeter-Wave Radar and Camera
-
-文件：`ref_papers/99_irrelevant_literature/Study on Multi-Heterogeneous Sensor Data Fusion Method Based on Millimeter-Wave Radar and Camera.pdf`
-
-复查结果：有 mmWave radar、camera、adaptive root-mean-square cubature Kalman filter、joint probability data association 等关键词，但任务是智能车辆目标跟踪和碰撞风险感知，不是结构位移或加速度-雷达融合。
-
-建议：暂不移回。若后续想写“异构传感器 Kalman/CKF 融合在雷达领域很常见”，可作为一句旁证；不建议作为 thesis 方法依据。
-
-### Sensor and Sensor Fusion Technology in Autonomous Vehicles: A Review
-
-文件：`ref_papers/99_irrelevant_literature/Sensor and Sensor Fusion Technology in Autonomous Vehicles: A Review.pdf`
-
-复查结果：是自动驾驶传感器校准、融合和目标检测综述，与结构位移监测弱相关。
-
-建议：不引用，除非论文需要非常泛化地解释 radar/camera/LiDAR 融合分类。
-
-### On the Integration of Enabling Wireless Technologies and Sensor Fusion for Next-Generation Connected and Autonomous Vehicles
-
-文件：`ref_papers/99_irrelevant_literature/On the Integration of Enabling Wireless Technologies and Sensor Fusion for Next-Generation Connected and Autonomous Vehicles.pdf`
-
-复查结果：车联网和自动驾驶综述，融合对象为 radar/LiDAR/camera/通信，不适合结构位移融合。
-
-建议：不引用。
-
-### Implementation of a drive-by monitoring system for transport infrastructure utilising smartphone technology and GNSS
-
-文件：`ref_papers/99_irrelevant_literature/Implementation of a drive-by monitoring system for transport infrastructure utilising smartphone technology and GNSS.pdf`
-
-复查结果：与交通基础设施监测有关，但是 drive-by / smartphone / GNSS 路线，不是固定结构测点的雷达+加速度融合。
-
-建议：暂不引用。
-
-### Investigation of Frequency-Domain Dimension Reduction for A2M-Based Bridge Damage Detection Using Accelerations of Moving Vehicles
-
-文件：`ref_papers/99_irrelevant_literature/Investigation of Frequency-Domain Dimension Reduction for A2M-Based Bridge Damage Detection Using Accelerations of Moving Vehicles.pdf`
-
-复查结果：使用移动车辆加速度做桥梁损伤检测，关注频域降维和分类，不涉及位移融合。
-
-建议：不引用。
 
 ## 对本文后续融合章节的建议写法
 

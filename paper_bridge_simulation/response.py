@@ -68,7 +68,7 @@ def simulate_response(
     The acceleration is computed from this equation and the analytic envelope,
     never independently synthesized or derived from noisy displacement.
 
-    The defaults reproduce the A20-parameterized nominal response.  Optional
+    The defaults reproduce the A20-parameterized reference response.  Optional
     ambient microtremor is an independent random forcing of the same modes,
     scaled to ``ambient_acceleration_rms_mps2`` and added to displacement and
     acceleration after the passage peak has been normalised.

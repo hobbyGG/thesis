@@ -9,9 +9,7 @@ class AlgorithmConfig:
     # The retained acquisition profile emits four MIMO loops per frame at 500 Hz.
     # ``run`` still replaces this with the measured package rate.
     sample_rate_hz: float = 500.0
-    # Tuned on the development ensemble, seeds 1000-1009 (experiments/results/
-    # tuning.json).  With the adaptive measurement variance setting the gain,
-    # the development objective is nearly flat over 3 <= q <= 1e4.
+    # Retained process-noise setting for the structural phase estimator.
     process_noise_intensity: float = 10.0
     initial_state_variance: float = 25.0
     initial_rate_variance: float = 400.0

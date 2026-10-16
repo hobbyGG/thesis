@@ -105,14 +105,18 @@ def build_radar_input(targets, detection, radar_time_ns) -> tuple[RadarInput, An
     from .selection import select_targets
 
     radar_time_ns = np.asarray(radar_time_ns, dtype=np.int64)
-    wrapped, centers, radii, circle_residual, normalized_iq = recursive_circle_phase(
-        targets.slow_time
+    wrapped, centers, radii, circle_residual, normalized_iq, circle_condition = recursive_circle_phase(
+        targets.slow_time, return_condition=True
     )
     targets = replace(targets, wrapped_phase_rad=wrapped)
     sample_period_s = (
         float(np.median(np.diff(radar_time_ns)) * 1.0e-9) if radar_time_ns.size > 1 else 1.0
     )
     selected, initial_r = select_targets(targets)
+    origin_reference = np.argmax(targets.available_mask, axis=1)
+    origin_iq = targets.slow_time[np.arange(targets.slow_time.shape[0]), origin_reference]
+    origin_wrapped = np.angle(targets.slow_time * np.conj(origin_iq)[:, None])
+    origin_wrapped[~targets.available_mask] = np.nan
     radar = RadarInput(
         targets.measured_beta,
         targets.wrapped_phase_rad,
@@ -131,6 +135,8 @@ def build_radar_input(targets, detection, radar_time_ns) -> tuple[RadarInput, An
             "circle_radius": radii,
             "circle_residual": circle_residual,
             "normalized_iq": normalized_iq,
+            "circle_condition": circle_condition,
+            "origin_wrapped_phase": origin_wrapped,
         },
     )
     return radar, targets

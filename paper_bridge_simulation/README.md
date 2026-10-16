@@ -18,17 +18,26 @@ python3 -m system.algorithm.run \
 52.93、84.44 Hz）。每次事件持续 0.8 s，事件之间静止 5 s，共生成三次响应；
 总位移峰值缩放到 1.712 mm。准静态通车挠度和阻尼模态共同构成位移，ADXL 加速度
 由同一结构响应计算后加入传感器噪声、偏置、比例误差和 3.26 ms 数字滤波群延迟。
-导出的 `estimated_sample_monotonic_ns` 与采集程序配置 `group_delay_ns` 时的规则
+ADXL 的 `acceleration_mps2.npy` 由 ±2 g、20 bit、256000 LSB/g 的量化码反算得到，
+因此算法输入中包含量化误差；RMSE 只在算法输出位移与 `truth/displacement_m.npy`
+对齐后计算，不把 ADXL 加速度与加速度真值单独作为性能指标。
+真值 `truth/acceleration_mps2.npy` 对应的是传感器实际采样的内容时刻
+`truth/adxl_time_ns.npy = DRDY - group_delay`；它不再错误地标成 DRDY 时刻。
+`truth/adxl_published_time_ns.npy` 保存含残余偏移与抖动、并经过严格递增修复的算法时间轴。
+算法输入中的 `estimated_sample_monotonic_ns` 与采集程序配置 `group_delay_ns` 时的规则
 相同：DRDY 时刻减去标定群延迟。
 
-`Scenario`（`scenario.py`，默认值即上述名义场景）描述观测对象：结构响应参数（车速、
+`Scenario`（`scenario.py`，默认值是上述 A20 参数化参考响应）描述观测对象：结构响应参数（车速、
 峰值挠度、通过时长、事件时刻、模态激励权重与相位、环境微振）与雷达场景（安装高度、
-5 个目标的角度/幅度/SNR、静态散射体）。`Impairments`（默认只含名义传感器模型，
-输出不变）描述传感器与环境对名义模型的偏离：
+5 个目标的角度/幅度/SNR、静态散射体）。`Impairments`（默认采用参考传感器参数）描述
+传感器与环境相对参考模型的偏离：
 
 | 参数 | 含义 |
 |---|---|
 | `snr_offset_db` | 每个目标散射系数的 SNR 偏移，相位噪声按 $10^{-\mathrm{SNR}/20}$ 缩放；热噪声与量化噪声在 DBF 输出中可忽略 |
+| `radar_mount_angle_error_deg` | 物理阵列视角相对算法标称视角的误差；只作用于前向信号，算法仍读取标称角度 |
+| `radar_array_spacing_error` | 物理虚拟阵元间距的相对误差；DBF 仍使用标称阵元位置 |
+| `radar_chirp_slope_error` | 物理 chirp 斜率相对标称 profile 的误差；算法仍使用标称距离标定 |
 | `iq_offset_ratio` | 每个目标距离—角度单元内不随结构运动的常值复数项（直流偏置、串扰与静态杂波的集总）占目标幅度的比例，使该目标的 IQ 圆心偏离原点 |
 | `target_sway_*` | 指定目标的独立低通视线运动（非刚性散射体） |
 | `radar_dropout_*` | 全部目标同时丢失的连续帧（ADC 数据置 NaN） |
@@ -44,13 +53,14 @@ python3 -m system.algorithm.run \
 | 车速 / 列车长度 | U(250, 350) km/h / U(40, 125) m，通过时长 $=(L+24.768)/v$ |
 | 峰值挠度 / 动态加速度峰值 | U(0.6, 2.2) mm / U(0.2, 0.8) m/s² |
 | 事件起始 | U(0.5, 1.3) s（4 s 记录内一次通过） |
-| 模态激励权重 / 相位 | 名义值 × U(0.5, 1.5) / U(0, 2π) |
+| 模态激励权重 / 相位 | 参考值 × U(0.5, 1.5) / U(0, 2π) |
 | 环境微振加速度 RMS | 对数均匀 0.5–5 mm/s² |
 | 安装高度 | U(8, 10) m |
 | 目标角度 | $\lvert\theta\rvert\sim$ U(2°, 28°)，随机符号；要求任意两目标距离差 ≥ 2.5 个距离单元或角度差 ≥ 14°，且最大距离 ≤ 10.9 m |
-| 目标幅度 / SNR | 名义值 × U(0.6, 1.4) / U(18, 32) dB |
+| 目标幅度 / SNR | 参考值 × U(0.6, 1.4) / U(18, 32) dB |
 | 静态散射体（2 个） | 距离 U(9, 10.9) m，角度 U(−35°, 35°)，幅度 U(0.01, 0.03) |
 | SNR 偏移 | U(−10, 0) dB |
+| 雷达安装角 / 阵元间距 / chirp 斜率失配 | N(0, 0.5°) 截断 ±2° / N(0, 1%) 截断 ±3% / N(0, 0.1%) 截断 ±0.3% |
 | IQ 偏置比例 | 对数均匀 0.02–0.5（未标定） |
 | 目标晃动 | 概率 0.5；随机 1–2 个目标；标准差对数均匀 2–40 µm |
 | ADXL 偏置 / 零偏游走 | U(−0.6, 0.6) m/s² / 对数均匀 1e-4–5e-3 m/s²/√s |
@@ -59,19 +69,20 @@ python3 -m system.algorithm.run \
 | 时间偏移 / 抖动 | N(0, 0.5 ms) 截断 ±2 ms / U(0, 100 µs) |
 | DRDY 时钟相位 / ODR 误差 | U(0, 2 ms) / U(−0.3%, 0.3%) |
 
-`generate(..., fast=True)` 不写无损 `chirp_cube.npy`，也不计算由它得到的 range-FFT
-统计量；`adc_cube`、ADXL、时间线与真值不变。它供大批量实验使用，保留的名义包不使用。
+`generate(..., fast=True)` 不写无损 `chirp_cube.npy`，但仍按分块计算轻量的有效 SNR
+统计量；`adc_cube`、ADXL、时间线与真值不变。它供大批量实验使用。
 ADXL 的 DRDY 序列比雷达记录多保留 4 个样本，使时钟相位与群延迟补偿不会让最后一个
 雷达区间失去后继样本。
 
-各旋钮由 `tests/test_simulation_model.py` 标定：SNR 偏移对应目标相位噪声的缩放、
+各旋钮在本模块内按硬件量纲和观测模型定义：SNR 偏移对应目标相位噪声的缩放、
 零偏游走方差随时间线性增长、抖动标准差、时钟相位/ODR 误差、比例误差与倾斜项的定义、
-晃动的平稳标准差与相关性、集合场景的取值范围。`range_fft_snr_db`（仅完整包）是未加窗
-FFT 的中位数底噪比；SNR 偏移 −10 dB 时它的变化小于 0.2 dB，因此不能作为 SNR 旋钮的度量
+晃动的平稳标准差与相关性、集合场景的取值范围。`source.effective_snr_db` 同时输出
+Range-FFT、DBF 和 IQ 三层有效 SNR。Range-FFT 使用与主算法一致的 Hamming 窗；DBF 使用
+标称阵元位置的固定 64 角度栅格；IQ 使用前 0.2 s 静止窗口的复数均值功率与残差方差。
+三者只写入 manifest，不参与算法决策。`range_fft_snr_db` 保留为 Range-FFT 层别名。
+SNR 偏移 −10 dB 时该指标仍可能受旁瓣与静态杂波支配，因此应按三层指标共同报告，不能只用
+散射系数 SNR 替代有效 SNR。
 （其底噪应由旁瓣与 ADC 量化噪声支配，未单独验证）。
-
-蒙特卡洛实验见 `experiments/`（`python3 -m experiments.sweep smoke|tune|test|report`），
-协议与结果见 `experiments/results/summary.md` 与 `docs/current_method_specification.md` §9。
 
 雷达观测模型使用 IWR1843 参数：77 GHz、70 MHz/µs 斜率、256 ADC 点、5.209 MS/s、
 500 Hz 外部触发、每帧 4 个 MIMO loop。每个 loop 包含 TX0 和 TX2 两个 TDM chirp，

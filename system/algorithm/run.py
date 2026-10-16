@@ -86,6 +86,9 @@ def run(input_dir: str | Path, output: str | Path) -> tuple[Path, Path]:
         "beta_source": result.extra["beta_source"],
     }
     if truth_aligned is not None:
+        # Performance is evaluated only at the estimator boundary: the
+        # displacement output is compared with the displacement truth.  The
+        # ADXL stream is an algorithm input, not a separately scored output.
         error = displacement_error_m(
             result.q_hat_m, truth_aligned, arrays["time_s"], config.cold_start_duration_s
         )

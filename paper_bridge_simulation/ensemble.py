@@ -3,7 +3,8 @@
 ``draw_case(seed)`` returns one ``(Scenario, Impairments)`` pair.  Every bound
 below is an explicit simulation assumption (documented in the package README);
 none is calibrated against a measured static capture yet.  A seed fixes the
-whole case, so a result table is reproducible from the seed list alone.
+whole case for a fixed generator version. Reports retain the trial impairments
+so later changes in random draws cannot relabel old measurements.
 """
 
 from __future__ import annotations
@@ -62,7 +63,7 @@ def draw_case(seed: int) -> tuple[Scenario, Impairments]:
         "ambient_seed": int(rng.integers(2**31)),
     }
 
-    # Radar scene: amplitudes fall with the off-nadir angle as in the nominal scene.
+    # Radar scene: amplitudes fall with the off-nadir angle as in the reference scene.
     angles, height = _draw_geometry(rng)
     amplitudes = TARGET_AMPLITUDES * rng.uniform(0.6, 1.4, TARGET_COUNT)
     snr_db = rng.uniform(18.0, 32.0, TARGET_COUNT)
@@ -83,6 +84,12 @@ def draw_case(seed: int) -> tuple[Scenario, Impairments]:
     sway_std_m = _log_uniform(rng, 2.0e-6, 40.0e-6)
     impairments = Impairments(
         snr_offset_db=float(rng.uniform(-10.0, 0.0)),
+        # Uncalibrated radar geometry/profile mismatch.  The generated signal
+        # uses the perturbed values while the algorithm receives nominal
+        # values in the manifest.
+        radar_mount_angle_error_deg=float(np.clip(rng.normal(0.0, 0.5), -2.0, 2.0)),
+        radar_array_spacing_error=float(np.clip(rng.normal(0.0, 0.01), -0.03, 0.03)),
+        radar_chirp_slope_error=float(np.clip(rng.normal(0.0, 0.001), -0.003, 0.003)),
         # Not calibrated against a measured static capture and the dominant
         # error source of the radar chain, so reports stratify by it.  Ratios
         # near 1 put the IQ circle through the origin and fail every method;

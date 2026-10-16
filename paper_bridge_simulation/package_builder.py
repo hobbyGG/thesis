@@ -73,14 +73,14 @@ RADAR_LOOP_REFERENCE_OFFSET_S = (
 RADAR_APERTURE_CENTER_OFFSET_S = RADAR_LOOP_REFERENCE_OFFSET_S + (RADAR_LOOPS_PER_FRAME - 1) * RADAR_LOOP_START_INTERVAL_S / 2.0
 RANGE_RESOLUTION_M = C_LIGHT_MPS * ADC_SAMPLE_RATE_HZ / (2.0 * CHIRP_SLOPE_HZ_PER_S * ADC_SAMPLES)
 MAX_BEAT_RANGE_M = C_LIGHT_MPS * ADC_SAMPLE_RATE_HZ / (2.0 * CHIRP_SLOPE_HZ_PER_S)
-_NOMINAL_SCENE = Scenario()
-GUIDEWAY_TO_GROUND_HEIGHT_M = _NOMINAL_SCENE.height_m
-TARGET_ANGLES_DEG = np.asarray(_NOMINAL_SCENE.target_angles_deg)
+_DEFAULT_SCENE = Scenario()
+GUIDEWAY_TO_GROUND_HEIGHT_M = _DEFAULT_SCENE.height_m
+TARGET_ANGLES_DEG = np.asarray(_DEFAULT_SCENE.target_angles_deg)
 TARGET_X_M = GUIDEWAY_TO_GROUND_HEIGHT_M * np.tan(np.deg2rad(TARGET_ANGLES_DEG))
 TARGET_RANGES_M = np.sqrt(GUIDEWAY_TO_GROUND_HEIGHT_M**2 + TARGET_X_M**2)
 TARGET_RANGE_BINS = np.rint(TARGET_RANGES_M / RANGE_RESOLUTION_M).astype(int)
-TARGET_AMPLITUDES = np.asarray(_NOMINAL_SCENE.target_amplitudes)
-TARGET_SNR_DB = np.asarray(_NOMINAL_SCENE.target_snr_db)
+TARGET_AMPLITUDES = np.asarray(_DEFAULT_SCENE.target_amplitudes)
+TARGET_SNR_DB = np.asarray(_DEFAULT_SCENE.target_snr_db)
 # Amplitudes refer to this range whatever the height of the drawn scene.
 TARGET_REFERENCE_RANGE_M = GUIDEWAY_TO_GROUND_HEIGHT_M
 # Keep the reflected path inside the complex-ADC beat-frequency limit even
@@ -96,7 +96,7 @@ RADAR_GENERATION_BLOCK_FRAMES = 32
 # above sandy soil and trees.  These are weak stationary point scatterers,
 # not an attempt to reproduce a full electromagnetic environment.  Their
 # ranges stay below the complex-ADC beat-frequency limit for this profile.
-STATIC_SCATTERERS = tuple(_NOMINAL_SCENE.static_scatterer_dicts())
+STATIC_SCATTERERS = tuple(_DEFAULT_SCENE.static_scatterer_dicts())
 # Structural response is generated this much beyond the record so that the
 # chirp and DRDY instants of the last frames stay inside the reference grid.
 RESPONSE_MARGIN_S = 0.05
@@ -152,6 +152,7 @@ def _scatterer_if(
     phase_bias: float,
     positions: np.ndarray,
     adc_time_s: np.ndarray,
+    chirp_slope_hz_per_s: float = CHIRP_SLOPE_HZ_PER_S,
 ) -> np.ndarray:
     """Return one point-scatterer dechirped FMCW IF contribution.
 
@@ -162,7 +163,7 @@ def _scatterer_if(
     """
     ranges = np.asarray(range_m, dtype=float)
     amplitude = np.asarray(amplitude, dtype=complex)
-    beat_hz = 2.0 * CHIRP_SLOPE_HZ_PER_S * ranges / C_LIGHT_MPS
+    beat_hz = 2.0 * chirp_slope_hz_per_s * ranges / C_LIGHT_MPS
     fast_time = np.exp(2j * np.pi * beat_hz[..., None] * adc_time_s[None, :])
     propagation = np.exp(1j * (4.0 * np.pi * ranges / WAVELENGTH_M + phase_bias))
     angle_tone = np.exp(2j * np.pi * positions * np.sin(np.deg2rad(angle_deg)))
@@ -179,7 +180,12 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
     # receives eight virtual antennas; the frame export averages four loops.
     rx_positions = np.arange(4, dtype=float) * 0.5
     tx_positions = np.asarray((0.0, 2.0), dtype=float)
-    positions = np.concatenate([tx + rx_positions for tx in tx_positions])
+    nominal_positions = np.concatenate([tx + rx_positions for tx in tx_positions])
+    # The physical forward model is deliberately allowed to differ from the
+    # nominal values exported to the algorithm.  This is a compact way to
+    # exercise angle, array-spacing and range-profile calibration errors.
+    positions = nominal_positions * (1.0 + impairments.radar_array_spacing_error)
+    actual_chirp_slope = CHIRP_SLOPE_HZ_PER_S * (1.0 + impairments.radar_chirp_slope_error)
     adc_time_s = RADAR_ADC_START_TIME_S + np.arange(ADC_SAMPLES, dtype=float) / ADC_SAMPLE_RATE_HZ
     # Keep the geometric ranges continuous.  The FFT bin in the manifest is
     # only the expected extraction bin; snapping the physical target to that
@@ -190,6 +196,7 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
     target_x_m = scene.height_m * np.tan(np.deg2rad(target_angles_deg))
     target_range_bins = np.rint(target_ranges_m / RANGE_RESOLUTION_M).astype(int)
     static_scatterers = scene.static_scatterer_dicts()
+    array_angle_error_deg = impairments.radar_mount_angle_error_deg
 
     directory = root / "radar" / "algorithm_input"
     directory.mkdir(parents=True)
@@ -235,10 +242,30 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
             )
             for tx in range(RADAR_TX_CHIRPS_PER_LOOP):
                 offset_if[tx] += _scatterer_if(
-                    np.full((1, 1), range_m), angle, offset_amplitude, offset_phases[index],
-                    positions[tx * 4:(tx + 1) * 4], adc_time_s,
+                    np.full((1, 1), range_m), angle + array_angle_error_deg, offset_amplitude, offset_phases[index],
+                    positions[tx * 4:(tx + 1) * 4], adc_time_s, actual_chirp_slope,
                 )
+    # Effective-SNR diagnostics use the same Hamming range FFT and fixed DBF
+    # grid as the retained algorithm.  They are written to the manifest only;
+    # no diagnostic statistic is fed back into target extraction or filtering.
     range_power_blocks = []
+    dbf_signal_blocks = [[] for _ in target_angles_deg]
+    dbf_noise_blocks = []
+    iq_sum = np.zeros(len(target_angles_deg), dtype=complex)
+    iq_abs2_sum = np.zeros(len(target_angles_deg), dtype=float)
+    iq_count = np.zeros(len(target_angles_deg), dtype=np.int64)
+    range_window = np.hamming(ADC_SAMPLES)
+    angle_window = np.hanning(VIRTUAL_RX)
+    spatial = np.fft.fftshift(np.fft.fftfreq(64, d=1.0))
+    diagnostic_steering = np.exp(
+        -2j * np.pi * nominal_positions[:, None]
+        * (spatial / 0.5)[None, :]
+    )
+    diagnostic_angle_axis = np.rad2deg(np.arcsin(np.clip(spatial / 0.5, -1.0, 1.0)))
+    target_angle_bins = np.asarray([
+        int(np.argmin(np.abs(diagnostic_angle_axis - (angle + array_angle_error_deg))))
+        for angle in target_angles_deg
+    ])
     saturated_i_count = 0
     saturated_q_count = 0
     for start in range(0, frames, RADAR_GENERATION_BLOCK_FRAMES):
@@ -260,16 +287,16 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
             for tx in range(RADAR_TX_CHIRPS_PER_LOOP):
                 channel_slice = slice(tx * 4, (tx + 1) * 4)
                 block[:, :, channel_slice, :] += _scatterer_if(
-                    ranges[:, :, tx], angle,
+                    ranges[:, :, tx], angle + array_angle_error_deg,
                     target_amplitude[:, :, tx] + target_noise[:, :, tx],
-                    propagation_bias, positions[channel_slice], adc_time_s,
+                    propagation_bias, positions[channel_slice], adc_time_s, actual_chirp_slope,
                 )
                 multipath_ranges = ranges[:, :, tx] + MULTIPATH_DELAY_M
                 block[:, :, channel_slice, :] += _scatterer_if(
-                    multipath_ranges, angle + 2.0,
+                    multipath_ranges, angle + 2.0 + array_angle_error_deg,
                     MULTIPATH_AMPLITUDE_RATIO * target_amplitude[:, :, tx]
                     * (ranges[:, :, tx] / multipath_ranges) ** 2,
-                    multipath_bias, positions[channel_slice], adc_time_s,
+                    multipath_bias, positions[channel_slice], adc_time_s, actual_chirp_slope,
                 )
 
         for scatterer_index, scatterer in enumerate(static_scatterers):
@@ -283,8 +310,8 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
             for tx in range(RADAR_TX_CHIRPS_PER_LOOP):
                 channel_slice = slice(tx * 4, (tx + 1) * 4)
                 block[:, :, channel_slice, :] += _scatterer_if(
-                    static_ranges[:, :, tx], scatterer["angle_deg"], static_amplitude,
-                    propagation_bias, positions[channel_slice], adc_time_s,
+                    static_ranges[:, :, tx], scatterer["angle_deg"] + array_angle_error_deg, static_amplitude,
+                    propagation_bias, positions[channel_slice], adc_time_s, actual_chirp_slope,
                 )
 
         if impairments.iq_offset_ratio > 0.0:
@@ -322,31 +349,71 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
                 frame_adc[s0:s1] = np.complex64(np.nan + 1j * np.nan)
         adc[start:end] = frame_adc
 
-        if not fast:
-            range_spectrum = np.fft.fft(block.astype(np.complex128), axis=-1)
-            range_power_blocks.append(np.median(np.abs(range_spectrum) ** 2, axis=(0, 1, 2)))
+        # Keep these calculations bounded by the generation block.  The
+        # nominal positions intentionally differ from the physical positions
+        # above, matching what the algorithm receives in its manifest.
+        range_spectrum = np.fft.fft(
+            block.astype(np.complex128) * range_window[None, None, None, :], axis=-1
+        )
+        range_power_blocks.append(np.nanmedian(np.abs(range_spectrum) ** 2, axis=(0, 1, 2)))
+        snapshots = np.transpose(range_spectrum, (0, 1, 3, 2))
+        dbf_cube = np.einsum(
+            "flrv,va->flra", snapshots * angle_window[None, None, None, :],
+            diagnostic_steering, optimize=True,
+        )
+        dbf_power = np.abs(dbf_cube) ** 2
+        dbf_power_map = np.nanmedian(dbf_power, axis=(0, 1))
+        excluded = np.zeros(dbf_power_map.shape, dtype=bool)
+        for target_bin, angle_bin in zip(target_range_bins, target_angle_bins):
+            excluded[max(0, target_bin - 2):min(ADC_SAMPLES, target_bin + 3),
+                     max(0, angle_bin - 2):min(64, angle_bin + 3)] = True
+        dbf_noise_blocks.append(float(np.nanmedian(dbf_power_map[~excluded])))
+        for target_index, (target_bin, angle_bin) in enumerate(zip(target_range_bins, target_angle_bins)):
+            dbf_signal_blocks[target_index].append(
+                float(np.nanmedian(dbf_power[:, :, int(target_bin), int(angle_bin)]))
+            )
+            quiet_end = max(0, min(block_frames, int(round(0.2 * RADAR_RATE_HZ)) - start))
+            if quiet_end:
+                quiet_iq = dbf_cube[:quiet_end, :, int(target_bin), int(angle_bin)].reshape(-1)
+                finite = np.isfinite(quiet_iq)
+                quiet_iq = quiet_iq[finite]
+                iq_sum[target_index] += np.sum(quiet_iq)
+                iq_abs2_sum[target_index] += float(np.sum(np.abs(quiet_iq) ** 2))
+                iq_count[target_index] += quiet_iq.size
 
     adc.flush()
     arrays = {
         "adc_cube": adc_description,
         "frame_times_s": _array(directory / "frame_times_s.npy", np.arange(frames) / RADAR_RATE_HZ, ["frame"]),
     }
-    # The fast record omits the lossless chirp cube (the capture program's
-    # save_chirp_cube=False option) and the range-FFT statistic computed from it.
+    # The fast record omits the lossless chirp cube, but the bounded effective
+    # SNR diagnostics are retained for both modes.
     chirp_payload_bytes = 0
-    range_fft_snr_db = None
+    range_power = np.nanmedian(np.stack(range_power_blocks, axis=0), axis=0)
+    excluded_range = np.zeros(ADC_SAMPLES, dtype=bool)
+    for target_bin in target_range_bins:
+        excluded_range[max(0, target_bin - 2):min(ADC_SAMPLES, target_bin + 3)] = True
+    range_noise_floor = float(np.nanmedian(range_power[~excluded_range]))
+    range_fft_snr_db = [
+        float(10.0 * np.log10(max(range_power[int(target_bin)], 1.0e-30)
+                               / max(range_noise_floor, 1.0e-30)))
+        for target_bin in target_range_bins
+    ]
+    dbf_noise_floor = float(np.nanmedian(np.asarray(dbf_noise_blocks)))
+    dbf_snr_db = [
+        float(10.0 * np.log10(max(float(np.nanmedian(values)), 1.0e-30)
+                               / max(dbf_noise_floor, 1.0e-30)))
+        for values in dbf_signal_blocks
+    ]
+    iq_snr_db = []
+    for index in range(len(target_angles_deg)):
+        count = max(int(iq_count[index]), 1)
+        mean_iq = iq_sum[index] / count
+        noise_power = max(iq_abs2_sum[index] / count - abs(mean_iq) ** 2, 1.0e-30)
+        iq_snr_db.append(float(10.0 * np.log10(max(abs(mean_iq) ** 2, 1.0e-30) / noise_power)))
     if chirp is not None:
         chirp.flush()
         chirp_payload_bytes = int(np.prod((frames, loops, VIRTUAL_RX, ADC_SAMPLES)) * 4)
-        range_power = np.median(np.stack(range_power_blocks, axis=0), axis=0)
-        excluded = np.zeros(ADC_SAMPLES, dtype=bool)
-        for target_bin in target_range_bins:
-            excluded[max(0, target_bin - 2):min(ADC_SAMPLES, target_bin + 3)] = True
-        noise_floor = float(np.median(range_power[~excluded]))
-        range_fft_snr_db = [
-            float(10.0 * np.log10(max(range_power[int(target_bin)], 1.0e-30) / max(noise_floor, 1.0e-30)))
-            for target_bin in target_range_bins
-        ]
         arrays["chirp_cube"] = chirp_description
     del chirp, adc
     _json(directory / "manifest.json", {
@@ -367,9 +434,21 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
                    "target_snr_db": snr_db_all.tolist(),
                    "snr_semantics": "per-target, per-TX, per-loop complex scattering coefficient before array projection and loop averaging",
                    "range_fft_snr_db": range_fft_snr_db,
+                   "effective_snr_db": {
+                       "range_fft": range_fft_snr_db,
+                       "dbf": dbf_snr_db,
+                       "iq": iq_snr_db,
+                       "target_angle_bins": target_angle_bins.tolist(),
+                       "quiet_window_s": [0.0, 0.2],
+                       "semantics": {
+                           "range_fft": "Hamming-windowed range FFT; target bin power divided by median non-target range-bin power before DBF",
+                           "dbf": "nominal-position fixed-grid DBF; target range-angle cell power divided by median non-target range-angle cell power",
+                           "iq": "quiet-window complex IQ mean power divided by residual complex variance at the nominal target range-angle cell",
+                       },
+                   },
                    "impairments": asdict(impairments),
                    "scenario": asdict(scene),
-                   "range_fft_snr_statistic": "median of bounded-block medians",
+                   "range_fft_snr_statistic": "Hamming-windowed median of bounded-block medians",
                    "scene": {"guideway_height_m": scene.height_m, "surface": "sandy soil with tree line",
                              "static_scatterers": static_scatterers,
                              "multipath_excess_path_m": MULTIPATH_DELAY_M,
@@ -390,7 +469,7 @@ def _radar_package(root: Path, tx_q: np.ndarray, seed: int, impairments: Impairm
             "loop_reference_offset_s": RADAR_LOOP_REFERENCE_OFFSET_S,
             "coherent_aperture_center_offset_s": RADAR_APERTURE_CENTER_OFFSET_S,
             "tx_indices": [0, 2], "rx_indices": [0, 1, 2, 3], "virtual_antennas": VIRTUAL_RX,
-            "virtual_array_positions_wavelengths": positions.tolist(),
+            "virtual_array_positions_wavelengths": nominal_positions.tolist(),
             "chirp_cube_semantics": "paired TDM virtual snapshot: channels 0..3 are TX0/RX0..3 and 4..7 are TX2/RX0..3",
             "adc_samples_per_chirp": ADC_SAMPLES, "adc_sample_rate_hz": ADC_SAMPLE_RATE_HZ,
             "adc_capture_time_s": ADC_CAPTURE_TIME_S,
@@ -428,8 +507,11 @@ class AdxlStream(NamedTuple):
     estimated_ns: np.ndarray
     values: np.ndarray
     bias_mps2: np.ndarray
-    # Structural acceleration at the DRDY instants (no filter delay).
+    # Structural acceleration at the physical content instants (no filter
+    # delay).  ``truth_content_ns`` is the time axis for this array; it is
+    # intentionally distinct from DRDY and published/estimated timestamps.
     truth_mps2: np.ndarray
+    truth_content_ns: np.ndarray
 
 
 def adxl_samples(scene: Scenario, impairments: Impairments, seed: int, duration_s: float) -> AdxlStream:
@@ -478,20 +560,42 @@ def adxl_samples(scene: Scenario, impairments: Impairments, seed: int, duration_
         estimated_ns = estimated_ns + np.rint(
             jitter_rng.standard_normal(count) * impairments.adxl_timestamp_jitter_std_s * 1.0e9
         ).astype(np.int64)
-        estimated_ns = np.maximum.accumulate(estimated_ns)
-    return AdxlStream(drdy_ns, estimated_ns, values, bias, np.interp(drdy_s, reference_time_s, acceleration))
+    # Timestamp jitter can make neighbouring published timestamps equal or
+    # reverse.  The capture contract requires strict ordering for interval
+    # preintegration, so repair only the timestamp sequence, never the sample
+    # values or their physical truth times.
+    for index in range(1, estimated_ns.size):
+        if estimated_ns[index] <= estimated_ns[index - 1]:
+            estimated_ns[index] = estimated_ns[index - 1] + 1
+    truth_content_s = content_s
+    truth_content_ns = BASE_TIME_NS + np.rint(truth_content_s * 1.0e9).astype(np.int64)
+    truth_mps2 = np.interp(truth_content_s, reference_time_s, acceleration)
+    return AdxlStream(drdy_ns, estimated_ns, values, bias, truth_mps2, truth_content_ns)
 
 
 def _adxl_package(root: Path, stream: AdxlStream, impairments: Impairments) -> None:
     values = stream.values
     sample_count = values.shape[0]
-    raw = np.rint(values / 9.80665 * 256000.0).astype(np.int32)
+    # Export the same quantized value that a ±2 g, 20-bit ADXL355 would
+    # deliver after the raw-code-to-acceleration conversion.  The algorithm
+    # reads ``acceleration_mps2`` rather than the diagnostic raw-code array,
+    # so keeping the pre-quantized floating-point values here would remove
+    # quantization from the evaluated estimator entirely.
+    sensitivity_lsb_per_g = 256_000.0
+    signed_code_min = -(2**19)
+    signed_code_max = 2**19 - 1
+    raw = np.clip(
+        np.rint(values / 9.80665 * sensitivity_lsb_per_g),
+        signed_code_min,
+        signed_code_max,
+    ).astype(np.int32)
+    quantized_values = raw.astype(np.float64) / sensitivity_lsb_per_g * 9.80665
     directory = root / "adxl355" / "algorithm_input"
     directory.mkdir(parents=True)
     sample_times_s = (stream.drdy_ns - stream.drdy_ns[0]) * 1.0e-9
     arrays = {
         "acceleration_raw": _array(directory / "acceleration_raw.npy", raw, ["sample", "axis"]),
-        "acceleration_mps2": _array(directory / "acceleration_mps2.npy", values, ["sample", "axis"]),
+        "acceleration_mps2": _array(directory / "acceleration_mps2.npy", quantized_values, ["sample", "axis"]),
         "drdy_monotonic_ns": _array(directory / "drdy_monotonic_ns.npy", stream.drdy_ns, ["sample"]),
         "estimated_sample_monotonic_ns": _array(directory / "estimated_sample_monotonic_ns.npy", stream.estimated_ns, ["sample"]),
         "sample_times_s": _array(directory / "sample_times_s.npy", sample_times_s, ["sample"]),
@@ -509,7 +613,8 @@ def _adxl_package(root: Path, stream: AdxlStream, impairments: Impairments) -> N
                     "group_delay_calibrated": True,
                     "native_summary": {"samples": sample_count, "mock": True, "simulation": True}},
         "timing": {"clock": "CLOCK_MONOTONIC", "drdy_monotonic_ns_semantics": "synthetic DRDY schedule with the configured clock phase and ODR error",
-                   "estimated_sample_monotonic_ns_semantics": "drdy_monotonic_ns - group_delay_ns + residual timing impairment"},
+                   "estimated_sample_monotonic_ns_semantics": "drdy_monotonic_ns - group_delay_ns + residual timing impairment, strictly increasing after timestamp repair",
+                   "truth_content_time_semantics": "truth/adxl_time_ns is the physical sensor content time, drdy_monotonic_ns - group_delay_ns before residual timing impairment"},
         "arrays": arrays,
     })
 
@@ -519,9 +624,9 @@ def generate(output: str | Path, *, duration_s: float = DURATION_S, seed: int = 
              fast: bool = False) -> Path:
     """Write one capture package.
 
-    ``fast`` omits the lossless chirp cube and the range-FFT statistic; the
-    ADC cube, ADXL stream, timelines and truth are unchanged.  It is meant for
-    large experiment sweeps, not for the retained nominal package.
+    ``fast`` omits the lossless chirp cube while retaining effective SNR
+    statistics. The ADC cube, ADXL stream, timelines and truth are unchanged.
+    It is meant for experiment sweeps that do not need the raw chirp cube.
     """
     output = Path(output)
     if duration_s <= 0.0 or duration_s > DURATION_S:
@@ -573,7 +678,8 @@ def generate(output: str | Path, *, duration_s: float = DURATION_S, seed: int = 
         np.save(truth / "displacement_m.npy", displacement[:truth_count], allow_pickle=False)
         np.save(truth / "time_ns.npy", BASE_TIME_NS + np.rint(reference_time_s[:truth_count] * 1.0e9).astype(np.int64), allow_pickle=False)
         np.save(truth / "acceleration_mps2.npy", stream.truth_mps2, allow_pickle=False)
-        np.save(truth / "adxl_time_ns.npy", stream.drdy_ns, allow_pickle=False)
+        np.save(truth / "adxl_time_ns.npy", stream.truth_content_ns, allow_pickle=False)
+        np.save(truth / "adxl_published_time_ns.npy", stream.estimated_ns, allow_pickle=False)
         _json(staging / "status.json", {"schema_version": 1, "status": "complete", "source_type": "paper_bridge_simulation", "reference": reference_metadata()["paper"]})
         if output.exists():
             shutil.rmtree(output)

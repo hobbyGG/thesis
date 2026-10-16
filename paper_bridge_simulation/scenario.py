@@ -1,9 +1,9 @@
 """Scenario (what is observed) and impairments (how sensors and environment deviate).
 
-``Scenario()`` is the A20-parameterized nominal scene and ``Impairments()``
-adds no error beyond the nominal sensor model, so ``generate()`` with the
-defaults is the retained nominal package.  Every field is an explicit
-simulation assumption unless the comment names a published source.
+``Scenario()`` is the A20-parameterized default response and ``Impairments()``
+holds the baseline sensor parameters. The defaults are generator references,
+not a scored experiment condition. Every field is an explicit simulation
+assumption unless the comment names a published source.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ from .response import (
     STATIC_INTERVAL_S,
 )
 
-NOMINAL_EVENT_STARTS_S = tuple(
+DEFAULT_EVENT_STARTS_S = tuple(
     float(start) for start in ARRIVAL_S + np.arange(3, dtype=float) * (PASSAGE_DURATION_S + STATIC_INTERVAL_S)
 )
 
@@ -35,7 +35,7 @@ class Scenario:
     speed_kmh: float = SPEED_KMH
     peak_deflection_m: float = PEAK_DEFLECTION_M
     passage_duration_s: float = PASSAGE_DURATION_S
-    event_starts_s: tuple[float, ...] = NOMINAL_EVENT_STARTS_S
+    event_starts_s: tuple[float, ...] = DEFAULT_EVENT_STARTS_S
     dynamic_acceleration_peak_mps2: float = DYNAMIC_ACCELERATION_PEAK_MPS2
     excitation_weights: tuple[float, ...] = tuple(float(w) for w in EXCITATION_WEIGHTS)
     excitation_phases_rad: tuple[float, ...] = (0.0, 0.0, 0.0, 0.0)
@@ -81,11 +81,18 @@ class Scenario:
 
 @dataclass(frozen=True)
 class Impairments:
-    """Deviations of sensors and environment from the nominal model."""
+    """Deviations of sensors and environment from the reference model."""
 
     # Radar.  Lowers every target's SNR and raises the receiver noise by this
     # many dB.
     snr_offset_db: float = 0.0
+    # Forward-model mismatch between the physical radar and the nominal
+    # parameters written to the capture manifest.  The algorithm still uses
+    # the nominal array/angle/chirp settings, so these terms test calibration
+    # sensitivity rather than changing the package contract.
+    radar_mount_angle_error_deg: float = 0.0
+    radar_array_spacing_error: float = 0.0
+    radar_chirp_slope_error: float = 0.0
     # Constant complex term at every target's range-angle cell (DC offset,
     # crosstalk, static clutter lumped together), as a fraction of the target
     # amplitude, with a random phase per target.  It moves with the radar, so

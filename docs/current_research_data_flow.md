@@ -128,7 +128,7 @@ $R_i^{-1}$ 加权合并后执行一次 Kalman 更新；$R_i$ 由各目标的后�
 
 仿真结果可用于评估统一采集包、目标提取、IQ 圆心补偿、ADXL 预积分与共享 Kalman
 滤波整条处理链的误差（RMSE）。评估协议（保留种子、对比方法、统计）见
-`docs/current_method_specification.md` §9，结果见 `experiments/results/summary.md`。
+`docs/current_method_specification.md` §9。仿真真值只用于离线评价，不进入算法估计。
 其结论不能替代与激光位移计的实测对比；实测数据还须
 独立标定阵列幅相、安装角、雷达等效载频、雷达时间延迟，以及 ADXL 的轴向与延迟。
 

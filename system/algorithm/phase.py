@@ -23,7 +23,10 @@ def unwrap_nearest_branch(wrapped_phase_rad, available_mask, selected_indices):
     return unwrapped
 
 
-def recursive_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e-12):
+def recursive_circle_phase(
+    iq_slow_time: np.ndarray, *, min_radius: float = 1.0e-12,
+    return_condition: bool = False,
+):
     """Recursive algebraic (Kasa) circle fit of slow-time IQ and phase extraction.
 
     The normal equations are accumulated in time order, so the circle centre
@@ -32,7 +35,10 @@ def recursive_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e
     prevents a centre update from producing a spurious phase step.  The
     accumulated phase is zero at the first valid sample and is wrapped to
     (-pi, pi].  Returns (wrapped phase, centre, radius, radial residual,
-    centred radius-normalised IQ); the last three are diagnostics only.
+    centred radius-normalised IQ); the last three are diagnostics only.  When
+    ``return_condition`` is true, a sixth diagnostic array containing the
+    cumulative normal-matrix condition number is appended.  This exposes fit
+    geometry for quality weighting without changing the circle fit.
     """
 
     values = np.asarray(iq_slow_time, dtype=np.complex128)
@@ -44,6 +50,7 @@ def recursive_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e
     radii = np.full((targets, samples), np.nan, dtype=float)
     residuals = np.full((targets, samples), np.nan, dtype=float)
     normalized = np.full((targets, samples), np.nan + 1j * np.nan, dtype=np.complex128)
+    conditions = np.full((targets, samples), np.nan, dtype=float)
 
     for target in range(targets):
         gram = np.zeros((3, 3), dtype=float)
@@ -75,6 +82,7 @@ def recursive_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e
             if count >= 3:
                 try:
                     condition = np.linalg.cond(gram)
+                    conditions[target, sample] = condition
                     # A short arc makes the algebraic circle problem nearly
                     # singular.  Waiting for a well-conditioned geometry is
                     # preferable to accepting a huge false center that would
@@ -116,4 +124,5 @@ def recursive_circle_phase(iq_slow_time: np.ndarray, *, min_radius: float = 1.0e
             residuals[target, sample] = abs(abs(centered) - radius)
             normalized[target, sample] = centered / max(radius, min_radius)
 
-    return wrapped, centers, radii, residuals, normalized
+    result = (wrapped, centers, radii, residuals, normalized)
+    return (*result, conditions) if return_condition else result
